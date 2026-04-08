@@ -1,1 +1,7 @@
 package
+
+# macOS Finder
+.DS_Store
+
+# Codex
+.codex/
