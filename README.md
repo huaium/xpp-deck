@@ -43,3 +43,30 @@
 * お好みのブラウザ版ブランチのzipを落とす 
 * デベロッパーモードで導入する
 * 拡張機能実行用のURL https://twitter.com/run-opdeck を開く
+
+## 開発者向け (web-ext)
+Firefox 向けの開発・検証・ビルドを高速化するために、`web-ext` 用スクリプトを追加しています。  
+このリポジトリは Chromium 用に `manifest.json`、Firefox 用に `manifest_firefox.json` を持つため、  
+`npm run webext:prepare` で一時ソースを生成して `manifest_firefox.json` を `manifest.json` として扱います。
+
+### 1) web-ext をインストール
+```
+npm install
+```
+
+### 2) Firefox でホットリロード開発
+```
+npm run webext:dev
+```
+
+### 3) Firefox 用 lint
+```
+npm run webext:lint
+```
+
+### 4) Firefox 用ビルド
+```
+npm run webext:build
+```
+
+ビルド成果物は `web-ext-artifacts/` に出力されます。
