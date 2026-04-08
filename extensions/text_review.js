@@ -354,25 +354,25 @@ class OpdExtTextReview {
         this.UITexts = {
             ja:{
                 textReview_buttonTitle: {
-                    message: "文章校正ができます(校正ログを一切保存しません)"
+                    message: "Proofread Japanese text (optimized for Japanese. no logs are saved)."
                 },
                 textReview_panelTitle: {
-                    message: "文章校正 (試作版)"
+                    message: "Text Review (Beta)"
                 },
                 textReview_inProgress: {
-                    message: "校正中..."
+                    message: "Reviewing..."
                 },
                 textReview_failed: {
-                    message: "校正に失敗しました"
+                    message: "Review failed."
                 },
                 textReview_noIssues: {
-                    message: "指摘箇所はありません"
+                    message: "No issues found."
                 },
                 textReview_applySelected: {
-                    message: "適用"
+                    message: "Apply"
                 },
                 textReview_applyAll: {
-                    message: "すべて適用"
+                    message: "Apply All"
                 }
             },
             en:{

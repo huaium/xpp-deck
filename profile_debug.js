@@ -9,7 +9,7 @@ window.addEventListener("load", function(){
         console.log("input");
         if(document.getElementById("profile_input_area").value.length != 0){
             if(document.querySelector("#is_ver105").checked){
-                if(confirm("入力したデータデータはv1.0.5以前のもので合っている場合は続行してください")){
+                if(confirm("Continue only if the input data is from v1.0.5 or earlier.")){
                     /*chrome.storage.local.set({'opd_profile_store': JSON.stringify(profile)}, function () {
                     });*/
                     const input_data = JSON.parse(document.getElementById("profile_input_area").value);
@@ -19,7 +19,7 @@ window.addEventListener("load", function(){
                             let load_setting = JSON.parse(value.opd_settings);
                             load_setting.last_load_profile = 0;
                             chrome.storage.local.set({'opd_settings': JSON.stringify(load_setting)}, function () {
-                                alert("読み込み完了しました。Open-Deckの画面を再読み込みしてください。")
+                                alert("Import completed. Please reload the Open-Deck page.")
                             });
                         });
                         
@@ -31,7 +31,7 @@ window.addEventListener("load", function(){
                         let load_setting = JSON.parse(value.opd_settings);
                         load_setting.last_load_profile = 0;
                         chrome.storage.local.set({'opd_settings': JSON.stringify(load_setting)}, function () {
-                            alert("読み込み完了しました。Open-Deckの画面を再読み込みしてください。")
+                            alert("Import completed. Please reload the Open-Deck page.")
                         });
                     });
                 });
