@@ -1,9 +1,9 @@
-// 自動更新機能で使用
+// Used by the auto-refresh feature.
 class OpdExtAutoReload {
     constructor() {
         this.opd_reload_token = null;
         this.Init = (column_window) => {
-            //ヘルパースクリプト追加
+            // Inject helper script.
             const helper_script = column_window.document.createElement('script');
             helper_script.src = chrome.runtime.getURL("extensions/auto_reload_helper.js");
             column_window.document.head.appendChild(helper_script);

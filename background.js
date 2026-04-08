@@ -64,7 +64,7 @@ let access_limit = {
     recommend_timeline:{limit: null, remaining: null, reset_unix_time: null}
 };
 function send_content_script(value){
-    //chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });//firefoxではsession.setAccessLevel()が未対応なのでsessionは一旦お預け
+    // session.setAccessLevel is unsupported in Firefox, so session storage is deferred for now.
     //chrome.storage.session.set
     chrome.storage.local.set({api_access_limit: value}, function(){
         console.log("set ok");

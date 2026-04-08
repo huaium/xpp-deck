@@ -1,10 +1,10 @@
-// 文章校正機能で使用する、カスタムな文字置換イベントを作成する
+// Create custom text-replacement events for text review.
 (() => {
     const isAllowed = (u) => {
         const url = new URL(u, location.href);
         return url.origin === location.origin && url.pathname.startsWith("/compose/post");
     };
-    //GIF ボタンを消す
+    // Hide GIF button.
     document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_post_css>main button[data-testid="gifSearchButton"]{display:none;}div[data-testid="twc-cc-mask"]{display:none;}</style>`);
     new MutationObserver(function(){
         const back_button = document.querySelector('main button[data-testid="app-bar-back"]');
@@ -17,14 +17,14 @@
     }).observe(document, {childList: true, subtree: true});
     
     (function() {
-        //投稿後の遷移メッセージを無効化する
+        // Disable post-submit navigation prompt.
         const native_add_evt = EventTarget.prototype.addEventListener;
         native_add_evt.call(window, 'beforeunload', function (e){
-            // 既存イベントをストップさせる
+            // Stop existing event handlers.
             e.stopImmediatePropagation();
         }, {capture: true});
         
-        //以後追加されるイベントを阻止する
+        // Block future added events.
         EventTarget.prototype.addEventListener = function (type, listener, options){
             if(String(type).toLowerCase() === 'beforeunload'){
                 return;
@@ -32,12 +32,12 @@
             return native_add_evt.call(this, type, listener, options);
         };
         
-        //投稿後は home に戻ってほしくないので遷移を阻止する
+        // Prevent navigation back to home after posting.
         const originalPushState = history.pushState;
         history.pushState = function(state, title, url) {
             const dest = url ? new URL(url, location.href).href : location.href;
             if (!isAllowed(dest)){
-                //home への遷移を阻止
+                // Block navigation to home.
                 location.replace(location.href);
                 return;
             }
@@ -45,7 +45,7 @@
         };
     })();
 
-    //校正周りの処理
+    // Text review processing.
     let target_editor_elem = null;
     let opd_paste_token = null;
     document.addEventListener("focusin", (ev) => {
@@ -54,47 +54,47 @@
         }
     });
     const handler = async(e) => {
-        //Firefox では detail にオブジェクトを乗せられない様なので、JSON化している
+        // Use JSON in detail because Firefox cannot carry object payload here.
         const detail = JSON.parse(e.detail);
-        //貼り付け時のトークンをチェックする
+        // Validate token before paste.
         if(opd_paste_token && opd_paste_token !== detail.token) return;
 
-        //X側のテキストエディタの内部関数を利用してテキストを正しく入力させる
+        // Use X editor internals to input text correctly.
         if(target_editor_elem && target_editor_elem.isContentEditable){
-            //文字を全て選択する
+            // Select all text.
             text_all_select(target_editor_elem);
-            //選択が終わるまで待機
+            // Wait until selection is applied.
             await new Promise(resolve => setTimeout(resolve, 30));
 
-            //Firefox では　DataTransfer や ClipboardEvent 使えないので動作を分ける
+            // Use separate path because Firefox lacks DataTransfer/ClipboardEvent behavior here.
             if (!detail.is_firefox) {
-                //ReactPropsを入手する
+                // Get React props.
                 const propsKey = Object.getOwnPropertyNames(target_editor_elem).find(k => k.includes('__reactProps$'));
                 const props = propsKey ? target_editor_elem[propsKey] : null;
                 const editor = props?.children?.props?.editor ??props?.children?.[0]?.props?.editor ?? null;
                 
-                //校正結果のテキストの DataTransfer を作成
+                // Create DataTransfer for reviewed text.
                 const dt = new DataTransfer();
                 dt.setData('text/plain', detail.text);
 
-                //クリップボードのペーストのイベントを作成する
+                // Create clipboard paste event.
                 const evt = new ClipboardEvent('paste', {
                     bubbles: true,
                     cancelable: true,
                     clipboardData: dt
                 });
-                //内部関数を使って校正文章を擬似的にペーストさせる
+                // Pseudo-paste reviewed text through internal handler.
                 editor?._onPaste(evt, editor);
             }else{
-                //execCommand は非推奨だが、Firefox では仕方なく使う様にする
-                //文字を置換する
+                // execCommand is deprecated but used as Firefox fallback.
+                // Replace text.
                 document.execCommand('insertText', false, detail.text);
             }
         }
     };
 
     async function text_all_select(target){
-        //テキスト全選択させる関数
+        // Select-all helper.
         if(!target && !target.isContentEditable) return false;
 
         const win = target.ownerDocument.defaultView;
@@ -111,12 +111,12 @@
         return true;
     }
 
-    //テキスト貼り付けの認証トークン受付イベントを作成する
+    // Register event to receive paste-auth token.
     window.addEventListener('opd_text_review_init', (e)=>{
         const detail = JSON.parse(e.detail);
         opd_paste_token = detail.token;
     }, true);
 
-    //テキストを貼り付けさせるイベントを作成する
+    // Register event that applies reviewed text.
     window.addEventListener('opd_text_review_apply', handler, true);
 })();

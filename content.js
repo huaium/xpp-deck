@@ -1,6 +1,6 @@
 console.log("Welcome to Open-Deck!");
 const manifest = chrome.runtime.getManifest();
-//試作版の場合は true にする
+// Set to true for prototype builds.
 const is_prototype = false;
 if(is_prototype){
     console.log("%cOpen-Deck Prototype", "background:#a1f4ff;padding:5px;border-radius:5px", `Version:${manifest.version}`);
@@ -41,19 +41,19 @@ const ui_icon_define = {
     next:"icon/next.svg",
     download:"icon/download.svg"
 }
-//UNIX時間分秒変換
+// Convert UNIX timestamp to local time string.
 function unix_time_mmss(input){
     const date = new Date(input * 1000);
     return date.toLocaleTimeString();
 }
-//ショートカットキー用に shift キーが押されていることを検出
+// Track whether the Shift key is pressed for shortcuts.
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Shift') is_shift_pressed = true;
 });
 document.addEventListener('keyup', (event) => {
     if (event.key === 'Shift') is_shift_pressed = false;
 });
-//ストレージの書き込み監視(主にAPIリミット監視に使う)
+// Watch storage updates (mainly for API rate-limit status).
 let api_limit_obj = null;
 let api_limit_dsc_obj = {time_line:"", recommend_timeline:"", search:""};
 chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -69,19 +69,19 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
                 timeline_limit_percentage = api_limit_obj.time_line.remaining / api_limit_obj.time_line.limit * 100;
                 api_limit_dsc_obj.time_line = `${i18n_message("label_api_timeline")}${api_limit_obj.time_line.remaining}/${api_limit_obj.time_line.limit}-${unix_time_mmss(api_limit_obj.time_line.reset_unix_time)}\r\n`;
             }else{
-                //初期状態
+                // Initial state.
             }
             if(api_limit_obj.recommend_timeline.remaining != null){
                 recommend_timeline_limit_percentage = api_limit_obj.recommend_timeline.remaining / api_limit_obj.recommend_timeline.limit * 100;
                 api_limit_dsc_obj.recommend_timeline = `${i18n_message("label_api_recommend_timeline")}${api_limit_obj.recommend_timeline.remaining}/${api_limit_obj.recommend_timeline.limit}-${unix_time_mmss(api_limit_obj.recommend_timeline.reset_unix_time)}\r\n`;
             }else{
-                //初期状態
+                // Initial state.
             }
             if(api_limit_obj.search.remaining != null){
                 search_limit_percentage = api_limit_obj.search.remaining / api_limit_obj.search.limit * 100;
                 api_limit_dsc_obj.search = `${i18n_message("label_api_search")}${api_limit_obj.search.remaining}/${api_limit_obj.search.limit}-${unix_time_mmss(api_limit_obj.search.reset_unix_time)}`;
             }else{
-                //初期状態
+                // Initial state.
             }
             api_linit_status_btn.textContent = `${Math.floor(Math.min(timeline_limit_percentage, recommend_timeline_limit_percentage, search_limit_percentage))}%`;
             api_linit_status_btn.title = `${i18n_message("msg_api_limit_status_title", [`${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`])}`;
@@ -158,7 +158,7 @@ if(location.href == "https://twitter.com/run-opdeck" || location.href == "https:
                         });
                     }
 
-                    //Updateされたときに設定のバージョンを上げる
+                    // Bump settings version when the extension is updated.
                     if(ext_update_flag){
                         const setting = JSON.parse(value.opd_settings);
                         setting.version = manifest.version;
@@ -192,13 +192,13 @@ function run(settings){
     //console.log(settings)
     let profile_list_html;
     let profile_list_btn_html = "";
-    //プロファイルリスト初期化
+    // Initialize profile list.
     for (let index = 0; index < profile_store.length; index++) {
         profile_list_btn_html += `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;//<div class="profile_list"><input type="button" id="userProfile-${index}" value="P${index}"></div>
     }
     profile_list_html = `<div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${last_load_profile}</div><div class="dsp_profile_list"><div id="profile_btn_list">${profile_list_btn_html}</div>`;
     //console.log(profile_list_btn_html)
-    //画像表示パネル
+    // Media preview panel.
     const media_viewer = new OpdExtMediaViewer();
     document.addEventListener('opd_send_media_info', (e) => {
         const detail = JSON.parse(e.detail);
@@ -210,7 +210,7 @@ function run(settings){
             }
         }
     });
-    //CSSタグ追加
+    // Insert CSS tags.
     document.querySelector("head").insertAdjacentHTML("afterbegin", `<style second_column_css></style>
     <style opd_default_css>
     html{
@@ -585,7 +585,7 @@ function run(settings){
     #opd_main_element[opd-dsp-theme="light"] {
         color-scheme: light;
     }
-    /*ダークモード検出時*/
+    /* When dark mode is detected. */
     #opd_main_element[opd-dsp-theme="dark"] {
         color-scheme: dark;
 
@@ -636,7 +636,7 @@ function run(settings){
         }
     }
 
-    /* メディアビューワー */
+    /* Media viewer. */
     ::backdrop {
         background: rgba(0, 0, 0, 0.9);
     }
@@ -718,7 +718,7 @@ function run(settings){
         padding: 5px;
     }
     </style>`);
-    //カラム要素作成-挿入
+    // Create and insert column elements.
     let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span><span class="dsp_column_btn"><input class="opd_top_bar" type="checkbox" title="${i18n_message("ui_column_top_toggle_title")}" %column_top_bar_ch%><label class="dsp_column_top_btn opd_ui_icon_color"></label></span>`;
     let post_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
     let othersns_default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
@@ -741,13 +741,13 @@ function run(settings){
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">Open-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
-    //設定2段
+    // Two-row layout settings.
     let first_column_end = false;
     let second_column_end = false;
     let second_rack_mode = false;
-    //カラム横幅
+    // Column width.
     let column_width_init = "30";
-    //スクロール検出用
+    // Used for scroll detection.
     let scroll_block = true;
     //
     //console.log(settings.column_settings.length)
@@ -769,15 +769,15 @@ function run(settings){
                 if(settings.column_settings[index].banner == true){
                     banner_checked = "checked";
                 }
-                //トップ検索など
+                // Top search area and related UI.
                 if(settings.column_settings[index].top_visible == true){
                     init_top_visible_checked = "checked";
                 }
-                //カラム横幅
+                // Column width.
                 if(settings.column_settings[index].column_width != null){
                     column_width_init = settings.column_settings[index].column_width;
                 }
-                //Exproleピン止め
+                // Explore pin state.
                 if(settings.column_settings[index].type == "explore"){
                     if(settings.column_settings[index].column_pinned_path != ""){
                         init_pinned_checked = "checked";
@@ -788,7 +788,7 @@ function run(settings){
                         init_column_save_path = settings.column_settings[index].column_save_path;
                     }
                 }
-                //自動更新
+                // Auto refresh.
                 if(settings.column_settings[index].type == "explore" || settings.column_settings[index].type == "home"){
                     if(settings.column_settings[index].auto_reload){
                         init_auto_reload_checked = "checked";
@@ -796,38 +796,38 @@ function run(settings){
                     }else{
                     }
                 }
-                //一段目終了検出にもかかわらず設定が存在していた場合2段目の変数に保存
+                // If first-row end is detected but settings still exist, append to second-row buffer.
                 if(first_column_end == true){
                     second_column_html += default_element[Object.keys(default_element)[default_index]]["html"].replaceAll("%column_save_path%", init_column_save_path).replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", banner_checked).replace("%column_top_bar_ch%", init_top_visible_checked).replace("%column_tw_view_mode%", tw_view_type).replace("%column_pinned_ch%", init_pinned_checked).replaceAll("%column_pinned_save_path%", init_pinned_path).replaceAll("%column_save_title%", init_column_save_title).replaceAll("%column_width_num%", column_width_init).replaceAll("%column_auto_reload_ch%", init_auto_reload_checked).replaceAll("%column_auto_reload_time%", auto_reload_time);
                 }else{
                     main_column_html += default_element[Object.keys(default_element)[default_index]]["html"].replaceAll("%column_save_path%", init_column_save_path).replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", banner_checked).replace("%column_top_bar_ch%", init_top_visible_checked).replace("%column_tw_view_mode%", tw_view_type).replace("%column_pinned_ch%", init_pinned_checked).replaceAll("%column_pinned_save_path%", init_pinned_path).replaceAll("%column_save_title%", init_column_save_title).replaceAll("%column_width_num%", column_width_init).replaceAll("%column_auto_reload_ch%", init_auto_reload_checked).replaceAll("%column_auto_reload_time%", auto_reload_time);
                 }
-                //一段目読込終了検出
+                // Detect end of first-row load.
                 if(first_column_end == false && settings.column_settings[index].type == "empty_column"){
                     first_column_end = true;
                 }
-                //二段目読込終了検出
+                // Detect end of second-row load.
                 if(second_column_end == false && settings.column_settings[index].type == "second_empty_column"){
                     second_column_end = true;
                 }
             }
         }
     }
-    //初期挿入HTML作成
+    // Build initial HTML to insert.
     ins_html.innerHTML = `${side_bar}<div id="main_rack_element" style=""><div id="first_rack_element" style="height: 100%;display:flex;flex-direction:row;">${main_column_html}</div><div id="second_rack_element" style="display:flex;flex-direction:row;">${second_column_html}</div></div>`;
-    //HTML挿入
+    // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
-    //APIリミット表示用
+    // Used for API limit display.
     document.querySelector("#api_limit_status").addEventListener("click", function(){
         if(api_limit_obj != null){
             alert(i18n_message("msg_api_limit_status_alert", [`${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`]))
         }
     });
-    //Open-Deckについて表示
+    // Open About Open-Deck.
     document.querySelector(".opd_ui_logo").addEventListener("click", function(){
         window.open(chrome.runtime.getURL("about_opd.html"), "About Open-Deck", 'width=720, height=280');
     });
-    //デバッグメニュー表示
+    // Show debug menu.
     let debug_menu_click_counter = 0;
     document.querySelector(".opd_version_span").addEventListener("click", function(){
         if(debug_menu_click_counter >= 7){
@@ -837,7 +837,7 @@ function run(settings){
             debug_menu_click_counter += 1;
         }
     });
-    //2段目が存在する場合の処理
+    // Handle case where second row exists.
     if(first_column_end == true && second_column_end == true){
         second_rack_mode = true;
         document.querySelector("#first_rack_element").style.height = "50vh";
@@ -856,9 +856,9 @@ function run(settings){
     column_dd();
     column_close();
     append_object_css();
-    //プロファイルリスト切替イベント作成関数
+    // Create profile switch event handlers.
     function create_profile_list_btn(){
-        //プロファイルリスト切替イベント初期化
+        // Initialize profile switch events.
         for (let index = 0; index < profile_store.length; index++) {
             document.querySelector(`#userProfile-${index}`).addEventListener("click",function(){
                 //console.log(profile_store[index].profile)
@@ -922,8 +922,8 @@ function run(settings){
             })
         }
     }
-    //CSS適用(追加/変更の時に呼び出し)
-    //session_webview_obj は Desktop 版とコード共通化を保たせるために同様の名称としている
+    // Apply CSS (called on add/update).
+    // Keep naming aligned with Desktop implementation for shared logic.
     function append_object_css(mode, session_webview_obj){
         let column_object = null;
         if(mode == "session_set" || mode == "add_column"){
@@ -933,7 +933,7 @@ function run(settings){
         }
         for (let index = 0; index < column_object.length; index++) {
             column_object[index].removeAttribute("opd_init_webview");
-            //バナー/表示モード変更
+            // Change banner/view mode.
             column_object[index].addEventListener("load", function(){
                 console.log(this.getAttribute("opd_iframe_width_only"))
                 if(this.getAttribute("opd_iframe_width_only") != ''){
@@ -942,15 +942,15 @@ function run(settings){
                     let opd_column_banner_checkbox = opd_column_div.querySelector(".opd_banner");
                     let opd_column_top_visible_checkbox = opd_column_div.querySelector(".opd_top_bar");
                     let opd_column_tw_view_mode_opt = opd_column_div.querySelector(".opd_tw_view_mode");
-                    //バナー表示設定読み込み適用
+                    // Load and apply banner visibility settings.
                     /*if(opd_column_banner_checkbox.checked == true){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
                     }else{
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
-                    //共通CSS挿入(スクロールバー細くする)
+                    // Insert shared CSS (thin scrollbar).
                     this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_main_css>html{scrollbar-width:thin;}</style>`);
-                    //バナー表示ロード
+                    // Load banner visibility state.
                     if(this.contentWindow.document.querySelector('head style[opd_banner_css]') == null){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
                     }
@@ -961,7 +961,7 @@ function run(settings){
                         //console.log("else")
                         this.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = ``;
                     }
-                    //トップ検索欄等削除適用
+                    // Apply top-search-area hide setting.
                     if(this.contentWindow.document.querySelector('head style[opd_top_visible_css]') == null){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_top_visible_css></style>`);
                     }
@@ -981,7 +981,7 @@ function run(settings){
                         this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = ``;
                     }
 
-                    //ツイート表示項目設定読み込み適用
+                    // Load and apply tweet view mode settings.
                     if(this.contentWindow.document.querySelector("head style[opd_tw_view_mode_css]") == null){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_tw_view_mode_css></style>`);
                     }
@@ -1000,17 +1000,17 @@ function run(settings){
                             break;
                     }
                     //console.log(opd_column_div.querySelector(".opd_banner").checked)
-                    //ポストカラムの動作
+                    // Post column behavior.
                     if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") === "post"){
                         const post_column_window = opd_column_div.querySelector("iframe").contentWindow;
-                        //文章校正機能
+                        // Text review feature.
                         const ext_text_review = new OpdExtTextReview();
                         const ui_lang = chrome.i18n.getUILanguage();
                         ext_text_review.Init(post_column_window, ui_icon_define, ui_lang);
                     }
                 }
             })
-            //各カラム読み込み後の動作(init)
+            // Post-load initialization for each column.
             column_object[index].addEventListener("load", function(){
                 //console.log(this)
                 let opd_column_div = this.closest("div[opd_column_type]");
@@ -1024,21 +1024,21 @@ function run(settings){
                 let opd_column_tw_view_mode_opt = opd_column_div.querySelector(".opd_tw_view_mode");
                 let opd_column_scroll_to_top = opd_column_div.querySelector(".opd_column_scroll_to_top");
                 let column_content_reload = null;
-                //カラム拡張読み込み
+                // Load column extensions.
                 if(mode != "session_set"){
                     const column_type = this.closest("div[opd_column_type]").getAttribute("opd_column_type");
                     if(column_type === "home" || column_type === "explore"){
                         const target_column = this.closest("div[opd_column_type]").querySelector("iframe").contentWindow;
-                        //自動更新関連仕込み
+                        // Set up auto-refresh hooks.
                         column_content_reload = new OpdExtAutoReload();
                         column_content_reload.Init(target_column);
-                        //メディアビューワー関連仕込み
+                        // Set up media-viewer hooks.
                         const column_media_viewer_blocker = new OpdMediaViewerBlocker();
                         column_media_viewer_blocker.Init(target_column);
                         media_viewer_token.push(column_media_viewer_blocker.opd_send_media_info_token);
                     }
                 }
-                //設定パネルイベント
+                // Settings panel events.
                 if(mode != "session_set"){
                     opd_column_div.querySelector(".opd_settings_btn").addEventListener("click", function(){
                         const settings_panel = this.closest("div[opd_column_type]").querySelector(".dsp_column_settings_panel");
@@ -1057,7 +1057,7 @@ function run(settings){
                         settings_panel.removeAttribute("open");
                         settings_panel.style.display = "none";
                     })
-                    //設定パネル&ホバー時動作
+                    // Settings panel and hover interactions.
                     opd_column_div.querySelector(".dsp_column_settings_panel").addEventListener("mouseover", function(){
                         opd_column_div.closest(".dsp_column").setAttribute("draggable", "false");
                     });
@@ -1065,7 +1065,7 @@ function run(settings){
                         opd_column_div.closest(".dsp_column").setAttribute("draggable", "true");
                     });
                 }
-                //設定パネルカラム幅設定
+                // Settings panel column-width control.
                 if(opd_column_width_select != null){
                     switch (opd_column_div.getAttribute("opd_column_width")){
                         case '15':
@@ -1105,7 +1105,7 @@ function run(settings){
                     }
                 }
                 if(mode != "session_set"){
-                    //カラム横幅設定イベント
+                    // Column width setting events.
                     opd_column_width_btn.addEventListener("click", function(){
                         const now_width = this.closest("div[opd_column_type]").getAttribute("opd_column_width");
                         let column_width_preset  = this.closest("div[opd_column_type]").querySelector(".opd_column_size_preset");
@@ -1138,9 +1138,9 @@ function run(settings){
                     });
                 }
 
-                //他SNSカラム対応
+                // Support for non-X columns.
                 if(this.getAttribute("opd_iframe_width_only") != ''){
-                    //バナー表示設定読み込み適用
+                    // Load and apply banner visibility settings.
                     /*if(opd_column_banner_checkbox.checked == true){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
                     }else{
@@ -1157,7 +1157,7 @@ function run(settings){
                         this.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = ``;
                     }
 
-                    //トップ検索欄等削除適用
+                    // Apply top-search-area hide setting.
                     if(this.contentWindow.document.querySelector('head style[opd_top_visible_css]') == null){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_top_visible_css></style>`);
                     }
@@ -1177,7 +1177,7 @@ function run(settings){
                         this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = ``;
                     }
                 
-                    //ツイート表示項目設定読み込み適用
+                    // Load and apply tweet view mode settings.
                     if(this.contentWindow.document.querySelector("head style[opd_tw_view_mode_css]") == null){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_tw_view_mode_css></style>`);
                     }
@@ -1196,11 +1196,11 @@ function run(settings){
                             this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
                             break;
                     }
-                    //自動更新初期適用
+                    // Apply initial auto-refresh state.
                     let reload_test = 0;
-                    let auto_reload_int = null;//チェックボックスイベントにも再利用
+                    let auto_reload_int = null;// Also reused in checkbox event handlers.
                     if(opd_column_auto_reload_checkbox != null){
-                        //Home, Exproleカラムホバー中 自動更新上部遷移停止
+                        // Pause top transition while hovering Home/Explore during auto refresh.
                         opd_column_div.querySelector("iframe").addEventListener("mouseover", function(){
                             this.setAttribute("auto_reload_mouse_hover", "true");
                         });
@@ -1222,7 +1222,7 @@ function run(settings){
                                 }
                             });
                         }
-                        //初期チェック動作
+                        // Initial checked-state behavior.
                         if(opd_column_auto_reload_checkbox.checked){
                             //console.log("init update!")
                             const auto_reload_time_input = auto_reload_target_elem.closest('div[opd_column_type]').querySelector(".opd_a_reload_time_setting");
@@ -1248,7 +1248,7 @@ function run(settings){
 
                     //console.log(opd_column_div.querySelector(".opd_banner").checked)
                     if(mode != "session_set"){
-                        //バナーチェックイベント
+                        // Banner toggle event.
                         opd_column_banner_checkbox?.addEventListener("change", function(){
                             column_settings_save("", last_load_profile);
                             //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
@@ -1266,7 +1266,7 @@ function run(settings){
                             }
                         });
 
-                        //トップ検索欄等削除イベント
+                        // Top-search hide toggle event.
                         opd_column_top_visible_checkbox?.addEventListener("change", function(){
                             column_settings_save("", last_load_profile);
                             let topvisible_mode_target_object = this.closest("div[opd_column_type]").querySelector("iframe");
@@ -1294,7 +1294,7 @@ function run(settings){
                         });
                     }
                 
-                    //Exproleピン止め
+                    // Explore pin state.
                     if(opd_column_pinned_checkbox != null){
                         if(mode != "session_set"){
                             opd_column_pinned_checkbox.addEventListener("click", function(){
@@ -1318,7 +1318,7 @@ function run(settings){
                             });
                         }
                     }
-                    //自動更新モードイベント
+                    // Auto-refresh mode events.
                     if(opd_column_auto_reload_checkbox != null){
                         if(mode != "session_set"){
                             opd_column_auto_reload_checkbox.addEventListener("click", function(){
@@ -1357,7 +1357,7 @@ function run(settings){
                     
                     }*/
                    if(mode != "session_set"){
-                        //ツイート表示モードイベント
+                        // Tweet view mode events.
                         opd_column_tw_view_mode_opt.addEventListener("change", function(){
                             column_settings_save("", last_load_profile);
                             //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
@@ -1384,18 +1384,18 @@ function run(settings){
                     }
                 }
 
-                //カラムバー空白領域クリックでトップにスクロール
+                // Clicking column bar empty area scrolls to top.
                 opd_column_scroll_to_top.addEventListener("click", (e) => { this.contentWindow.scrollTo({ top: 0, behavior: "auto" }); });
 
             }, {once: true})
-            //exploreURL検出処理
+            // Explore URL detection logic.
             const opd_column_mutate = column_object[index].closest("div[opd_column_type]");
             if(opd_column_mutate.getAttribute("opd_column_type") == 'explore'){
                 mutate_url(opd_column_mutate);
             }
         }
     }
-    //URL, ページタイトル監視
+    // Monitor URL and page title changes.
     function mutate_url(element){
         let exp_object = element.querySelector("iframe");
         exp_object.addEventListener("load", function(){
@@ -1415,24 +1415,24 @@ function run(settings){
                     exp_observer.observe(exp_object.contentWindow.document, {childList: true, subtree: true});
         })
     }
-    //メインバーイベント
+    // Main bar events.
     document.getElementById("init_settings").addEventListener("click", function(){
         chrome.storage.local.remove("opd_settings", function(value){
             alert(i18n_message("msg_settings_reset_completed"));
         });
     });
-    //画像付きを開いた時の自動スクロール阻止
+    // Prevent auto-scroll when opening media posts.
     document.querySelector("#main_rack_element").addEventListener("scrollend", function(){
         document.querySelector("#main_rack_element").scrollTop = 0;
     })
-    //二段表示
+    // Two-row view.
     document.getElementById("second_rack").addEventListener("click", function(){
         if(second_rack_mode == false){
             //document.querySelector("#main_rack_element").style.height = "50vh";
             document.querySelector("#first_rack_element").style.height = "50vh";
             document.querySelector("#second_rack_element").style.height = "50vh";
             //console.log(default_element.second_empty_column)
-            //const second_rack_empty_html = `<section draggable="false" id="column_%column_num%" class="dsp_column dsp_column_second_emptycolumn"><div opd_column_type="second_empty_column" style="height: calc(100% - 20px);min-width: 30rem;display: flex;align-items: center;justify-content: center;"><p>2段目<br>${i18n_message("ui_second_empty_column_message")}</p></div></section>`;
+            // Legacy second-row empty-column template (currently unused).
             const second_rack_default_html = default_element.second_empty_column.html.replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", "").replace("%column_tw_view_mode%", "0");
             document.querySelector("#second_rack_element").insertAdjacentHTML("beforeend", second_rack_default_html);
             /*for (let index = 0; index < document.querySelectorAll('.dsp_column[draggable="true"]').length; index++) {
@@ -1464,7 +1464,7 @@ function run(settings){
         }
         
     });
-    //プロファイルローダー
+    // Profile loader.
     document.getElementById("profile_load_save").addEventListener("click", function(){
         window.open(chrome.runtime.getURL("profile_debug.html"), "OPD-Profile-Loader", 'width=720, height=600');
     });
@@ -1483,8 +1483,8 @@ function run(settings){
             chrome.runtime.sendMessage({message: "ext_reload"});
         }
     });
-    //ポストカラム追加
-    //TODO: カラム追加周りの処理をもっと簡略化すること
+    // Add Post column.
+    // TODO: Simplify the column-addition flow.
     document.getElementById("add_post").addEventListener("click", function(){
         const empty_column = document.querySelector(".dsp_column_emptycolumn");
         const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
@@ -1499,7 +1499,7 @@ function run(settings){
         column_close();
         column_settings_save("", last_load_profile);
     });
-    //タイムラインカラム追加
+    // Add Timeline column.
     document.getElementById("add_timeline").addEventListener("click", function(){
         const empty_column = document.querySelector(".dsp_column_emptycolumn");
         const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
@@ -1514,7 +1514,7 @@ function run(settings){
         column_close();
         column_settings_save("", last_load_profile);
     });
-    //通知カラム追加
+    // Add Notification column.
     document.getElementById("add_notify").addEventListener("click", function(){
         const empty_column = document.querySelector(".dsp_column_emptycolumn");
         const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
@@ -1529,7 +1529,7 @@ function run(settings){
         column_close();
         column_settings_save("", last_load_profile);
     });
-    //Explore(ユニバーサル)カラム追加
+    // Add Explore (universal) column.
     document.getElementById("add_explore").addEventListener("click", function(){
         const empty_column = document.querySelector(".dsp_column_emptycolumn");
         const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
@@ -1544,7 +1544,7 @@ function run(settings){
         column_close();
         column_settings_save("", last_load_profile);
     });
-    //プロファイル保存ボタン
+    // Profile save button.
     document.getElementById("profile_save").addEventListener("click", function(){
         if(confirm(i18n_message("msg_profile_save_confirm"))){
             let profile = column_settings_save("profile_out");
@@ -1554,7 +1554,7 @@ function run(settings){
             //console.log(profile_store)
             chrome.storage.local.set({'opd_profile_store': JSON.stringify(profile_store)}, function () {
                 let profile_list_btn_html = "";
-                //プロファイルリスト初期化
+                // Initialize profile list.
                 for (let index = 0; index < profile_store.length; index++) {
                     profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
                 }
@@ -1563,7 +1563,7 @@ function run(settings){
             });
         }
     });
-    //プロファイル削除ボタン
+    // Profile delete button.
     document.getElementById("profile_delete").addEventListener("click", function(){
         const delete_num = Number(prompt(i18n_message("msg_profile_delete_number_prompt")));
         if(last_load_profile != delete_num){
@@ -1590,7 +1590,7 @@ function run(settings){
                         load_setting.last_load_profile = after_profile_num;
                         chrome.storage.local.set({'opd_settings': JSON.stringify(load_setting)}, function () {
                             let profile_list_btn_html = "";
-                            //プロファイルリスト初期化
+                            // Initialize profile list.
                             for (let index = 0; index < profile_store.length; index++) {
                                 profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
                             }
@@ -1608,7 +1608,7 @@ function run(settings){
             alert(i18n_message("msg_profile_delete_current_alert"));
         }
     });
-    //カラム移動
+    // Column move handling.
     function column_dd(){
         let column_class = document.querySelectorAll(".dsp_column");
         let column_copy_source = null;
@@ -1627,11 +1627,11 @@ function run(settings){
             });
             column_class[index].addEventListener("drop", function(ev){
                 ev.preventDefault();
-                //移動時初期表示設定
+                // Initialize display settings during move.
                 //bn_twview_mode(this.querySelector("iframe"));
-                //exploreのURLセット
+                // Set Explore URL.
                 //console.log(column_class[index])
-                //移動セット
+                // Apply move operation.
                 const dt_id = ev.dataTransfer.getData('text/plain');
                 const dr_elem = document.getElementById(dt_id);
                 if(dr_elem != null){
@@ -1659,7 +1659,7 @@ function run(settings){
             })
         }
     }
-    //カラム終了
+    // Close column.
     function column_close(){
         for (let index = 0; index < document.querySelectorAll(".column_close_btn").length; index++) {
             document.querySelectorAll(".column_close_btn")[index].addEventListener("click", function(){
@@ -1680,7 +1680,7 @@ function run(settings){
             })
         }
     }
-    //カラム構成保存
+    // Save column layout.
     function column_settings_save(mode, profile_num){
         let settings_array = {
             column_settings:[],
@@ -1701,7 +1701,7 @@ function run(settings){
             }else{
                 banner_checked = false;
             }
-            //トップ検索欄等 
+            // Top search area and related elements.
             if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_top_bar")?.checked == true){
                 top_visible_checked = true;
             }else{
@@ -1713,24 +1713,24 @@ function run(settings){
             }else{
                 tw_view_type = "0";
             }
-            //横幅設定
+            // Width setting.
             if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width") != "null"){
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width"))
                 column_width_value = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width");
             }
-            //exploreの処理
+            // Explore-specific processing.
             if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type") == 'explore'){
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path"));
                 column_open_path = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path");
-                //ピン止め
+                // Pinned state.
                 column_pinned_save_path = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_pinned_path");
-                //タイトル
+                // Title.
                 column_page_title = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_title");
             }else{
                 column_open_path = "";
                 column_pinned_save_path = "";
             }
-            //自動更新
+            // Auto refresh.
             if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type") == 'explore' || document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type") == 'home'){
                 if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_a_reload_bar")?.checked == true){
                     column_auto_reload = true;
@@ -1764,11 +1764,11 @@ function run(settings){
             });
         }
     }
-    //ランダムID作成
+    // Create random ID.
     function create_random_id(){
         return Math.random().toString(32).substring(2);
     }
-    //メインX動作マスク
+    // Mask default X UI behaviors.
     function main_dsp(){
         document.getElementById("react-root").style.visibility = "hidden";
         document.getElementById("react-root").style.overflow = "hidden";
@@ -1780,11 +1780,11 @@ function run(settings){
         characterData: true,
         subtree: false
     });
-    //title変更監視
+    // Watch title changes.
     const head_observer = new MutationObserver(function(){
         document.title = "Open-Deck";
         document.querySelector('link[rel="shortcut icon"]').href = chrome.runtime.getURL("icon.png");
-        //デフォルトのCSSがUIに影響を与えないように削除する
+        // Remove default CSS so it does not affect UI.
         if(!is_removed_default_style){
             document.head.querySelectorAll('style').forEach(style => {
                 if(style.textContent.includes('*, ::before, ::after')){
@@ -1794,7 +1794,7 @@ function run(settings){
             });
         }
 
-        //ダークモード検出&設定
+        // Detect and apply dark mode settings.
         const color_scheme = window.matchMedia('(prefers-color-scheme: dark)');
         const main_element = document.getElementById("opd_main_element");
         if(!main_element) return;
@@ -1808,10 +1808,10 @@ function run(settings){
                     main_element.setAttribute("opd-dsp-theme", currentScheme);
                 };
         
-                // 初回反映
+                // Initial apply.
                 apply_ui_color();
         
-                // system 指定時のみ、OS側のカラーモード変更に追従
+                // Follow OS color mode changes only when set to system.
                 if(!is_added_system_color_mode){
                     color_scheme.addEventListener("change", apply_ui_color);
                     is_added_system_color_mode = true;
@@ -1819,7 +1819,7 @@ function run(settings){
                 break;
             }
             case "light":
-                // system の監視が残ってたら解除
+                // Remove remaining system-mode watcher if present.
                 if(is_added_system_color_mode && apply_ui_color){
                     color_scheme.removeEventListener("change", apply_ui_color);
                     is_added_system_color_mode = false;
@@ -1845,25 +1845,25 @@ function run(settings){
         subtree: false
     });
 }
-//Cookieからカラーモードを取得する
+// Get color mode from cookie.
 function get_cookie_color_mode() {
     const cookie = document.cookie.split(/;\s*/).find(c => c.startsWith('night_mode='));
 
-    //night_mode が存在しない場合は system を返す
+    // Return system if night_mode is missing.
     if(!cookie) return "system";
 
     const color_mode_number = Number(cookie.split('=')[1]);
 
-    // 数値として正常でない場合は system を返す
+    // Return system when value is invalid.
     if(!Number.isInteger(color_mode_number)) return "system";
 
-    //カラーモードが 0 以下の場合は light を返す
+    // Return light when color mode <= 0.
     if(color_mode_number <= 0) return "light";
 
-    //カラーモードが 1 以上の場合は dark を返す
+    // Return dark when color mode >= 1.
     return "dark";
 }
-//設定初期化
+// Initialize settings.
 function settings_init(){
     const profile_store_default = [{type:"main_bar_empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}, {type:"home", banner:true, top_visible:true, tw_view_mode:"0", column_save_path:"", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}, {type:"notification", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", auto_reload:false, auto_reload_time:10000, column_pinned_path:"", column_save_title:"", column_width:null}, {type:"explore", banner:false, top_visible:true, tw_view_mode:"0", exp_type:"", column_save_path:"/explore", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}, {type:"empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}];
     const settings = {

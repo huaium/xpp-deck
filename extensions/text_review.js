@@ -1,16 +1,16 @@
-// 文章校正機能で使用
+// Used by text review feature.
 class OpdExtTextReview {
     constructor() {
         this.opd_text_review_token = null;
         this.opd_use_lang = "ja";
         this.Init = (column_window, icons, ui_lang) => {
-            //初期化
+            // Initialize.
             let editable_elem = null;
             let is_textarea_empty = true;
             let review_state = false;
             this.opd_use_lang = ui_lang.split("-")[0];
             column_window.document.head.insertAdjacentHTML("beforeend", `<style opd_post_textreview_css>
-                /* Premium 勧誘要素非表示 */
+                /* Hide Premium promotion elements. */
                 div[aria-live="polite"][role="status"]:has(a[dir="ltr"]){
                     display: none;
                 }
@@ -105,12 +105,12 @@ class OpdExtTextReview {
                     opacity: 0.8;
                 }
             </style>`);
-            //ヘルパースクリプト追加
+            // Inject helper script.
             const helper_script = column_window.document.createElement('script');
             helper_script.src = chrome.runtime.getURL("extensions/text_review_helper.js");
             column_window.document.head.appendChild(helper_script);
 
-            //貼り付け認証トークンを追加する
+            // Set paste authorization token.
             this.opd_text_review_token = crypto.randomUUID();
             setTimeout(() => {
                 column_window.document.dispatchEvent(new CustomEvent('opd_text_review_init', {
@@ -119,11 +119,11 @@ class OpdExtTextReview {
             }, 10);
             
             column_window.document.addEventListener("focusin", (ev) => {
-                //テキストエリアフォーカスタイミングで文字有無のカウンタを仕込む
+                // Attach text-empty watcher when editor gains focus.
                 if (ev.target && ev.target.isContentEditable) {
                     editable_elem = ev.target;
                     if(!editable_elem.getAttribute("opd_text_counter")){
-                        //input イベントでは半角文字の削除が取得できないため、MutationObserver を使う
+                        // Use MutationObserver because input events miss some deletions.
                         const editor_observer = new MutationObserver((mutations, obs) => {
                             is_textarea_empty = editable_elem.innerText.trim() === '';
                             if(is_textarea_empty){
@@ -142,18 +142,18 @@ class OpdExtTextReview {
                 }
             });
             const observer = new MutationObserver((mutations, obs) => {
-                //文章校正ボタンを仕込む
-                //既存のボタン類のパネルに組み込むと、他のボタンが表示されなくなる現象があるので仕方なく文字数カウンタの下に配置している
+                // Inject text review button.
+                // Place under character counter because toolbar insertion hides other buttons.
                 const btnAddTarget = column_window.document.querySelector('div[data-testid="toolBar"]');
                 const function_panel = column_window.document.querySelector('div.opd_post_functions');
                 if (btnAddTarget && !function_panel) {
-                    //テーマカラー取得&ボタンカラー設定
+                    // Get theme color and apply button colors.
                     const theme_color = this.CssChecker(getComputedStyle(column_window.document.querySelector('div[data-testid="progressBar-bar"]')).backgroundColor);
                     column_window.document.head.insertAdjacentHTML("beforeend", `<style opd_post_textreview_theme_css>.opd_text_review_btn_icon{background-color:${theme_color};}.opd_text_review_btn:not([opd_text_review_is_empty]):hover{border-radius: 100px;transition-duration: 0.2s;background-color:${theme_color.replace(")", ", 0.1)")};}.opd_text_review_panel{background-color:${theme_color.replace(")", ", 0.1)")};}</style>`);
-                    //校正ボタンパネル追加
-                    //TODO:今後、他機能追加する際は opd_post_functions 追加処理を別の場所で1回のみ行う実装をする
+                    // Add review button panel.
+                    // TODO: Move opd_post_functions insertion to a single shared initialization point.
                     btnAddTarget.insertAdjacentHTML('afterend', `<div class="opd_post_functions"><div id="opd_post_text_review" class="opd_text_review_btn" title="${this.UITexts[this.opd_use_lang].textReview_buttonTitle.message}" opd_text_review_is_empty><div class="opd_text_review_btn_icon"></div></div></div><div class="opd_text_review_panel"></div>`);
-                    //校正ボタン動作追加
+                    // Add review button behavior.
                     column_window.document.getElementById("opd_post_text_review").addEventListener("click", async ()=>{
                         if(!review_state && editable_elem && !is_textarea_empty){
                             review_state = true;
@@ -171,30 +171,30 @@ class OpdExtTextReview {
             });
         }
         this.Review = async(text, panel_elem, column_window) => {
-            //校正開始
+            // Start review.
             const review_request = await this.ReviewRquest(text);
             
-            //校正に失敗したら終了
+            // Exit if review fails.
             if(!review_request){
                 panel_elem.textContent = "";
                 panel_elem.insertAdjacentHTML("beforeend", `<div>${this.UITexts[this.opd_use_lang].textReview_panelTitle.message}</div><div>${this.UITexts[this.opd_use_lang].textReview_failed.message}</div>`);
                 return;
             }
-            //校正パネルを空にする
+            // Clear review panel.
             panel_elem.textContent = "";
 
-            //指摘箇所がなければ終了
+            // Exit if no issues are found.
             if(review_request.indications.length === 0){
                 panel_elem.insertAdjacentHTML("beforeend", `<div>${this.UITexts[this.opd_use_lang].textReview_panelTitle.message}</div><div>${this.UITexts[this.opd_use_lang].textReview_noIssues.message}</div>`);
                 return;
             }
-            //校正結果がある場合
+            // When review result contains issues.
             let result = [];
             let indication_id = [];
             const indications_fix_enabled = [];
             let indication_fix_str = text;
             
-            //indicationsの分だけ校正パネルへ指摘リストを表示
+            // Render issue list for each indication.
             review_request.indications.forEach((review) => {
                 const id = this.CreateRandomID();
                 let suggest_elem = "";
@@ -205,7 +205,7 @@ class OpdExtTextReview {
                 indication_id.push(id);
                 indications_fix_enabled.push(false);
             });
-            //校正パネルへ全文指摘を表示
+            // Render full text with issue highlights.
             const review_view = this.IndicationTexts(text, review_request.indications, indication_id);
             panel_elem.insertAdjacentHTML("beforeend", `<div>${this.UITexts[this.opd_use_lang].textReview_panelTitle.message}</div><div class="opd_text_review_result"><div class="opd_text_review_result_preview">${review_view}</div><div class="opd_text_review_indication_switcher">${result.join("")}</div><div class="opd_text_review_indication_apply_panel"><button id="opd_text_review_apply_selected">${this.UITexts[this.opd_use_lang].textReview_applySelected.message}</button><button id="opd_text_review_apply_all">${this.UITexts[this.opd_use_lang].textReview_applyAll.message}</button></div></div>`);
 
@@ -224,7 +224,7 @@ class OpdExtTextReview {
                 });
             });
 
-            //指摘適用ボタンの動作を追加
+            // Attach apply-buttons behavior.
             panel_elem.querySelector(`#opd_text_review_apply_selected`).addEventListener("click", (ev)=>{
                 column_window.document.dispatchEvent(new CustomEvent('opd_text_review_apply', {
                     bubbles: true,
@@ -247,10 +247,10 @@ class OpdExtTextReview {
             });
         }
         this.IndicationTexts = (text, result, indication_ids) =>{
-            //全文指摘表示機能用のHTML生成関数
+            // Build HTML for full-text issue view.
             if (!result?.length) return this.EscapeHTML(text);
 
-            //offsetの昇順で処理
+            // Process in ascending offset order.
             const sorted = [...result].sort((a, b) => a.offset - b.offset);
 
             let cur = 0;
@@ -262,7 +262,7 @@ class OpdExtTextReview {
                 const end = start + length;
                 const suggest = params?.suggests?.at(-1) ?? "";
 
-                //範囲チェック
+                // Bounds check.
                 if (start < cur || start > text.length) continue;
                 if (end > text.length) continue;
 
@@ -283,10 +283,10 @@ class OpdExtTextReview {
             return html;
         }
         this.GetReviewedText = (text, result, indication_enabled) =>{
-            //指摘適用済みのテキストを生成生成する関数
+            // Generate text with selected fixes applied.
             if (!result?.length) return text;
 
-            //offsetの昇順で処理
+            // Process in ascending offset order.
             const sorted = [...result].sort((a, b) => a.offset - b.offset);
 
             let cur = 0;
@@ -299,11 +299,11 @@ class OpdExtTextReview {
                 const suggest = params?.suggests?.at(-1) ?? "";
                 const problem = text.slice(start, end);
 
-                //範囲チェック
+                // Bounds check.
                 if (start < cur || start > text.length) continue;
                 if (end > text.length) continue;
 
-                //前の修正部分の後から今回の修正部分の前までを追加
+                // Append unchanged segment before this fix.
                 output += text.slice(cur, start);
 
                 if (indication_enabled[i]) {
@@ -320,7 +320,7 @@ class OpdExtTextReview {
             return output;
         }
         this.ReviewRquest = async(str)=>{
-            //校正を開始し、結果を得る関数
+            // Run review and return result.
             const review_result = await chrome.runtime.sendMessage({message: "text_review", review_text: str});
             if(review_result){
                 return review_result;
@@ -334,15 +334,15 @@ class OpdExtTextReview {
             return is_firefox;
         }
         this.CreateRandomID = () =>{
-            //ランダムなIDを生成する関数
+            // Generate random ID.
             return Math.random().toString(32).substring(2);
         }
         this.CssChecker = (str) =>{
-            //CSSが正常かどうかチェックする関数
+            // Validate CSS value.
             return CSS.supports('color', str) ? str : 'black'
         }
         this.EscapeHTML = (str) =>{
-            //文字列をエスケープ化する関数
+            // Escape string for HTML.
             if (str == null) return '';
             return String(str)
             .replace(/&/g, '&amp;')

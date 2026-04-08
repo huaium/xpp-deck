@@ -1,4 +1,4 @@
-// メディアビューワー
+// Media viewer.
 class OpdExtMediaViewer {
     constructor() {
         this.Preview = (media_info, pre_index) => {
@@ -97,17 +97,17 @@ class OpdExtMediaViewer {
             media_viewer_div.appendChild(media_viewer_dialog);
             const append_viewer_element = document.body.appendChild(media_viewer_div);
 
-            //Videoの音量設定
+            // Set video volume.
             let video_element = append_viewer_element.getElementsByTagName('video')[0];
             if(video_element){
-                //音量の大きい動画が急に再生されるとびっくりするので、音量を下げておく
+                // Lower default video volume to avoid sudden loud playback.
                 video_element.volume = 0.2;
             }
 
             function media_viewer_close(){
                 video_element = append_viewer_element.getElementsByTagName('video')[0];
                 if(video_element){
-                    //稀にビューワーを閉じた後でもVideoが再生されてしまう場合があるので念のため、Videoを止めて消す
+                    // Stop and remove video on close to avoid rare lingering playback.
                     video_element.pause();
                     video_element.remove();
                 }
@@ -117,7 +117,7 @@ class OpdExtMediaViewer {
             media_viewer_dialog.addEventListener("close", () => media_viewer_close());
             media_viewer_dialog.querySelector("[data-close]")?.addEventListener("click", () => media_viewer_close());
 
-            //背景クリックで閉じやすくする
+            // Allow closing by clicking background.
             media_viewer_dialog.addEventListener("click", (event)=>{
                 const tag_name = event.target.tagName;
                 const allowed_tag = ["IMG", "VIDEO", "SPAN", "BUTTON"];

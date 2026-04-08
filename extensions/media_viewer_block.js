@@ -1,9 +1,9 @@
-// メディアビューワー停止用
+// Disable native media viewer behavior.
 class OpdMediaViewerBlocker {
     constructor() {
         this.opd_send_media_info_token = null;
         this.Init = (column_window) => {
-            //ヘルパースクリプト追加
+            // Inject helper script.
             const helper_script = column_window.document.createElement('script');
             helper_script.src = chrome.runtime.getURL("extensions/media_viewer_block_helper.js");
 
@@ -15,7 +15,7 @@ class OpdMediaViewerBlocker {
                     detail: JSON.stringify({ token: this.opd_send_media_info_token })
                 }));
 
-                /*ショートカットキーとしてAlt(Option)キーの動作を設定*/
+                /* Handle Alt/Option as shortcut modifier. */
                 document.addEventListener('keydown', (event) => {
                     if(event.key === 'Alt'){
                         column_window.document.dispatchEvent(new CustomEvent('opd_media_viewer_shotcut', {

@@ -1,11 +1,11 @@
 $ErrorActionPreference = "Stop"
 
-# 設定
+# Settings.
 $TargetDir = "."
 $TmpDir = Join-Path $TargetDir "package_tmp"
 $OutputDir = Join-Path $TargetDir "package"
 
-# バージョン取得
+# Get version.
 function Get-Version {
     $manifestPath = $null
     if (Test-Path (Join-Path $TargetDir "manifest.json")) {
@@ -27,12 +27,12 @@ Write-Host "version: $Version"
 $ZipFirefox = "Open-Deck_Firefox_${Version}.zip"
 $ZipChrome  = "Open-Deck_Chromium_${Version}.zip"
 
-# 初期化
+# Initialize.
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 Remove-Item -Recurse -Force -ErrorAction Ignore $TmpDir
 New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
 
-# ディレクトリ除外
+# Excluded directories.
 $ExcludeDirs = @(
     ".git",
     ".github",
@@ -40,7 +40,7 @@ $ExcludeDirs = @(
     "package"
 )
 
-# ファイル除外
+# Excluded files.
 $ExcludeFiles = @(
     ".gitignore",
     "README.md",
@@ -73,7 +73,7 @@ function Invoke-RoboCopy {
     }
 }
 
-# Firefox 用 ZIP 作成
+# Build Firefox ZIP.
 Invoke-RoboCopy -Source $TargetDir -Dest $TmpDir -XD $ExcludeDirs -XF $ExcludeFiles
 
 $ffManifest = Join-Path $TmpDir "manifest_firefox.json"
@@ -89,7 +89,7 @@ Compress-Archive -Path (Join-Path $TmpDir "*") -DestinationPath $ffZipPath -Forc
 Remove-Item -Recurse -Force $TmpDir
 New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
 
-# Chrome 用 ZIP 作成
+# Build Chromium ZIP.
 Invoke-RoboCopy -Source $TargetDir -Dest $TmpDir -XD $ExcludeDirs -XF ($ExcludeFiles + @("manifest_firefox.json"))
 
 $chZipPath = Join-Path $OutputDir $ZipChrome
