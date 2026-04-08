@@ -2,71 +2,71 @@
 ![icon](https://github.com/kawa-nobu/Open-Deck/assets/44832116/3d4d1e64-6a74-4587-a248-da8424190d41)  
 
 
-## 機能
-* タイムラインカラム
-* 通知カラム
-* Explore(ユニバーサルカラム※1)
-* 端末スペックやブラウザが許す限り制限なくカラムを追加可能
-* カラムの2段表示
-* 1秒単位で設定できるカラムの自動更新(タイムライン・検索対応)
-* 1rem(単位)で自由に調整できるカラム幅設定機能
-* 無制限のプロファイル(カラム構成・設定)保存・切り替え機能
+## Features
+* Timeline columns
+* Notification columns
+* Explore (Universal Column*1)
+* Add as many columns as your device and browser can handle
+* Two-row column layout
+* Auto-refresh columns with 1-second granularity (supports timeline and search)
+* Freely adjustable column width settings (in `1rem` units)
+* Unlimited profile save/switch support (column layout and settings)
 
-※1 トレンドや検索以外にDM画面やリストなどを自由に設定可能なユニバーサルなカラムです。  
+*1 A universal column that can be configured freely for DMs, lists, and more, in addition to trends and search.  
 
-**FireFox ESR115(ESR版ベース含む)をお使いの方はツイート種類の表示モードは動作しません。  
-これはESR版が本拡張機能が使用しているCSSのセレクタに対応していないためです。**
+**If you use Firefox ESR115 (including ESR-based builds), Tweet Type Display Mode does not work.  
+This is because ESR does not support the CSS selectors used by this extension.**
 
-## スクリーンショット
+## Screenshots
 <img width="960" alt="image" src="https://github.com/kawa-nobu/Open-Deck/assets/44832116/0970c89f-d099-4d8e-ac84-54037d8c9868">  
 <img width="962" alt="image" src="https://github.com/kawa-nobu/Open-Deck/assets/44832116/2753c97a-f8e5-4eab-b096-82cfed081fb0">
 
 
 
 
-## 使用方法
-作成中
+## Usage
+Coming soon.
 
 
-## 導入方法(推奨)
-### Chrome Web Store経由
-[Chrome Web Storeのリンク](https://chromewebstore.google.com/detail/open-deck/gmkadaeibmhchpimnfplodelecmogdic) へアクセスし、  
-[Chrome(Brave等)に追加]ボタン押下で簡単にお使いの端末へ導入が完了します。
+## Installation (Recommended)
+### Via Chrome Web Store
+Visit the [Chrome Web Store listing](https://chromewebstore.google.com/detail/open-deck/gmkadaeibmhchpimnfplodelecmogdic),  
+then click the **Add to Chrome (or Brave, etc.)** button to install it easily.
 
-### Mozilla公式サイト経由
+### Via Mozilla Official Site
 
-[addons.mozilla.org(AMO)](https://addons.mozilla.org/ja/firefox/addon/open-deck/) へアクセスし、  
-[FireFoxへ追加]ボタン押下で簡単にお使いの端末へ導入が完了します。
+Visit [addons.mozilla.org (AMO)](https://addons.mozilla.org/ja/firefox/addon/open-deck/),  
+then click the **Add to Firefox** button to install it easily.
 
-## 導入方法(デベロッパーモード)
-**導入方法が分かる人のみお使いください。**
-* お好みのブラウザ版ブランチのzipを落とす 
-* デベロッパーモードで導入する
-* 拡張機能実行用のURL https://twitter.com/run-opdeck を開く
+## Installation (Developer Mode)
+**Only use this if you already know how to install extensions in developer mode.**
+* Download the ZIP from the browser-specific branch you want
+* Install it in developer mode
+* Open the extension runtime URL: https://twitter.com/run-opdeck
 
-## 開発者向け (web-ext)
-Firefox 向けの開発・検証・ビルドを高速化するために、`web-ext` 用スクリプトを追加しています。  
-このリポジトリは Chromium 用に `manifest.json`、Firefox 用に `manifest_firefox.json` を持つため、  
-`npm run webext:prepare` で一時ソースを生成して `manifest_firefox.json` を `manifest.json` として扱います。
+## For Developers (web-ext)
+To speed up Firefox development, validation, and builds, this repository includes `web-ext` scripts.  
+This repo uses `manifest.json` for Chromium and `manifest_firefox.json` for Firefox,  
+so `npm run webext:prepare` generates a temporary source where `manifest_firefox.json` is handled as `manifest.json`.
 
-### 1) web-ext をインストール
+### 1) Install dependencies
 ```
 npm install
 ```
 
-### 2) Firefox でホットリロード開発
+### 2) Hot-reload development in Firefox
 ```
 npm run webext:dev
 ```
 
-### 3) Firefox 用 lint
+### 3) Lint for Firefox
 ```
 npm run webext:lint
 ```
 
-### 4) Firefox 用ビルド
+### 4) Build for Firefox
 ```
 npm run webext:build
 ```
 
-ビルド成果物は `web-ext-artifacts/` に出力されます。
+Build artifacts are output to `web-ext-artifacts/`.
