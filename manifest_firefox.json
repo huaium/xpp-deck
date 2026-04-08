@@ -58,8 +58,7 @@
       "declarativeNetRequest",
        "*://*.twitter.com/*",
        "*://*.x.com/*",
-       "*://*.twimg.com/*",
-       "*://*.kwdev-sys.com/*"
+       "*://*.twimg.com/*"
     ],
     "content_scripts": [{
       "matches": ["https://twitter.com/*", "https://x.com/*"],
