@@ -283,7 +283,7 @@ function run(settings) {
     for (let index = 0; index < profile_store.length; index++) {
         profile_list_btn_html += `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`; //<div class="profile_list"><input type="button" id="userProfile-${index}" value="P${index}"></div>
     }
-    profile_list_html = `<div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${last_load_profile}</div><div class="dsp_profile_list"><div id="profile_btn_list">${profile_list_btn_html}</div>`;
+    profile_list_html = `<div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${last_load_profile}</div><div class="dsp_profile_list"><div id="profile_btn_list">${profile_list_btn_html}</div></div>`;
     //console.log(profile_list_btn_html)
     // Media preview panel.
     const media_viewer = new OpdExtMediaViewer();
@@ -305,39 +305,84 @@ function run(settings) {
     html{
         overflow-y:hidden !important;
     }
+    #opd_main_element{
+        --opd-bg: #e6e9ee;
+        --opd-surface: #ffffff;
+        --opd-surface-alt: #f5f7fa;
+        --opd-border: #c6ced8;
+        --opd-border-strong: #a8b2bf;
+        --opd-text: #1f2937;
+        --opd-muted: #5f6b7a;
+        --opd-hover: #e7edf4;
+        --opd-focus: #3b82f6;
+    }
+    #opd_main_element *{
+        box-sizing: border-box;
+    }
     .main_bar_functions{
         display: flex;
-        justify-content: center;
         flex-direction: column;
         align-items: center;
-        margin-top: 0.5rem;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
+        color: var(--opd-text);
     }
     .main_bar_functions hr{
         width: 80%;
-        margin: 0;
+        margin: 0.15rem 0;
+        border: 0;
+        border-top: 1px solid var(--opd-border);
     }
     .opd_version_span{
         cursor: pointer;
+        color: var(--opd-muted);
+        font-size: 0.72rem;
     }
     .opd_debug_menu{
         display: none;
+        width: 100%;
+        padding: 0 0.35rem;
+        color: var(--opd-text);
+        font-size: 0.72rem;
+        text-align: center;
+    }
+    .opd_debug_menu input{
+        width: 100%;
+        margin-top: 0.2rem;
+        min-height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--opd-border);
+        background: var(--opd-surface);
+        font-size: 0.7rem;
+        cursor: pointer;
+    }
+    .opd_debug_menu input:hover{
+        background: var(--opd-hover);
     }
     #opd_main_element{
-        background: #e4e4e4 !important;
+        background: var(--opd-bg) !important;
     }
     div[opd_column_type="dsp_column"]{
         overflow-x: scroll;
         scrollbar-width: none;
     }
     #main_bar_empty_column{
-        background-color: white;
+        background-color: var(--opd-surface);
+        border-right: 1px solid var(--opd-border);
     }
     #api_limit_status{
-        border-radius: 100px;
-        width: 50px;
+        border-radius: 999px;
+        width: 48px;
+        min-height: 24px;
+        line-height: 24px;
+        text-align: center;
+        border: 1px solid var(--opd-border);
+        background: var(--opd-surface-alt);
+        color: var(--opd-muted);
+        font-size: 0.72rem;
     }
     #api_limit_status:hover{
-        background-color: #d5d5d5;
+        background-color: var(--opd-hover);
         cursor: help;
     }
     .opd_ui_logo_parent{
@@ -358,11 +403,17 @@ function run(settings) {
         cursor: pointer;
     }
     .profile_val_now{
-        border-radius: 100px;
-        width: 55px;
+        border-radius: 999px;
+        width: 48px;
+        min-height: 24px;
+        line-height: 24px;
+        border: 1px solid var(--opd-border);
+        color: var(--opd-muted);
+        font-size: 0.72rem;
+        background: var(--opd-surface-alt);
     }
     .profile_val_now:hover{
-        background-color: #d5d5d5;
+        background-color: var(--opd-hover);
     }
     #main_rack_element{
         position: fixed;
@@ -386,16 +437,18 @@ function run(settings) {
     }
     .dsp_btn_parent{
         overflow: hidden;
-        border-radius: 100px;
+        border-radius: 10px;
         display: flex;
-        width: 50px;
-        height: 50px;
+        width: 44px;
+        height: 44px;
         align-content: center;
         justify-content: center;
         align-items: center;
+        border: 1px solid transparent;
     }
     .dsp_btn_parent:hover{
-        background: #d5d5d5;
+        background: var(--opd-hover);
+        border-color: var(--opd-border);
         cursor: pointer;
     }
     .dsp_btn_add_post_img{
@@ -456,7 +509,9 @@ function run(settings) {
     }
     .dsp_btn_change_profile_btn{
         display: flex;
-        font-size: 1.2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--opd-muted);
         justify-content: center;
         align-items: center;
         height: 69%;
@@ -468,12 +523,11 @@ function run(settings) {
         scrollbar-width: none;
     }
     .dsp_column_draggable_true{
-        border-left: solid 3px #0000002e;
-        border-right: solid 3px #0000002e;
-        border-bottom: solid 3px #0000002e;
+        border: 1px solid var(--opd-border);
         /*overflow: hidden;*/
-        background-color: white;
-        border-radius: 6px 6px;
+        background-color: var(--opd-surface);
+        border-radius: 8px;
+        margin: 0 0.15rem;
     }
     .dsp_column_draggable_true div[opd_column_type]{
         display: flex;
@@ -483,51 +537,61 @@ function run(settings) {
         border: 0;
     }
     .dsp_column_btn{
-        width: 20px;
-        min-width: 20px;
-        border-radius: 2px;
+        width: 24px;
+        min-width: 24px;
+        height: 24px;
+        border-radius: 6px;
         overflow: hidden;
-        margin-right: 5px;
+        margin-right: 4px;
+        border: 1px solid transparent;
     }
     .dsp_column_btn:hover{
-        background: #d5d5d5;
+        background: var(--opd-hover);
+        border-color: var(--opd-border);
         cursor: pointer;
     }
     .column_bar{
         display: flex;
         flex-direction: row;
         width: 100%;
-        min-height: 20px;
+        min-height: 30px;
+        align-items: center;
+        padding: 2px 6px;
+        gap: 2px;
         overflow: hidden;
-        border-top: solid #a0a0a073 1px !important;
-        border-bottom: solid #a0a0a073 1px !important;
-        border-radius: 4px 4px 0 0;
+        border-top: solid var(--opd-border) 1px !important;
+        border-bottom: solid var(--opd-border) 1px !important;
+        border-radius: 8px 8px 0 0;
+        background: var(--opd-surface-alt);
     }
     .dsp_column_title{
         width: auto;
-        background-color: white;
-        margin-right: 5px;
+        color: var(--opd-text);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 2px;
     }
     .dsp_column_move_icon_parent{
-        max-height: 20px;
+        max-height: 24px;
         display: flex;
         flex-direction: row;
         align-items: center;
+        gap: 4px;
     }
     .dsp_column_move_icon{
         display: block;
         filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_move)});
         background-size: cover;
-        width: 15px;
-        height: 15px;   
+        width: 14px;
+        height: 14px;   
     }
     .dsp_column_settings_btn{
         display: block;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_settings)});
         background-size: cover;
-        width: 20px;
-        height: 20px;    
+        width: 24px;
+        height: 24px;    
     }
     .dsp_column_settings_btn:hover{
         cursor: pointer;
@@ -544,8 +608,8 @@ function run(settings) {
         background-size: 15px;
         background-repeat: no-repeat;
         background-position: center;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
     .dsp_column_close_btn:hover{
         cursor: pointer;
@@ -559,8 +623,8 @@ function run(settings) {
         background-image: url(${chrome.runtime.getURL(ui_icon_define.banner_hide)});
         transform: rotate(180deg);
         background-size: cover;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
     input:checked + .dsp_column_banner_btn{
         transform: rotate(0deg);
@@ -570,8 +634,8 @@ function run(settings) {
         position: absolute;
         z-index: 10;
         margin: 0;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         cursor: pointer;
     }
     .dsp_column_top_btn{
@@ -579,8 +643,8 @@ function run(settings) {
         background-image: url(${chrome.runtime.getURL(ui_icon_define.top_bar_hide)});
         transform: rotate(180deg);
         background-size: cover;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         cursor: pointer;  
     }
     input:checked + .dsp_column_top_btn{
@@ -591,8 +655,8 @@ function run(settings) {
         position: absolute;
         z-index: 10;
         margin: 0;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;    
     }
     .dsp_column_close_btn_wrap{
         display: flex;
@@ -617,8 +681,8 @@ function run(settings) {
         position: absolute;
         z-index: 10;
         margin: 0;
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
 
     .dsp_column_settings_panel{
@@ -626,8 +690,10 @@ function run(settings) {
         position: relative;
         width: inherit;
         height: auto;
-        background: #efefefeb;
-        border: 1px solid #a9a9a9eb;
+        background: var(--opd-surface-alt);
+        border: 1px solid var(--opd-border-strong);
+        border-radius: 0 0 8px 8px;
+        border-top: 0;
         flex-direction: column;
     }
     .dsp_column_settings_panel h2{
@@ -635,31 +701,83 @@ function run(settings) {
         margin: 0;
     }
     .dsp_column_settings_panel_content{
-        margin-left: 0.5rem;
+        margin: 0.4rem 0.5rem 0 0.5rem;
     }
     .dsp_column_settings_panel_content h2{
-        font-size: 1.2rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--opd-text);
+        margin-bottom: 0.35rem;
     }
     .opd_column_settings_input_text{
-        width: 5rem;
+        width: 4.5rem;
         margin-right: 0.2rem;
     }
     .dsp_column_settings_list{
-        background: white;
-        border-radius: 5px;
-        margin: 0 0.5rem 0.5rem 0;
-        padding: 0.5rem;
+        background: var(--opd-surface);
+        border-radius: 6px;
+        border: 1px solid var(--opd-border);
+        margin: 0;
+        padding: 0.45rem;
     }
     .dsp_column_settings_content_div{
-        margin-bottom: 0.1rem;
+        margin-bottom: 0.25rem;
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.8rem;
+        color: var(--opd-text);
     }
     .dsp_column_settings_panel_close_btn_wrap{
         display: flex;
         flex-direction: row;
         justify-content: center;
-        margin: 0 0.5rem 0.5rem 0;
+        margin: 0.4rem 0.5rem 0.5rem 0.5rem;
+    }
+    .dsp_column_settings_panel_close_btn{
+        border: 1px solid var(--opd-border-strong);
+        background: var(--opd-surface);
+        color: var(--opd-text);
+        border-radius: 999px;
+        font-size: 0.75rem;
+        line-height: 1;
+        min-height: 28px;
+        padding: 0.3rem 0.9rem;
+        cursor: pointer;
+    }
+    .dsp_column_settings_panel_close_btn:hover{
+        background: var(--opd-hover);
+    }
+    .dsp_column_settings_panel select,
+    .dsp_column_settings_panel input[type="number"]{
+        border: 1px solid var(--opd-border);
+        border-radius: 6px;
+        min-height: 24px;
+        padding: 0 0.35rem;
+        font-size: 0.76rem;
+        color: var(--opd-text);
+        background: var(--opd-surface);
+    }
+    .column_width_btn{
+        border: 1px solid var(--opd-border);
+        border-radius: 6px;
+        background: var(--opd-surface);
+        min-height: 24px;
+        padding: 0 0.45rem;
+        cursor: pointer;
+        font-size: 0.75rem;
+    }
+    .column_width_btn:hover{
+        background: var(--opd-hover);
+    }
+    #opd_main_element button:focus-visible,
+    #opd_main_element input:focus-visible,
+    #opd_main_element select:focus-visible,
+    #opd_main_element .dsp_btn_parent:focus-visible,
+    #opd_main_element .dsp_column_btn:focus-within{
+        outline: 2px solid var(--opd-focus);
+        outline-offset: 1px;
     }
     .opd_ui_icon_color{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
@@ -679,7 +797,7 @@ function run(settings) {
         color-scheme: dark;
 
         & #main_rack_element {
-            background-color: black !important;
+            background-color: #101215 !important;
             scrollbar-color: auto;
         }
 
@@ -693,7 +811,7 @@ function run(settings) {
 
         & .dsp_column_draggable_true,
         & .dsp_column_title {
-            background-color: #2e2e2e !important;
+            background-color: #2a2f36 !important;
         }
 
         & .dsp_btn_add_post_img,
@@ -712,16 +830,27 @@ function run(settings) {
         & .dsp_btn_parent:hover,
         & .dsp_column_btn:hover,
         & .profile_val_now:hover {
-            background: #555555;
+            background: #3f4752;
         }
 
         & .dsp_column_settings_panel {
-            background: #2e2e2e;
-            border: 1px solid #5d5d5d;
+            background: #2b3139;
+            border: 1px solid #4f5a68;
         }
 
         & .dsp_column_settings_list {
-            background: #474747;
+            background: #353d47;
+            border-color: #4f5a68;
+        }
+
+        & .dsp_column_settings_panel select,
+        & .dsp_column_settings_panel input[type="number"],
+        & .opd_debug_menu input,
+        & .column_width_btn,
+        & .dsp_column_settings_panel_close_btn {
+            background: #242b33;
+            color: #d6dce5;
+            border-color: #4f5a68;
         }
     }
 
@@ -812,9 +941,9 @@ function run(settings) {
     let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span><span class="dsp_column_btn"><input class="opd_top_bar" type="checkbox" title="${i18n_message("ui_column_top_toggle_title")}" %column_top_bar_ch%><label class="dsp_column_top_btn opd_ui_icon_color"></label></span>`;
     let post_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
     let othersns_default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
-    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_view_mode_label")}<span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_auto_reload_label")}<span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_auto_reload_interval_label")}<span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>`;
-    let column_settings_panel_no_auto = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_view_mode_label")}<span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>`;
-    let column_settings_panel_othersns = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>`;
+    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
+    let column_settings_panel_no_auto = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
+    let column_settings_panel_othersns = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
     let default_element = {
         /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" opd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
         empty_column: {
@@ -840,7 +969,7 @@ function run(settings) {
     ins_html.id = "opd_main_element";
     ins_html.style =
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><p class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<br><input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><br><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><br><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><br><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /><br><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">Open-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
