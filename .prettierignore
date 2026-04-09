@@ -1,0 +1,7 @@
+.git
+.web-ext-firefox-src
+node_modules
+package
+package_tmp
+pnpm-lock.yaml
+web-ext-artifacts
