@@ -555,11 +555,15 @@ function run(settings) {
         border: 0;
     }
     .dsp_column_btn{
-        width: 24px;
-        min-width: 24px;
-        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+        line-height: 0;
         border-radius: 6px;
-        overflow: hidden;
+        overflow: visible;
         margin-right: 4px;
         border: 1px solid transparent;
     }
@@ -572,11 +576,11 @@ function run(settings) {
         display: flex;
         flex-direction: row;
         width: 100%;
-        min-height: 30px;
+        min-height: 34px;
         align-items: center;
-        padding: 2px 6px;
+        padding: 3px 6px;
         gap: 2px;
-        overflow: hidden;
+        overflow: visible;
         border-top: solid var(--opd-border) 1px !important;
         border-bottom: solid var(--opd-border) 1px !important;
         border-radius: 8px 8px 0 0;
@@ -607,9 +611,11 @@ function run(settings) {
     .dsp_column_settings_btn{
         display: block;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_settings)});
-        background-size: cover;
-        width: 24px;
-        height: 24px;    
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 22px;
+        height: 22px;    
     }
     .dsp_column_settings_btn:hover{
         cursor: pointer;
@@ -626,8 +632,8 @@ function run(settings) {
         background-size: 15px;
         background-repeat: no-repeat;
         background-position: center;
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
     .dsp_column_close_btn:hover{
         cursor: pointer;
@@ -640,9 +646,11 @@ function run(settings) {
         display: block;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.banner_hide)});
         transform: rotate(180deg);
-        background-size: cover;
-        width: 24px;
-        height: 24px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 22px;
+        height: 22px;
     }
     input:checked + .dsp_column_banner_btn{
         transform: rotate(0deg);
@@ -660,9 +668,11 @@ function run(settings) {
         display: block;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.top_bar_hide)});
         transform: rotate(180deg);
-        background-size: cover;
-        width: 24px;
-        height: 24px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 22px;
+        height: 22px;
         cursor: pointer;  
     }
     input:checked + .dsp_column_top_btn{
@@ -687,9 +697,11 @@ function run(settings) {
     .dsp_column_pin_btn{
         display: block;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_pin)});
-        background-size: cover;
-        width: 20px;
-        height: 20px;    
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 18px;
+        height: 18px;    
     }
     input:checked + .dsp_column_pin_btn{
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_pinned)});
