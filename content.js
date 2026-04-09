@@ -40,6 +40,7 @@ const ui_icon_define = {
     add_timeline_column: "icon/tl_column.svg",
     add_notification_column: "icon/notice_column.svg",
     add_explore_column: "icon/exp_column.svg",
+    add_custom_url_column: "icon/t_logo.svg",
     column_single_rack: "icon/single_view.svg",
     column_second_rack: "icon/second_view.svg",
     profile_save: "icon/profile_save.svg",
@@ -483,6 +484,14 @@ function run(settings) {
         height: 69%;
         width: 69%;
     }
+    .dsp_btn_add_custom_url_img{
+        filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: url(${chrome.runtime.getURL(ui_icon_define.add_custom_url_column)});
+        height: 69%;
+        width: 69%;
+    }
     .dsp_btn_second_rack_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
@@ -818,6 +827,7 @@ function run(settings) {
         & .dsp_btn_add_tl_img,
         & .dsp_btn_add_ntfc_img,
         & .dsp_btn_add_explr_img,
+        & .dsp_btn_add_custom_url_img,
         & .dsp_btn_second_rack_img,
         & .dsp_btn_profile_add_img,
         & .dsp_btn_profile_delete_img,
@@ -969,7 +979,7 @@ function run(settings) {
     ins_html.id = "opd_main_element";
     ins_html.style =
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><div class="dsp_btn_parent" id="add_custom_url" title="${i18n_message("ui_add_custom_url_column_title")}"><div class="dsp_btn_add_custom_url_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">Open-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
@@ -2497,41 +2507,97 @@ function run(settings) {
             column_close();
             column_settings_save("", last_load_profile);
         });
+    function normalize_custom_x_path(input_value) {
+        const trimmed_value = input_value?.trim();
+        if (!trimmed_value) {
+            return null;
+        }
+        if (
+            /^(https?:\/\/)?(www\.)?(x\.com|twitter\.com)\/?$/i.test(
+                trimmed_value,
+            )
+        ) {
+            return "/home";
+        }
+        let normalized_url;
+        try {
+            if (trimmed_value.startsWith("/")) {
+                normalized_url = new URL(`https://x.com${trimmed_value}`);
+            } else if (
+                /^https?:\/\//i.test(trimmed_value) ||
+                /^(x\.com|twitter\.com|www\.x\.com|www\.twitter\.com)\//i.test(
+                    trimmed_value,
+                )
+            ) {
+                normalized_url = new URL(
+                    /^https?:\/\//i.test(trimmed_value)
+                        ? trimmed_value
+                        : `https://${trimmed_value}`,
+                );
+            } else {
+                normalized_url = new URL(`https://x.com/${trimmed_value}`);
+            }
+        } catch (error) {
+            return null;
+        }
+        const host = normalized_url.hostname.toLowerCase();
+        const allowed_hosts = ["x.com", "twitter.com", "www.x.com", "www.twitter.com"];
+        if (!allowed_hosts.includes(host)) {
+            return null;
+        }
+        const normalized_path = `${normalized_url.pathname}${normalized_url.search}`;
+        return normalized_path === "" ? "/home" : normalized_path;
+    }
+    function add_explore_column_with_path(column_path) {
+        const empty_column = document.querySelector(".dsp_column_emptycolumn");
+        const first_column = empty_column
+            ?.closest("div")
+            ?.querySelector('section[draggable="true"]');
+        const add_target_column =
+            is_shift_pressed && first_column ? first_column : empty_column;
+        const new_column = default_element["explore"]["html"]
+            .replaceAll("%column_save_path%", column_path)
+            .replaceAll("%column_num%", create_random_id())
+            .replace("%column_banner_ch%", "")
+            .replace("%column_top_bar_ch%", "checked")
+            .replace("%column_tw_view_mode%", "0")
+            .replaceAll("%column_pinned_save_path%", "")
+            .replaceAll("%column_width_num%", "30")
+            .replaceAll("%column_auto_reload_ch%", "")
+            .replaceAll("%column_auto_reload_time%", "10000");
+        add_target_column.insertAdjacentHTML("beforebegin", new_column);
+        add_target_column.scrollIntoView({
+            behavior: "smooth",
+            inline: "end",
+        });
+        const all_webview = document.querySelectorAll(
+            "#main_rack_element iframe[opd_init_webview]",
+        );
+        append_object_css("add_column", all_webview);
+        column_dd();
+        column_close();
+        column_settings_save("", last_load_profile);
+    }
     // Add Explore (universal) column.
     document
         .getElementById("add_explore")
         .addEventListener("click", function () {
-            const empty_column = document.querySelector(
-                ".dsp_column_emptycolumn",
-            );
-            const first_column = empty_column
-                ?.closest("div")
-                ?.querySelector('section[draggable="true"]');
-            const add_target_column =
-                is_shift_pressed && first_column ? first_column : empty_column;
-
-            const new_column = default_element["explore"]["html"]
-                .replaceAll("%column_save_path%", "/explore")
-                .replaceAll("%column_num%", create_random_id())
-                .replace("%column_banner_ch%", "")
-                .replace("%column_top_bar_ch%", "checked")
-                .replace("%column_tw_view_mode%", "0")
-                .replaceAll("%column_pinned_save_path%", "")
-                .replaceAll("%column_width_num%", "30")
-                .replaceAll("%column_auto_reload_ch%", "")
-                .replaceAll("%column_auto_reload_time%", "10000");
-            add_target_column.insertAdjacentHTML("beforebegin", new_column);
-            add_target_column.scrollIntoView({
-                behavior: "smooth",
-                inline: "end",
-            });
-            const all_webview = document.querySelectorAll(
-                "#main_rack_element iframe[opd_init_webview]",
-            );
-            append_object_css("add_column", all_webview);
-            column_dd();
-            column_close();
-            column_settings_save("", last_load_profile);
+            add_explore_column_with_path("/explore");
+        });
+    // Add custom URL under x.com/twitter.com.
+    document
+        .getElementById("add_custom_url")
+        .addEventListener("click", function () {
+            const input_value = prompt(i18n_message("msg_custom_x_url_prompt"));
+            if (input_value == null) {
+                return;
+            }
+            const custom_path = normalize_custom_x_path(input_value);
+            if (custom_path == null) {
+                alert(i18n_message("msg_invalid_value_alert"));
+                return;
+            }
+            add_explore_column_with_path(custom_path);
         });
     // Profile save button.
     document

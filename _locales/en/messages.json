@@ -41,6 +41,9 @@
     "ui_add_explore_column_title": {
         "message": "Add Explore (universal) column"
     },
+    "ui_add_custom_url_column_title": {
+        "message": "Add custom X/Twitter URL column"
+    },
     "ui_toggle_second_rack_title": {
         "message": "Toggle multi-row layout"
     },
@@ -169,6 +172,9 @@
     },
     "msg_column_width_prompt": {
         "message": "Enter the column width in rem (numbers only).\nGuide: Small:15 / Medium:20 / Large:30 / Default:30\nValues of 11 or less are not allowed."
+    },
+    "msg_custom_x_url_prompt": {
+        "message": "Enter an X/Twitter URL or path.\nExamples:\nhttps://x.com/i/bookmarks\nhttps://twitter.com/home\n/i/bookmarks"
     },
     "msg_invalid_value_alert": {
         "message": "Please enter a valid value."
