@@ -2,41 +2,60 @@
 (() => {
     const isAllowed = (u) => {
         const url = new URL(u, location.href);
-        return url.origin === location.origin && url.pathname.startsWith("/compose/post");
+        return (
+            url.origin === location.origin &&
+            url.pathname.startsWith("/compose/post")
+        );
     };
     // Hide GIF button.
-    document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_post_css>main button[data-testid="gifSearchButton"]{display:none;}div[data-testid="twc-cc-mask"]{display:none;}</style>`);
-    new MutationObserver(function(){
-        const back_button = document.querySelector('main button[data-testid="app-bar-back"]');
-        if(!back_button) return;
-        if(location.pathname === "/compose/post"){
+    document
+        .querySelector("head")
+        .insertAdjacentHTML(
+            "beforeend",
+            `<style opd_post_css>main button[data-testid="gifSearchButton"]{display:none;}div[data-testid="twc-cc-mask"]{display:none;}</style>`,
+        );
+    new MutationObserver(function () {
+        const back_button = document.querySelector(
+            'main button[data-testid="app-bar-back"]',
+        );
+        if (!back_button) return;
+        if (location.pathname === "/compose/post") {
             back_button.style.display = "none";
-        }else{
+        } else {
             back_button.style.display = "block";
         }
-    }).observe(document, {childList: true, subtree: true});
-    
-    (function() {
+    }).observe(document, { childList: true, subtree: true });
+
+    (function () {
         // Disable post-submit navigation prompt.
         const native_add_evt = EventTarget.prototype.addEventListener;
-        native_add_evt.call(window, 'beforeunload', function (e){
-            // Stop existing event handlers.
-            e.stopImmediatePropagation();
-        }, {capture: true});
-        
+        native_add_evt.call(
+            window,
+            "beforeunload",
+            function (e) {
+                // Stop existing event handlers.
+                e.stopImmediatePropagation();
+            },
+            { capture: true },
+        );
+
         // Block future added events.
-        EventTarget.prototype.addEventListener = function (type, listener, options){
-            if(String(type).toLowerCase() === 'beforeunload'){
+        EventTarget.prototype.addEventListener = function (
+            type,
+            listener,
+            options,
+        ) {
+            if (String(type).toLowerCase() === "beforeunload") {
                 return;
             }
             return native_add_evt.call(this, type, listener, options);
         };
-        
+
         // Prevent navigation back to home after posting.
         const originalPushState = history.pushState;
-        history.pushState = function(state, title, url) {
+        history.pushState = function (state, title, url) {
             const dest = url ? new URL(url, location.href).href : location.href;
-            if (!isAllowed(dest)){
+            if (!isAllowed(dest)) {
                 // Block navigation to home.
                 location.replace(location.href);
                 return;
@@ -49,53 +68,58 @@
     let target_editor_elem = null;
     let opd_paste_token = null;
     document.addEventListener("focusin", (ev) => {
-        if(ev.target && ev.target.isContentEditable){
+        if (ev.target && ev.target.isContentEditable) {
             target_editor_elem = ev.target;
         }
     });
-    const handler = async(e) => {
+    const handler = async (e) => {
         // Use JSON in detail because Firefox cannot carry object payload here.
         const detail = JSON.parse(e.detail);
         // Validate token before paste.
-        if(opd_paste_token && opd_paste_token !== detail.token) return;
+        if (opd_paste_token && opd_paste_token !== detail.token) return;
 
         // Use X editor internals to input text correctly.
-        if(target_editor_elem && target_editor_elem.isContentEditable){
+        if (target_editor_elem && target_editor_elem.isContentEditable) {
             // Select all text.
             text_all_select(target_editor_elem);
             // Wait until selection is applied.
-            await new Promise(resolve => setTimeout(resolve, 30));
+            await new Promise((resolve) => setTimeout(resolve, 30));
 
             // Use separate path because Firefox lacks DataTransfer/ClipboardEvent behavior here.
             if (!detail.is_firefox) {
                 // Get React props.
-                const propsKey = Object.getOwnPropertyNames(target_editor_elem).find(k => k.includes('__reactProps$'));
+                const propsKey = Object.getOwnPropertyNames(
+                    target_editor_elem,
+                ).find((k) => k.includes("__reactProps$"));
                 const props = propsKey ? target_editor_elem[propsKey] : null;
-                const editor = props?.children?.props?.editor ??props?.children?.[0]?.props?.editor ?? null;
-                
+                const editor =
+                    props?.children?.props?.editor ??
+                    props?.children?.[0]?.props?.editor ??
+                    null;
+
                 // Create DataTransfer for reviewed text.
                 const dt = new DataTransfer();
-                dt.setData('text/plain', detail.text);
+                dt.setData("text/plain", detail.text);
 
                 // Create clipboard paste event.
-                const evt = new ClipboardEvent('paste', {
+                const evt = new ClipboardEvent("paste", {
                     bubbles: true,
                     cancelable: true,
-                    clipboardData: dt
+                    clipboardData: dt,
                 });
                 // Pseudo-paste reviewed text through internal handler.
                 editor?._onPaste(evt, editor);
-            }else{
+            } else {
                 // execCommand is deprecated but used as Firefox fallback.
                 // Replace text.
-                document.execCommand('insertText', false, detail.text);
+                document.execCommand("insertText", false, detail.text);
             }
         }
     };
 
-    async function text_all_select(target){
+    async function text_all_select(target) {
         // Select-all helper.
-        if(!target && !target.isContentEditable) return false;
+        if (!target && !target.isContentEditable) return false;
 
         const win = target.ownerDocument.defaultView;
         const doc = target.ownerDocument;
@@ -112,11 +136,15 @@
     }
 
     // Register event to receive paste-auth token.
-    window.addEventListener('opd_text_review_init', (e)=>{
-        const detail = JSON.parse(e.detail);
-        opd_paste_token = detail.token;
-    }, true);
+    window.addEventListener(
+        "opd_text_review_init",
+        (e) => {
+            const detail = JSON.parse(e.detail);
+            opd_paste_token = detail.token;
+        },
+        true,
+    );
 
     // Register event that applies reviewed text.
-    window.addEventListener('opd_text_review_apply', handler, true);
+    window.addEventListener("opd_text_review_apply", handler, true);
 })();

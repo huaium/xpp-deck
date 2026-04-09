@@ -2,10 +2,18 @@ console.log("Welcome to Open-Deck!");
 const manifest = chrome.runtime.getManifest();
 // Set to true for prototype builds.
 const is_prototype = false;
-if(is_prototype){
-    console.log("%cOpen-Deck Prototype", "background:#a1f4ff;padding:5px;border-radius:5px", `Version:${manifest.version}`);
-}else{
-    console.log("%cOpen-Deck", "background:#a1f4ff;padding:5px;border-radius:5px", `Version:${manifest.version}`);
+if (is_prototype) {
+    console.log(
+        "%cOpen-Deck Prototype",
+        "background:#a1f4ff;padding:5px;border-radius:5px",
+        `Version:${manifest.version}`,
+    );
+} else {
+    console.log(
+        "%cOpen-Deck",
+        "background:#a1f4ff;padding:5px;border-radius:5px",
+        `Version:${manifest.version}`,
+    );
 }
 //
 const url_path = new URL(location.href);
@@ -18,200 +26,281 @@ let last_load_profile = 0;
 let is_removed_default_style = false;
 let media_viewer_token = [];
 const ui_icon_define = {
-    banner_hide:"icon/banner_hide.svg",
-    top_bar_hide:"icon/top_hide.svg",
-    column_move:"icon/column_move.svg",
-    column_close:"icon/column_close.svg",
+    banner_hide: "icon/banner_hide.svg",
+    top_bar_hide: "icon/top_hide.svg",
+    column_move: "icon/column_move.svg",
+    column_close: "icon/column_close.svg",
     column_settings: "icon/settings.svg",
-    column_pin:"icon/pin.svg",
-    column_pinned:"icon/pinned.svg",
-    column_widesize:"icon/column_w_size.svg",
-    column_add_1:"icon/column_add_1st.svg",
-    column_add_2:"icon/column_add_2nd.svg",
-    add_post_column:"icon/post.svg",
-    add_timeline_column:"icon/tl_column.svg",
-    add_notification_column:"icon/notice_column.svg",
-    add_explore_column:"icon/exp_column.svg",
-    column_single_rack:"icon/single_view.svg",
-    column_second_rack:"icon/second_view.svg",
-    profile_save:"icon/profile_save.svg",
-    profile_delete:"icon/profile_delete.svg",
-    text_review:"icon/text_review.svg",
-    forward:"icon/forward.svg",
-    next:"icon/next.svg",
-    download:"icon/download.svg"
-}
+    column_pin: "icon/pin.svg",
+    column_pinned: "icon/pinned.svg",
+    column_widesize: "icon/column_w_size.svg",
+    column_add_1: "icon/column_add_1st.svg",
+    column_add_2: "icon/column_add_2nd.svg",
+    add_post_column: "icon/post.svg",
+    add_timeline_column: "icon/tl_column.svg",
+    add_notification_column: "icon/notice_column.svg",
+    add_explore_column: "icon/exp_column.svg",
+    column_single_rack: "icon/single_view.svg",
+    column_second_rack: "icon/second_view.svg",
+    profile_save: "icon/profile_save.svg",
+    profile_delete: "icon/profile_delete.svg",
+    text_review: "icon/text_review.svg",
+    forward: "icon/forward.svg",
+    next: "icon/next.svg",
+    download: "icon/download.svg",
+};
 // Convert UNIX timestamp to local time string.
-function unix_time_mmss(input){
+function unix_time_mmss(input) {
     const date = new Date(input * 1000);
     return date.toLocaleTimeString();
 }
 // Track whether the Shift key is pressed for shortcuts.
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Shift') is_shift_pressed = true;
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Shift") is_shift_pressed = true;
 });
-document.addEventListener('keyup', (event) => {
-    if (event.key === 'Shift') is_shift_pressed = false;
+document.addEventListener("keyup", (event) => {
+    if (event.key === "Shift") is_shift_pressed = false;
 });
 // Watch storage updates (mainly for API rate-limit status).
 let api_limit_obj = null;
-let api_limit_dsc_obj = {time_line:"", recommend_timeline:"", search:""};
+let api_limit_dsc_obj = { time_line: "", recommend_timeline: "", search: "" };
 chrome.storage.onChanged.addListener((changes, namespace) => {
-    if(changes.api_access_limit != undefined){
+    if (changes.api_access_limit != undefined) {
         //console.log(changes)
         api_limit_obj = changes.api_access_limit.newValue;
-        const api_linit_status_btn = document.querySelector("#api_limit_status");
-        if(api_linit_status_btn != null){
+        const api_linit_status_btn =
+            document.querySelector("#api_limit_status");
+        if (api_linit_status_btn != null) {
             let timeline_limit_percentage = 99999;
             let recommend_timeline_limit_percentage = 99999;
             let search_limit_percentage = 99999;
-            if(api_limit_obj.time_line.remaining != null){
-                timeline_limit_percentage = api_limit_obj.time_line.remaining / api_limit_obj.time_line.limit * 100;
+            if (api_limit_obj.time_line.remaining != null) {
+                timeline_limit_percentage =
+                    (api_limit_obj.time_line.remaining /
+                        api_limit_obj.time_line.limit) *
+                    100;
                 api_limit_dsc_obj.time_line = `${i18n_message("label_api_timeline")}${api_limit_obj.time_line.remaining}/${api_limit_obj.time_line.limit}-${unix_time_mmss(api_limit_obj.time_line.reset_unix_time)}\r\n`;
-            }else{
+            } else {
                 // Initial state.
             }
-            if(api_limit_obj.recommend_timeline.remaining != null){
-                recommend_timeline_limit_percentage = api_limit_obj.recommend_timeline.remaining / api_limit_obj.recommend_timeline.limit * 100;
+            if (api_limit_obj.recommend_timeline.remaining != null) {
+                recommend_timeline_limit_percentage =
+                    (api_limit_obj.recommend_timeline.remaining /
+                        api_limit_obj.recommend_timeline.limit) *
+                    100;
                 api_limit_dsc_obj.recommend_timeline = `${i18n_message("label_api_recommend_timeline")}${api_limit_obj.recommend_timeline.remaining}/${api_limit_obj.recommend_timeline.limit}-${unix_time_mmss(api_limit_obj.recommend_timeline.reset_unix_time)}\r\n`;
-            }else{
+            } else {
                 // Initial state.
             }
-            if(api_limit_obj.search.remaining != null){
-                search_limit_percentage = api_limit_obj.search.remaining / api_limit_obj.search.limit * 100;
+            if (api_limit_obj.search.remaining != null) {
+                search_limit_percentage =
+                    (api_limit_obj.search.remaining /
+                        api_limit_obj.search.limit) *
+                    100;
                 api_limit_dsc_obj.search = `${i18n_message("label_api_search")}${api_limit_obj.search.remaining}/${api_limit_obj.search.limit}-${unix_time_mmss(api_limit_obj.search.reset_unix_time)}`;
-            }else{
+            } else {
                 // Initial state.
             }
             api_linit_status_btn.textContent = `${Math.floor(Math.min(timeline_limit_percentage, recommend_timeline_limit_percentage, search_limit_percentage))}%`;
             api_linit_status_btn.title = `${i18n_message("msg_api_limit_status_title", [`${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`])}`;
         }
     }
-  });
+});
 //
-if(location.href == "https://twitter.com/run-opdeck" || location.href == "https://x.com/run-opdeck"){
+if (
+    location.href == "https://twitter.com/run-opdeck" ||
+    location.href == "https://x.com/run-opdeck"
+) {
     //testmode
-    if(url_path.pathname == "/run-opdeck_test.html"){
+    if (url_path.pathname == "/run-opdeck_test.html") {
         //init();
-        console.log("testmode")
-        chrome.runtime.sendMessage({message: "dnr_upd_internal_dsp"}).then((value)=>{
-            init();
-        });
-    }else{
-        if(navigator.brave != undefined){
-            chrome.runtime.sendMessage({message: "dnr_upd"}).then((value)=>{
+        console.log("testmode");
+        chrome.runtime
+            .sendMessage({ message: "dnr_upd_internal_dsp" })
+            .then((value) => {
+                init();
+            });
+    } else {
+        if (navigator.brave != undefined) {
+            chrome.runtime.sendMessage({ message: "dnr_upd" }).then((value) => {
                 init();
             });
             //init();
-        }else{
-            chrome.runtime.sendMessage({message: "dnr_upd"}).then((value)=>{
+        } else {
+            chrome.runtime.sendMessage({ message: "dnr_upd" }).then((value) => {
                 init();
             });
         }
     }
     //chrome.runtime.sendMessage({message: "dnr_upd"});
-    function init(){
+    function init() {
         //console.log("Welcome to Open-Deck!");
-        chrome.storage.local.get("opd_settings", function(value){
-            if(value.opd_settings == undefined){
+        chrome.storage.local.get("opd_settings", function (value) {
+            if (value.opd_settings == undefined) {
                 last_load_profile = 0;
                 settings_init();
-            }else{
-                if(JSON.parse(value.opd_settings).last_load_profile == undefined){
-                    if(confirm(i18n_message("msg_profile_data_broken_confirm"))){
-                        chrome.storage.local.remove("opd_settings", function(){
-                            alert(i18n_message("msg_profile_init_completed"));
-                        });
-                    }else{
+            } else {
+                if (
+                    JSON.parse(value.opd_settings).last_load_profile ==
+                    undefined
+                ) {
+                    if (
+                        confirm(i18n_message("msg_profile_data_broken_confirm"))
+                    ) {
+                        chrome.storage.local.remove(
+                            "opd_settings",
+                            function () {
+                                alert(
+                                    i18n_message("msg_profile_init_completed"),
+                                );
+                            },
+                        );
+                    } else {
                         last_load_profile = 0;
                     }
-                }else{
-                    last_load_profile = JSON.parse(value.opd_settings).last_load_profile;
+                } else {
+                    last_load_profile = JSON.parse(
+                        value.opd_settings,
+                    ).last_load_profile;
                 }
                 //console.log(last_load_profile);
             }
-            
-            chrome.storage.local.get("opd_profile_store", function(store_value){
-                //console.log(store_value)
-                //console.log(JSON.parse(store_value.opd_profile_store))
-                profile_store = JSON.parse(store_value.opd_profile_store);
-                //RUN
-                let ext_update_flag = null;
-                let ext_settings = null;
-                if(value.opd_settings != undefined){
-                    if(JSON.parse(value.opd_settings).version != manifest.version){
-                        ext_update_flag = true;
-                    }else{
-                        ext_update_flag = false;
-                    }
-                }
-                if(value.opd_settings == undefined || ext_update_flag == true){
-                    //settings_init();
-                    //ext_settings = JSON.parse(value.opd_settings);
-                    if(profile_store[last_load_profile]?.profile == undefined){
-                        let recovery_setting = JSON.parse(value.opd_settings);
-                        recovery_setting.last_load_profile = 0;
-                        chrome.storage.local.set({'opd_settings': JSON.stringify(recovery_setting)}, function(){
-                            alert(i18n_message("msg_settings_auto_repair"));
-                            last_load_profile = 0;
-                            window.reload();
-                        });
-                    }
 
-                    // Bump settings version when the extension is updated.
-                    if(ext_update_flag){
-                        const setting = JSON.parse(value.opd_settings);
-                        setting.version = manifest.version;
-                        chrome.storage.local.set({'opd_settings': JSON.stringify(setting)}, function(){
-                            if(confirm(i18n_message("app_update"))){
-                                open(`https://github.com/kawa-nobu/Open-Deck/releases/tag/v${manifest.version}`, '_blank', 'popup');
-                            }
-                        });
+            chrome.storage.local.get(
+                "opd_profile_store",
+                function (store_value) {
+                    //console.log(store_value)
+                    //console.log(JSON.parse(store_value.opd_profile_store))
+                    profile_store = JSON.parse(store_value.opd_profile_store);
+                    //RUN
+                    let ext_update_flag = null;
+                    let ext_settings = null;
+                    if (value.opd_settings != undefined) {
+                        if (
+                            JSON.parse(value.opd_settings).version !=
+                            manifest.version
+                        ) {
+                            ext_update_flag = true;
+                        } else {
+                            ext_update_flag = false;
+                        }
                     }
-                    ext_settings = {column_settings:profile_store[last_load_profile].profile};
-                }else{
-                    //ext_settings = JSON.parse(value.opd_settings);
-                    if(profile_store[last_load_profile]?.profile == undefined){
-                        let recovery_setting = JSON.parse(value.opd_settings);
-                        recovery_setting.last_load_profile = 0;
-                        chrome.storage.local.set({'opd_settings': JSON.stringify(recovery_setting)}, function(){
-                            alert(i18n_message("msg_settings_auto_repair"));
-                            last_load_profile = 0;
-                            window.reload();
-                        });
+                    if (
+                        value.opd_settings == undefined ||
+                        ext_update_flag == true
+                    ) {
+                        //settings_init();
+                        //ext_settings = JSON.parse(value.opd_settings);
+                        if (
+                            profile_store[last_load_profile]?.profile ==
+                            undefined
+                        ) {
+                            let recovery_setting = JSON.parse(
+                                value.opd_settings,
+                            );
+                            recovery_setting.last_load_profile = 0;
+                            chrome.storage.local.set(
+                                {
+                                    opd_settings:
+                                        JSON.stringify(recovery_setting),
+                                },
+                                function () {
+                                    alert(
+                                        i18n_message(
+                                            "msg_settings_auto_repair",
+                                        ),
+                                    );
+                                    last_load_profile = 0;
+                                    window.reload();
+                                },
+                            );
+                        }
+
+                        // Bump settings version when the extension is updated.
+                        if (ext_update_flag) {
+                            const setting = JSON.parse(value.opd_settings);
+                            setting.version = manifest.version;
+                            chrome.storage.local.set(
+                                { opd_settings: JSON.stringify(setting) },
+                                function () {
+                                    if (confirm(i18n_message("app_update"))) {
+                                        open(
+                                            `https://github.com/kawa-nobu/Open-Deck/releases/tag/v${manifest.version}`,
+                                            "_blank",
+                                            "popup",
+                                        );
+                                    }
+                                },
+                            );
+                        }
+                        ext_settings = {
+                            column_settings:
+                                profile_store[last_load_profile].profile,
+                        };
+                    } else {
+                        //ext_settings = JSON.parse(value.opd_settings);
+                        if (
+                            profile_store[last_load_profile]?.profile ==
+                            undefined
+                        ) {
+                            let recovery_setting = JSON.parse(
+                                value.opd_settings,
+                            );
+                            recovery_setting.last_load_profile = 0;
+                            chrome.storage.local.set(
+                                {
+                                    opd_settings:
+                                        JSON.stringify(recovery_setting),
+                                },
+                                function () {
+                                    alert(
+                                        i18n_message(
+                                            "msg_settings_auto_repair",
+                                        ),
+                                    );
+                                    last_load_profile = 0;
+                                    window.reload();
+                                },
+                            );
+                        }
+                        ext_settings = {
+                            column_settings:
+                                profile_store[last_load_profile].profile,
+                        };
                     }
-                    ext_settings = {column_settings:profile_store[last_load_profile].profile};
-                }
-                //console.log(ext_settings);
-                run(ext_settings);
-            });
+                    //console.log(ext_settings);
+                    run(ext_settings);
+                },
+            );
         });
     }
 }
-function run(settings){
+function run(settings) {
     //console.log(settings)
     let profile_list_html;
     let profile_list_btn_html = "";
     // Initialize profile list.
     for (let index = 0; index < profile_store.length; index++) {
-        profile_list_btn_html += `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;//<div class="profile_list"><input type="button" id="userProfile-${index}" value="P${index}"></div>
+        profile_list_btn_html += `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`; //<div class="profile_list"><input type="button" id="userProfile-${index}" value="P${index}"></div>
     }
     profile_list_html = `<div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${last_load_profile}</div><div class="dsp_profile_list"><div id="profile_btn_list">${profile_list_btn_html}</div>`;
     //console.log(profile_list_btn_html)
     // Media preview panel.
     const media_viewer = new OpdExtMediaViewer();
-    document.addEventListener('opd_send_media_info', (e) => {
+    document.addEventListener("opd_send_media_info", (e) => {
         const detail = JSON.parse(e.detail);
         for (let index = 0; index < media_viewer_token.length; index++) {
             const token = media_viewer_token[index];
-            if(detail.token === token){
+            if (detail.token === token) {
                 media_viewer.Preview(detail.media_info, detail.selected_index);
                 break;
             }
         }
     });
     // Insert CSS tags.
-    document.querySelector("head").insertAdjacentHTML("afterbegin", `<style second_column_css></style>
+    document.querySelector("head").insertAdjacentHTML(
+        "afterbegin",
+        `<style second_column_css></style>
     <style opd_default_css>
     html{
         overflow-y:hidden !important;
@@ -717,26 +806,40 @@ function run(settings){
         height: 30px;
         padding: 5px;
     }
-    </style>`);
+    </style>`,
+    );
     // Create and insert column elements.
     let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span><span class="dsp_column_btn"><input class="opd_top_bar" type="checkbox" title="${i18n_message("ui_column_top_toggle_title")}" %column_top_bar_ch%><label class="dsp_column_top_btn opd_ui_icon_color"></label></span>`;
     let post_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
     let othersns_default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
-    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_view_mode_label")}<span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_auto_reload_label")}<span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_auto_reload_interval_label")}<span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>` ;
-    let column_settings_panel_no_auto = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_view_mode_label")}<span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>` ;
-    let column_settings_panel_othersns = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>` ;
+    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_view_mode_label")}<span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_auto_reload_label")}<span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_auto_reload_interval_label")}<span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>`;
+    let column_settings_panel_no_auto = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_view_mode_label")}<span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>`;
+    let column_settings_panel_othersns = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_label")}<span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div">${i18n_message("ui_settings_column_width_custom_label")}<span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}" style="vertical-align: text-top;font-size: 0.8rem;"/></div></div></div>`;
     let default_element = {
         /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" opd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
-        empty_column:{html:`<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_emptycolumn"><div opd_column_type="empty_column" opd_column_width="%column_width_num%" style="height: 100%;min-width: 30rem;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_1)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_empty_column_message")}</p></div></div></section>`},
-        post:{html:`<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Post</span></div></span>${post_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`},
-        second_empty_column:{html:`<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_second_emptycolumn"><div opd_column_type="second_empty_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 30rem;overflow: hidden;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_2)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_second_empty_column_message")}</p></div></div></section>`},
-        home:{html:`<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Timeline</span></div></span>${default_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`},
-        notification:{html:`<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Notifications</span></div></span>${default_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe allow="fullscreen" src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`},
-        explore:{html:`<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="%column_save_title%" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Explore</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span><div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`}
+        empty_column: {
+            html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_emptycolumn"><div opd_column_type="empty_column" opd_column_width="%column_width_num%" style="height: 100%;min-width: 30rem;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_1)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_empty_column_message")}</p></div></div></section>`,
+        },
+        post: {
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Post</span></div></span>${post_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+        },
+        second_empty_column: {
+            html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_second_emptycolumn"><div opd_column_type="second_empty_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 30rem;overflow: hidden;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_2)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_second_empty_column_message")}</p></div></div></section>`,
+        },
+        home: {
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Timeline</span></div></span>${default_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+        },
+        notification: {
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Notifications</span></div></span>${default_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe allow="fullscreen" src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+        },
+        explore: {
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="%column_save_title%" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Explore</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span><div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+        },
     };
     let ins_html = document.createElement("div");
     ins_html.id = "opd_main_element";
-    ins_html.style = "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
+    ins_html.style =
+        "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
     let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><p class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<br><input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><br><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><br><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><br><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /><br><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">Open-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
@@ -753,61 +856,143 @@ function run(settings){
     //console.log(settings.column_settings.length)
     for (let index = 0; index < settings.column_settings.length; index++) {
         //console.log(default_element)
-        for (let default_index = 0; default_index < Object.keys(default_element).length; default_index++) {
+        for (
+            let default_index = 0;
+            default_index < Object.keys(default_element).length;
+            default_index++
+        ) {
             //console.log(settings.column_settings[index].type+"-"+Object.keys(default_element))
-            if(settings.column_settings[index].type == Object.keys(default_element)[default_index]){
+            if (
+                settings.column_settings[index].type ==
+                Object.keys(default_element)[default_index]
+            ) {
                 //console.log(default_element[Object.keys(default_element)[default_index]]["html"])
                 let banner_checked = "";
                 let init_top_visible_checked = "";
                 let init_pinned_checked = "";
                 let init_pinned_path = "";
                 let init_auto_reload_checked = "";
-                let init_column_save_path = settings.column_settings[index].column_save_path;
-                let init_column_save_title = settings.column_settings[index].column_save_title;
+                let init_column_save_path =
+                    settings.column_settings[index].column_save_path;
+                let init_column_save_title =
+                    settings.column_settings[index].column_save_title;
                 let tw_view_type = settings.column_settings[index].tw_view_mode;
-                let auto_reload_time = settings.column_settings[index].auto_reload_time / 1000;
-                if(settings.column_settings[index].banner == true){
+                let auto_reload_time =
+                    settings.column_settings[index].auto_reload_time / 1000;
+                if (settings.column_settings[index].banner == true) {
                     banner_checked = "checked";
                 }
                 // Top search area and related UI.
-                if(settings.column_settings[index].top_visible == true){
+                if (settings.column_settings[index].top_visible == true) {
                     init_top_visible_checked = "checked";
                 }
                 // Column width.
-                if(settings.column_settings[index].column_width != null){
-                    column_width_init = settings.column_settings[index].column_width;
+                if (settings.column_settings[index].column_width != null) {
+                    column_width_init =
+                        settings.column_settings[index].column_width;
                 }
                 // Explore pin state.
-                if(settings.column_settings[index].type == "explore"){
-                    if(settings.column_settings[index].column_pinned_path != ""){
+                if (settings.column_settings[index].type == "explore") {
+                    if (
+                        settings.column_settings[index].column_pinned_path != ""
+                    ) {
                         init_pinned_checked = "checked";
-                        init_pinned_path = settings.column_settings[index].column_pinned_path;
-                        init_column_save_path = settings.column_settings[index].column_pinned_path;
+                        init_pinned_path =
+                            settings.column_settings[index].column_pinned_path;
+                        init_column_save_path =
+                            settings.column_settings[index].column_pinned_path;
                         //%column_pinned_ch%
-                    }else{
-                        init_column_save_path = settings.column_settings[index].column_save_path;
+                    } else {
+                        init_column_save_path =
+                            settings.column_settings[index].column_save_path;
                     }
                 }
                 // Auto refresh.
-                if(settings.column_settings[index].type == "explore" || settings.column_settings[index].type == "home"){
-                    if(settings.column_settings[index].auto_reload){
+                if (
+                    settings.column_settings[index].type == "explore" ||
+                    settings.column_settings[index].type == "home"
+                ) {
+                    if (settings.column_settings[index].auto_reload) {
                         init_auto_reload_checked = "checked";
                         //%column_pinned_ch%
-                    }else{
+                    } else {
                     }
                 }
                 // If first-row end is detected but settings still exist, append to second-row buffer.
-                if(first_column_end == true){
-                    second_column_html += default_element[Object.keys(default_element)[default_index]]["html"].replaceAll("%column_save_path%", init_column_save_path).replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", banner_checked).replace("%column_top_bar_ch%", init_top_visible_checked).replace("%column_tw_view_mode%", tw_view_type).replace("%column_pinned_ch%", init_pinned_checked).replaceAll("%column_pinned_save_path%", init_pinned_path).replaceAll("%column_save_title%", init_column_save_title).replaceAll("%column_width_num%", column_width_init).replaceAll("%column_auto_reload_ch%", init_auto_reload_checked).replaceAll("%column_auto_reload_time%", auto_reload_time);
-                }else{
-                    main_column_html += default_element[Object.keys(default_element)[default_index]]["html"].replaceAll("%column_save_path%", init_column_save_path).replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", banner_checked).replace("%column_top_bar_ch%", init_top_visible_checked).replace("%column_tw_view_mode%", tw_view_type).replace("%column_pinned_ch%", init_pinned_checked).replaceAll("%column_pinned_save_path%", init_pinned_path).replaceAll("%column_save_title%", init_column_save_title).replaceAll("%column_width_num%", column_width_init).replaceAll("%column_auto_reload_ch%", init_auto_reload_checked).replaceAll("%column_auto_reload_time%", auto_reload_time);
+                if (first_column_end == true) {
+                    second_column_html += default_element[
+                        Object.keys(default_element)[default_index]
+                    ]["html"]
+                        .replaceAll("%column_save_path%", init_column_save_path)
+                        .replaceAll("%column_num%", create_random_id())
+                        .replace("%column_banner_ch%", banner_checked)
+                        .replace(
+                            "%column_top_bar_ch%",
+                            init_top_visible_checked,
+                        )
+                        .replace("%column_tw_view_mode%", tw_view_type)
+                        .replace("%column_pinned_ch%", init_pinned_checked)
+                        .replaceAll(
+                            "%column_pinned_save_path%",
+                            init_pinned_path,
+                        )
+                        .replaceAll(
+                            "%column_save_title%",
+                            init_column_save_title,
+                        )
+                        .replaceAll("%column_width_num%", column_width_init)
+                        .replaceAll(
+                            "%column_auto_reload_ch%",
+                            init_auto_reload_checked,
+                        )
+                        .replaceAll(
+                            "%column_auto_reload_time%",
+                            auto_reload_time,
+                        );
+                } else {
+                    main_column_html += default_element[
+                        Object.keys(default_element)[default_index]
+                    ]["html"]
+                        .replaceAll("%column_save_path%", init_column_save_path)
+                        .replaceAll("%column_num%", create_random_id())
+                        .replace("%column_banner_ch%", banner_checked)
+                        .replace(
+                            "%column_top_bar_ch%",
+                            init_top_visible_checked,
+                        )
+                        .replace("%column_tw_view_mode%", tw_view_type)
+                        .replace("%column_pinned_ch%", init_pinned_checked)
+                        .replaceAll(
+                            "%column_pinned_save_path%",
+                            init_pinned_path,
+                        )
+                        .replaceAll(
+                            "%column_save_title%",
+                            init_column_save_title,
+                        )
+                        .replaceAll("%column_width_num%", column_width_init)
+                        .replaceAll(
+                            "%column_auto_reload_ch%",
+                            init_auto_reload_checked,
+                        )
+                        .replaceAll(
+                            "%column_auto_reload_time%",
+                            auto_reload_time,
+                        );
                 }
                 // Detect end of first-row load.
-                if(first_column_end == false && settings.column_settings[index].type == "empty_column"){
+                if (
+                    first_column_end == false &&
+                    settings.column_settings[index].type == "empty_column"
+                ) {
                     first_column_end = true;
                 }
                 // Detect end of second-row load.
-                if(second_column_end == false && settings.column_settings[index].type == "second_empty_column"){
+                if (
+                    second_column_end == false &&
+                    settings.column_settings[index].type ==
+                        "second_empty_column"
+                ) {
                     second_column_end = true;
                 }
             }
@@ -818,27 +1003,42 @@ function run(settings){
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
     // Used for API limit display.
-    document.querySelector("#api_limit_status").addEventListener("click", function(){
-        if(api_limit_obj != null){
-            alert(i18n_message("msg_api_limit_status_alert", [`${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`]))
-        }
-    });
+    document
+        .querySelector("#api_limit_status")
+        .addEventListener("click", function () {
+            if (api_limit_obj != null) {
+                alert(
+                    i18n_message("msg_api_limit_status_alert", [
+                        `${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`,
+                    ]),
+                );
+            }
+        });
     // Open About Open-Deck.
-    document.querySelector(".opd_ui_logo").addEventListener("click", function(){
-        window.open(chrome.runtime.getURL("about_opd.html"), "About Open-Deck", 'width=720, height=280');
-    });
+    document
+        .querySelector(".opd_ui_logo")
+        .addEventListener("click", function () {
+            window.open(
+                chrome.runtime.getURL("about_opd.html"),
+                "About Open-Deck",
+                "width=720, height=280",
+            );
+        });
     // Show debug menu.
     let debug_menu_click_counter = 0;
-    document.querySelector(".opd_version_span").addEventListener("click", function(){
-        if(debug_menu_click_counter >= 7){
-            alert(i18n_message("msg_debug_menu_enabled"));
-            document.querySelector(".opd_debug_menu").style.display = "block";
-        }else{
-            debug_menu_click_counter += 1;
-        }
-    });
+    document
+        .querySelector(".opd_version_span")
+        .addEventListener("click", function () {
+            if (debug_menu_click_counter >= 7) {
+                alert(i18n_message("msg_debug_menu_enabled"));
+                document.querySelector(".opd_debug_menu").style.display =
+                    "block";
+            } else {
+                debug_menu_click_counter += 1;
+            }
+        });
     // Handle case where second row exists.
-    if(first_column_end == true && second_column_end == true){
+    if (first_column_end == true && second_column_end == true) {
         second_rack_mode = true;
         document.querySelector("#first_rack_element").style.height = "50vh";
         document.querySelector("#second_rack_element").style.height = "50vh";
@@ -849,7 +1049,10 @@ function run(settings){
         //document.querySelector("style[second_column_css]").textContent = `#second_rack_element .dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
 
         document.querySelector("#second_rack").value = "Single Rack";
-        document.querySelector(".dsp_btn_second_rack_img").style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
+        document.querySelector(
+            ".dsp_btn_second_rack_img",
+        ).style.backgroundImage =
+            `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
     }
     //
     create_profile_list_btn();
@@ -857,91 +1060,158 @@ function run(settings){
     column_close();
     append_object_css();
     // Create profile switch event handlers.
-    function create_profile_list_btn(){
+    function create_profile_list_btn() {
         // Initialize profile switch events.
         for (let index = 0; index < profile_store.length; index++) {
-            document.querySelector(`#userProfile-${index}`).addEventListener("click",function(){
-                //console.log(profile_store[index].profile)
-                const preload_array = profile_store[index].profile;
-                let preload_desc_array = new Array(); 
-                let preload_desc_count = 0;
-                for (let preload_index = 0; preload_index < preload_array.length; preload_index++) {
-                    switch (preload_array[preload_index].type) {
-                        case "dsp_column":
-                            preload_desc_count = 0;
-                            break;
-                        case "main_bar_empty_column":
-                            preload_desc_count = 0;
-                            break;
-                        case "empty_column":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_first_row_end"));
-                            preload_desc_count = 0;
-                            break;
-                        case "second_empty_column":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_second_row_end"));
-                            preload_desc_count = 0;
-                            break;
-                        case "post":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_post_column", [preload_desc_count]));
-                            break;
-                        case "home":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_timeline_column", [preload_desc_count]));
-                            break;
-                        case "notification":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_notification_column", [preload_desc_count]));
-                            break;
-                        case "explore":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_explore_column", [preload_desc_count, preload_array[preload_index].column_save_title]));
-                            break;
-                        case "misskey":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_misskey_column"));
-                            break;
-                        case "bsky":
-                            preload_desc_array.push(i18n_message("msg_profile_desc_bluesky_column"));
-                            break;
-                        default:
-                            preload_desc_count = 0;
-                            break;
+            document
+                .querySelector(`#userProfile-${index}`)
+                .addEventListener("click", function () {
+                    //console.log(profile_store[index].profile)
+                    const preload_array = profile_store[index].profile;
+                    let preload_desc_array = new Array();
+                    let preload_desc_count = 0;
+                    for (
+                        let preload_index = 0;
+                        preload_index < preload_array.length;
+                        preload_index++
+                    ) {
+                        switch (preload_array[preload_index].type) {
+                            case "dsp_column":
+                                preload_desc_count = 0;
+                                break;
+                            case "main_bar_empty_column":
+                                preload_desc_count = 0;
+                                break;
+                            case "empty_column":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_first_row_end",
+                                    ),
+                                );
+                                preload_desc_count = 0;
+                                break;
+                            case "second_empty_column":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_second_row_end",
+                                    ),
+                                );
+                                preload_desc_count = 0;
+                                break;
+                            case "post":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_post_column",
+                                        [preload_desc_count],
+                                    ),
+                                );
+                                break;
+                            case "home":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_timeline_column",
+                                        [preload_desc_count],
+                                    ),
+                                );
+                                break;
+                            case "notification":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_notification_column",
+                                        [preload_desc_count],
+                                    ),
+                                );
+                                break;
+                            case "explore":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_explore_column",
+                                        [
+                                            preload_desc_count,
+                                            preload_array[preload_index]
+                                                .column_save_title,
+                                        ],
+                                    ),
+                                );
+                                break;
+                            case "misskey":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_misskey_column",
+                                    ),
+                                );
+                                break;
+                            case "bsky":
+                                preload_desc_array.push(
+                                    i18n_message(
+                                        "msg_profile_desc_bluesky_column",
+                                    ),
+                                );
+                                break;
+                            default:
+                                preload_desc_count = 0;
+                                break;
+                        }
+                        preload_desc_count += 1;
                     }
-                    preload_desc_count += 1;
-                }
-                //console.log(preload_desc_array)
-                if(confirm(`${i18n_message("msg_profile_load_confirm", [index, preload_desc_array.join("\r\n")])}`)){
-                    document.querySelector("#opd_main_element").remove();
-                    last_load_profile = index;
-                    chrome.storage.local.get("opd_settings", function(value){
-                        let load_setting = JSON.parse(value.opd_settings);
-                        load_setting.last_load_profile = index;
-                        chrome.storage.local.set({'opd_settings': JSON.stringify(load_setting)}, function () {
-                        });
-                    });
-                    const column_settings = {column_settings:profile_store[index].profile};
-                    //console.log(column_settings)
-                    run(column_settings, profile_store);
-                }
-            })
+                    //console.log(preload_desc_array)
+                    if (
+                        confirm(
+                            `${i18n_message("msg_profile_load_confirm", [index, preload_desc_array.join("\r\n")])}`,
+                        )
+                    ) {
+                        document.querySelector("#opd_main_element").remove();
+                        last_load_profile = index;
+                        chrome.storage.local.get(
+                            "opd_settings",
+                            function (value) {
+                                let load_setting = JSON.parse(
+                                    value.opd_settings,
+                                );
+                                load_setting.last_load_profile = index;
+                                chrome.storage.local.set(
+                                    {
+                                        opd_settings:
+                                            JSON.stringify(load_setting),
+                                    },
+                                    function () {},
+                                );
+                            },
+                        );
+                        const column_settings = {
+                            column_settings: profile_store[index].profile,
+                        };
+                        //console.log(column_settings)
+                        run(column_settings, profile_store);
+                    }
+                });
         }
     }
     // Apply CSS (called on add/update).
     // Keep naming aligned with Desktop implementation for shared logic.
-    function append_object_css(mode, session_webview_obj){
+    function append_object_css(mode, session_webview_obj) {
         let column_object = null;
-        if(mode == "session_set" || mode == "add_column"){
+        if (mode == "session_set" || mode == "add_column") {
             column_object = session_webview_obj;
-        }else{
-            column_object = document.querySelectorAll('.dsp_column:not([opd_column_type="dsp_column"], [opd_column_type="empty_column"], [opd_column_type="main_bar_empty_column"]) iframe');
+        } else {
+            column_object = document.querySelectorAll(
+                '.dsp_column:not([opd_column_type="dsp_column"], [opd_column_type="empty_column"], [opd_column_type="main_bar_empty_column"]) iframe',
+            );
         }
         for (let index = 0; index < column_object.length; index++) {
             column_object[index].removeAttribute("opd_init_webview");
             // Change banner/view mode.
-            column_object[index].addEventListener("load", function(){
-                console.log(this.getAttribute("opd_iframe_width_only"))
-                if(this.getAttribute("opd_iframe_width_only") != ''){
+            column_object[index].addEventListener("load", function () {
+                console.log(this.getAttribute("opd_iframe_width_only"));
+                if (this.getAttribute("opd_iframe_width_only") != "") {
                     //console.log(this)
                     let opd_column_div = this.closest("div[opd_column_type]");
-                    let opd_column_banner_checkbox = opd_column_div.querySelector(".opd_banner");
-                    let opd_column_top_visible_checkbox = opd_column_div.querySelector(".opd_top_bar");
-                    let opd_column_tw_view_mode_opt = opd_column_div.querySelector(".opd_tw_view_mode");
+                    let opd_column_banner_checkbox =
+                        opd_column_div.querySelector(".opd_banner");
+                    let opd_column_top_visible_checkbox =
+                        opd_column_div.querySelector(".opd_top_bar");
+                    let opd_column_tw_view_mode_opt =
+                        opd_column_div.querySelector(".opd_tw_view_mode");
                     // Load and apply banner visibility settings.
                     /*if(opd_column_banner_checkbox.checked == true){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
@@ -949,744 +1219,1413 @@ function run(settings){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
                     // Insert shared CSS (thin scrollbar).
-                    this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_main_css>html{scrollbar-width:thin;}</style>`);
+                    this.contentWindow.document
+                        .querySelector("head")
+                        .insertAdjacentHTML(
+                            "beforeend",
+                            `<style opd_main_css>html{scrollbar-width:thin;}</style>`,
+                        );
                     // Load banner visibility state.
-                    if(this.contentWindow.document.querySelector('head style[opd_banner_css]') == null){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
+                    if (
+                        this.contentWindow.document.querySelector(
+                            "head style[opd_banner_css]",
+                        ) == null
+                    ) {
+                        this.contentWindow.document
+                            .querySelector("head")
+                            .insertAdjacentHTML(
+                                "beforeend",
+                                `<style opd_banner_css></style>`,
+                            );
                     }
-                    if(opd_column_banner_checkbox?.checked != true){
+                    if (opd_column_banner_checkbox?.checked != true) {
                         //console.log(this)
-                        this.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = `header[role="banner"]{display:none};`;
-                    }else{
+                        this.contentWindow.document.querySelector(
+                            "head style[opd_banner_css]",
+                        ).textContent = `header[role="banner"]{display:none};`;
+                    } else {
                         //console.log("else")
-                        this.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = ``;
+                        this.contentWindow.document.querySelector(
+                            "head style[opd_banner_css]",
+                        ).textContent = ``;
                     }
                     // Apply top-search-area hide setting.
-                    if(this.contentWindow.document.querySelector('head style[opd_top_visible_css]') == null){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_top_visible_css></style>`);
+                    if (
+                        this.contentWindow.document.querySelector(
+                            "head style[opd_top_visible_css]",
+                        ) == null
+                    ) {
+                        this.contentWindow.document
+                            .querySelector("head")
+                            .insertAdjacentHTML(
+                                "beforeend",
+                                `<style opd_top_visible_css></style>`,
+                            );
                     }
-                    if(opd_column_top_visible_checkbox?.checked != true){
-                        if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore"){
+                    if (opd_column_top_visible_checkbox?.checked != true) {
+                        if (
+                            this.closest("div[opd_column_type]").getAttribute(
+                                "opd_column_type",
+                            ) == "explore"
+                        ) {
                             //div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]){display:none;}
-                            this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)`;
-                        }else{
-                            if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
-                                this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;} div[role="progressbar"] + div{display:none;}`;
-                            }else{
-                                this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;}`;
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_top_visible_css]",
+                            ).textContent =
+                                `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)`;
+                        } else {
+                            if (
+                                this.closest(
+                                    "div[opd_column_type]",
+                                ).getAttribute("opd_column_type") == "home"
+                            ) {
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_top_visible_css]",
+                                ).textContent =
+                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;} div[role="progressbar"] + div{display:none;}`;
+                            } else {
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_top_visible_css]",
+                                ).textContent =
+                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;}`;
                             }
                         }
-                    }else{
+                    } else {
                         //console.log("else")
-                        this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = ``;
+                        this.contentWindow.document.querySelector(
+                            "head style[opd_top_visible_css]",
+                        ).textContent = ``;
                     }
 
                     // Load and apply tweet view mode settings.
-                    if(this.contentWindow.document.querySelector("head style[opd_tw_view_mode_css]") == null){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_tw_view_mode_css></style>`);
+                    if (
+                        this.contentWindow.document.querySelector(
+                            "head style[opd_tw_view_mode_css]",
+                        ) == null
+                    ) {
+                        this.contentWindow.document
+                            .querySelector("head")
+                            .insertAdjacentHTML(
+                                "beforeend",
+                                `<style opd_tw_view_mode_css></style>`,
+                            );
                     }
                     switch (opd_column_tw_view_mode_opt.value) {
                         case "0":
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_tw_view_mode_css]",
+                            ).textContent = ``;
                             break;
                         case "1":
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_tw_view_mode_css]",
+                            ).textContent =
+                                `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                             break;
                         case "2":
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_tw_view_mode_css]",
+                            ).textContent =
+                                `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                             break;
                         default:
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_tw_view_mode_css]",
+                            ).textContent = ``;
                             break;
                     }
                     //console.log(opd_column_div.querySelector(".opd_banner").checked)
                     // Post column behavior.
-                    if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") === "post"){
-                        const post_column_window = opd_column_div.querySelector("iframe").contentWindow;
+                    if (
+                        this.closest("div[opd_column_type]").getAttribute(
+                            "opd_column_type",
+                        ) === "post"
+                    ) {
+                        const post_column_window =
+                            opd_column_div.querySelector(
+                                "iframe",
+                            ).contentWindow;
                         // Text review feature.
                         const ext_text_review = new OpdExtTextReview();
                         const ui_lang = chrome.i18n.getUILanguage();
-                        ext_text_review.Init(post_column_window, ui_icon_define, ui_lang);
+                        ext_text_review.Init(
+                            post_column_window,
+                            ui_icon_define,
+                            ui_lang,
+                        );
                     }
                 }
-            })
+            });
             // Post-load initialization for each column.
-            column_object[index].addEventListener("load", function(){
-                //console.log(this)
-                let opd_column_div = this.closest("div[opd_column_type]");
-                let opd_column_width_btn = opd_column_div.querySelector(".column_width_btn");
-                let opd_column_width_select = opd_column_div.querySelector(".opd_column_size_preset");
-                let opd_column_banner_checkbox = opd_column_div.querySelector(".opd_banner");
-                let opd_column_top_visible_checkbox = opd_column_div.querySelector(".opd_top_bar");
-                let opd_column_pinned_checkbox = opd_column_div.querySelector(".opd_pinned_btn");
-                let opd_column_auto_reload_checkbox = opd_column_div.querySelector(".opd_a_reload_bar");
-                let opd_column_auto_reload_time_reload = opd_column_div.querySelector(".opd_a_reload_time_setting");
-                let opd_column_tw_view_mode_opt = opd_column_div.querySelector(".opd_tw_view_mode");
-                let opd_column_scroll_to_top = opd_column_div.querySelector(".opd_column_scroll_to_top");
-                let column_content_reload = null;
-                // Load column extensions.
-                if(mode != "session_set"){
-                    const column_type = this.closest("div[opd_column_type]").getAttribute("opd_column_type");
-                    if(column_type === "home" || column_type === "explore"){
-                        const target_column = this.closest("div[opd_column_type]").querySelector("iframe").contentWindow;
-                        // Set up auto-refresh hooks.
-                        column_content_reload = new OpdExtAutoReload();
-                        column_content_reload.Init(target_column);
-                        // Set up media-viewer hooks.
-                        const column_media_viewer_blocker = new OpdMediaViewerBlocker();
-                        column_media_viewer_blocker.Init(target_column);
-                        media_viewer_token.push(column_media_viewer_blocker.opd_send_media_info_token);
-                    }
-                }
-                // Settings panel events.
-                if(mode != "session_set"){
-                    opd_column_div.querySelector(".opd_settings_btn").addEventListener("click", function(){
-                        const settings_panel = this.closest("div[opd_column_type]").querySelector(".dsp_column_settings_panel");
-                        if(settings_panel.getAttribute("open") == null){
-                            settings_panel.setAttribute("open", "");
-                            settings_panel.style.display = "flex";
-                        }else{
-                            settings_panel.removeAttribute("open");
-                            settings_panel.style.display = "none";
+            column_object[index].addEventListener(
+                "load",
+                function () {
+                    //console.log(this)
+                    let opd_column_div = this.closest("div[opd_column_type]");
+                    let opd_column_width_btn =
+                        opd_column_div.querySelector(".column_width_btn");
+                    let opd_column_width_select = opd_column_div.querySelector(
+                        ".opd_column_size_preset",
+                    );
+                    let opd_column_banner_checkbox =
+                        opd_column_div.querySelector(".opd_banner");
+                    let opd_column_top_visible_checkbox =
+                        opd_column_div.querySelector(".opd_top_bar");
+                    let opd_column_pinned_checkbox =
+                        opd_column_div.querySelector(".opd_pinned_btn");
+                    let opd_column_auto_reload_checkbox =
+                        opd_column_div.querySelector(".opd_a_reload_bar");
+                    let opd_column_auto_reload_time_reload =
+                        opd_column_div.querySelector(
+                            ".opd_a_reload_time_setting",
+                        );
+                    let opd_column_tw_view_mode_opt =
+                        opd_column_div.querySelector(".opd_tw_view_mode");
+                    let opd_column_scroll_to_top = opd_column_div.querySelector(
+                        ".opd_column_scroll_to_top",
+                    );
+                    let column_content_reload = null;
+                    // Load column extensions.
+                    if (mode != "session_set") {
+                        const column_type = this.closest(
+                            "div[opd_column_type]",
+                        ).getAttribute("opd_column_type");
+                        if (
+                            column_type === "home" ||
+                            column_type === "explore"
+                        ) {
+                            const target_column = this.closest(
+                                "div[opd_column_type]",
+                            ).querySelector("iframe").contentWindow;
+                            // Set up auto-refresh hooks.
+                            column_content_reload = new OpdExtAutoReload();
+                            column_content_reload.Init(target_column);
+                            // Set up media-viewer hooks.
+                            const column_media_viewer_blocker =
+                                new OpdMediaViewerBlocker();
+                            column_media_viewer_blocker.Init(target_column);
+                            media_viewer_token.push(
+                                column_media_viewer_blocker.opd_send_media_info_token,
+                            );
                         }
-                    });
-                }
-                if(mode != "session_set"){
-                    opd_column_div.querySelector(".dsp_column_settings_panel_close_btn").addEventListener("click", function(){
-                        const settings_panel = this.closest("div[opd_column_type]").querySelector(".dsp_column_settings_panel");
-                        settings_panel.removeAttribute("open");
-                        settings_panel.style.display = "none";
-                    })
-                    // Settings panel and hover interactions.
-                    opd_column_div.querySelector(".dsp_column_settings_panel").addEventListener("mouseover", function(){
-                        opd_column_div.closest(".dsp_column").setAttribute("draggable", "false");
-                    });
-                    opd_column_div.querySelector(".dsp_column_settings_panel").addEventListener("mouseleave", function(){
-                        opd_column_div.closest(".dsp_column").setAttribute("draggable", "true");
-                    });
-                }
-                // Settings panel column-width control.
-                if(opd_column_width_select != null){
-                    switch (opd_column_div.getAttribute("opd_column_width")){
-                        case '15':
-                            opd_column_width_select.value = 0;
-                            break;
-                        case '20':
-                            opd_column_width_select.value = 1;
-                                break;
-                        case '30':
-                            opd_column_width_select.value = 2;
-                            break;
-                        default:
-                            opd_column_width_select.value = 3;
-                            break;
                     }
-                    if(mode != "session_set"){
-                        opd_column_width_select.addEventListener("change", function(){
-                            let preset_rem = null;
-                            switch (this.value){
-                                case '0':
-                                    preset_rem = 15;
-                                    break;
-                                case '1':
-                                    preset_rem = 20;
-                                    break;
-                                case '2':
-                                    preset_rem = 30;
-                                    break;
-                                default:
-                                    preset_rem = 30;
-                                    break;
-                            }
-                            this.closest("div[opd_column_type]").setAttribute("opd_column_width", preset_rem);
-                            this.closest("div[opd_column_type]").style.width = `${preset_rem}rem`;
-                            column_settings_save("", last_load_profile);
-                        })
-                    }
-                }
-                if(mode != "session_set"){
-                    // Column width setting events.
-                    opd_column_width_btn.addEventListener("click", function(){
-                        const now_width = this.closest("div[opd_column_type]").getAttribute("opd_column_width");
-                        let column_width_preset  = this.closest("div[opd_column_type]").querySelector(".opd_column_size_preset");
-                        let setting_width = prompt(i18n_message("msg_column_width_prompt"), now_width);
-                        //console.log(setting_width);
-                        if(setting_width != null){
-                            const setting_width_num = Number(setting_width);
-                            if(setting_width_num != NaN && setting_width_num > 11){
-                                this.closest("div[opd_column_type]").setAttribute("opd_column_width", setting_width_num);
-                                this.closest("div[opd_column_type]").style.width = `${setting_width_num}rem`;
-                                column_settings_save("", last_load_profile);
-                                switch (setting_width_num){
-                                    case 15:
-                                        column_width_preset.value = 0;
-                                        break;
-                                    case 20:
-                                        column_width_preset.value = 1;
-                                        break;
-                                    case 30:
-                                        column_width_preset.value = 2;
-                                        break;
-                                    default:
-                                        column_width_preset.value = 3;
-                                        break;
+                    // Settings panel events.
+                    if (mode != "session_set") {
+                        opd_column_div
+                            .querySelector(".opd_settings_btn")
+                            .addEventListener("click", function () {
+                                const settings_panel = this.closest(
+                                    "div[opd_column_type]",
+                                ).querySelector(".dsp_column_settings_panel");
+                                if (
+                                    settings_panel.getAttribute("open") == null
+                                ) {
+                                    settings_panel.setAttribute("open", "");
+                                    settings_panel.style.display = "flex";
+                                } else {
+                                    settings_panel.removeAttribute("open");
+                                    settings_panel.style.display = "none";
                                 }
-                            }else{
-                                alert(i18n_message("msg_invalid_value_alert"));
-                            }
+                            });
+                    }
+                    if (mode != "session_set") {
+                        opd_column_div
+                            .querySelector(
+                                ".dsp_column_settings_panel_close_btn",
+                            )
+                            .addEventListener("click", function () {
+                                const settings_panel = this.closest(
+                                    "div[opd_column_type]",
+                                ).querySelector(".dsp_column_settings_panel");
+                                settings_panel.removeAttribute("open");
+                                settings_panel.style.display = "none";
+                            });
+                        // Settings panel and hover interactions.
+                        opd_column_div
+                            .querySelector(".dsp_column_settings_panel")
+                            .addEventListener("mouseover", function () {
+                                opd_column_div
+                                    .closest(".dsp_column")
+                                    .setAttribute("draggable", "false");
+                            });
+                        opd_column_div
+                            .querySelector(".dsp_column_settings_panel")
+                            .addEventListener("mouseleave", function () {
+                                opd_column_div
+                                    .closest(".dsp_column")
+                                    .setAttribute("draggable", "true");
+                            });
+                    }
+                    // Settings panel column-width control.
+                    if (opd_column_width_select != null) {
+                        switch (
+                            opd_column_div.getAttribute("opd_column_width")
+                        ) {
+                            case "15":
+                                opd_column_width_select.value = 0;
+                                break;
+                            case "20":
+                                opd_column_width_select.value = 1;
+                                break;
+                            case "30":
+                                opd_column_width_select.value = 2;
+                                break;
+                            default:
+                                opd_column_width_select.value = 3;
+                                break;
                         }
-                    });
-                }
+                        if (mode != "session_set") {
+                            opd_column_width_select.addEventListener(
+                                "change",
+                                function () {
+                                    let preset_rem = null;
+                                    switch (this.value) {
+                                        case "0":
+                                            preset_rem = 15;
+                                            break;
+                                        case "1":
+                                            preset_rem = 20;
+                                            break;
+                                        case "2":
+                                            preset_rem = 30;
+                                            break;
+                                        default:
+                                            preset_rem = 30;
+                                            break;
+                                    }
+                                    this.closest(
+                                        "div[opd_column_type]",
+                                    ).setAttribute(
+                                        "opd_column_width",
+                                        preset_rem,
+                                    );
+                                    this.closest(
+                                        "div[opd_column_type]",
+                                    ).style.width = `${preset_rem}rem`;
+                                    column_settings_save("", last_load_profile);
+                                },
+                            );
+                        }
+                    }
+                    if (mode != "session_set") {
+                        // Column width setting events.
+                        opd_column_width_btn.addEventListener(
+                            "click",
+                            function () {
+                                const now_width = this.closest(
+                                    "div[opd_column_type]",
+                                ).getAttribute("opd_column_width");
+                                let column_width_preset = this.closest(
+                                    "div[opd_column_type]",
+                                ).querySelector(".opd_column_size_preset");
+                                let setting_width = prompt(
+                                    i18n_message("msg_column_width_prompt"),
+                                    now_width,
+                                );
+                                //console.log(setting_width);
+                                if (setting_width != null) {
+                                    const setting_width_num =
+                                        Number(setting_width);
+                                    if (
+                                        setting_width_num != NaN &&
+                                        setting_width_num > 11
+                                    ) {
+                                        this.closest(
+                                            "div[opd_column_type]",
+                                        ).setAttribute(
+                                            "opd_column_width",
+                                            setting_width_num,
+                                        );
+                                        this.closest(
+                                            "div[opd_column_type]",
+                                        ).style.width =
+                                            `${setting_width_num}rem`;
+                                        column_settings_save(
+                                            "",
+                                            last_load_profile,
+                                        );
+                                        switch (setting_width_num) {
+                                            case 15:
+                                                column_width_preset.value = 0;
+                                                break;
+                                            case 20:
+                                                column_width_preset.value = 1;
+                                                break;
+                                            case 30:
+                                                column_width_preset.value = 2;
+                                                break;
+                                            default:
+                                                column_width_preset.value = 3;
+                                                break;
+                                        }
+                                    } else {
+                                        alert(
+                                            i18n_message(
+                                                "msg_invalid_value_alert",
+                                            ),
+                                        );
+                                    }
+                                }
+                            },
+                        );
+                    }
 
-                // Support for non-X columns.
-                if(this.getAttribute("opd_iframe_width_only") != ''){
-                    // Load and apply banner visibility settings.
-                    /*if(opd_column_banner_checkbox.checked == true){
+                    // Support for non-X columns.
+                    if (this.getAttribute("opd_iframe_width_only") != "") {
+                        // Load and apply banner visibility settings.
+                        /*if(opd_column_banner_checkbox.checked == true){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
                     }else{
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
-                    if(this.contentWindow.document.querySelector('head style[opd_banner_css]') == null){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
-                    }
-                    if(opd_column_banner_checkbox?.checked != true){
-                        //console.log(this)
-                        this.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = `header[role="banner"]{display:none};`;
-                    }else{
-                        //console.log("else")
-                        this.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = ``;
-                    }
+                        if (
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_banner_css]",
+                            ) == null
+                        ) {
+                            this.contentWindow.document
+                                .querySelector("head")
+                                .insertAdjacentHTML(
+                                    "beforeend",
+                                    `<style opd_banner_css></style>`,
+                                );
+                        }
+                        if (opd_column_banner_checkbox?.checked != true) {
+                            //console.log(this)
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_banner_css]",
+                            ).textContent =
+                                `header[role="banner"]{display:none};`;
+                        } else {
+                            //console.log("else")
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_banner_css]",
+                            ).textContent = ``;
+                        }
 
-                    // Apply top-search-area hide setting.
-                    if(this.contentWindow.document.querySelector('head style[opd_top_visible_css]') == null){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_top_visible_css></style>`);
-                    }
-                    if(opd_column_top_visible_checkbox?.checked != true){
-                        //console.log("home_notcheck")
-                        if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore"){
-                            this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                        }else{
-                            if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
-                                this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                            }else{
-                                this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                            }
+                        // Apply top-search-area hide setting.
+                        if (
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_top_visible_css]",
+                            ) == null
+                        ) {
+                            this.contentWindow.document
+                                .querySelector("head")
+                                .insertAdjacentHTML(
+                                    "beforeend",
+                                    `<style opd_top_visible_css></style>`,
+                                );
                         }
-                    }else{
-                        //console.log("else")
-                        this.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = ``;
-                    }
-                
-                    // Load and apply tweet view mode settings.
-                    if(this.contentWindow.document.querySelector("head style[opd_tw_view_mode_css]") == null){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_tw_view_mode_css></style>`);
-                    }
-                    opd_column_tw_view_mode_opt.value = opd_column_tw_view_mode_opt.getAttribute("column_tw_view_mode_val")
-                    switch (opd_column_tw_view_mode_opt.getAttribute("column_tw_view_mode_val")) {
-                        case "0":
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
-                            break;
-                        case "1":
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
-                            break;
-                        case "2":
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
-                            break;
-                        default:
-                            this.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
-                            break;
-                    }
-                    // Apply initial auto-refresh state.
-                    let reload_test = 0;
-                    let auto_reload_int = null;// Also reused in checkbox event handlers.
-                    if(opd_column_auto_reload_checkbox != null){
-                        // Pause top transition while hovering Home/Explore during auto refresh.
-                        opd_column_div.querySelector("iframe").addEventListener("mouseover", function(){
-                            this.setAttribute("auto_reload_mouse_hover", "true");
-                        });
-                        opd_column_div.querySelector("iframe").addEventListener("mouseleave", function(){
-                            this.setAttribute("auto_reload_mouse_hover", "false");
-                        });
-                        const auto_reload_target_elem = this;
-                        //console.log(opd_column_auto_reload_checkbox)
-                        if(mode != "session_set"){
-                            opd_column_auto_reload_time_reload.addEventListener("change", function(){
-                                const auto_reload_time = auto_reload_target_elem.closest('div[opd_column_type]').querySelector(".opd_a_reload_time_setting");
-                                if(Number(auto_reload_time.value) >= 1){
-                                    alert(i18n_message("msg_auto_reload_set", [auto_reload_time.value]));
-                                    column_settings_save("", last_load_profile);
-                                }else{
-                                    alert(i18n_message("msg_auto_reload_minimum_alert"));
-                                    auto_reload_time.value = '10';
-                                    column_settings_save("", last_load_profile);
+                        if (opd_column_top_visible_checkbox?.checked != true) {
+                            //console.log("home_notcheck")
+                            if (
+                                this.closest(
+                                    "div[opd_column_type]",
+                                ).getAttribute("opd_column_type") == "explore"
+                            ) {
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_top_visible_css]",
+                                ).textContent =
+                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                            } else {
+                                if (
+                                    this.closest(
+                                        "div[opd_column_type]",
+                                    ).getAttribute("opd_column_type") == "home"
+                                ) {
+                                    this.contentWindow.document.querySelector(
+                                        "head style[opd_top_visible_css]",
+                                    ).textContent =
+                                        `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                                } else {
+                                    this.contentWindow.document.querySelector(
+                                        "head style[opd_top_visible_css]",
+                                    ).textContent =
+                                        `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                 }
-                            });
+                            }
+                        } else {
+                            //console.log("else")
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_top_visible_css]",
+                            ).textContent = ``;
                         }
-                        // Initial checked-state behavior.
-                        if(opd_column_auto_reload_checkbox.checked){
-                            //console.log("init update!")
-                            const auto_reload_time_input = auto_reload_target_elem.closest('div[opd_column_type]').querySelector(".opd_a_reload_time_setting");
-                            const auto_reload_load_time = Number(auto_reload_time_input.value) * 1000;
-                            auto_reload_time_input.disabled = true;
-                            auto_reload_int = setInterval(function(){
-                                //console.log("update!")
-                                //console.log(auto_reload_target_elem.contentWindow)
-                                const path_name = auto_reload_target_elem.contentWindow.location.pathname;
-                                if(['/home', '/search'].includes(path_name) || path_name.startsWith('/i/lists')){
-                                    if(auto_reload_target_elem.getAttribute("auto_reload_mouse_hover") == "false"){
-                                        if (column_content_reload){
-                                            column_content_reload.Reload(auto_reload_target_elem.contentWindow);
-                                            setTimeout(() => {
-                                                auto_reload_target_elem.contentWindow.scrollTo({ top: 0, behavior: 'auto' });
-                                            }, 100);
+
+                        // Load and apply tweet view mode settings.
+                        if (
+                            this.contentWindow.document.querySelector(
+                                "head style[opd_tw_view_mode_css]",
+                            ) == null
+                        ) {
+                            this.contentWindow.document
+                                .querySelector("head")
+                                .insertAdjacentHTML(
+                                    "beforeend",
+                                    `<style opd_tw_view_mode_css></style>`,
+                                );
+                        }
+                        opd_column_tw_view_mode_opt.value =
+                            opd_column_tw_view_mode_opt.getAttribute(
+                                "column_tw_view_mode_val",
+                            );
+                        switch (
+                            opd_column_tw_view_mode_opt.getAttribute(
+                                "column_tw_view_mode_val",
+                            )
+                        ) {
+                            case "0":
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent = ``;
+                                break;
+                            case "1":
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent =
+                                    `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
+                                break;
+                            case "2":
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent =
+                                    `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
+                                break;
+                            default:
+                                this.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent = ``;
+                                break;
+                        }
+                        // Apply initial auto-refresh state.
+                        let reload_test = 0;
+                        let auto_reload_int = null; // Also reused in checkbox event handlers.
+                        if (opd_column_auto_reload_checkbox != null) {
+                            // Pause top transition while hovering Home/Explore during auto refresh.
+                            opd_column_div
+                                .querySelector("iframe")
+                                .addEventListener("mouseover", function () {
+                                    this.setAttribute(
+                                        "auto_reload_mouse_hover",
+                                        "true",
+                                    );
+                                });
+                            opd_column_div
+                                .querySelector("iframe")
+                                .addEventListener("mouseleave", function () {
+                                    this.setAttribute(
+                                        "auto_reload_mouse_hover",
+                                        "false",
+                                    );
+                                });
+                            const auto_reload_target_elem = this;
+                            //console.log(opd_column_auto_reload_checkbox)
+                            if (mode != "session_set") {
+                                opd_column_auto_reload_time_reload.addEventListener(
+                                    "change",
+                                    function () {
+                                        const auto_reload_time =
+                                            auto_reload_target_elem
+                                                .closest("div[opd_column_type]")
+                                                .querySelector(
+                                                    ".opd_a_reload_time_setting",
+                                                );
+                                        if (
+                                            Number(auto_reload_time.value) >= 1
+                                        ) {
+                                            alert(
+                                                i18n_message(
+                                                    "msg_auto_reload_set",
+                                                    [auto_reload_time.value],
+                                                ),
+                                            );
+                                            column_settings_save(
+                                                "",
+                                                last_load_profile,
+                                            );
+                                        } else {
+                                            alert(
+                                                i18n_message(
+                                                    "msg_auto_reload_minimum_alert",
+                                                ),
+                                            );
+                                            auto_reload_time.value = "10";
+                                            column_settings_save(
+                                                "",
+                                                last_load_profile,
+                                            );
+                                        }
+                                    },
+                                );
+                            }
+                            // Initial checked-state behavior.
+                            if (opd_column_auto_reload_checkbox.checked) {
+                                //console.log("init update!")
+                                const auto_reload_time_input =
+                                    auto_reload_target_elem
+                                        .closest("div[opd_column_type]")
+                                        .querySelector(
+                                            ".opd_a_reload_time_setting",
+                                        );
+                                const auto_reload_load_time =
+                                    Number(auto_reload_time_input.value) * 1000;
+                                auto_reload_time_input.disabled = true;
+                                auto_reload_int = setInterval(function () {
+                                    //console.log("update!")
+                                    //console.log(auto_reload_target_elem.contentWindow)
+                                    const path_name =
+                                        auto_reload_target_elem.contentWindow
+                                            .location.pathname;
+                                    if (
+                                        ["/home", "/search"].includes(
+                                            path_name,
+                                        ) ||
+                                        path_name.startsWith("/i/lists")
+                                    ) {
+                                        if (
+                                            auto_reload_target_elem.getAttribute(
+                                                "auto_reload_mouse_hover",
+                                            ) == "false"
+                                        ) {
+                                            if (column_content_reload) {
+                                                column_content_reload.Reload(
+                                                    auto_reload_target_elem.contentWindow,
+                                                );
+                                                setTimeout(() => {
+                                                    auto_reload_target_elem.contentWindow.scrollTo(
+                                                        {
+                                                            top: 0,
+                                                            behavior: "auto",
+                                                        },
+                                                    );
+                                                }, 100);
+                                            }
                                         }
                                     }
-                                };
-                            }, auto_reload_load_time);
+                                }, auto_reload_load_time);
+                            }
                         }
-                    }
 
-                    //console.log(opd_column_div.querySelector(".opd_banner").checked)
-                    if(mode != "session_set"){
-                        // Banner toggle event.
-                        opd_column_banner_checkbox?.addEventListener("change", function(){
-                            column_settings_save("", last_load_profile);
-                            //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
-                            let banner_mode_target_object = this.closest("div[opd_column_type]").querySelector("iframe");
-                            //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]'))
-                            if(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]') == null){
-                                banner_mode_target_object.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
-                            }
-                            if(this.checked != true){
-                                //console.log(this)
-                                banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = `header[role="banner"]{visibility: hidden; width: 0;};`;
-                            }else{
-                                //console.log("else")
-                                banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]').textContent = ``;
-                            }
-                        });
+                        //console.log(opd_column_div.querySelector(".opd_banner").checked)
+                        if (mode != "session_set") {
+                            // Banner toggle event.
+                            opd_column_banner_checkbox?.addEventListener(
+                                "change",
+                                function () {
+                                    column_settings_save("", last_load_profile);
+                                    //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
+                                    let banner_mode_target_object =
+                                        this.closest(
+                                            "div[opd_column_type]",
+                                        ).querySelector("iframe");
+                                    //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]'))
+                                    if (
+                                        banner_mode_target_object.contentWindow.document.querySelector(
+                                            "head style[opd_banner_css]",
+                                        ) == null
+                                    ) {
+                                        banner_mode_target_object.contentWindow.document
+                                            .querySelector("head")
+                                            .insertAdjacentHTML(
+                                                "beforeend",
+                                                `<style opd_banner_css></style>`,
+                                            );
+                                    }
+                                    if (this.checked != true) {
+                                        //console.log(this)
+                                        banner_mode_target_object.contentWindow.document.querySelector(
+                                            "head style[opd_banner_css]",
+                                        ).textContent =
+                                            `header[role="banner"]{visibility: hidden; width: 0;};`;
+                                    } else {
+                                        //console.log("else")
+                                        banner_mode_target_object.contentWindow.document.querySelector(
+                                            "head style[opd_banner_css]",
+                                        ).textContent = ``;
+                                    }
+                                },
+                            );
 
-                        // Top-search hide toggle event.
-                        opd_column_top_visible_checkbox?.addEventListener("change", function(){
-                            column_settings_save("", last_load_profile);
-                            let topvisible_mode_target_object = this.closest("div[opd_column_type]").querySelector("iframe");
-                            //console.log(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]'))
-                            if(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]') == null){
-                                topvisible_mode_target_object.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_top_visible_css></style>`);
-                            }
-                            if(this.checked != true){
-                                //console.log(this)
-                                //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
-                                if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore"){
-                                    topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                }else{
-                                    //console.log(this.closest("div[opd_column_type]").getAttribute("opd_column_type"))
-                                    if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
-                                        topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;} [data-testid="app-bar-back"]{visibility: visible;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                    }else{
-                                        topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                            // Top-search hide toggle event.
+                            opd_column_top_visible_checkbox?.addEventListener(
+                                "change",
+                                function () {
+                                    column_settings_save("", last_load_profile);
+                                    let topvisible_mode_target_object =
+                                        this.closest(
+                                            "div[opd_column_type]",
+                                        ).querySelector("iframe");
+                                    //console.log(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]'))
+                                    if (
+                                        topvisible_mode_target_object.contentWindow.document.querySelector(
+                                            "head style[opd_top_visible_css]",
+                                        ) == null
+                                    ) {
+                                        topvisible_mode_target_object.contentWindow.document
+                                            .querySelector("head")
+                                            .insertAdjacentHTML(
+                                                "beforeend",
+                                                `<style opd_top_visible_css></style>`,
+                                            );
                                     }
-                                }
-                            }else{
-                                //console.log("else")
-                                topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = ``;
-                            }
-                        });
-                    }
-                
-                    // Explore pin state.
-                    if(opd_column_pinned_checkbox != null){
-                        if(mode != "session_set"){
-                            opd_column_pinned_checkbox.addEventListener("click", function(){
-                                if(this.checked){
-                                    if(confirm(i18n_message("msg_explore_pin_confirm"))){
-                                        const now_path = this.closest("div[opd_column_type]").getAttribute("opd_explore_path");
-                                        this.closest("div[opd_column_type]").setAttribute("opd_pinned_path",now_path);
-                                        column_settings_save("", last_load_profile);
-                                    }else{
-                                        this.checked = false;
-                                    }
-                                }else{
-                                    if(confirm(i18n_message("msg_explore_unpin_confirm"))){
-                                        this.closest("div[opd_column_type]").setAttribute("opd_pinned_path","");
-                                        column_settings_save("", last_load_profile);
-                                        this.checked = false;
-                                    }else{
-                                        this.checked = true;
-                                    }
-                                }
-                            });
-                        }
-                    }
-                    // Auto-refresh mode events.
-                    if(opd_column_auto_reload_checkbox != null){
-                        if(mode != "session_set"){
-                            opd_column_auto_reload_checkbox.addEventListener("click", function(){
-                                let auto_reload_target_object = this.closest("div[opd_column_type]").querySelector("iframe");
-                                const auto_reload_time_input = this.closest("div[opd_column_type]").querySelector(".opd_a_reload_time_setting");
-                                const auto_reload_time = Number(auto_reload_time_input.value) * 1000;
-                                if(this.checked){
-                                    auto_reload_time_input.disabled = true;
-                                    auto_reload_int = setInterval(function(){
-                                        //console.log("update!")
-                                        //console.log(auto_reload_target_object.contentWindow)
-                                        const path_name = auto_reload_target_object.contentWindow.location.pathname;
-                                        if(['/home', '/search'].includes(path_name) || path_name.startsWith('/i/lists')){
-                                            if(auto_reload_target_object.getAttribute("auto_reload_mouse_hover") == "false"){
-                                                if (column_content_reload){
-                                                    column_content_reload.Reload(auto_reload_target_object.contentWindow);
-                                                    setTimeout(() => {
-                                                        auto_reload_target_object.contentWindow.scrollTo({ top: 0, behavior: 'auto' });
-                                                    }, 500);
-                                                }
+                                    if (this.checked != true) {
+                                        //console.log(this)
+                                        //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
+                                        if (
+                                            this.closest(
+                                                "div[opd_column_type]",
+                                            ).getAttribute("opd_column_type") ==
+                                            "explore"
+                                        ) {
+                                            topvisible_mode_target_object.contentWindow.document.querySelector(
+                                                "head style[opd_top_visible_css]",
+                                            ).textContent =
+                                                `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                                        } else {
+                                            //console.log(this.closest("div[opd_column_type]").getAttribute("opd_column_type"))
+                                            if (
+                                                this.closest(
+                                                    "div[opd_column_type]",
+                                                ).getAttribute(
+                                                    "opd_column_type",
+                                                ) == "home"
+                                            ) {
+                                                topvisible_mode_target_object.contentWindow.document.querySelector(
+                                                    "head style[opd_top_visible_css]",
+                                                ).textContent =
+                                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;} [data-testid="app-bar-back"]{visibility: visible;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                                            } else {
+                                                topvisible_mode_target_object.contentWindow.document.querySelector(
+                                                    "head style[opd_top_visible_css]",
+                                                ).textContent =
+                                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                             }
-                                        };
-                                    }, auto_reload_time);
-                                    //console.log(auto_reload_time)
-                                    column_settings_save("", last_load_profile);
-                                }else{
-                                    auto_reload_time_input.disabled = false;
-                                    //console.log("update stop!")
-                                    clearInterval(auto_reload_int);
-                                    column_settings_save("", last_load_profile);
-                                }
-                            });
+                                        }
+                                    } else {
+                                        //console.log("else")
+                                        topvisible_mode_target_object.contentWindow.document.querySelector(
+                                            "head style[opd_top_visible_css]",
+                                        ).textContent = ``;
+                                    }
+                                },
+                            );
                         }
-                    }
-                    /*if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore" || this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
+
+                        // Explore pin state.
+                        if (opd_column_pinned_checkbox != null) {
+                            if (mode != "session_set") {
+                                opd_column_pinned_checkbox.addEventListener(
+                                    "click",
+                                    function () {
+                                        if (this.checked) {
+                                            if (
+                                                confirm(
+                                                    i18n_message(
+                                                        "msg_explore_pin_confirm",
+                                                    ),
+                                                )
+                                            ) {
+                                                const now_path = this.closest(
+                                                    "div[opd_column_type]",
+                                                ).getAttribute(
+                                                    "opd_explore_path",
+                                                );
+                                                this.closest(
+                                                    "div[opd_column_type]",
+                                                ).setAttribute(
+                                                    "opd_pinned_path",
+                                                    now_path,
+                                                );
+                                                column_settings_save(
+                                                    "",
+                                                    last_load_profile,
+                                                );
+                                            } else {
+                                                this.checked = false;
+                                            }
+                                        } else {
+                                            if (
+                                                confirm(
+                                                    i18n_message(
+                                                        "msg_explore_unpin_confirm",
+                                                    ),
+                                                )
+                                            ) {
+                                                this.closest(
+                                                    "div[opd_column_type]",
+                                                ).setAttribute(
+                                                    "opd_pinned_path",
+                                                    "",
+                                                );
+                                                column_settings_save(
+                                                    "",
+                                                    last_load_profile,
+                                                );
+                                                this.checked = false;
+                                            } else {
+                                                this.checked = true;
+                                            }
+                                        }
+                                    },
+                                );
+                            }
+                        }
+                        // Auto-refresh mode events.
+                        if (opd_column_auto_reload_checkbox != null) {
+                            if (mode != "session_set") {
+                                opd_column_auto_reload_checkbox.addEventListener(
+                                    "click",
+                                    function () {
+                                        let auto_reload_target_object =
+                                            this.closest(
+                                                "div[opd_column_type]",
+                                            ).querySelector("iframe");
+                                        const auto_reload_time_input =
+                                            this.closest(
+                                                "div[opd_column_type]",
+                                            ).querySelector(
+                                                ".opd_a_reload_time_setting",
+                                            );
+                                        const auto_reload_time =
+                                            Number(
+                                                auto_reload_time_input.value,
+                                            ) * 1000;
+                                        if (this.checked) {
+                                            auto_reload_time_input.disabled = true;
+                                            auto_reload_int = setInterval(
+                                                function () {
+                                                    //console.log("update!")
+                                                    //console.log(auto_reload_target_object.contentWindow)
+                                                    const path_name =
+                                                        auto_reload_target_object
+                                                            .contentWindow
+                                                            .location.pathname;
+                                                    if (
+                                                        [
+                                                            "/home",
+                                                            "/search",
+                                                        ].includes(path_name) ||
+                                                        path_name.startsWith(
+                                                            "/i/lists",
+                                                        )
+                                                    ) {
+                                                        if (
+                                                            auto_reload_target_object.getAttribute(
+                                                                "auto_reload_mouse_hover",
+                                                            ) == "false"
+                                                        ) {
+                                                            if (
+                                                                column_content_reload
+                                                            ) {
+                                                                column_content_reload.Reload(
+                                                                    auto_reload_target_object.contentWindow,
+                                                                );
+                                                                setTimeout(
+                                                                    () => {
+                                                                        auto_reload_target_object.contentWindow.scrollTo(
+                                                                            {
+                                                                                top: 0,
+                                                                                behavior:
+                                                                                    "auto",
+                                                                            },
+                                                                        );
+                                                                    },
+                                                                    500,
+                                                                );
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                auto_reload_time,
+                                            );
+                                            //console.log(auto_reload_time)
+                                            column_settings_save(
+                                                "",
+                                                last_load_profile,
+                                            );
+                                        } else {
+                                            auto_reload_time_input.disabled = false;
+                                            //console.log("update stop!")
+                                            clearInterval(auto_reload_int);
+                                            column_settings_save(
+                                                "",
+                                                last_load_profile,
+                                            );
+                                        }
+                                    },
+                                );
+                            }
+                        }
+                        /*if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore" || this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
                     
                     }*/
-                   if(mode != "session_set"){
-                        // Tweet view mode events.
-                        opd_column_tw_view_mode_opt.addEventListener("change", function(){
-                            column_settings_save("", last_load_profile);
-                            //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
-                            let tw_view_mode_target_object = this.closest("div[opd_column_type]").querySelector("iframe");
-                            //console.log(this.value)
-                            if(tw_view_mode_target_object.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]') == null){
-                                tw_view_mode_target_object.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_tw_view_mode_css></style>`);
-                            }
-                            switch (this.value) {
-                                case "0":
-                                    tw_view_mode_target_object.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
-                                    break;
-                                case "1":
-                                    tw_view_mode_target_object.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
-                                    break;
-                                case "2":
-                                    tw_view_mode_target_object.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
-                                    break;
-                                default:
-                                    tw_view_mode_target_object.contentWindow.document.querySelector('head style[opd_tw_view_mode_css]').textContent = ``;
-                                    break;
-                            }
-                        })
+                        if (mode != "session_set") {
+                            // Tweet view mode events.
+                            opd_column_tw_view_mode_opt.addEventListener(
+                                "change",
+                                function () {
+                                    column_settings_save("", last_load_profile);
+                                    //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
+                                    let tw_view_mode_target_object =
+                                        this.closest(
+                                            "div[opd_column_type]",
+                                        ).querySelector("iframe");
+                                    //console.log(this.value)
+                                    if (
+                                        tw_view_mode_target_object.contentWindow.document.querySelector(
+                                            "head style[opd_tw_view_mode_css]",
+                                        ) == null
+                                    ) {
+                                        tw_view_mode_target_object.contentWindow.document
+                                            .querySelector("head")
+                                            .insertAdjacentHTML(
+                                                "beforeend",
+                                                `<style opd_tw_view_mode_css></style>`,
+                                            );
+                                    }
+                                    switch (this.value) {
+                                        case "0":
+                                            tw_view_mode_target_object.contentWindow.document.querySelector(
+                                                "head style[opd_tw_view_mode_css]",
+                                            ).textContent = ``;
+                                            break;
+                                        case "1":
+                                            tw_view_mode_target_object.contentWindow.document.querySelector(
+                                                "head style[opd_tw_view_mode_css]",
+                                            ).textContent =
+                                                `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
+                                            break;
+                                        case "2":
+                                            tw_view_mode_target_object.contentWindow.document.querySelector(
+                                                "head style[opd_tw_view_mode_css]",
+                                            ).textContent =
+                                                `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
+                                            break;
+                                        default:
+                                            tw_view_mode_target_object.contentWindow.document.querySelector(
+                                                "head style[opd_tw_view_mode_css]",
+                                            ).textContent = ``;
+                                            break;
+                                    }
+                                },
+                            );
+                        }
                     }
-                }
 
-                // Clicking column bar empty area scrolls to top.
-                opd_column_scroll_to_top.addEventListener("click", (e) => { this.contentWindow.scrollTo({ top: 0, behavior: "auto" }); });
-
-            }, {once: true})
+                    // Clicking column bar empty area scrolls to top.
+                    opd_column_scroll_to_top.addEventListener("click", (e) => {
+                        this.contentWindow.scrollTo({
+                            top: 0,
+                            behavior: "auto",
+                        });
+                    });
+                },
+                { once: true },
+            );
             // Explore URL detection logic.
-            const opd_column_mutate = column_object[index].closest("div[opd_column_type]");
-            if(opd_column_mutate.getAttribute("opd_column_type") == 'explore'){
+            const opd_column_mutate = column_object[index].closest(
+                "div[opd_column_type]",
+            );
+            if (
+                opd_column_mutate.getAttribute("opd_column_type") == "explore"
+            ) {
                 mutate_url(opd_column_mutate);
             }
         }
     }
     // Monitor URL and page title changes.
-    function mutate_url(element){
+    function mutate_url(element) {
         let exp_object = element.querySelector("iframe");
-        exp_object.addEventListener("load", function(){
+        exp_object.addEventListener("load", function () {
             let exp_old_url = exp_object.contentWindow.location.href;
-                    let exp_observer = new MutationObserver(function(){
-                        if(exp_old_url != exp_object.contentWindow.location.href){
-                            let exp_url = new URL(exp_object.contentWindow.location.href);
-                            let exp_title = exp_object.contentWindow.document.title.replace(" / X", "");
-                            //console.log(`${exp_url.pathname}${exp_url.search}`);
-                            element.setAttribute("opd_explore_path", `${exp_url.pathname}${exp_url.search}`);
-                            exp_old_url = exp_object.contentWindow.location.href;
-                            element.setAttribute("opd_explore_title", exp_title);
-                            //console.log(exp_title);
-                            column_settings_save("", last_load_profile);
-                        }
-                    });
-                    exp_observer.observe(exp_object.contentWindow.document, {childList: true, subtree: true});
-        })
-    }
-    // Main bar events.
-    document.getElementById("init_settings").addEventListener("click", function(){
-        chrome.storage.local.remove("opd_settings", function(value){
-            alert(i18n_message("msg_settings_reset_completed"));
-        });
-    });
-    // Prevent auto-scroll when opening media posts.
-    document.querySelector("#main_rack_element").addEventListener("scrollend", function(){
-        document.querySelector("#main_rack_element").scrollTop = 0;
-    })
-    // Two-row view.
-    document.getElementById("second_rack").addEventListener("click", function(){
-        if(second_rack_mode == false){
-            //document.querySelector("#main_rack_element").style.height = "50vh";
-            document.querySelector("#first_rack_element").style.height = "50vh";
-            document.querySelector("#second_rack_element").style.height = "50vh";
-            //console.log(default_element.second_empty_column)
-            // Legacy second-row empty-column template (currently unused).
-            const second_rack_default_html = default_element.second_empty_column.html.replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", "").replace("%column_tw_view_mode%", "0");
-            document.querySelector("#second_rack_element").insertAdjacentHTML("beforeend", second_rack_default_html);
-            /*for (let index = 0; index < document.querySelectorAll('.dsp_column[draggable="true"]').length; index++) {
-                document.querySelectorAll('.dsp_column[draggable="true"]')[index].style.height = "calc(100% - 25px)";
-            }*/
-            //document.querySelector("style[second_column_css]").textContent = `.dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
-            //document.querySelector(".dsp_column_second_emptycolumn").scrollIntoView({behavior: "smooth",inline: "end"});
-            //append_object_css();
-            column_dd();
-            column_close();
-            column_settings_save("", last_load_profile);
-            second_rack_mode = true;
-            document.querySelector("#second_rack").value = "Single Rack";
-            document.querySelector(".dsp_btn_second_rack_img").style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
-        }else{
-            if(confirm(i18n_message("msg_second_rack_to_single_confirm"))){
-                document.querySelector("#second_rack_element").textContent = "";
-                document.querySelector("style[second_column_css]").textContent = ``;
-                document.querySelector("#first_rack_element").style.height = "100vh";
-                document.querySelector("#second_rack_element").style.height = "0";
-                document.querySelector("#second_rack_element").style.height = "0";
-                //append_object_css();
-                //column_dd();
-                column_settings_save("", last_load_profile);
-                second_rack_mode = false;
-                document.querySelector("#second_rack").value = "Second Rack";
-                document.querySelector(".dsp_btn_second_rack_img").style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_second_rack)})`;
-            }
-        }
-        
-    });
-    // Profile loader.
-    document.getElementById("profile_load_save").addEventListener("click", function(){
-        window.open(chrome.runtime.getURL("profile_debug.html"), "OPD-Profile-Loader", 'width=720, height=600');
-    });
-    //
-    document.getElementById("dnr_reload").addEventListener("click", function(){
-        if(confirm(i18n_message("msg_dnr_reload_confirm"))){
-            chrome.runtime.sendMessage({message: "dnr_upd"}).then((value)=>{
-                if(value == true){
-                    location.reload();
+            let exp_observer = new MutationObserver(function () {
+                if (exp_old_url != exp_object.contentWindow.location.href) {
+                    let exp_url = new URL(
+                        exp_object.contentWindow.location.href,
+                    );
+                    let exp_title =
+                        exp_object.contentWindow.document.title.replace(
+                            " / X",
+                            "",
+                        );
+                    //console.log(`${exp_url.pathname}${exp_url.search}`);
+                    element.setAttribute(
+                        "opd_explore_path",
+                        `${exp_url.pathname}${exp_url.search}`,
+                    );
+                    exp_old_url = exp_object.contentWindow.location.href;
+                    element.setAttribute("opd_explore_title", exp_title);
+                    //console.log(exp_title);
+                    column_settings_save("", last_load_profile);
                 }
             });
-        }
-    });
-    document.getElementById("ext_reload").addEventListener("click", function(){
-        if(confirm(i18n_message("msg_extension_reload_confirm"))){
-            chrome.runtime.sendMessage({message: "ext_reload"});
-        }
-    });
+            exp_observer.observe(exp_object.contentWindow.document, {
+                childList: true,
+                subtree: true,
+            });
+        });
+    }
+    // Main bar events.
+    document
+        .getElementById("init_settings")
+        .addEventListener("click", function () {
+            chrome.storage.local.remove("opd_settings", function (value) {
+                alert(i18n_message("msg_settings_reset_completed"));
+            });
+        });
+    // Prevent auto-scroll when opening media posts.
+    document
+        .querySelector("#main_rack_element")
+        .addEventListener("scrollend", function () {
+            document.querySelector("#main_rack_element").scrollTop = 0;
+        });
+    // Two-row view.
+    document
+        .getElementById("second_rack")
+        .addEventListener("click", function () {
+            if (second_rack_mode == false) {
+                //document.querySelector("#main_rack_element").style.height = "50vh";
+                document.querySelector("#first_rack_element").style.height =
+                    "50vh";
+                document.querySelector("#second_rack_element").style.height =
+                    "50vh";
+                //console.log(default_element.second_empty_column)
+                // Legacy second-row empty-column template (currently unused).
+                const second_rack_default_html =
+                    default_element.second_empty_column.html
+                        .replaceAll("%column_num%", create_random_id())
+                        .replace("%column_banner_ch%", "")
+                        .replace("%column_tw_view_mode%", "0");
+                document
+                    .querySelector("#second_rack_element")
+                    .insertAdjacentHTML("beforeend", second_rack_default_html);
+                /*for (let index = 0; index < document.querySelectorAll('.dsp_column[draggable="true"]').length; index++) {
+                document.querySelectorAll('.dsp_column[draggable="true"]')[index].style.height = "calc(100% - 25px)";
+            }*/
+                //document.querySelector("style[second_column_css]").textContent = `.dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
+                //document.querySelector(".dsp_column_second_emptycolumn").scrollIntoView({behavior: "smooth",inline: "end"});
+                //append_object_css();
+                column_dd();
+                column_close();
+                column_settings_save("", last_load_profile);
+                second_rack_mode = true;
+                document.querySelector("#second_rack").value = "Single Rack";
+                document.querySelector(
+                    ".dsp_btn_second_rack_img",
+                ).style.backgroundImage =
+                    `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
+            } else {
+                if (
+                    confirm(i18n_message("msg_second_rack_to_single_confirm"))
+                ) {
+                    document.querySelector("#second_rack_element").textContent =
+                        "";
+                    document.querySelector(
+                        "style[second_column_css]",
+                    ).textContent = ``;
+                    document.querySelector("#first_rack_element").style.height =
+                        "100vh";
+                    document.querySelector(
+                        "#second_rack_element",
+                    ).style.height = "0";
+                    document.querySelector(
+                        "#second_rack_element",
+                    ).style.height = "0";
+                    //append_object_css();
+                    //column_dd();
+                    column_settings_save("", last_load_profile);
+                    second_rack_mode = false;
+                    document.querySelector("#second_rack").value =
+                        "Second Rack";
+                    document.querySelector(
+                        ".dsp_btn_second_rack_img",
+                    ).style.backgroundImage =
+                        `url(${chrome.runtime.getURL(ui_icon_define.column_second_rack)})`;
+                }
+            }
+        });
+    // Profile loader.
+    document
+        .getElementById("profile_load_save")
+        .addEventListener("click", function () {
+            window.open(
+                chrome.runtime.getURL("profile_debug.html"),
+                "OPD-Profile-Loader",
+                "width=720, height=600",
+            );
+        });
+    //
+    document
+        .getElementById("dnr_reload")
+        .addEventListener("click", function () {
+            if (confirm(i18n_message("msg_dnr_reload_confirm"))) {
+                chrome.runtime
+                    .sendMessage({ message: "dnr_upd" })
+                    .then((value) => {
+                        if (value == true) {
+                            location.reload();
+                        }
+                    });
+            }
+        });
+    document
+        .getElementById("ext_reload")
+        .addEventListener("click", function () {
+            if (confirm(i18n_message("msg_extension_reload_confirm"))) {
+                chrome.runtime.sendMessage({ message: "ext_reload" });
+            }
+        });
     // Add Post column.
     // TODO: Simplify the column-addition flow.
-    document.getElementById("add_post").addEventListener("click", function(){
+    document.getElementById("add_post").addEventListener("click", function () {
         const empty_column = document.querySelector(".dsp_column_emptycolumn");
-        const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
-        const add_target_column = (is_shift_pressed && first_column) ? first_column : empty_column;
+        const first_column = empty_column
+            ?.closest("div")
+            ?.querySelector('section[draggable="true"]');
+        const add_target_column =
+            is_shift_pressed && first_column ? first_column : empty_column;
 
-        const new_column = default_element["post"]["html"].replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", "").replace("%column_top_bar_ch%", "checked").replace("%column_tw_view_mode%", "0").replaceAll("%column_width_num%", "30").replaceAll("%column_auto_reload_ch%", "").replaceAll("%column_auto_reload_time%", "10000");
+        const new_column = default_element["post"]["html"]
+            .replaceAll("%column_num%", create_random_id())
+            .replace("%column_banner_ch%", "")
+            .replace("%column_top_bar_ch%", "checked")
+            .replace("%column_tw_view_mode%", "0")
+            .replaceAll("%column_width_num%", "30")
+            .replaceAll("%column_auto_reload_ch%", "")
+            .replaceAll("%column_auto_reload_time%", "10000");
         add_target_column.insertAdjacentHTML("beforebegin", new_column);
-        add_target_column.scrollIntoView({behavior: "smooth",inline: "end"});
-        const all_webview = document.querySelectorAll('#main_rack_element iframe[opd_init_webview]');
+        add_target_column.scrollIntoView({ behavior: "smooth", inline: "end" });
+        const all_webview = document.querySelectorAll(
+            "#main_rack_element iframe[opd_init_webview]",
+        );
         append_object_css("add_column", all_webview);
         column_dd();
         column_close();
         column_settings_save("", last_load_profile);
     });
     // Add Timeline column.
-    document.getElementById("add_timeline").addEventListener("click", function(){
-        const empty_column = document.querySelector(".dsp_column_emptycolumn");
-        const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
-        const add_target_column = (is_shift_pressed && first_column) ? first_column : empty_column;
-        
-        const new_column = default_element["home"]["html"].replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", "").replace("%column_top_bar_ch%", "checked").replace("%column_tw_view_mode%", "0").replaceAll("%column_width_num%", "30").replaceAll("%column_auto_reload_ch%", "").replaceAll("%column_auto_reload_time%", "10000");
-        add_target_column.insertAdjacentHTML("beforebegin", new_column);
-        add_target_column.scrollIntoView({behavior: "smooth",inline: "end"});
-        const all_webview = document.querySelectorAll('#main_rack_element iframe[opd_init_webview]');
-        append_object_css("add_column", all_webview);
-        column_dd();
-        column_close();
-        column_settings_save("", last_load_profile);
-    });
-    // Add Notification column.
-    document.getElementById("add_notify").addEventListener("click", function(){
-        const empty_column = document.querySelector(".dsp_column_emptycolumn");
-        const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
-        const add_target_column = (is_shift_pressed && first_column) ? first_column : empty_column;
-        
-        const new_column = default_element["notification"]["html"].replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", "").replace("%column_top_bar_ch%", "checked").replace("%column_tw_view_mode%", "0").replaceAll("%column_width_num%", "30");
-        add_target_column.insertAdjacentHTML("beforebegin", new_column);
-        add_target_column.scrollIntoView({behavior: "smooth",inline: "end"});
-        const all_webview = document.querySelectorAll('#main_rack_element iframe[opd_init_webview]');
-        append_object_css("add_column", all_webview);
-        column_dd();
-        column_close();
-        column_settings_save("", last_load_profile);
-    });
-    // Add Explore (universal) column.
-    document.getElementById("add_explore").addEventListener("click", function(){
-        const empty_column = document.querySelector(".dsp_column_emptycolumn");
-        const first_column = empty_column?.closest('div')?.querySelector('section[draggable="true"]');
-        const add_target_column = (is_shift_pressed && first_column) ? first_column : empty_column;
-        
-        const new_column = default_element["explore"]["html"].replaceAll("%column_save_path%", "/explore").replaceAll("%column_num%", create_random_id()).replace("%column_banner_ch%", "").replace("%column_top_bar_ch%", "checked").replace("%column_tw_view_mode%", "0").replaceAll("%column_pinned_save_path%", "").replaceAll("%column_width_num%", "30").replaceAll("%column_auto_reload_ch%", "").replaceAll("%column_auto_reload_time%", "10000");
-        add_target_column.insertAdjacentHTML("beforebegin", new_column);
-        add_target_column.scrollIntoView({behavior: "smooth",inline: "end"});
-        const all_webview = document.querySelectorAll('#main_rack_element iframe[opd_init_webview]');
-        append_object_css("add_column", all_webview);
-        column_dd();
-        column_close();
-        column_settings_save("", last_load_profile);
-    });
-    // Profile save button.
-    document.getElementById("profile_save").addEventListener("click", function(){
-        if(confirm(i18n_message("msg_profile_save_confirm"))){
-            let profile = column_settings_save("profile_out");
-            const save_object = {name:"user_profile", profile:profile.column_settings};
-            //console.log(profile)
-            profile_store.push(save_object);
-            //console.log(profile_store)
-            chrome.storage.local.set({'opd_profile_store': JSON.stringify(profile_store)}, function () {
-                let profile_list_btn_html = "";
-                // Initialize profile list.
-                for (let index = 0; index < profile_store.length; index++) {
-                    profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
-                }
-                document.querySelector("#profile_btn_list").innerHTML = profile_list_btn_html;
-                create_profile_list_btn();
+    document
+        .getElementById("add_timeline")
+        .addEventListener("click", function () {
+            const empty_column = document.querySelector(
+                ".dsp_column_emptycolumn",
+            );
+            const first_column = empty_column
+                ?.closest("div")
+                ?.querySelector('section[draggable="true"]');
+            const add_target_column =
+                is_shift_pressed && first_column ? first_column : empty_column;
+
+            const new_column = default_element["home"]["html"]
+                .replaceAll("%column_num%", create_random_id())
+                .replace("%column_banner_ch%", "")
+                .replace("%column_top_bar_ch%", "checked")
+                .replace("%column_tw_view_mode%", "0")
+                .replaceAll("%column_width_num%", "30")
+                .replaceAll("%column_auto_reload_ch%", "")
+                .replaceAll("%column_auto_reload_time%", "10000");
+            add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            add_target_column.scrollIntoView({
+                behavior: "smooth",
+                inline: "end",
             });
-        }
-    });
-    // Profile delete button.
-    document.getElementById("profile_delete").addEventListener("click", function(){
-        const delete_num = Number(prompt(i18n_message("msg_profile_delete_number_prompt")));
-        if(last_load_profile != delete_num){
-            if(confirm(i18n_message("msg_profile_delete_confirm", [delete_num]))){
-                let after_profile_num = null;
-                profile_store.splice(delete_num, 1);
+            const all_webview = document.querySelectorAll(
+                "#main_rack_element iframe[opd_init_webview]",
+            );
+            append_object_css("add_column", all_webview);
+            column_dd();
+            column_close();
+            column_settings_save("", last_load_profile);
+        });
+    // Add Notification column.
+    document
+        .getElementById("add_notify")
+        .addEventListener("click", function () {
+            const empty_column = document.querySelector(
+                ".dsp_column_emptycolumn",
+            );
+            const first_column = empty_column
+                ?.closest("div")
+                ?.querySelector('section[draggable="true"]');
+            const add_target_column =
+                is_shift_pressed && first_column ? first_column : empty_column;
+
+            const new_column = default_element["notification"]["html"]
+                .replaceAll("%column_num%", create_random_id())
+                .replace("%column_banner_ch%", "")
+                .replace("%column_top_bar_ch%", "checked")
+                .replace("%column_tw_view_mode%", "0")
+                .replaceAll("%column_width_num%", "30");
+            add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            add_target_column.scrollIntoView({
+                behavior: "smooth",
+                inline: "end",
+            });
+            const all_webview = document.querySelectorAll(
+                "#main_rack_element iframe[opd_init_webview]",
+            );
+            append_object_css("add_column", all_webview);
+            column_dd();
+            column_close();
+            column_settings_save("", last_load_profile);
+        });
+    // Add Explore (universal) column.
+    document
+        .getElementById("add_explore")
+        .addEventListener("click", function () {
+            const empty_column = document.querySelector(
+                ".dsp_column_emptycolumn",
+            );
+            const first_column = empty_column
+                ?.closest("div")
+                ?.querySelector('section[draggable="true"]');
+            const add_target_column =
+                is_shift_pressed && first_column ? first_column : empty_column;
+
+            const new_column = default_element["explore"]["html"]
+                .replaceAll("%column_save_path%", "/explore")
+                .replaceAll("%column_num%", create_random_id())
+                .replace("%column_banner_ch%", "")
+                .replace("%column_top_bar_ch%", "checked")
+                .replace("%column_tw_view_mode%", "0")
+                .replaceAll("%column_pinned_save_path%", "")
+                .replaceAll("%column_width_num%", "30")
+                .replaceAll("%column_auto_reload_ch%", "")
+                .replaceAll("%column_auto_reload_time%", "10000");
+            add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            add_target_column.scrollIntoView({
+                behavior: "smooth",
+                inline: "end",
+            });
+            const all_webview = document.querySelectorAll(
+                "#main_rack_element iframe[opd_init_webview]",
+            );
+            append_object_css("add_column", all_webview);
+            column_dd();
+            column_close();
+            column_settings_save("", last_load_profile);
+        });
+    // Profile save button.
+    document
+        .getElementById("profile_save")
+        .addEventListener("click", function () {
+            if (confirm(i18n_message("msg_profile_save_confirm"))) {
+                let profile = column_settings_save("profile_out");
+                const save_object = {
+                    name: "user_profile",
+                    profile: profile.column_settings,
+                };
+                //console.log(profile)
+                profile_store.push(save_object);
                 //console.log(profile_store)
-                chrome.storage.local.set({'opd_profile_store': JSON.stringify(profile_store)}, function () {
-                    //
-                    chrome.storage.local.get("opd_settings", function(load_value){
-                        //console.log(last_load_profile)
-                        if(last_load_profile<delete_num){
-                            after_profile_num = last_load_profile;
-                        }else{
-                            after_profile_num = last_load_profile - 1;
+                chrome.storage.local.set(
+                    { opd_profile_store: JSON.stringify(profile_store) },
+                    function () {
+                        let profile_list_btn_html = "";
+                        // Initialize profile list.
+                        for (
+                            let index = 0;
+                            index < profile_store.length;
+                            index++
+                        ) {
+                            profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
                         }
-                        if(after_profile_num < 0){
-                            after_profile_num = 0;
-                        }
-                        last_load_profile = after_profile_num;
-                        //
-                        console.log(after_profile_num)
-                        let load_setting = JSON.parse(load_value.opd_settings);
-                        load_setting.last_load_profile = after_profile_num;
-                        chrome.storage.local.set({'opd_settings': JSON.stringify(load_setting)}, function () {
-                            let profile_list_btn_html = "";
-                            // Initialize profile list.
-                            for (let index = 0; index < profile_store.length; index++) {
-                                profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
-                            }
-                            document.querySelector(".profile_val_now").textContent = after_profile_num;
-                            document.querySelector("#profile_btn_list").innerHTML = profile_list_btn_html;
-                            create_profile_list_btn();
-                            });
-                        });
-                    //last_load_profile
-                    //
-                    //.aaaa
-                });
+                        document.querySelector("#profile_btn_list").innerHTML =
+                            profile_list_btn_html;
+                        create_profile_list_btn();
+                    },
+                );
             }
-        }else{
-            alert(i18n_message("msg_profile_delete_current_alert"));
-        }
-    });
+        });
+    // Profile delete button.
+    document
+        .getElementById("profile_delete")
+        .addEventListener("click", function () {
+            const delete_num = Number(
+                prompt(i18n_message("msg_profile_delete_number_prompt")),
+            );
+            if (last_load_profile != delete_num) {
+                if (
+                    confirm(
+                        i18n_message("msg_profile_delete_confirm", [
+                            delete_num,
+                        ]),
+                    )
+                ) {
+                    let after_profile_num = null;
+                    profile_store.splice(delete_num, 1);
+                    //console.log(profile_store)
+                    chrome.storage.local.set(
+                        { opd_profile_store: JSON.stringify(profile_store) },
+                        function () {
+                            //
+                            chrome.storage.local.get(
+                                "opd_settings",
+                                function (load_value) {
+                                    //console.log(last_load_profile)
+                                    if (last_load_profile < delete_num) {
+                                        after_profile_num = last_load_profile;
+                                    } else {
+                                        after_profile_num =
+                                            last_load_profile - 1;
+                                    }
+                                    if (after_profile_num < 0) {
+                                        after_profile_num = 0;
+                                    }
+                                    last_load_profile = after_profile_num;
+                                    //
+                                    console.log(after_profile_num);
+                                    let load_setting = JSON.parse(
+                                        load_value.opd_settings,
+                                    );
+                                    load_setting.last_load_profile =
+                                        after_profile_num;
+                                    chrome.storage.local.set(
+                                        {
+                                            opd_settings:
+                                                JSON.stringify(load_setting),
+                                        },
+                                        function () {
+                                            let profile_list_btn_html = "";
+                                            // Initialize profile list.
+                                            for (
+                                                let index = 0;
+                                                index < profile_store.length;
+                                                index++
+                                            ) {
+                                                profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
+                                            }
+                                            document.querySelector(
+                                                ".profile_val_now",
+                                            ).textContent = after_profile_num;
+                                            document.querySelector(
+                                                "#profile_btn_list",
+                                            ).innerHTML = profile_list_btn_html;
+                                            create_profile_list_btn();
+                                        },
+                                    );
+                                },
+                            );
+                            //last_load_profile
+                            //
+                            //.aaaa
+                        },
+                    );
+                }
+            } else {
+                alert(i18n_message("msg_profile_delete_current_alert"));
+            }
+        });
     // Column move handling.
-    function column_dd(){
+    function column_dd() {
         let column_class = document.querySelectorAll(".dsp_column");
         let column_copy_source = null;
         for (let index = 0; index < column_class.length; index++) {
-            column_class[index].addEventListener("dragstart", function(ev){
+            column_class[index].addEventListener("dragstart", function (ev) {
                 //console.log(this)
                 column_copy_source = this;
-                ev.dataTransfer.setData('text/plain', ev.target.id);
+                ev.dataTransfer.setData("text/plain", ev.target.id);
             });
-            column_class[index].addEventListener("dragover", function(ev){
+            column_class[index].addEventListener("dragover", function (ev) {
                 ev.preventDefault();
-                this.style.borderLeft = '15px solid #2e2e2e';
+                this.style.borderLeft = "15px solid #2e2e2e";
             });
-            column_class[index].addEventListener("dragleave", function(){
-                this.style.borderLeft = '';
+            column_class[index].addEventListener("dragleave", function () {
+                this.style.borderLeft = "";
             });
-            column_class[index].addEventListener("drop", function(ev){
+            column_class[index].addEventListener("drop", function (ev) {
                 ev.preventDefault();
                 // Initialize display settings during move.
                 //bn_twview_mode(this.querySelector("iframe"));
                 // Set Explore URL.
                 //console.log(column_class[index])
                 // Apply move operation.
-                const dt_id = ev.dataTransfer.getData('text/plain');
+                const dt_id = ev.dataTransfer.getData("text/plain");
                 const dr_elem = document.getElementById(dt_id);
-                if(dr_elem != null){
-                    if(dr_elem?.querySelector("div")?.getAttribute("opd_column_type") == 'explore'){
+                if (dr_elem != null) {
+                    if (
+                        dr_elem
+                            ?.querySelector("div")
+                            ?.getAttribute("opd_column_type") == "explore"
+                    ) {
                         // && dr_elem.querySelector("div").querySelector("iframe").src != `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`
                         //console.log(dr_elem.querySelector("div").getAttribute("opd_explore_path"))
                         //console.log(dr_elem.querySelector("div").getAttribute("opd_pinned_path"))
-                        if(dr_elem.querySelector("div").getAttribute("opd_pinned_path") != ""){
+                        if (
+                            dr_elem
+                                .querySelector("div")
+                                .getAttribute("opd_pinned_path") != ""
+                        ) {
                             //console.log("Pinned")
-                            dr_elem.querySelector("div").querySelector("iframe").src = `https://x.com${dr_elem.querySelector("div").getAttribute("opd_pinned_path")}`;
-                        }else{
-                           //console.log("Exp_save")
-                            dr_elem.querySelector("div").querySelector("iframe").src = `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`;
+                            dr_elem
+                                .querySelector("div")
+                                .querySelector("iframe").src =
+                                `https://x.com${dr_elem.querySelector("div").getAttribute("opd_pinned_path")}`;
+                        } else {
+                            //console.log("Exp_save")
+                            dr_elem
+                                .querySelector("div")
+                                .querySelector("iframe").src =
+                                `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`;
                         }
                     }
                     this.parentNode.insertBefore(dr_elem, this);
-                    this.style.borderLeft = '';
+                    this.style.borderLeft = "";
                     //append_object_css();
                     //column_dd();
                     column_settings_save("", last_load_profile);
-                }else{
-                    this.style.borderLeft = '';
+                } else {
+                    this.style.borderLeft = "";
                 }
-                
-            })
+            });
         }
     }
     // Close column.
-    function column_close(){
-        for (let index = 0; index < document.querySelectorAll(".column_close_btn").length; index++) {
-            document.querySelectorAll(".column_close_btn")[index].addEventListener("click", function(){
-                const pin_checkbox = this.closest(".dsp_column").querySelector(".opd_pinned_btn")?.checked;
-                if(pin_checkbox == false || pin_checkbox == undefined){
-                    this.closest(".dsp_column").remove();
-                    append_object_css();
-                    //column_dd();
-                    column_settings_save("", last_load_profile);
-                }else{
-                    if(confirm(i18n_message("msg_pinned_column_close_confirm"))){
+    function column_close() {
+        for (
+            let index = 0;
+            index < document.querySelectorAll(".column_close_btn").length;
+            index++
+        ) {
+            document
+                .querySelectorAll(".column_close_btn")
+                [index].addEventListener("click", function () {
+                    const pin_checkbox =
+                        this.closest(".dsp_column").querySelector(
+                            ".opd_pinned_btn",
+                        )?.checked;
+                    if (pin_checkbox == false || pin_checkbox == undefined) {
                         this.closest(".dsp_column").remove();
                         append_object_css();
                         //column_dd();
                         column_settings_save("", last_load_profile);
+                    } else {
+                        if (
+                            confirm(
+                                i18n_message("msg_pinned_column_close_confirm"),
+                            )
+                        ) {
+                            this.closest(".dsp_column").remove();
+                            append_object_css();
+                            //column_dd();
+                            column_settings_save("", last_load_profile);
+                        }
                     }
-                }
-            })
+                });
         }
     }
     // Save column layout.
-    function column_settings_save(mode, profile_num){
+    function column_settings_save(mode, profile_num) {
         let settings_array = {
-            column_settings:[],
-            version:manifest.version
+            column_settings: [],
+            version: manifest.version,
         };
-        for (let index = 0; index < document.querySelectorAll("#opd_main_element div[opd_column_type]").length; index++) {
+        for (
+            let index = 0;
+            index <
+            document.querySelectorAll("#opd_main_element div[opd_column_type]")
+                .length;
+            index++
+        ) {
             let banner_checked = null;
             let top_visible_checked = null;
             let tw_view_type = null;
@@ -1696,98 +2635,170 @@ function run(settings){
             let column_width_value = null;
             let column_auto_reload = null;
             let column_auto_reload_time = 10000;
-            if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_banner")?.checked == true){
+            if (
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].querySelector(".opd_banner")?.checked == true
+            ) {
                 banner_checked = true;
-            }else{
+            } else {
                 banner_checked = false;
             }
             // Top search area and related elements.
-            if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_top_bar")?.checked == true){
+            if (
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].querySelector(".opd_top_bar")?.checked == true
+            ) {
                 top_visible_checked = true;
-            }else{
+            } else {
                 top_visible_checked = false;
             }
             //
-            if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_tw_view_mode")?.value != undefined){
-                tw_view_type = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_tw_view_mode").value;
-            }else{
+            if (
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].querySelector(".opd_tw_view_mode")?.value !=
+                undefined
+            ) {
+                tw_view_type = document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].querySelector(".opd_tw_view_mode").value;
+            } else {
                 tw_view_type = "0";
             }
             // Width setting.
-            if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width") != "null"){
+            if (
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_column_width") != "null"
+            ) {
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width"))
-                column_width_value = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width");
+                column_width_value = document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_column_width");
             }
             // Explore-specific processing.
-            if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type") == 'explore'){
+            if (
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_column_type") == "explore"
+            ) {
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path"));
-                column_open_path = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path");
+                column_open_path = document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_explore_path");
                 // Pinned state.
-                column_pinned_save_path = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_pinned_path");
+                column_pinned_save_path = document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_pinned_path");
                 // Title.
-                column_page_title = document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_title");
-            }else{
+                column_page_title = document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_explore_title");
+            } else {
                 column_open_path = "";
                 column_pinned_save_path = "";
             }
             // Auto refresh.
-            if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type") == 'explore' || document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type") == 'home'){
-                if(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_a_reload_bar")?.checked == true){
+            if (
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_column_type") == "explore" ||
+                document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_column_type") == "home"
+            ) {
+                if (
+                    document
+                        .querySelectorAll(
+                            "#opd_main_element div[opd_column_type]",
+                        )
+                        [index].querySelector(".opd_a_reload_bar")?.checked ==
+                    true
+                ) {
                     column_auto_reload = true;
-                }else{
+                } else {
                     column_auto_reload = false;
                 }
-                const column_setting_time = Number(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].querySelector(".opd_a_reload_time_setting").value) * 1000;
+                const column_setting_time =
+                    Number(
+                        document
+                            .querySelectorAll(
+                                "#opd_main_element div[opd_column_type]",
+                            )
+                            [index].querySelector(".opd_a_reload_time_setting")
+                            .value,
+                    ) * 1000;
                 //console.log(column_setting_time)
-                if(column_setting_time >= 1000){
-                    
+                if (column_setting_time >= 1000) {
                     column_auto_reload_time = column_setting_time;
-                }else{
+                } else {
                     column_auto_reload_time = 10000;
                 }
             }
-            settings_array["column_settings"].push({type:document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_type"), banner:banner_checked, top_visible:top_visible_checked, tw_view_mode:tw_view_type, column_save_path:column_open_path, column_save_title:column_page_title, column_pinned_path:column_pinned_save_path, auto_reload:column_auto_reload, auto_reload_time:column_auto_reload_time, column_width:column_width_value});
+            settings_array["column_settings"].push({
+                type: document
+                    .querySelectorAll("#opd_main_element div[opd_column_type]")
+                    [index].getAttribute("opd_column_type"),
+                banner: banner_checked,
+                top_visible: top_visible_checked,
+                tw_view_mode: tw_view_type,
+                column_save_path: column_open_path,
+                column_save_title: column_page_title,
+                column_pinned_path: column_pinned_save_path,
+                auto_reload: column_auto_reload,
+                auto_reload_time: column_auto_reload_time,
+                column_width: column_width_value,
+            });
         }
-        if(mode == "profile_out"){
+        if (mode == "profile_out") {
             return settings_array;
-        }else{
+        } else {
             //console.log(settings_array);
             /*chrome.storage.local.set({'opd_settings': JSON.stringify(settings_array)}, function () {
                 console.log(settings_array);
             });*/
-            const save_object = {name:"user_profile", profile:settings_array.column_settings};
+            const save_object = {
+                name: "user_profile",
+                profile: settings_array.column_settings,
+            };
             //profile_store.push(save_object);
             Object.assign(profile_store[profile_num], save_object);
             //console.log(profile_store);
-            chrome.storage.local.set({'opd_profile_store': JSON.stringify(profile_store)}, function () {
-                //console.log(settings_array);
-            });
+            chrome.storage.local.set(
+                { opd_profile_store: JSON.stringify(profile_store) },
+                function () {
+                    //console.log(settings_array);
+                },
+            );
         }
     }
     // Create random ID.
-    function create_random_id(){
+    function create_random_id() {
         return Math.random().toString(32).substring(2);
     }
     // Mask default X UI behaviors.
-    function main_dsp(){
+    function main_dsp() {
         document.getElementById("react-root").style.visibility = "hidden";
         document.getElementById("react-root").style.overflow = "hidden";
     }
     const target_elem = document.getElementById("react-root");
     const observer = new MutationObserver(main_dsp);
-    observer.observe(target_elem,{
+    observer.observe(target_elem, {
         childList: true,
         characterData: true,
-        subtree: false
+        subtree: false,
     });
     // Watch title changes.
-    const head_observer = new MutationObserver(function(){
+    const head_observer = new MutationObserver(function () {
         document.title = "Open-Deck";
-        document.querySelector('link[rel="shortcut icon"]').href = chrome.runtime.getURL("icon.png");
+        document.querySelector('link[rel="shortcut icon"]').href =
+            chrome.runtime.getURL("icon.png");
         // Remove default CSS so it does not affect UI.
-        if(!is_removed_default_style){
-            document.head.querySelectorAll('style').forEach(style => {
-                if(style.textContent.includes('*, ::before, ::after')){
+        if (!is_removed_default_style) {
+            document.head.querySelectorAll("style").forEach((style) => {
+                if (style.textContent.includes("*, ::before, ::after")) {
                     style.remove();
                     is_removed_default_style = true;
                 }
@@ -1795,32 +2806,34 @@ function run(settings){
         }
 
         // Detect and apply dark mode settings.
-        const color_scheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const color_scheme = window.matchMedia("(prefers-color-scheme: dark)");
         const main_element = document.getElementById("opd_main_element");
-        if(!main_element) return;
+        if (!main_element) return;
 
         const color_mode = get_cookie_color_mode();
 
-        switch (color_mode){
+        switch (color_mode) {
             case "system": {
                 apply_ui_color = () => {
-                    const currentScheme = color_scheme.matches ? "dark" : "light";
+                    const currentScheme = color_scheme.matches
+                        ? "dark"
+                        : "light";
                     main_element.setAttribute("opd-dsp-theme", currentScheme);
                 };
-        
+
                 // Initial apply.
                 apply_ui_color();
-        
+
                 // Follow OS color mode changes only when set to system.
-                if(!is_added_system_color_mode){
+                if (!is_added_system_color_mode) {
                     color_scheme.addEventListener("change", apply_ui_color);
                     is_added_system_color_mode = true;
-                    }
+                }
                 break;
             }
             case "light":
                 // Remove remaining system-mode watcher if present.
-                if(is_added_system_color_mode && apply_ui_color){
+                if (is_added_system_color_mode && apply_ui_color) {
                     color_scheme.removeEventListener("change", apply_ui_color);
                     is_added_system_color_mode = false;
                 }
@@ -1828,60 +2841,133 @@ function run(settings){
                 break;
 
             case "dark":
-                if(is_added_system_color_mode && apply_ui_color){
+                if (is_added_system_color_mode && apply_ui_color) {
                     color_scheme.removeEventListener("change", apply_ui_color);
                     is_added_system_color_mode = false;
                 }
                 main_element.setAttribute("opd-dsp-theme", "dark");
                 break;
-                
+
             default:
                 break;
         }
-
-    }).observe(document.querySelector("head"),{
+    }).observe(document.querySelector("head"), {
         childList: true,
         characterData: true,
-        subtree: false
+        subtree: false,
     });
 }
 // Get color mode from cookie.
 function get_cookie_color_mode() {
-    const cookie = document.cookie.split(/;\s*/).find(c => c.startsWith('night_mode='));
+    const cookie = document.cookie
+        .split(/;\s*/)
+        .find((c) => c.startsWith("night_mode="));
 
     // Return system if night_mode is missing.
-    if(!cookie) return "system";
+    if (!cookie) return "system";
 
-    const color_mode_number = Number(cookie.split('=')[1]);
+    const color_mode_number = Number(cookie.split("=")[1]);
 
     // Return system when value is invalid.
-    if(!Number.isInteger(color_mode_number)) return "system";
+    if (!Number.isInteger(color_mode_number)) return "system";
 
     // Return light when color mode <= 0.
-    if(color_mode_number <= 0) return "light";
+    if (color_mode_number <= 0) return "light";
 
     // Return dark when color mode >= 1.
     return "dark";
 }
 // Initialize settings.
-function settings_init(){
-    const profile_store_default = [{type:"main_bar_empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}, {type:"home", banner:true, top_visible:true, tw_view_mode:"0", column_save_path:"", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}, {type:"notification", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", auto_reload:false, auto_reload_time:10000, column_pinned_path:"", column_save_title:"", column_width:null}, {type:"explore", banner:false, top_visible:true, tw_view_mode:"0", exp_type:"", column_save_path:"/explore", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}, {type:"empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_save_title:"", column_pinned_path:"", auto_reload:false, auto_reload_time:10000, column_width:null}];
+function settings_init() {
+    const profile_store_default = [
+        {
+            type: "main_bar_empty_column",
+            banner: false,
+            top_visible: true,
+            tw_view_mode: "0",
+            column_save_path: "",
+            column_save_title: "",
+            column_pinned_path: "",
+            auto_reload: false,
+            auto_reload_time: 10000,
+            column_width: null,
+        },
+        {
+            type: "home",
+            banner: true,
+            top_visible: true,
+            tw_view_mode: "0",
+            column_save_path: "",
+            column_save_title: "",
+            column_pinned_path: "",
+            auto_reload: false,
+            auto_reload_time: 10000,
+            column_width: null,
+        },
+        {
+            type: "notification",
+            banner: false,
+            top_visible: true,
+            tw_view_mode: "0",
+            column_save_path: "",
+            auto_reload: false,
+            auto_reload_time: 10000,
+            column_pinned_path: "",
+            column_save_title: "",
+            column_width: null,
+        },
+        {
+            type: "explore",
+            banner: false,
+            top_visible: true,
+            tw_view_mode: "0",
+            exp_type: "",
+            column_save_path: "/explore",
+            column_save_title: "",
+            column_pinned_path: "",
+            auto_reload: false,
+            auto_reload_time: 10000,
+            column_width: null,
+        },
+        {
+            type: "empty_column",
+            banner: false,
+            top_visible: true,
+            tw_view_mode: "0",
+            column_save_path: "",
+            column_save_title: "",
+            column_pinned_path: "",
+            auto_reload: false,
+            auto_reload_time: 10000,
+            column_width: null,
+        },
+    ];
     const settings = {
-        last_load_profile:0,
+        last_load_profile: 0,
         //column_settings:[{type:"main_bar_empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"home", banner:true, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"notification", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"explore", banner:false, top_visible:true, tw_view_mode:"0", exp_type:"", column_save_path:"/explore", column_pinned_path:"", column_width:null}, {type:"empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}],
-        version:manifest.version
+        version: manifest.version,
     };
-    let profile = [{name:"default", profile: profile_store_default}];
+    let profile = [{ name: "default", profile: profile_store_default }];
     //console.log(profile);
-    chrome.storage.local.set({'opd_profile_store': JSON.stringify(profile)}, function () {
-        chrome.storage.local.set({'opd_settings': JSON.stringify(settings)}, function () {
-            if(is_prototype){
-                alert(i18n_message("msg_initial_setup_completed_prototype"));
-            }else{
-                alert(i18n_message("msg_initial_setup_completed"));
-            }
-            
-            location.reload();
-        });
-    });
+    chrome.storage.local.set(
+        { opd_profile_store: JSON.stringify(profile) },
+        function () {
+            chrome.storage.local.set(
+                { opd_settings: JSON.stringify(settings) },
+                function () {
+                    if (is_prototype) {
+                        alert(
+                            i18n_message(
+                                "msg_initial_setup_completed_prototype",
+                            ),
+                        );
+                    } else {
+                        alert(i18n_message("msg_initial_setup_completed"));
+                    }
+
+                    location.reload();
+                },
+            );
+        },
+    );
 }

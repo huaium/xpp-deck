@@ -1,4 +1,4 @@
-<!-- 
+<!--
 タイトルは以下のように記載してください
 # 修正がメインの時
 fix: [何をしたのか、わかりやすいタイトル]
@@ -14,7 +14,9 @@ fix: [A clear and concise description of the fix]
 # For new features
 feat: [A clear and concise description of the feature]
 -->
+
 ## 追加されたもの / New features
+
 <!--
 追加した機能を記載する
 [例]
@@ -27,6 +29,7 @@ Describe the added features.
 -->
 
 ## 直したもの / Fixed items
+
 <!--
 修正した機能を記載する
 [例]
@@ -38,6 +41,7 @@ Describe the added features.
 -->
 
 ## 動作確認 / Verification
+
 <!--
 動作確認をした項目を記載する
 
@@ -47,11 +51,13 @@ Describe the fixed features.
 - Columns
   - Fixed an issue where columns could not be reordered.
 -->
+
 - [ ] Firefox系のブラウザでも問題なく動作するか
-  - 検証したバージョン
-    - 
+    - 検証したバージョン
+        -
 
 ## その他の変更 / Other Changes
+
 <!--
 その他の変更を記載する
 [例]
@@ -64,6 +70,7 @@ Describe other changes.
 -->
 
 ## マージ後の Open-Deck バージョン / Open-Deck version after merging
+
 <!--
 マージ後のOpen-Deckバージョンを記載する
 (kawa-nobu本人以外は未記載でOK)
@@ -78,6 +85,7 @@ Enter the Open-Deck version after merging.
 -->
 
 ## 雑記(あればご自由にどうぞ) / Personal Notes (Optional / Feel free to write anything!)
+
 <!--
 PR作成者の雑記を書けます！
 日記でも何でもどうぞ。

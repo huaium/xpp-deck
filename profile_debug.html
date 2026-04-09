@@ -1,42 +1,74 @@
-<!DOCTYPE html>
-<head>
-    <meta charset="UTF-8" >
-    <title>Open-Deck Profile Loader</title>
-    <script src="profile_debug.js" charset="UTF-8"></script>
-</head>
-<body>
-    <h1>Open-Deck Profile Loader</h1>
-    <p>Use this page to import/export profile data (including column layouts).
-        <br>
-        This is useful when moving to a new prototype release.
-        <br>
-        Input/output format is JSON. Invalid data may not work correctly.
-        <br>
-        If you imported invalid data, use `Debug` -> `init settings` to reset.
-    </p>
-    <section>
-        <h2>Export Profile</h2>
-        <p>Click the `Export Profile` button to output column settings.
-            <br>
-            The data appears in the text area below the button. Save it after export.
-            <br>
-            You can import this exported profile in the section below.
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Open-Deck Profile Loader</title>
+        <script src="profile_debug.js" charset="UTF-8"></script>
+    </head>
+    <body>
+        <h1>Open-Deck Profile Loader</h1>
+        <p>
+            Use this page to import/export profile data (including column
+            layouts).
+            <br />
+            This is useful when moving to a new prototype release.
+            <br />
+            Input/output format is JSON. Invalid data may not work correctly.
+            <br />
+            If you imported invalid data, use `Debug` -> `init settings` to
+            reset.
         </p>
-        <div style="margin-bottom: 1rem;"><input id="output_profile_btn" type="button" value="Export Profile"/></div>
-        <h3>Output</h3>
-        <div><textarea id="profile_output_area" style="width: 20rem;height: 10rem;"></textarea></div>
-    </section>
-    <hr>
-    <section>
-        <h2>Import Profile</h2>
-        <p>Paste a profile into the text area below, then click `Import`.
-            <br>
-            This will load column configuration and related settings.
-        </p>
-        <h3>Profile JSON Input</h3>
-        <div><textarea id="profile_input_area" style="width: 20rem;height: 10rem; margin-bottom: 0;"></textarea></div>
-        <div>The input profile is from prototype versions up to v1.0.5 <span><input type="checkbox" id="is_ver105"></span></div>
-        <div style="margin-top: 1rem;"><input id="input_profile_btn" type="button" value="Import Profile"/></div>
-    </section>
-</body>
+        <section>
+            <h2>Export Profile</h2>
+            <p>
+                Click the `Export Profile` button to output column settings.
+                <br />
+                The data appears in the text area below the button. Save it
+                after export.
+                <br />
+                You can import this exported profile in the section below.
+            </p>
+            <div style="margin-bottom: 1rem">
+                <input
+                    id="output_profile_btn"
+                    type="button"
+                    value="Export Profile"
+                />
+            </div>
+            <h3>Output</h3>
+            <div>
+                <textarea
+                    id="profile_output_area"
+                    style="width: 20rem; height: 10rem"
+                ></textarea>
+            </div>
+        </section>
+        <hr />
+        <section>
+            <h2>Import Profile</h2>
+            <p>
+                Paste a profile into the text area below, then click `Import`.
+                <br />
+                This will load column configuration and related settings.
+            </p>
+            <h3>Profile JSON Input</h3>
+            <div>
+                <textarea
+                    id="profile_input_area"
+                    style="width: 20rem; height: 10rem; margin-bottom: 0"
+                ></textarea>
+            </div>
+            <div>
+                The input profile is from prototype versions up to v1.0.5
+                <span><input type="checkbox" id="is_ver105" /></span>
+            </div>
+            <div style="margin-top: 1rem">
+                <input
+                    id="input_profile_btn"
+                    type="button"
+                    value="Import Profile"
+                />
+            </div>
+        </section>
+    </body>
 </html>

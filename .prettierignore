@@ -5,3 +5,4 @@ package
 package_tmp
 pnpm-lock.yaml
 web-ext-artifacts
+.serena/
