@@ -53,7 +53,7 @@ window.addEventListener("load", function () {
                                             },
                                             function () {
                                                 alert(
-                                                    "Import completed. Please reload the Open-Deck page.",
+                                                    "Import completed. Please reload the XPP-Deck page.",
                                                 );
                                             },
                                         );
@@ -84,7 +84,7 @@ window.addEventListener("load", function () {
                                         },
                                         function () {
                                             alert(
-                                                "Import completed. Please reload the Open-Deck page.",
+                                                "Import completed. Please reload the XPP-Deck page.",
                                             );
                                         },
                                     );

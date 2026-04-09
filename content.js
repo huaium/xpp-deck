@@ -1,16 +1,16 @@
-console.log("Welcome to Open-Deck!");
+console.log("Welcome to XPP-Deck!");
 const manifest = chrome.runtime.getManifest();
 // Set to true for prototype builds.
 const is_prototype = false;
 if (is_prototype) {
     console.log(
-        "%cOpen-Deck Prototype",
+        "%cXPP-Deck Prototype",
         "background:#a1f4ff;padding:5px;border-radius:5px",
         `Version:${manifest.version}`,
     );
 } else {
     console.log(
-        "%cOpen-Deck",
+        "%cXPP-Deck",
         "background:#a1f4ff;padding:5px;border-radius:5px",
         `Version:${manifest.version}`,
     );
@@ -136,7 +136,7 @@ if (
     }
     //chrome.runtime.sendMessage({message: "dnr_upd"});
     function init() {
-        //console.log("Welcome to Open-Deck!");
+        //console.log("Welcome to XPP-Deck!");
         chrome.storage.local.get("opd_settings", function (value) {
             if (value.opd_settings == undefined) {
                 last_load_profile = 0;
@@ -1002,7 +1002,7 @@ function run(settings) {
     ins_html.style =
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
     let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><div class="dsp_btn_parent" id="add_lists" title="${i18n_message("ui_add_lists_column_title")}"><div class="dsp_btn_add_lists_img"></div></div><div class="dsp_btn_parent" id="add_custom_url" title="${i18n_message("ui_add_custom_url_column_title")}"><div class="dsp_btn_add_custom_url_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
-    //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">Open-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
+    //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">XPP-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
     // Two-row layout settings.
@@ -1198,13 +1198,13 @@ function run(settings) {
                 );
             }
         });
-    // Open About Open-Deck.
+    // Open About XPP-Deck.
     document
         .querySelector(".opd_ui_logo")
         .addEventListener("click", function () {
             window.open(
                 chrome.runtime.getURL("about_opd.html"),
-                "About Open-Deck",
+                "About XPP-Deck",
                 "width=720, height=280",
             );
         });
@@ -3100,7 +3100,7 @@ function run(settings) {
     });
     // Watch title changes.
     const head_observer = new MutationObserver(function () {
-        document.title = "Open-Deck";
+        document.title = "XPP-Deck";
         document.querySelector('link[rel="shortcut icon"]').href =
             chrome.runtime.getURL("icon.png");
         // Remove default CSS so it does not affect UI.

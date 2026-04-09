@@ -25,8 +25,8 @@ get_version() {
 VERSION="$(get_version)"
 echo "version: $VERSION"
 
-ZIP_FIREFOX="Open-Deck_firefox_${VERSION}.zip"
-ZIP_CHROME="Open-Deck_chromium_${VERSION}.zip"
+ZIP_FIREFOX="XPP-Deck_firefox_${VERSION}.zip"
+ZIP_CHROME="XPP-Deck_chromium_${VERSION}.zip"
 
 # Initialize.
 mkdir -p "$OUTPUT_DIR"

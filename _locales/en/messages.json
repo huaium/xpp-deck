@@ -1,9 +1,9 @@
 {
     "app_console_welcome": {
-        "message": "Welcome to Open-Deck!"
+        "message": "Welcome to XPP-Deck!"
     },
     "app_update": {
-        "message": "Open-Deck has been updated. View release notes?"
+        "message": "XPP-Deck has been updated. View release notes?"
     },
     "ui_profile_switch_title": {
         "message": "Switch profile"
@@ -27,7 +27,7 @@
         "message": "Toggle pin"
     },
     "ui_sidebar_logo_title": {
-        "message": "Open-Deck\nv$1"
+        "message": "XPP-Deck\nv$1"
     },
     "ui_add_post_column_title": {
         "message": "Add post column"
@@ -213,10 +213,10 @@
         "message": "This column is pinned.\nClose the column?"
     },
     "msg_initial_setup_completed_prototype": {
-        "message": "Initial setup has completed.\nWelcome to the Open-Deck prototype!"
+        "message": "Initial setup has completed.\nWelcome to the XPP-Deck prototype!"
     },
     "msg_initial_setup_completed": {
-        "message": "Initial setup has completed!\nWelcome to Open-Deck!"
+        "message": "Initial setup has completed!\nWelcome to XPP-Deck!"
     },
     "msg_profile_desc_post_column": {
         "message": "$1-Post column"

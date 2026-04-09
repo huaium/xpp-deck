@@ -1,8 +1,8 @@
 {
-    "name": "open-deck",
+    "name": "xpp-deck",
     "private": true,
     "version": "0.1.0",
-    "description": "Development utilities for Open-Deck",
+    "description": "Development utilities for XPP-Deck",
     "scripts": {
         "format": "prettier . --write",
         "format:check": "prettier . --check",

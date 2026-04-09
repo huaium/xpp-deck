@@ -24,8 +24,8 @@ function Get-Version {
 $Version = Get-Version
 Write-Host "version: $Version"
 
-$ZipFirefox = "Open-Deck_Firefox_${Version}.zip"
-$ZipChrome  = "Open-Deck_Chromium_${Version}.zip"
+$ZipFirefox = "XPP-Deck_Firefox_${Version}.zip"
+$ZipChrome  = "XPP-Deck_Chromium_${Version}.zip"
 
 # Initialize.
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
