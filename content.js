@@ -40,7 +40,7 @@ const ui_icon_define = {
     add_timeline_column: "icon/tl_column.svg",
     add_notification_column: "icon/notice_column.svg",
     add_explore_column: "icon/exp_column.svg",
-    add_custom_url_column: "icon/t_logo.svg",
+    add_custom_url_column: "icon/custom_url_column.svg",
     column_single_rack: "icon/single_view.svg",
     column_second_rack: "icon/second_view.svg",
     profile_save: "icon/profile_save.svg",
@@ -2541,7 +2541,12 @@ function run(settings) {
             return null;
         }
         const host = normalized_url.hostname.toLowerCase();
-        const allowed_hosts = ["x.com", "twitter.com", "www.x.com", "www.twitter.com"];
+        const allowed_hosts = [
+            "x.com",
+            "twitter.com",
+            "www.x.com",
+            "www.twitter.com",
+        ];
         if (!allowed_hosts.includes(host)) {
             return null;
         }
