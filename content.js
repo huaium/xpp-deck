@@ -972,7 +972,7 @@ function run(settings) {
             html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Notifications</span></div></span>${default_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe allow="fullscreen" src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         explore: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="%column_save_title%" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>%column_save_title%</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span><div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Explore</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span><div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
     };
     let ins_html = document.createElement("div");
@@ -1081,10 +1081,6 @@ function run(settings) {
                             "%column_pinned_save_path%",
                             init_pinned_path,
                         )
-                        .replaceAll(
-                            "%column_save_title%",
-                            init_column_save_title,
-                        )
                         .replaceAll("%column_width_num%", column_width_init)
                         .replaceAll(
                             "%column_auto_reload_ch%",
@@ -1110,10 +1106,6 @@ function run(settings) {
                         .replaceAll(
                             "%column_pinned_save_path%",
                             init_pinned_path,
-                        )
-                        .replaceAll(
-                            "%column_save_title%",
-                            init_column_save_title,
                         )
                         .replaceAll("%column_width_num%", column_width_init)
                         .replaceAll(
@@ -1147,6 +1139,31 @@ function run(settings) {
     ins_html.innerHTML = `${side_bar}<div id="main_rack_element" style=""><div id="first_rack_element" style="height: 100%;display:flex;flex-direction:row;">${main_column_html}</div><div id="second_rack_element" style="display:flex;flex-direction:row;">${second_column_html}</div></div>`;
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
+    // Apply Explore titles safely after DOM insertion.
+    const all_columns = document.querySelectorAll(
+        "#opd_main_element div[opd_column_type]",
+    );
+    for (
+        let index = 0;
+        index < settings.column_settings.length && index < all_columns.length;
+        index++
+    ) {
+        if (settings.column_settings[index].type !== "explore") {
+            continue;
+        }
+        const safe_title =
+            settings.column_settings[index].column_save_title &&
+            settings.column_settings[index].column_save_title !== ""
+                ? settings.column_settings[index].column_save_title
+                : "Explore";
+        all_columns[index].setAttribute("opd_explore_title", safe_title);
+        const title_node = all_columns[index].querySelector(
+            ".dsp_column_title .dsp_column_move_icon_parent span:last-child",
+        );
+        if (title_node != null) {
+            title_node.textContent = safe_title;
+        }
+    }
     // Used for API limit display.
     document
         .querySelector("#api_limit_status")
@@ -2572,7 +2589,6 @@ function run(settings) {
         const column_id = create_random_id();
         const new_column = default_element["explore"]["html"]
             .replaceAll("%column_save_path%", column_path)
-            .replaceAll("%column_save_title%", column_title)
             .replaceAll("%column_num%", column_id)
             .replace("%column_banner_ch%", "")
             .replace("%column_top_bar_ch%", "checked")
