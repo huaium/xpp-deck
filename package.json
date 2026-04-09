@@ -8,8 +8,8 @@
         "format:check": "prettier . --check",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "webext:prepare": "rm -rf .web-ext-firefox-src && mkdir -p .web-ext-firefox-src && rsync -a --exclude='.git' --exclude='.github' --exclude='.serena' --exclude='.codex' --exclude='.DS_Store' --exclude='package' --exclude='package_tmp' --exclude='web-ext-artifacts' --exclude='.web-ext-firefox-src' --exclude='node_modules' --exclude='pnpm-lock.yaml' ./ .web-ext-firefox-src/ && cp .web-ext-firefox-src/manifest_firefox.json .web-ext-firefox-src/manifest.json",
-        "webext:dev": "npm run webext:prepare && web-ext run --source-dir .web-ext-firefox-src",
+        "webext:prepare": "mkdir -p .webext-profile && rm -rf .web-ext-firefox-src && mkdir -p .web-ext-firefox-src && rsync -a --exclude='.git' --exclude='.github' --exclude='.serena' --exclude='.codex' --exclude='.DS_Store' --exclude='package' --exclude='package_tmp' --exclude='web-ext-artifacts' --exclude='.web-ext-firefox-src' --exclude='.webext-profile' --exclude='node_modules' --exclude='pnpm-lock.yaml' ./ .web-ext-firefox-src/ && cp .web-ext-firefox-src/manifest_firefox.json .web-ext-firefox-src/manifest.json",
+        "webext:dev": "npm run webext:prepare && web-ext run --config=web-ext-config.mjs",
         "webext:lint": "npm run webext:prepare && web-ext lint --source-dir .web-ext-firefox-src",
         "webext:build": "npm run webext:prepare && mkdir -p web-ext-artifacts && web-ext build --source-dir .web-ext-firefox-src --artifacts-dir web-ext-artifacts --overwrite-dest",
         "webext:clean": "rm -rf .web-ext-firefox-src"
