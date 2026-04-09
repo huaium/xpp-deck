@@ -69,7 +69,7 @@ function Invoke-RoboCopy {
     $null = & robocopy @args
 
     if ($LASTEXITCODE -ge 8) {
-        throw "robocopy に失敗しました $LASTEXITCODE"
+        throw "robocopy failed with exit code $LASTEXITCODE"
     }
 }
 
@@ -98,6 +98,6 @@ Compress-Archive -Path (Join-Path $TmpDir "*") -DestinationPath $chZipPath -Forc
 
 Remove-Item -Recurse -Force $TmpDir
 
-Write-Host "ZIP圧縮が完了しました:"
-Write-Host " - Firefox版: $ffZipPath"
-Write-Host " - Chrome版:  $chZipPath"
+Write-Host "ZIP packaging completed:"
+Write-Host " - Firefox build: $ffZipPath"
+Write-Host " - Chrome build:  $chZipPath"

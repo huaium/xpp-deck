@@ -4,8 +4,8 @@
     let is_alt_pressed = false;
     // Stop column-side media open and pass media info back to OPD.
     /*
-    TODO:ツイートページのツイートに画像や動画付きの引用が付いていて、引用のメディアをクリックした際に元のメディアが表示される問題を修正する。
-    ※引用を開いた際の判定と引用のメディア情報を抽出する方法を調査する
+    TODO: Fix an issue where clicking quoted media on a post page sometimes opens the original post media.
+    Investigate reliable quote detection and how to extract media metadata from quoted posts.
     */
     document.addEventListener(
         "click",

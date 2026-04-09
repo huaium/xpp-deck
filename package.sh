@@ -59,6 +59,6 @@ rsync -av "${RSYNC_EXCLUDES[@]}" --exclude="manifest_firefox.json" "$TARGET_DIR/
 (cd "$TMP_DIR" && zip -r "../$OUTPUT_DIR/$ZIP_CHROME" .)
 rm -rf "$TMP_DIR"
 
-echo "ZIP圧縮が完了しました:"
-echo " - Firefox版: $OUTPUT_DIR/$ZIP_FIREFOX"
-echo " - Chrome版:  $OUTPUT_DIR/$ZIP_CHROME"
+echo "ZIP packaging completed:"
+echo " - Firefox build: $OUTPUT_DIR/$ZIP_FIREFOX"
+echo " - Chrome build:  $OUTPUT_DIR/$ZIP_CHROME"
