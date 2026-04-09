@@ -28,8 +28,7 @@ Describe what you verified and how.
 -->
 
 - [ ] Works correctly on Firefox-based browsers
-  - Verified version:
-    -
+    - Verified version:
 
 ## Other Changes
 
