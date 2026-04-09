@@ -972,7 +972,7 @@ function run(settings) {
             html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Notifications</span></div></span>${default_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe allow="fullscreen" src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         explore: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="%column_save_title%" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Explore</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span><div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="%column_save_title%" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>%column_save_title%</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span><div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
     };
     let ins_html = document.createElement("div");
@@ -1032,6 +1032,12 @@ function run(settings) {
                 }
                 // Explore pin state.
                 if (settings.column_settings[index].type == "explore") {
+                    if (
+                        init_column_save_title == null ||
+                        init_column_save_title === ""
+                    ) {
+                        init_column_save_title = "Explore";
+                    }
                     if (
                         settings.column_settings[index].column_pinned_path != ""
                     ) {
@@ -2553,16 +2559,21 @@ function run(settings) {
         const normalized_path = `${normalized_url.pathname}${normalized_url.search}`;
         return normalized_path === "" ? "/home" : normalized_path;
     }
-    function add_explore_column_with_path(column_path) {
+    function add_explore_column_with_path(
+        column_path,
+        column_title = "Explore",
+    ) {
         const empty_column = document.querySelector(".dsp_column_emptycolumn");
         const first_column = empty_column
             ?.closest("div")
             ?.querySelector('section[draggable="true"]');
         const add_target_column =
             is_shift_pressed && first_column ? first_column : empty_column;
+        const column_id = create_random_id();
         const new_column = default_element["explore"]["html"]
             .replaceAll("%column_save_path%", column_path)
-            .replaceAll("%column_num%", create_random_id())
+            .replaceAll("%column_save_title%", column_title)
+            .replaceAll("%column_num%", column_id)
             .replace("%column_banner_ch%", "")
             .replace("%column_top_bar_ch%", "checked")
             .replace("%column_tw_view_mode%", "0")
@@ -2571,6 +2582,22 @@ function run(settings) {
             .replaceAll("%column_auto_reload_ch%", "")
             .replaceAll("%column_auto_reload_time%", "10000");
         add_target_column.insertAdjacentHTML("beforebegin", new_column);
+        const inserted_column = document.querySelector(`#column_${column_id}`);
+        const inserted_column_root = inserted_column?.querySelector(
+            "div[opd_column_type='explore']",
+        );
+        const title_text = inserted_column?.querySelector(
+            ".dsp_column_title .dsp_column_move_icon_parent span:last-child",
+        );
+        if (inserted_column_root != null) {
+            inserted_column_root.setAttribute(
+                "opd_explore_title",
+                column_title,
+            );
+        }
+        if (title_text != null) {
+            title_text.textContent = column_title;
+        }
         add_target_column.scrollIntoView({
             behavior: "smooth",
             inline: "end",
@@ -2602,7 +2629,7 @@ function run(settings) {
                 alert(i18n_message("msg_invalid_value_alert"));
                 return;
             }
-            add_explore_column_with_path(custom_path);
+            add_explore_column_with_path(custom_path, "Custom");
         });
     // Profile save button.
     document
