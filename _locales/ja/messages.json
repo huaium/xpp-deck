@@ -44,6 +44,9 @@
     "ui_add_custom_url_column_title": {
         "message": "カスタム X/Twitter URL カラム追加"
     },
+    "ui_add_lists_column_title": {
+        "message": "あなたのリストカラム追加"
+    },
     "ui_toggle_second_rack_title": {
         "message": "カラム段切り替え"
     },
@@ -178,6 +181,9 @@
     },
     "msg_invalid_value_alert": {
         "message": "正しい値を入力してください"
+    },
+    "msg_username_not_found_alert": {
+        "message": "ユーザー名を取得できませんでした。プロフィールを一度開いてから再試行してください。"
     },
     "msg_auto_reload_set": {
         "message": "自動更新の秒数を$1秒に設定しました"

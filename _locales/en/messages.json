@@ -44,6 +44,9 @@
     "ui_add_custom_url_column_title": {
         "message": "Add custom X/Twitter URL column"
     },
+    "ui_add_lists_column_title": {
+        "message": "Add your Lists column"
+    },
     "ui_toggle_second_rack_title": {
         "message": "Toggle multi-row layout"
     },
@@ -178,6 +181,9 @@
     },
     "msg_invalid_value_alert": {
         "message": "Please enter a valid value."
+    },
+    "msg_username_not_found_alert": {
+        "message": "Could not detect your username. Open your profile once and try again."
     },
     "msg_auto_reload_set": {
         "message": "Auto-load interval set to $1 seconds."
