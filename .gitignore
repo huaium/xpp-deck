@@ -156,3 +156,6 @@ package
 web-ext-artifacts/
 .web-ext-firefox-src/
 .webext-profile/
+
+# Serena
+.serena/
