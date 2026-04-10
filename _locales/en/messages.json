@@ -152,6 +152,12 @@
     "ui_button_api_label": {
         "message": "API"
     },
+    "ui_dialog_ok_button": {
+        "message": "OK"
+    },
+    "ui_dialog_cancel_button": {
+        "message": "Cancel"
+    },
     "msg_debug_menu_enabled": {
         "message": "Debug menu is now available!"
     },

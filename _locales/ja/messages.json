@@ -152,6 +152,12 @@
     "ui_button_api_label": {
         "message": "API"
     },
+    "ui_dialog_ok_button": {
+        "message": "OK"
+    },
+    "ui_dialog_cancel_button": {
+        "message": "キャンセル"
+    },
     "msg_debug_menu_enabled": {
         "message": "デバッグメニューが利用できます!"
     },
