@@ -218,14 +218,11 @@
     "msg_settings_reset_completed": {
         "message": "設定を初期化しました。再読み込みしてください。"
     },
-    "msg_profile_delete_number_prompt": {
-        "message": "削除するプロファイル番号を半角入力"
-    },
     "msg_profile_delete_confirm": {
-        "message": "プロファイル$1を削除しますか?\n※削除後、残ったプロファイル番号は0から再度割り振られます。"
+        "message": "プロファイル$1を削除しますか?\n※削除後、残ったプロファイル番号は1から再度割り振られます。"
     },
     "msg_profile_delete_current_alert": {
-        "message": "表示中のプロファイルは削除できません"
+        "message": "プロファイルが1つしかないため削除できません"
     },
     "msg_explore_pin_confirm": {
         "message": "この場所でピン止めしますか?"

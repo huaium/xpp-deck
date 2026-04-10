@@ -218,14 +218,11 @@
     "msg_settings_reset_completed": {
         "message": "Settings have been reset. Please reload the page."
     },
-    "msg_profile_delete_number_prompt": {
-        "message": "Enter the profile number to delete."
-    },
     "msg_profile_delete_confirm": {
-        "message": "Delete profile $1?\nAfter deletion, remaining profiles will be renumbered starting from 0."
+        "message": "Delete profile $1?\nAfter deletion, remaining profiles will be renumbered starting from 1."
     },
     "msg_profile_delete_current_alert": {
-        "message": "The currently active profile cannot be deleted."
+        "message": "Cannot delete profile because only one profile exists."
     },
     "msg_explore_pin_confirm": {
         "message": "Pin this location?"

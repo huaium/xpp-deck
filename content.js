@@ -2139,7 +2139,7 @@ function run(settings) {
                     //console.log(preload_desc_array)
                     if (
                         await opd_confirm(
-                            `${i18n_message("msg_profile_load_confirm", [index, preload_desc_array.join("\r\n")])}`,
+                            `${i18n_message("msg_profile_load_confirm", [index + 1, preload_desc_array.join("\r\n")])}`,
                         )
                     ) {
                         document.querySelector("#opd_main_element").remove();
@@ -3548,74 +3548,57 @@ function run(settings) {
     document
         .getElementById("profile_delete")
         .addEventListener("click", async function () {
-            const delete_num = Number(
-                await opd_prompt(
-                    i18n_message("msg_profile_delete_number_prompt"),
-                ),
-            );
-            if (last_load_profile != delete_num) {
-                if (
-                    await opd_confirm(
-                        i18n_message("msg_profile_delete_confirm", [
-                            delete_num,
-                        ]),
-                    )
-                ) {
-                    let after_profile_num = null;
-                    profile_store.splice(delete_num, 1);
-                    //console.log(profile_store)
-                    chrome.storage.local.set(
-                        { opd_profile_store: JSON.stringify(profile_store) },
-                        function () {
-                            //
-                            chrome.storage.local.get(
-                                "opd_settings",
-                                function (load_value) {
-                                    //console.log(last_load_profile)
-                                    if (last_load_profile < delete_num) {
-                                        after_profile_num = last_load_profile;
-                                    } else {
-                                        after_profile_num =
-                                            last_load_profile - 1;
-                                    }
-                                    if (after_profile_num < 0) {
-                                        after_profile_num = 0;
-                                    }
-                                    last_load_profile = after_profile_num;
-                                    //
-                                    console.log(after_profile_num);
-                                    let load_setting = JSON.parse(
-                                        load_value.opd_settings,
-                                    );
-                                    load_setting.last_load_profile =
-                                        after_profile_num;
-                                    chrome.storage.local.set(
-                                        {
-                                            opd_settings:
-                                                JSON.stringify(load_setting),
-                                        },
-                                        function () {
-                                            document.querySelector(
-                                                "#profile_btn_list",
-                                            ).innerHTML =
-                                                create_profile_list_buttons_html(
-                                                    profile_store.length,
-                                                    after_profile_num,
-                                                );
-                                            create_profile_list_btn();
-                                        },
-                                    );
-                                },
-                            );
-                            //last_load_profile
-                            //
-                            //.aaaa
-                        },
-                    );
-                }
-            } else {
+            if (profile_store.length <= 1) {
                 await opd_alert(
                     i18n_message("msg_profile_delete_current_alert"),
+                );
+                return;
+            }
+
+            const delete_num = last_load_profile;
+            if (
+                await opd_confirm(
+                    i18n_message("msg_profile_delete_confirm", [
+                        delete_num + 1,
+                    ]),
+                )
+            ) {
+                let after_profile_num = delete_num - 1;
+                if (after_profile_num < 0) {
+                    after_profile_num = 0;
+                }
+                profile_store.splice(delete_num, 1);
+                chrome.storage.local.set(
+                    { opd_profile_store: JSON.stringify(profile_store) },
+                    function () {
+                        chrome.storage.local.get(
+                            "opd_settings",
+                            function (load_value) {
+                                last_load_profile = after_profile_num;
+                                let load_setting = JSON.parse(
+                                    load_value.opd_settings,
+                                );
+                                load_setting.last_load_profile =
+                                    after_profile_num;
+                                chrome.storage.local.set(
+                                    {
+                                        opd_settings:
+                                            JSON.stringify(load_setting),
+                                    },
+                                    function () {
+                                        document.querySelector(
+                                            "#profile_btn_list",
+                                        ).innerHTML =
+                                            create_profile_list_buttons_html(
+                                                profile_store.length,
+                                                after_profile_num,
+                                            );
+                                        create_profile_list_btn();
+                                    },
+                                );
+                            },
+                        );
+                    },
                 );
             }
         });
