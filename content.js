@@ -62,7 +62,10 @@ function create_profile_button_html(index, current_profile_index) {
     const profile_display_number = index + 1;
     return `<div class="dsp_btn_parent${selected_profile_class}" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">P${profile_display_number}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_switch_label", [`${profile_display_number}`])}</span></div>`;
 }
-function create_profile_list_buttons_html(profile_length, current_profile_index) {
+function create_profile_list_buttons_html(
+    profile_length,
+    current_profile_index,
+) {
     let profile_list_btn_html = "";
     for (let index = 0; index < profile_length; index++) {
         profile_list_btn_html += create_profile_button_html(
@@ -1289,7 +1292,9 @@ function run(settings) {
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
     const opd_main_element = document.querySelector("#opd_main_element");
-    const sidebar_toggle_button = document.querySelector("#sidebar_fold_toggle");
+    const sidebar_toggle_button = document.querySelector(
+        "#sidebar_fold_toggle",
+    );
     const sidebar_toggle_label =
         sidebar_toggle_button.querySelector(".dsp_btn_label");
     function apply_sidebar_collapsed_state(is_collapsed) {
