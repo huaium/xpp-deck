@@ -1130,6 +1130,12 @@ function run(settings) {
         width: auto;
         min-width: 48px;
     }
+    #api_limit_status_button{
+        justify-content: center;
+    }
+    #api_limit_status_button .dsp_btn_label{
+        text-align: center;
+    }
     #opd_main_element.opd_sidebar_collapsed .dsp_btn_parent{
         justify-content: center;
         padding: 0;
