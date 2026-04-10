@@ -1056,9 +1056,11 @@ function run(settings) {
     }
     .dsp_column_emptycolumn p{
         text-align: center;
+        color: var(--opd-text);
     }
     .dsp_column_second_emptycolumn p{
         text-align: center;
+        color: var(--opd-text);
     }
     .dsp_btn_parent{
         overflow: hidden;
