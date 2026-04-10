@@ -155,6 +155,12 @@
     "ui_button_api_usage_label": {
         "message": "API Usage"
     },
+    "ui_theme_switch_title": {
+        "message": "Toggle Theme"
+    },
+    "ui_theme_switch_label": {
+        "message": "Toggle Theme"
+    },
     "ui_about_title": {
         "message": "About"
     },

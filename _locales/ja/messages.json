@@ -155,6 +155,12 @@
     "ui_button_api_usage_label": {
         "message": "API使用状況"
     },
+    "ui_theme_switch_title": {
+        "message": "テーマ切り替え"
+    },
+    "ui_theme_switch_label": {
+        "message": "テーマ切り替え"
+    },
     "ui_about_title": {
         "message": "情報"
     },
