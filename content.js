@@ -165,6 +165,123 @@ function ensure_opd_dialog_style() {
     }
     .opd_dialog_actions .opd_dialog_primary:hover{
         background: #1d4ed8;
+    }
+    .opd_about_dialog{
+        width: min(760px, 100%);
+        max-height: min(92vh, 700px);
+        overflow: auto;
+    }
+    .opd_about_header{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.6rem;
+    }
+    .opd_about_title{
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #111827;
+    }
+    .opd_about_close{
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #111827;
+        min-width: 34px;
+        height: 34px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+    .opd_about_close:hover{
+        background: #eef2f7;
+    }
+    .opd_about_close_icon{
+        width: 14px;
+        height: 14px;
+        display: block;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+    }
+    .opd_about_area1{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .opd_about_logo{
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+        width: 200px;
+        min-width: 120px;
+        min-height: 60px;
+        height: 200px;
+        cursor: pointer;
+    }
+    .opd_about_wordmark{
+        width: 100%;
+        max-width: 460px;
+        margin-bottom: 0.5rem;
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+        font-weight: 900;
+        color: #111827;
+    }
+    .opd_about_value{
+        font-size: 1rem;
+        color: #111827;
+        margin-bottom: 0.25rem;
+    }
+    .opd_about_value span{
+        margin-left: 0.5rem;
+        font-weight: 700;
+    }
+    .opd_about_area2{
+        margin-top: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        row-gap: 0.8rem;
+        column-gap: 1rem;
+        justify-content: space-between;
+    }
+    .opd_about_area2 div{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 170px;
+        font-size: 1rem;
+        color: #111827;
+    }
+    .opd_about_area2 a{
+        color: #2563eb;
+        text-decoration: underline;
+    }
+    .opd_about_area2 a:hover{
+        color: #1d4ed8;
+    }
+    @media (max-width: 680px){
+        .opd_about_area1{
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .opd_about_logo{
+            width: 150px;
+            height: 150px;
+        }
+        .opd_about_wordmark{
+            max-width: 320px;
+            font-size: clamp(1.8rem, 10vw, 3rem);
+        }
+        .opd_about_area2{
+            justify-content: flex-start;
+        }
     }`;
     document.head.appendChild(style);
 }
@@ -332,6 +449,159 @@ async function opd_prompt(message, defaultValue = "") {
         type: "prompt",
         defaultValue,
     });
+}
+async function open_about_page_modal() {
+    return enqueue_opd_dialog(
+        () =>
+            new Promise((resolve) => {
+                ensure_opd_dialog_style();
+                const overlay = document.createElement("div");
+                overlay.className = "opd_dialog_overlay";
+                const dialog = document.createElement("div");
+                dialog.className = "opd_dialog opd_about_dialog";
+                dialog.setAttribute("role", "dialog");
+                dialog.setAttribute("aria-modal", "true");
+                const header = document.createElement("div");
+                header.className = "opd_about_header";
+                const title = document.createElement("h2");
+                title.className = "opd_about_title";
+                title.textContent = "About page";
+                const close_button = document.createElement("button");
+                close_button.type = "button";
+                close_button.className = "opd_about_close";
+                close_button.setAttribute(
+                    "aria-label",
+                    i18n_message_or_fallback(
+                        "ui_dialog_cancel_button",
+                        "Close",
+                    ),
+                );
+                const close_icon = document.createElement("span");
+                close_icon.className = "opd_about_close_icon";
+                close_icon.style.backgroundImage =
+                    `url(${chrome.runtime.getURL(ui_icon_define.column_close)})`;
+                close_button.appendChild(close_icon);
+                header.appendChild(title);
+                header.appendChild(close_button);
+
+                const body_top = document.createElement("section");
+                body_top.className = "opd_about_area1";
+                const logo = document.createElement("div");
+                logo.className = "opd_about_logo";
+                logo.style.backgroundImage =
+                    `url(${chrome.runtime.getURL("icon/logo_icon.svg")})`;
+                const body_top_right = document.createElement("div");
+                const wordmark = document.createElement("div");
+                wordmark.className = "opd_about_wordmark";
+                wordmark.textContent = "XPP-Deck";
+                const code_name = document.createElement("div");
+                code_name.className = "opd_about_value";
+                code_name.innerHTML = `CodeName:<span>Shizuku</span>`;
+                const version = document.createElement("div");
+                version.className = "opd_about_value";
+                version.innerHTML =
+                    `Version:<span>${chrome.runtime.getManifest().version}</span>`;
+                body_top_right.appendChild(wordmark);
+                body_top_right.appendChild(code_name);
+                body_top_right.appendChild(version);
+                body_top.appendChild(logo);
+                body_top.appendChild(body_top_right);
+
+                const body_links = document.createElement("section");
+                body_links.className = "opd_about_area2";
+                body_links.innerHTML = `
+                    <div>Development<br /><a href="https://twitter.com/kw_nobu2" target="_blank" rel="noopener noreferrer">kawa-nobu</a></div>
+                    <div>GitHub<br /><a href="https://github.com/kawa-nobu/Open-Deck" target="_blank" rel="noopener noreferrer">XPP-Deck</a></div>
+                    <div>ChangeLog<br /><a href="https://github.com/kawa-nobu/Open-Deck/releases" target="_blank" rel="noopener noreferrer">Releases</a></div>
+                `;
+
+                dialog.appendChild(header);
+                dialog.appendChild(body_top);
+                dialog.appendChild(body_links);
+                overlay.appendChild(dialog);
+                const previous_active_element = document.activeElement;
+                document.body.appendChild(overlay);
+
+                let change_img_mode = 0;
+                logo.addEventListener("click", () => {
+                    if (change_img_mode == 0) {
+                        logo.style.backgroundImage =
+                            `url(${chrome.runtime.getURL("icon/logo_v1.svg")})`;
+                        change_img_mode = 1;
+                    } else {
+                        logo.style.backgroundImage =
+                            `url(${chrome.runtime.getURL("icon/logo_icon.svg")})`;
+                        change_img_mode = 0;
+                    }
+                });
+
+                const get_focusable_elements = () =>
+                    Array.from(
+                        dialog.querySelectorAll(
+                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                        ),
+                    ).filter((elem) => !elem.hasAttribute("disabled"));
+
+                const finish = () => {
+                    document.removeEventListener("keydown", key_listener, true);
+                    overlay.remove();
+                    if (
+                        previous_active_element != null &&
+                        typeof previous_active_element.focus == "function"
+                    ) {
+                        previous_active_element.focus();
+                    }
+                    resolve();
+                };
+                const key_listener = (event) => {
+                    if (event.isComposing || event.keyCode == 229) {
+                        return;
+                    }
+                    if (event.key == "Tab") {
+                        const focusable_elements = get_focusable_elements();
+                        if (focusable_elements.length == 0) {
+                            event.preventDefault();
+                            return;
+                        }
+                        const first_elem = focusable_elements[0];
+                        const last_elem =
+                            focusable_elements[focusable_elements.length - 1];
+                        const active_elem = document.activeElement;
+                        if (event.shiftKey) {
+                            if (
+                                active_elem == first_elem ||
+                                !dialog.contains(active_elem)
+                            ) {
+                                event.preventDefault();
+                                last_elem.focus();
+                            }
+                        } else {
+                            if (
+                                active_elem == last_elem ||
+                                !dialog.contains(active_elem)
+                            ) {
+                                event.preventDefault();
+                                first_elem.focus();
+                            }
+                        }
+                        return;
+                    }
+                    if (event.key == "Escape") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        finish();
+                    }
+                };
+                document.addEventListener("keydown", key_listener, true);
+                close_button.addEventListener("click", finish);
+                overlay.addEventListener("click", (event) => {
+                    if (event.target == overlay) {
+                        finish();
+                    }
+                });
+                close_button.focus();
+            }),
+    );
 }
 // Convert UNIX timestamp to local time string.
 function unix_time_mmss(input) {
@@ -1632,15 +1902,11 @@ function run(settings) {
     document
         .querySelector("#api_limit_status_button")
         .addEventListener("click", show_api_limit_status);
-    // Open About XPP-Deck.
+    // Open About page.
     document
         .querySelector(".opd_ui_logo")
-        .addEventListener("click", function () {
-            window.open(
-                chrome.runtime.getURL("about_opd.html"),
-                "About XPP-Deck",
-                "width=720, height=280",
-            );
+        .addEventListener("click", async function () {
+            await open_about_page_modal();
         });
     // Show debug menu.
     let debug_menu_click_counter = 0;
