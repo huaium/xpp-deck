@@ -164,6 +164,21 @@
     "ui_about_title": {
         "message": "About"
     },
+    "ui_about_original_dev_label": {
+        "message": "Original Dev"
+    },
+    "ui_about_version_label": {
+        "message": "Version"
+    },
+    "ui_about_github_label": {
+        "message": "GitHub"
+    },
+    "ui_about_changelog_label": {
+        "message": "Change Log"
+    },
+    "ui_about_releases_label": {
+        "message": "Releases"
+    },
     "ui_dialog_ok_button": {
         "message": "OK"
     },

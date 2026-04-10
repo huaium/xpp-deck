@@ -578,7 +578,7 @@ async function open_about_page_modal() {
                 wordmark.textContent = "XPP-Deck";
                 const version = document.createElement("div");
                 version.className = "opd_about_value";
-                version.innerHTML = `Version:<span>${chrome.runtime.getManifest().version}</span>`;
+                version.innerHTML = `${i18n_message_or_fallback("ui_about_version_label", "Version")}:<span>${chrome.runtime.getManifest().version}</span>`;
                 body_top_right.appendChild(wordmark);
                 body_top_right.appendChild(version);
                 body_top.appendChild(logo);
@@ -587,9 +587,9 @@ async function open_about_page_modal() {
                 const body_links = document.createElement("section");
                 body_links.className = "opd_about_area2";
                 body_links.innerHTML = `
-                    <div>Development<br /><a href="https://twitter.com/kw_nobu2" target="_blank" rel="noopener noreferrer">kawa-nobu</a></div>
-                    <div>GitHub<br /><a href="https://github.com/kawa-nobu/Open-Deck" target="_blank" rel="noopener noreferrer">XPP-Deck</a></div>
-                    <div>ChangeLog<br /><a href="https://github.com/kawa-nobu/Open-Deck/releases" target="_blank" rel="noopener noreferrer">Releases</a></div>
+                    <div>${i18n_message_or_fallback("ui_about_original_dev_label", "Original Dev")}<br /><a href="https://twitter.com/kw_nobu2" target="_blank" rel="noopener noreferrer">kawa-nobu</a></div>
+                    <div>${i18n_message_or_fallback("ui_about_github_label", "GitHub")}<br /><a href="https://github.com/kawa-nobu/Open-Deck" target="_blank" rel="noopener noreferrer">XPP-Deck</a></div>
+                    <div>${i18n_message_or_fallback("ui_about_changelog_label", "Change Log")}<br /><a href="https://github.com/kawa-nobu/Open-Deck/releases" target="_blank" rel="noopener noreferrer">${i18n_message_or_fallback("ui_about_releases_label", "Releases")}</a></div>
                 `;
 
                 dialog.appendChild(header);

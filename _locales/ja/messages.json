@@ -164,6 +164,21 @@
     "ui_about_title": {
         "message": "情報"
     },
+    "ui_about_original_dev_label": {
+        "message": "オリジナル開発"
+    },
+    "ui_about_version_label": {
+        "message": "バージョン"
+    },
+    "ui_about_github_label": {
+        "message": "GitHub"
+    },
+    "ui_about_changelog_label": {
+        "message": "更新履歴"
+    },
+    "ui_about_releases_label": {
+        "message": "リリース"
+    },
     "ui_dialog_ok_button": {
         "message": "OK"
     },
