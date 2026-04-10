@@ -25,7 +25,69 @@ const beforeunload_bypass_key =
     opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
 const opd_root_theme_attribute =
     opd_bootstrap.rootThemeAttribute || "data-opd-theme";
-const i18n_message = chrome.i18n.getMessage;
+let opd_i18n_override_messages = null;
+let opd_i18n_language = "browser";
+function normalize_i18n_substitutions(substitutions) {
+    if (substitutions == null) {
+        return [];
+    }
+    if (Array.isArray(substitutions)) {
+        return substitutions.map((value) => String(value));
+    }
+    return [String(substitutions)];
+}
+function apply_i18n_substitutions(message, substitutions) {
+    const normalized_substitutions =
+        normalize_i18n_substitutions(substitutions);
+    return message
+        .replace(/\$\$/g, "__OPD_DOLLAR__")
+        .replace(/\$(\d+)/g, (match, index_text) => {
+            const index = Number(index_text) - 1;
+            return normalized_substitutions[index] ?? "";
+        })
+        .replace(/__OPD_DOLLAR__/g, "$");
+}
+function i18n_message(message_name, substitutions) {
+    const override_message =
+        opd_i18n_override_messages?.[message_name]?.message;
+    if (typeof override_message === "string") {
+        return apply_i18n_substitutions(override_message, substitutions);
+    }
+    return chrome.i18n.getMessage(message_name, substitutions);
+}
+function get_storage_local_async(key) {
+    return new Promise((resolve) => {
+        chrome.storage.local.get(key, (value) => resolve(value));
+    });
+}
+async function initialize_i18n_override() {
+    const language_setting = await get_storage_local_async(
+        "opd_language_override",
+    );
+    const selected_language =
+        typeof language_setting.opd_language_override === "string"
+            ? language_setting.opd_language_override
+            : "browser";
+    opd_i18n_language = selected_language;
+    if (selected_language === "browser") {
+        opd_i18n_override_messages = null;
+        return;
+    }
+    try {
+        const response = await fetch(
+            chrome.runtime.getURL(
+                `_locales/${selected_language}/messages.json`,
+            ),
+        );
+        if (!response.ok) {
+            opd_i18n_override_messages = null;
+            return;
+        }
+        opd_i18n_override_messages = await response.json();
+    } catch {
+        opd_i18n_override_messages = null;
+    }
+}
 let is_shift_pressed = false;
 let profile_store;
 let last_load_profile = 0;
@@ -92,6 +154,9 @@ function create_profile_list_buttons_html(
 }
 function create_profile_list_html(profile_length, current_profile_index) {
     return `<div class="dsp_profile_section"><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length, current_profile_index)}</div></div></div>`;
+}
+function create_language_select_html() {
+    return `<div class="opd_language_select_wrap" title="${i18n_message_or_fallback("ui_language_selector_title", "Language")}"><div class="opd_language_select_label">${i18n_message_or_fallback("ui_language_selector_label", "Language")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_system", "System")}</option><option value="en" ${opd_i18n_language === "en" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_english", "English")}</option><option value="ja" ${opd_i18n_language === "ja" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_japanese", "Japanese")}</option></select></div>`;
 }
 function i18n_message_or_fallback(message_id, fallback_text) {
     const translated = i18n_message(message_id);
@@ -754,6 +819,7 @@ if (
     function init() {
         //console.log("Welcome to XPP-Deck!");
         chrome.storage.local.get("opd_settings", async function (value) {
+            await initialize_i18n_override();
             if (value.opd_settings == undefined) {
                 last_load_profile = 0;
                 settings_init();
@@ -1040,6 +1106,35 @@ function run(settings) {
         min-height: 52px;
         padding: 0.1rem 0;
     }
+    .opd_language_select_wrap{
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 0.25rem;
+        margin-bottom: 0.1rem;
+    }
+    .opd_language_select_label{
+        color: var(--opd-muted);
+        font-size: 0.72rem;
+        text-align: left;
+        line-height: 1;
+        padding: 0 0.15rem;
+    }
+    .opd_language_select{
+        width: 100%;
+        min-height: 30px;
+        border: 1px solid var(--opd-border);
+        border-radius: 8px;
+        background: var(--opd-surface);
+        color: var(--opd-text);
+        font-size: 0.8rem;
+        padding: 0 0.45rem;
+        cursor: pointer;
+    }
+    .opd_language_select:hover{
+        background: var(--opd-hover);
+    }
     .opd_ui_logo{
         background-size: cover;
         background-repeat: no-repeat;
@@ -1149,6 +1244,9 @@ function run(settings) {
         justify-content: center;
         padding: 0;
         min-height: 44px;
+    }
+    #opd_main_element.opd_sidebar_collapsed .opd_language_select_wrap{
+        display: none;
     }
     #opd_main_element.opd_sidebar_collapsed .opd_debug_menu{
         display: none !important;
@@ -1756,7 +1854,7 @@ function run(settings) {
     ins_html.id = "opd_main_element";
     ins_html.style =
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><div class="dsp_btn_parent" id="api_limit_status_button" title="${i18n_message("msg_api_limit_status_title", [i18n_message("ui_button_api_label")])}"><div class="dsp_btn_icon_wrap"><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div></div><span class="dsp_btn_label">${i18n_message_or_fallback("ui_button_api_usage_label", "API Usage")}</span></div>${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_language_select_html()}<div class="dsp_btn_parent" id="api_limit_status_button" title="${i18n_message("msg_api_limit_status_title", [i18n_message("ui_button_api_label")])}"><div class="dsp_btn_icon_wrap"><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div></div><span class="dsp_btn_label">${i18n_message_or_fallback("ui_button_api_usage_label", "API Usage")}</span></div>${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">XPP-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
@@ -1909,6 +2007,7 @@ function run(settings) {
         "#sidebar_fold_toggle",
     );
     const switch_theme_button = document.querySelector("#switch_theme");
+    const language_select = document.querySelector("#opd_language_select");
     const sidebar_toggle_label =
         sidebar_toggle_button.querySelector(".dsp_btn_label");
     function apply_sidebar_collapsed_state(is_collapsed) {
@@ -1942,6 +2041,21 @@ function run(settings) {
             },
         );
     });
+    if (language_select != null) {
+        language_select.value = opd_i18n_language;
+        language_select.addEventListener("change", function () {
+            const next_language = this.value;
+            if (next_language === opd_i18n_language) {
+                return;
+            }
+            chrome.storage.local.set(
+                { opd_language_override: next_language },
+                function () {
+                    request_page_reload();
+                },
+            );
+        });
+    }
     if (switch_theme_button != null) {
         switch_theme_button.addEventListener("click", function () {
             const next_theme_mode =

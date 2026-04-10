@@ -161,6 +161,21 @@
     "ui_theme_switch_label": {
         "message": "テーマ切り替え"
     },
+    "ui_language_selector_title": {
+        "message": "言語"
+    },
+    "ui_language_selector_label": {
+        "message": "言語"
+    },
+    "ui_language_option_system": {
+        "message": "システム"
+    },
+    "ui_language_option_english": {
+        "message": "English"
+    },
+    "ui_language_option_japanese": {
+        "message": "日本語"
+    },
     "ui_about_title": {
         "message": "情報"
     },
