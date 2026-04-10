@@ -224,7 +224,7 @@ function ensure_opd_dialog_style() {
         min-width: 120px;
         min-height: 60px;
         height: 200px;
-        cursor: pointer;
+        cursor: default;
     }
     .opd_about_wordmark{
         width: 100%;
@@ -589,19 +589,6 @@ async function open_about_page_modal() {
                 overlay.appendChild(dialog);
                 const previous_active_element = document.activeElement;
                 document.body.appendChild(overlay);
-
-                let change_img_mode = 0;
-                logo.addEventListener("click", () => {
-                    if (change_img_mode == 0) {
-                        logo.style.backgroundImage =
-                            `url(${chrome.runtime.getURL("icon/logo_v1.svg")})`;
-                        change_img_mode = 1;
-                    } else {
-                        logo.style.backgroundImage =
-                            `url(${chrome.runtime.getURL("icon/logo_icon.svg")})`;
-                        change_img_mode = 0;
-                    }
-                });
 
                 const get_focusable_elements = () =>
                     Array.from(
