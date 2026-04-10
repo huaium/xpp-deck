@@ -34,3 +34,4 @@ class OpdExtAutoReload {
         };
     }
 }
+window.OpdExtAutoReload = OpdExtAutoReload;

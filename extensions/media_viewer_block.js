@@ -57,3 +57,4 @@ class OpdMediaViewerBlocker {
         };
     }
 }
+window.OpdMediaViewerBlocker = OpdMediaViewerBlocker;

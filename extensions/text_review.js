@@ -134,26 +134,24 @@ class OpdExtTextReview {
                     editable_elem = ev.target;
                     if (!editable_elem.getAttribute("opd_text_counter")) {
                         // Use MutationObserver because input events miss some deletions.
-                        const editor_observer = new MutationObserver(
-                            (mutations, obs) => {
-                                is_textarea_empty =
-                                    editable_elem.innerText.trim() === "";
-                                if (is_textarea_empty) {
-                                    column_window.document
-                                        .getElementById("opd_post_text_review")
-                                        .setAttribute(
-                                            "opd_text_review_is_empty",
-                                            "",
-                                        );
-                                } else {
-                                    column_window.document
-                                        .getElementById("opd_post_text_review")
-                                        .removeAttribute(
-                                            "opd_text_review_is_empty",
-                                        );
-                                }
-                            },
-                        ).observe(editable_elem, {
+                        new MutationObserver(() => {
+                            is_textarea_empty =
+                                editable_elem.innerText.trim() === "";
+                            if (is_textarea_empty) {
+                                column_window.document
+                                    .getElementById("opd_post_text_review")
+                                    .setAttribute(
+                                        "opd_text_review_is_empty",
+                                        "",
+                                    );
+                            } else {
+                                column_window.document
+                                    .getElementById("opd_post_text_review")
+                                    .removeAttribute(
+                                        "opd_text_review_is_empty",
+                                    );
+                            }
+                        }).observe(editable_elem, {
                             childList: true,
                             subtree: true,
                         });
@@ -163,7 +161,7 @@ class OpdExtTextReview {
                     editable_elem = null;
                 }
             });
-            const observer = new MutationObserver((mutations, obs) => {
+            new MutationObserver(() => {
                 // Inject text review button.
                 // Place under character counter because toolbar insertion hides other buttons.
                 const btnAddTarget = column_window.document.querySelector(
@@ -515,3 +513,4 @@ class OpdExtTextReview {
         };
     }
 }
+window.OpdExtTextReview = OpdExtTextReview;

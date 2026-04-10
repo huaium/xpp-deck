@@ -576,14 +576,10 @@ async function open_about_page_modal() {
                 const wordmark = document.createElement("div");
                 wordmark.className = "opd_about_wordmark";
                 wordmark.textContent = "XPP-Deck";
-                const code_name = document.createElement("div");
-                code_name.className = "opd_about_value";
-                code_name.innerHTML = `CodeName:<span>Shizuku</span>`;
                 const version = document.createElement("div");
                 version.className = "opd_about_value";
                 version.innerHTML = `Version:<span>${chrome.runtime.getManifest().version}</span>`;
                 body_top_right.appendChild(wordmark);
-                body_top_right.appendChild(code_name);
                 body_top_right.appendChild(version);
                 body_top.appendChild(logo);
                 body_top.appendChild(body_top_right);
@@ -798,7 +794,7 @@ if (
                     profile_store = JSON.parse(store_value.opd_profile_store);
                     //RUN
                     let ext_update_flag = null;
-                    let ext_settings = null;
+                    let ext_settings;
                     if (value.opd_settings != undefined) {
                         if (
                             JSON.parse(value.opd_settings).version !=
@@ -1733,10 +1729,8 @@ function run(settings) {
     // Create and insert column elements.
     let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span><span class="dsp_column_btn"><input class="opd_top_bar" type="checkbox" title="${i18n_message("ui_column_top_toggle_title")}" %column_top_bar_ch%><label class="dsp_column_top_btn opd_ui_icon_color"></label></span>`;
     let post_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
-    let othersns_default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
     let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
     let column_settings_panel_no_auto = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
-    let column_settings_panel_othersns = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
     let default_element = {
         /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" opd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
         empty_column: {
@@ -1772,9 +1766,6 @@ function run(settings) {
     let second_rack_mode = false;
     // Column width.
     let column_width_init = "30";
-    // Used for scroll detection.
-    let scroll_block = true;
-    //
     //console.log(settings.column_settings.length)
     for (let index = 0; index < settings.column_settings.length; index++) {
         //console.log(default_element)
@@ -1796,8 +1787,6 @@ function run(settings) {
                 let init_auto_reload_checked = "";
                 let init_column_save_path =
                     settings.column_settings[index].column_save_path;
-                let init_column_save_title =
-                    settings.column_settings[index].column_save_title;
                 let tw_view_type = settings.column_settings[index].tw_view_mode;
                 let auto_reload_time =
                     settings.column_settings[index].auto_reload_time / 1000;
@@ -1815,12 +1804,6 @@ function run(settings) {
                 }
                 // Explore pin state.
                 if (settings.column_settings[index].type == "explore") {
-                    if (
-                        init_column_save_title == null ||
-                        init_column_save_title === ""
-                    ) {
-                        init_column_save_title = "Explore";
-                    }
                     if (
                         settings.column_settings[index].column_pinned_path != ""
                     ) {
@@ -1843,7 +1826,6 @@ function run(settings) {
                     if (settings.column_settings[index].auto_reload) {
                         init_auto_reload_checked = "checked";
                         //%column_pinned_ch%
-                    } else {
                     }
                 }
                 // If first-row end is detected but settings still exist, append to second-row buffer.
@@ -2196,7 +2178,7 @@ function run(settings) {
     // Apply CSS (called on add/update).
     // Keep naming aligned with Desktop implementation for shared logic.
     function append_object_css(mode, session_webview_obj) {
-        let column_object = null;
+        let column_object;
         if (mode == "session_set" || mode == "add_column") {
             column_object = session_webview_obj;
         } else {
@@ -2484,7 +2466,7 @@ function run(settings) {
                             opd_column_width_select.addEventListener(
                                 "change",
                                 function () {
-                                    let preset_rem = null;
+                                    let preset_rem;
                                     switch (this.value) {
                                         case "0":
                                             preset_rem = 15;
@@ -2533,7 +2515,7 @@ function run(settings) {
                                     const setting_width_num =
                                         Number(setting_width);
                                     if (
-                                        setting_width_num != NaN &&
+                                        !Number.isNaN(setting_width_num) &&
                                         setting_width_num > 11
                                     ) {
                                         this.closest(
@@ -2703,7 +2685,6 @@ function run(settings) {
                                 break;
                         }
                         // Apply initial auto-refresh state.
-                        let reload_test = 0;
                         let auto_reload_int = null; // Also reused in checkbox event handlers.
                         if (opd_column_auto_reload_checkbox != null) {
                             // Pause top transition while hovering Home/Explore during auto refresh.
@@ -3413,7 +3394,7 @@ function run(settings) {
             } else {
                 normalized_url = new URL(`https://x.com/${trimmed_value}`);
             }
-        } catch (error) {
+        } catch {
             return null;
         }
         const host = normalized_url.hostname.toLowerCase();
@@ -3634,11 +3615,9 @@ function run(settings) {
     // Column move handling.
     function column_dd() {
         let column_class = document.querySelectorAll(".dsp_column");
-        let column_copy_source = null;
         for (let index = 0; index < column_class.length; index++) {
             column_class[index].addEventListener("dragstart", function (ev) {
                 //console.log(this)
-                column_copy_source = this;
                 ev.dataTransfer.setData("text/plain", ev.target.id);
             });
             column_class[index].addEventListener("dragover", function (ev) {
@@ -3734,35 +3713,23 @@ function run(settings) {
             "#opd_main_element div[opd_column_type]",
         );
         for (let index = 0; index < columns.length; index++) {
-            let banner_checked = null;
-            let top_visible_checked = null;
-            let tw_view_type = null;
-            let column_open_path = null;
-            let column_pinned_save_path = null;
+            const banner_checked =
+                columns[index].querySelector(".opd_banner")?.checked == true;
+            const top_visible_checked =
+                columns[index].querySelector(".opd_top_bar")?.checked == true;
+            let tw_view_type = "0";
+            let column_open_path = "";
+            let column_pinned_save_path = "";
             let column_page_title = null;
             let column_width_value = null;
             let column_auto_reload = null;
             let column_auto_reload_time = 10000;
-            if (columns[index].querySelector(".opd_banner")?.checked == true) {
-                banner_checked = true;
-            } else {
-                banner_checked = false;
-            }
-            // Top search area and related elements.
-            if (columns[index].querySelector(".opd_top_bar")?.checked == true) {
-                top_visible_checked = true;
-            } else {
-                top_visible_checked = false;
-            }
-            //
             if (
                 columns[index].querySelector(".opd_tw_view_mode")?.value !=
                 undefined
             ) {
                 tw_view_type =
                     columns[index].querySelector(".opd_tw_view_mode").value;
-            } else {
-                tw_view_type = "0";
             }
             // Width setting.
             if (columns[index].getAttribute("opd_column_width") != "null") {
@@ -3781,9 +3748,6 @@ function run(settings) {
                 // Title.
                 column_page_title =
                     columns[index].getAttribute("opd_explore_title");
-            } else {
-                column_open_path = "";
-                column_pinned_save_path = "";
             }
             // Auto refresh.
             if (
@@ -3863,7 +3827,7 @@ function run(settings) {
         subtree: false,
     });
     // Watch title changes.
-    const head_observer = new MutationObserver(function () {
+    new MutationObserver(function () {
         document.title = "XPP-Deck";
         document.querySelector('link[rel="shortcut icon"]').href =
             chrome.runtime.getURL("icon/logo_icon.svg");

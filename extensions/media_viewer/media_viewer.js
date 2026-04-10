@@ -37,7 +37,9 @@ class OpdExtMediaViewer {
                     elem.pause();
                     elem.removeAttribute("src");
                     elem.load();
-                } catch (error) {}
+                } catch {
+                    // no-op: media may already be detached
+                }
             };
 
             const setMedia = (idx) => {
@@ -276,3 +278,4 @@ class OpdExtMediaViewer {
         };
     }
 }
+window.OpdExtMediaViewer = OpdExtMediaViewer;
