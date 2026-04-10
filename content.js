@@ -347,6 +347,7 @@ function run(settings) {
     }
     #opd_main_element *{
         box-sizing: border-box;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
     .main_bar_functions{
         display: flex;
@@ -355,6 +356,7 @@ function run(settings) {
         gap: 0.4rem;
         margin-top: 0.4rem;
         color: var(--opd-text);
+        font-weight: 700;
         width: var(--opd-sidebar-width);
         padding: 0 0.5rem 0.5rem;
         overflow: hidden;
