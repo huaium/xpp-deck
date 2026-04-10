@@ -25,6 +25,8 @@ let profile_store;
 let last_load_profile = 0;
 let is_removed_default_style = false;
 let media_viewer_token = [];
+const opd_sidebar_width_expanded = "220px";
+const opd_sidebar_width_collapsed = "60px";
 const ui_icon_define = {
     banner_hide: "icon/banner_hide.svg",
     top_bar_hide: "icon/top_hide.svg",
@@ -51,6 +53,25 @@ const ui_icon_define = {
     next: "icon/next.svg",
     download: "icon/download.svg",
 };
+function create_sidebar_button_html(id, title, icon_class, label) {
+    return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
+}
+function create_profile_button_html(index) {
+    return `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${index}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_switch_label", [`${index}`])}</span></div>`;
+}
+function create_profile_list_buttons_html(profile_length) {
+    let profile_list_btn_html = "";
+    for (let index = 0; index < profile_length; index++) {
+        profile_list_btn_html += create_profile_button_html(index);
+    }
+    return profile_list_btn_html;
+}
+function create_current_profile_html(current_profile_index) {
+    return `<div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${current_profile_index}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_current_label", [`${current_profile_index}`])}</span>`;
+}
+function create_profile_list_html(profile_length, current_profile_index) {
+    return `<div class="dsp_profile_section"><div class="dsp_sidebar_section_label">${i18n_message("ui_profile_current_title")}</div><div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${create_current_profile_html(current_profile_index)}</div><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length)}</div></div></div>`;
+}
 // Convert UNIX timestamp to local time string.
 function unix_time_mmss(input) {
     const date = new Date(input * 1000);
@@ -280,12 +301,10 @@ if (
 function run(settings) {
     //console.log(settings)
     let profile_list_html;
-    let profile_list_btn_html = "";
-    // Initialize profile list.
-    for (let index = 0; index < profile_store.length; index++) {
-        profile_list_btn_html += `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`; //<div class="profile_list"><input type="button" id="userProfile-${index}" value="P${index}"></div>
-    }
-    profile_list_html = `<div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${last_load_profile}</div><div class="dsp_profile_list"><div id="profile_btn_list">${profile_list_btn_html}</div></div>`;
+    profile_list_html = create_profile_list_html(
+        profile_store.length,
+        last_load_profile,
+    );
     //console.log(profile_list_btn_html)
     // Media preview panel.
     const media_viewer = new OpdExtMediaViewer();
@@ -317,6 +336,14 @@ function run(settings) {
         --opd-muted: #5f6b7a;
         --opd-hover: #e7edf4;
         --opd-focus: #3b82f6;
+        --opd-sidebar-width: ${opd_sidebar_width_expanded};
+        --opd-sidebar-label-opacity: 1;
+        --opd-sidebar-label-width: auto;
+    }
+    #opd_main_element.opd_sidebar_collapsed{
+        --opd-sidebar-width: ${opd_sidebar_width_collapsed};
+        --opd-sidebar-label-opacity: 0;
+        --opd-sidebar-label-width: 0;
     }
     #opd_main_element *{
         box-sizing: border-box;
@@ -324,13 +351,17 @@ function run(settings) {
     .main_bar_functions{
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
         gap: 0.4rem;
         margin-top: 0.4rem;
         color: var(--opd-text);
+        width: var(--opd-sidebar-width);
+        padding: 0 0.5rem 0.5rem;
+        overflow: hidden;
+        transition: width 0.18s ease;
     }
     .main_bar_functions hr{
-        width: 80%;
+        width: 100%;
         margin: 0.15rem 0;
         border: 0;
         border-top: 1px solid var(--opd-border);
@@ -339,14 +370,15 @@ function run(settings) {
         cursor: pointer;
         color: var(--opd-muted);
         font-size: 0.72rem;
+        white-space: nowrap;
     }
     .opd_debug_menu{
         display: none;
         width: 100%;
-        padding: 0 0.35rem;
+        padding: 0;
         color: var(--opd-text);
         font-size: 0.72rem;
-        text-align: center;
+        text-align: left;
     }
     .opd_debug_menu input{
         width: 100%;
@@ -371,10 +403,14 @@ function run(settings) {
     #main_bar_empty_column{
         background-color: var(--opd-surface);
         border-right: 1px solid var(--opd-border);
+        min-width: var(--opd-sidebar-width) !important;
+        max-width: var(--opd-sidebar-width) !important;
+        transition: min-width 0.18s ease, max-width 0.18s ease;
     }
     #api_limit_status{
         border-radius: 999px;
         width: 48px;
+        min-width: 48px;
         min-height: 24px;
         line-height: 24px;
         text-align: center;
@@ -390,11 +426,14 @@ function run(settings) {
     .opd_ui_logo_parent{
         overflow: hidden;
         display: flex;
-        width: 50px;
+        width: 100%;
         align-content: center;
         justify-content: center;
         align-items: center;
-        flex-direction: column;
+        flex-direction: row;
+        gap: 0.75rem;
+        min-height: 52px;
+        padding: 0.1rem 0;
     }
     .opd_ui_logo{
         background-size: cover;
@@ -405,25 +444,31 @@ function run(settings) {
         cursor: pointer;
     }
     .profile_val_now{
-        border-radius: 999px;
-        width: 48px;
-        min-height: 24px;
-        line-height: 24px;
-        border: 1px solid var(--opd-border);
-        color: var(--opd-muted);
-        font-size: 0.72rem;
-        background: var(--opd-surface-alt);
+        border-radius: 10px;
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--opd-focus);
+        color: var(--opd-text);
+        font-size: 0.8rem;
+        background: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0 0.7rem;
+        overflow: hidden;
     }
     .profile_val_now:hover{
         background-color: var(--opd-hover);
     }
     #main_rack_element{
         position: fixed;
-        left:60px;
+        left: var(--opd-sidebar-width);
         height:100vh;
-        max-width:calc(100vw - 60px);
-        width:calc(100vw - 60px);
+        max-width:calc(100vw - var(--opd-sidebar-width));
+        width:calc(100vw - var(--opd-sidebar-width));
         overflow:scroll hidden;
+        transition: left 0.18s ease, width 0.18s ease, max-width 0.18s ease;
     }
     #first_rack_element{
         /*overflow: hidden;*/
@@ -441,104 +486,205 @@ function run(settings) {
         overflow: hidden;
         border-radius: 10px;
         display: flex;
-        width: 44px;
+        width: 100%;
         height: 44px;
         align-content: center;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         border: 1px solid transparent;
+        gap: 0.75rem;
+        padding: 0 0.7rem;
     }
     .dsp_btn_parent:hover{
         background: var(--opd-hover);
         border-color: var(--opd-border);
         cursor: pointer;
     }
+    .dsp_btn_icon_wrap{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        min-width: 24px;
+        height: 24px;
+    }
+    .dsp_btn_label{
+        overflow: hidden;
+        max-width: 100%;
+        color: var(--opd-text);
+        font-size: 0.9rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        opacity: var(--opd-sidebar-label-opacity);
+        width: var(--opd-sidebar-label-width);
+        transition: opacity 0.15s ease;
+    }
+    .dsp_btn_sidebar_fold_img{
+        display: block;
+        background-image: url(${chrome.runtime.getURL(ui_icon_define.banner_hide)});
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 22px;
+        height: 22px;
+        transform: scaleX(1);
+    }
+    #sidebar_fold_toggle.opd_sidebar_toggle_is_collapsed .dsp_btn_sidebar_fold_img{
+        transform: scaleX(-1);
+    }
+    #api_limit_status_button .dsp_btn_icon_wrap{
+        width: auto;
+        min-width: 48px;
+    }
+    #opd_main_element.opd_sidebar_collapsed .dsp_btn_parent{
+        justify-content: center;
+        padding: 0;
+        gap: 0;
+    }
+    #opd_main_element.opd_sidebar_collapsed .profile_val_now{
+        justify-content: center;
+        padding: 0;
+        gap: 0;
+    }
+    #opd_main_element.opd_sidebar_collapsed .dsp_profile_section{
+        align-items: center;
+    }
+    #opd_main_element.opd_sidebar_collapsed .dsp_sidebar_section_label{
+        display: none;
+    }
+    #opd_main_element.opd_sidebar_collapsed .main_bar_functions{
+        align-items: center;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+    }
+    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo_parent{
+        justify-content: center;
+        padding: 0;
+        min-height: 44px;
+    }
+    #opd_main_element.opd_sidebar_collapsed .opd_debug_menu{
+        display: none !important;
+    }
+    #opd_main_element.opd_sidebar_collapsed .opd_version_span{
+        display: none;
+    }
+    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo{
+        width: 42px;
+        height: 42px;
+    }
+    #opd_main_element.opd_sidebar_collapsed #api_limit_status_button .dsp_btn_icon_wrap{
+        min-width: 48px;
+    }
     .dsp_btn_add_post_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.add_post_column)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_add_tl_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.add_timeline_column)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_add_ntfc_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.add_notification_column)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_add_explr_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.add_explore_column)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_add_custom_url_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.add_custom_url_column)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_add_lists_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.add_lists_column)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_second_rack_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_second_rack)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_profile_add_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.profile_save)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_profile_delete_img{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL(ui_icon_define.profile_delete)});
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
     }
     .dsp_btn_change_profile_btn{
         display: flex;
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 600;
         color: var(--opd-muted);
         justify-content: center;
         align-items: center;
-        height: 69%;
-        width: 69%;
+        height: 100%;
+        width: 100%;
+    }
+    .dsp_profile_section{
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        width: 100%;
+    }
+    .dsp_sidebar_section_label{
+        width: 100%;
+        padding: 0 0.2rem;
+        color: var(--opd-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-align: left;
+        text-transform: uppercase;
     }
     .dsp_profile_list{
+        width: 100%;
         max-height: 1000px;
         overflow-y: scroll;
         scrollbar-width: none;
+    }
+    #profile_btn_list{
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        width: 100%;
     }
     .dsp_column_draggable_true{
         border: 1px solid var(--opd-border);
@@ -1001,7 +1147,7 @@ function run(settings) {
     ins_html.id = "opd_main_element";
     ins_html.style =
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 60px;max-width: 60px;text-align: center;background-color: white;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div><hr><div class="dsp_btn_parent" id="add_post" title="${i18n_message("ui_add_post_column_title")}"><div class="dsp_btn_add_post_img"></div></div><hr><div class="dsp_btn_parent" id="add_timeline" title="${i18n_message("ui_add_timeline_column_title")}"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent" id="add_notify" title="${i18n_message("ui_add_notification_column_title")}"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent" id="add_explore" title="${i18n_message("ui_add_explore_column_title")}"><div class="dsp_btn_add_explr_img"></div></div><div class="dsp_btn_parent" id="add_lists" title="${i18n_message("ui_add_lists_column_title")}"><div class="dsp_btn_add_lists_img"></div></div><div class="dsp_btn_parent" id="add_custom_url" title="${i18n_message("ui_add_custom_url_column_title")}"><div class="dsp_btn_add_custom_url_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_toggle_second_rack_title")}" id="second_rack"><div class="dsp_btn_second_rack_img"></div></div><hr><div class="dsp_btn_parent" title="${i18n_message("ui_profile_save_title")}" id="profile_save"><div class="dsp_btn_profile_add_img"></div></div><div class="dsp_btn_parent" title="${i18n_message("ui_profile_delete_title")}" id="profile_delete"><div class="dsp_btn_profile_delete_img"></div></div>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 60px;max-width: 60px;"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}<hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div class="dsp_btn_parent" id="api_limit_status_button" title="${i18n_message("msg_api_limit_status_title", [i18n_message("ui_button_api_label")])}"><div class="dsp_btn_icon_wrap"><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div></div><span class="dsp_btn_label">${i18n_message("ui_button_api_label")}</span></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">XPP-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
@@ -1161,6 +1307,40 @@ function run(settings) {
     ins_html.innerHTML = `${side_bar}<div id="main_rack_element" style=""><div id="first_rack_element" style="height: 100%;display:flex;flex-direction:row;">${main_column_html}</div><div id="second_rack_element" style="display:flex;flex-direction:row;">${second_column_html}</div></div>`;
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
+    const opd_main_element = document.querySelector("#opd_main_element");
+    const sidebar_toggle_button = document.querySelector("#sidebar_fold_toggle");
+    const sidebar_toggle_label =
+        sidebar_toggle_button.querySelector(".dsp_btn_label");
+    function apply_sidebar_collapsed_state(is_collapsed) {
+        opd_main_element.classList.toggle(
+            "opd_sidebar_collapsed",
+            is_collapsed,
+        );
+        sidebar_toggle_button.classList.toggle(
+            "opd_sidebar_toggle_is_collapsed",
+            is_collapsed,
+        );
+        sidebar_toggle_button.title = is_collapsed
+            ? i18n_message("ui_sidebar_expand_title")
+            : i18n_message("ui_sidebar_collapse_title");
+        sidebar_toggle_label.textContent = is_collapsed
+            ? i18n_message("ui_sidebar_expand_label")
+            : i18n_message("ui_sidebar_collapse_label");
+    }
+    chrome.storage.local.get("opd_sidebar_collapsed", function (value) {
+        apply_sidebar_collapsed_state(value.opd_sidebar_collapsed === true);
+    });
+    sidebar_toggle_button.addEventListener("click", function () {
+        const next_sidebar_state = !opd_main_element.classList.contains(
+            "opd_sidebar_collapsed",
+        );
+        chrome.storage.local.set(
+            { opd_sidebar_collapsed: next_sidebar_state },
+            function () {
+                apply_sidebar_collapsed_state(next_sidebar_state);
+            },
+        );
+    });
     // Apply Explore titles safely after DOM insertion.
     const all_columns = document.querySelectorAll(
         "#opd_main_element div[opd_column_type]",
@@ -1187,17 +1367,24 @@ function run(settings) {
         }
     }
     // Used for API limit display.
+    function show_api_limit_status() {
+        if (api_limit_obj != null) {
+            alert(
+                i18n_message("msg_api_limit_status_alert", [
+                    `${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`,
+                ]),
+            );
+        }
+    }
     document
         .querySelector("#api_limit_status")
-        .addEventListener("click", function () {
-            if (api_limit_obj != null) {
-                alert(
-                    i18n_message("msg_api_limit_status_alert", [
-                        `${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`,
-                    ]),
-                );
-            }
+        .addEventListener("click", function (event) {
+            event.stopPropagation();
+            show_api_limit_status();
         });
+    document
+        .querySelector("#api_limit_status_button")
+        .addEventListener("click", show_api_limit_status);
     // Open About XPP-Deck.
     document
         .querySelector(".opd_ui_logo")
@@ -2728,17 +2915,10 @@ function run(settings) {
                 chrome.storage.local.set(
                     { opd_profile_store: JSON.stringify(profile_store) },
                     function () {
-                        let profile_list_btn_html = "";
-                        // Initialize profile list.
-                        for (
-                            let index = 0;
-                            index < profile_store.length;
-                            index++
-                        ) {
-                            profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
-                        }
                         document.querySelector("#profile_btn_list").innerHTML =
-                            profile_list_btn_html;
+                            create_profile_list_buttons_html(
+                                profile_store.length,
+                            );
                         create_profile_list_btn();
                     },
                 );
@@ -2793,21 +2973,18 @@ function run(settings) {
                                                 JSON.stringify(load_setting),
                                         },
                                         function () {
-                                            let profile_list_btn_html = "";
-                                            // Initialize profile list.
-                                            for (
-                                                let index = 0;
-                                                index < profile_store.length;
-                                                index++
-                                            ) {
-                                                profile_list_btn_html += `<div class="dsp_btn_parent" id="userProfile-${index}"><div class="dsp_btn_change_profile_btn">P${index}</div></div>`;
-                                            }
                                             document.querySelector(
                                                 ".profile_val_now",
-                                            ).textContent = after_profile_num;
+                                            ).innerHTML =
+                                                create_current_profile_html(
+                                                    after_profile_num,
+                                                );
                                             document.querySelector(
                                                 "#profile_btn_list",
-                                            ).innerHTML = profile_list_btn_html;
+                                            ).innerHTML =
+                                                create_profile_list_buttons_html(
+                                                    profile_store.length,
+                                                );
                                             create_profile_list_btn();
                                         },
                                     );

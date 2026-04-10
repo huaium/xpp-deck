@@ -8,8 +8,14 @@
     "ui_profile_switch_title": {
         "message": "Switch profile"
     },
+    "ui_profile_switch_label": {
+        "message": "Profile $1"
+    },
     "ui_profile_current_title": {
         "message": "Current profile"
+    },
+    "ui_profile_current_label": {
+        "message": "Current profile: $1"
     },
     "ui_column_settings_title": {
         "message": "Column settings"
@@ -28,6 +34,18 @@
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
+    },
+    "ui_sidebar_collapse_title": {
+        "message": "Collapse sidebar"
+    },
+    "ui_sidebar_collapse_label": {
+        "message": "Collapse sidebar"
+    },
+    "ui_sidebar_expand_title": {
+        "message": "Expand sidebar"
+    },
+    "ui_sidebar_expand_label": {
+        "message": "Expand sidebar"
     },
     "ui_add_post_column_title": {
         "message": "Add post column"

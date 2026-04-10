@@ -8,8 +8,14 @@
     "ui_profile_switch_title": {
         "message": "プロファイルを切り替える"
     },
+    "ui_profile_switch_label": {
+        "message": "プロファイル$1"
+    },
     "ui_profile_current_title": {
         "message": "使用中のプロファイル"
+    },
+    "ui_profile_current_label": {
+        "message": "使用中: $1"
     },
     "ui_column_settings_title": {
         "message": "カラム設定"
@@ -28,6 +34,18 @@
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
+    },
+    "ui_sidebar_collapse_title": {
+        "message": "サイドバーを折りたたむ"
+    },
+    "ui_sidebar_collapse_label": {
+        "message": "サイドバーを折りたたむ"
+    },
+    "ui_sidebar_expand_title": {
+        "message": "サイドバーを展開する"
+    },
+    "ui_sidebar_expand_label": {
+        "message": "サイドバーを展開する"
     },
     "ui_add_post_column_title": {
         "message": "ポストカラム追加"
