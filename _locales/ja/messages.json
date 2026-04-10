@@ -152,6 +152,12 @@
     "ui_button_api_label": {
         "message": "API"
     },
+    "ui_button_api_usage_label": {
+        "message": "API使用状況"
+    },
+    "ui_about_title": {
+        "message": "情報"
+    },
     "ui_dialog_ok_button": {
         "message": "OK"
     },
