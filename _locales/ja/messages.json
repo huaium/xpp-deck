@@ -36,10 +36,10 @@
         "message": "XPP-Deck\nv$1"
     },
     "ui_sidebar_collapse_title": {
-        "message": "サイドバーを折りたたむ"
+        "message": "折りたたむ"
     },
     "ui_sidebar_collapse_label": {
-        "message": "サイドバーを折りたたむ"
+        "message": "折りたたむ"
     },
     "ui_sidebar_expand_title": {
         "message": "サイドバーを展開する"
@@ -48,25 +48,25 @@
         "message": "サイドバーを展開する"
     },
     "ui_add_post_column_title": {
-        "message": "ポストカラム追加"
+        "message": "ポスト追加"
     },
     "ui_add_timeline_column_title": {
-        "message": "タイムラインカラム追加"
+        "message": "タイムライン追加"
     },
     "ui_add_notification_column_title": {
-        "message": "通知カラム追加"
+        "message": "通知追加"
     },
     "ui_add_explore_column_title": {
-        "message": "Explore(ユニバーサル)カラム追加"
+        "message": "Explore追加"
     },
     "ui_add_custom_url_column_title": {
-        "message": "カスタム X/Twitter URL カラム追加"
+        "message": "カスタムURL追加"
     },
     "ui_add_lists_column_title": {
-        "message": "あなたのリストカラム追加"
+        "message": "リスト追加"
     },
     "ui_toggle_second_rack_title": {
-        "message": "カラム段切り替え"
+        "message": "レイアウト切り替え"
     },
     "ui_profile_save_title": {
         "message": "プロファイル保存"

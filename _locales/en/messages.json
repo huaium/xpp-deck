@@ -36,10 +36,10 @@
         "message": "XPP-Deck\nv$1"
     },
     "ui_sidebar_collapse_title": {
-        "message": "Collapse sidebar"
+        "message": "Collapse"
     },
     "ui_sidebar_collapse_label": {
-        "message": "Collapse sidebar"
+        "message": "Collapse"
     },
     "ui_sidebar_expand_title": {
         "message": "Expand sidebar"
@@ -48,31 +48,31 @@
         "message": "Expand sidebar"
     },
     "ui_add_post_column_title": {
-        "message": "Add post column"
+        "message": "Add Post"
     },
     "ui_add_timeline_column_title": {
-        "message": "Add timeline column"
+        "message": "Add Timeline"
     },
     "ui_add_notification_column_title": {
-        "message": "Add notifications column"
+        "message": "Add Notifications"
     },
     "ui_add_explore_column_title": {
-        "message": "Add Explore (universal) column"
+        "message": "Add Explore"
     },
     "ui_add_custom_url_column_title": {
-        "message": "Add custom X/Twitter URL column"
+        "message": "Add Custom URL"
     },
     "ui_add_lists_column_title": {
-        "message": "Add your Lists column"
+        "message": "Add Lists"
     },
     "ui_toggle_second_rack_title": {
-        "message": "Toggle multi-row layout"
+        "message": "Toggle Layout"
     },
     "ui_profile_save_title": {
-        "message": "Save profile"
+        "message": "Save Profile"
     },
     "ui_profile_delete_title": {
-        "message": "Delete profile"
+        "message": "Delete Profile"
     },
     "ui_empty_column_message": {
         "message": "Add a column from the left bar"
