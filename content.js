@@ -546,8 +546,7 @@ async function open_about_page_modal() {
                 );
                 const close_icon = document.createElement("span");
                 close_icon.className = "opd_about_close_icon";
-                close_icon.style.backgroundImage =
-                    `url(${chrome.runtime.getURL(ui_icon_define.column_close)})`;
+                close_icon.style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_close)})`;
                 close_button.appendChild(close_icon);
                 header.appendChild(title);
                 header.appendChild(close_button);
@@ -556,8 +555,7 @@ async function open_about_page_modal() {
                 body_top.className = "opd_about_area1";
                 const logo = document.createElement("div");
                 logo.className = "opd_about_logo";
-                logo.style.backgroundImage =
-                    `url(${chrome.runtime.getURL("icon/logo_icon.svg")})`;
+                logo.style.backgroundImage = `url(${chrome.runtime.getURL("icon/logo_icon.svg")})`;
                 const body_top_right = document.createElement("div");
                 const wordmark = document.createElement("div");
                 wordmark.className = "opd_about_wordmark";
@@ -567,8 +565,7 @@ async function open_about_page_modal() {
                 code_name.innerHTML = `CodeName:<span>Shizuku</span>`;
                 const version = document.createElement("div");
                 version.className = "opd_about_value";
-                version.innerHTML =
-                    `Version:<span>${chrome.runtime.getManifest().version}</span>`;
+                version.innerHTML = `Version:<span>${chrome.runtime.getManifest().version}</span>`;
                 body_top_right.appendChild(wordmark);
                 body_top_right.appendChild(code_name);
                 body_top_right.appendChild(version);
@@ -3252,7 +3249,9 @@ function run(settings) {
     document
         .getElementById("ext_reload")
         .addEventListener("click", async function () {
-            if (await opd_confirm(i18n_message("msg_extension_reload_confirm"))) {
+            if (
+                await opd_confirm(i18n_message("msg_extension_reload_confirm"))
+            ) {
                 chrome.runtime.sendMessage({ message: "ext_reload" });
             }
         });
@@ -3545,7 +3544,9 @@ function run(settings) {
         .getElementById("profile_delete")
         .addEventListener("click", async function () {
             const delete_num = Number(
-                await opd_prompt(i18n_message("msg_profile_delete_number_prompt")),
+                await opd_prompt(
+                    i18n_message("msg_profile_delete_number_prompt"),
+                ),
             );
             if (last_load_profile != delete_num) {
                 if (
@@ -3608,7 +3609,9 @@ function run(settings) {
                     );
                 }
             } else {
-                await opd_alert(i18n_message("msg_profile_delete_current_alert"));
+                await opd_alert(
+                    i18n_message("msg_profile_delete_current_alert"),
+                );
             }
         });
     // Column move handling.
@@ -3921,7 +3924,10 @@ function run(settings) {
 
                 // Follow OS color mode changes only when set to system.
                 if (!is_added_system_color_mode) {
-                    system_dark_query.addEventListener("change", apply_ui_color);
+                    system_dark_query.addEventListener(
+                        "change",
+                        apply_ui_color,
+                    );
                     is_added_system_color_mode = true;
                 }
                 break;
