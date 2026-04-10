@@ -36,7 +36,9 @@ const opd_sidebar_width_collapsed = "60px";
 function request_page_reload() {
     try {
         sessionStorage.setItem(beforeunload_bypass_key, "1");
-    } catch (error) {}
+    } catch {
+        // no-op: fallback to normal reload when storage is unavailable
+    }
     location.reload();
 }
 const ui_icon_define = {
@@ -3275,7 +3277,9 @@ function run(settings) {
             ) {
                 try {
                     sessionStorage.setItem(beforeunload_bypass_key, "1");
-                } catch (error) {}
+                } catch {
+                    // no-op: fallback to guarded beforeunload prompt
+                }
                 chrome.runtime.sendMessage({ message: "ext_reload" });
             }
         });
@@ -3687,36 +3691,31 @@ function run(settings) {
     }
     // Close column.
     function column_close() {
-        for (
-            let index = 0;
-            index < document.querySelectorAll(".column_close_btn").length;
-            index++
-        ) {
-            document
-                .querySelectorAll(".column_close_btn")
-                [index].addEventListener("click", async function () {
-                    const pin_checkbox =
-                        this.closest(".dsp_column").querySelector(
-                            ".opd_pinned_btn",
-                        )?.checked;
-                    if (pin_checkbox == false || pin_checkbox == undefined) {
+        const close_buttons = document.querySelectorAll(".column_close_btn");
+        for (let index = 0; index < close_buttons.length; index++) {
+            close_buttons[index].addEventListener("click", async function () {
+                const pin_checkbox =
+                    this.closest(".dsp_column").querySelector(
+                        ".opd_pinned_btn",
+                    )?.checked;
+                if (pin_checkbox == false || pin_checkbox == undefined) {
+                    this.closest(".dsp_column").remove();
+                    append_object_css();
+                    //column_dd();
+                    column_settings_save("", last_load_profile);
+                } else {
+                    if (
+                        await opd_confirm(
+                            i18n_message("msg_pinned_column_close_confirm"),
+                        )
+                    ) {
                         this.closest(".dsp_column").remove();
                         append_object_css();
                         //column_dd();
                         column_settings_save("", last_load_profile);
-                    } else {
-                        if (
-                            await opd_confirm(
-                                i18n_message("msg_pinned_column_close_confirm"),
-                            )
-                        ) {
-                            this.closest(".dsp_column").remove();
-                            append_object_css();
-                            //column_dd();
-                            column_settings_save("", last_load_profile);
-                        }
                     }
-                });
+                }
+            });
         }
     }
     // Save column layout.
@@ -3725,13 +3724,10 @@ function run(settings) {
             column_settings: [],
             version: manifest.version,
         };
-        for (
-            let index = 0;
-            index <
-            document.querySelectorAll("#opd_main_element div[opd_column_type]")
-                .length;
-            index++
-        ) {
+        const columns = document.querySelectorAll(
+            "#opd_main_element div[opd_column_type]",
+        );
+        for (let index = 0; index < columns.length; index++) {
             let banner_checked = null;
             let top_visible_checked = null;
             let tw_view_type = null;
@@ -3741,87 +3737,56 @@ function run(settings) {
             let column_width_value = null;
             let column_auto_reload = null;
             let column_auto_reload_time = 10000;
-            if (
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].querySelector(".opd_banner")?.checked == true
-            ) {
+            if (columns[index].querySelector(".opd_banner")?.checked == true) {
                 banner_checked = true;
             } else {
                 banner_checked = false;
             }
             // Top search area and related elements.
-            if (
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].querySelector(".opd_top_bar")?.checked == true
-            ) {
+            if (columns[index].querySelector(".opd_top_bar")?.checked == true) {
                 top_visible_checked = true;
             } else {
                 top_visible_checked = false;
             }
             //
             if (
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].querySelector(".opd_tw_view_mode")?.value !=
+                columns[index].querySelector(".opd_tw_view_mode")?.value !=
                 undefined
             ) {
-                tw_view_type = document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].querySelector(".opd_tw_view_mode").value;
+                tw_view_type =
+                    columns[index].querySelector(".opd_tw_view_mode").value;
             } else {
                 tw_view_type = "0";
             }
             // Width setting.
-            if (
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_column_width") != "null"
-            ) {
+            if (columns[index].getAttribute("opd_column_width") != "null") {
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width"))
-                column_width_value = document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_column_width");
+                column_width_value =
+                    columns[index].getAttribute("opd_column_width");
             }
             // Explore-specific processing.
-            if (
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_column_type") == "explore"
-            ) {
+            if (columns[index].getAttribute("opd_column_type") == "explore") {
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path"));
-                column_open_path = document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_explore_path");
+                column_open_path =
+                    columns[index].getAttribute("opd_explore_path");
                 // Pinned state.
-                column_pinned_save_path = document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_pinned_path");
+                column_pinned_save_path =
+                    columns[index].getAttribute("opd_pinned_path");
                 // Title.
-                column_page_title = document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_explore_title");
+                column_page_title =
+                    columns[index].getAttribute("opd_explore_title");
             } else {
                 column_open_path = "";
                 column_pinned_save_path = "";
             }
             // Auto refresh.
             if (
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_column_type") == "explore" ||
-                document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_column_type") == "home"
+                columns[index].getAttribute("opd_column_type") == "explore" ||
+                columns[index].getAttribute("opd_column_type") == "home"
             ) {
                 if (
-                    document
-                        .querySelectorAll(
-                            "#opd_main_element div[opd_column_type]",
-                        )
-                        [index].querySelector(".opd_a_reload_bar")?.checked ==
-                    true
+                    columns[index].querySelector(".opd_a_reload_bar")
+                        ?.checked == true
                 ) {
                     column_auto_reload = true;
                 } else {
@@ -3829,12 +3794,9 @@ function run(settings) {
                 }
                 const column_setting_time =
                     Number(
-                        document
-                            .querySelectorAll(
-                                "#opd_main_element div[opd_column_type]",
-                            )
-                            [index].querySelector(".opd_a_reload_time_setting")
-                            .value,
+                        columns[index].querySelector(
+                            ".opd_a_reload_time_setting",
+                        ).value,
                     ) * 1000;
                 //console.log(column_setting_time)
                 if (column_setting_time >= 1000) {
@@ -3844,9 +3806,7 @@ function run(settings) {
                 }
             }
             settings_array["column_settings"].push({
-                type: document
-                    .querySelectorAll("#opd_main_element div[opd_column_type]")
-                    [index].getAttribute("opd_column_type"),
+                type: columns[index].getAttribute("opd_column_type"),
                 banner: banner_checked,
                 top_visible: top_visible_checked,
                 tw_view_mode: tw_view_type,
@@ -3983,7 +3943,9 @@ function get_cookie_color_mode() {
     if (typeof opd_bootstrap.getCookieColorMode === "function") {
         try {
             return opd_bootstrap.getCookieColorMode();
-        } catch (error) {}
+        } catch {
+            // no-op: fallback to local cookie parsing
+        }
     }
     const cookie = document.cookie
         .split(/;\s*/)

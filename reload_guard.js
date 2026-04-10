@@ -79,7 +79,9 @@ html[data-opd-theme="light"] body {
                 sessionStorage.removeItem(bypassKey);
                 return;
             }
-        } catch (error) {}
+        } catch {
+            // no-op: treat missing sessionStorage as prompt-required
+        }
 
         event.preventDefault();
         event.returnValue = "";
