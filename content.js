@@ -20,6 +20,8 @@ const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
 let apply_ui_color = null;
 const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
+let suppress_beforeunload_prompt = false;
+let beforeunload_prompt_handler = null;
 const i18n_message = chrome.i18n.getMessage;
 let is_shift_pressed = false;
 let profile_store;
@@ -28,6 +30,10 @@ let is_removed_default_style = false;
 let media_viewer_token = [];
 const opd_sidebar_width_expanded = "220px";
 const opd_sidebar_width_collapsed = "60px";
+function request_page_reload() {
+    suppress_beforeunload_prompt = true;
+    location.reload();
+}
 const ui_icon_define = {
     banner_hide: "icon/banner_hide.svg",
     top_bar_hide: "icon/top_hide.svg",
@@ -822,7 +828,7 @@ if (
                                         ),
                                     );
                                     last_load_profile = 0;
-                                    window.reload();
+                                    request_page_reload();
                                 },
                             );
                         }
@@ -874,7 +880,7 @@ if (
                                         ),
                                     );
                                     last_load_profile = 0;
-                                    window.reload();
+                                    request_page_reload();
                                 },
                             );
                         }
@@ -910,6 +916,20 @@ function run(settings) {
             }
         }
     });
+    if (beforeunload_prompt_handler != null) {
+        window.removeEventListener(
+            "beforeunload",
+            beforeunload_prompt_handler,
+        );
+    }
+    beforeunload_prompt_handler = (event) => {
+        if (suppress_beforeunload_prompt) {
+            return;
+        }
+        event.preventDefault();
+        event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", beforeunload_prompt_handler);
     // Insert CSS tags.
     document.querySelector("head").insertAdjacentHTML(
         "afterbegin",
@@ -3246,7 +3266,7 @@ function run(settings) {
                     .sendMessage({ message: "dnr_upd" })
                     .then((value) => {
                         if (value == true) {
-                            location.reload();
+                            request_page_reload();
                         }
                     });
             }
@@ -3257,6 +3277,7 @@ function run(settings) {
             if (
                 await opd_confirm(i18n_message("msg_extension_reload_confirm"))
             ) {
+                suppress_beforeunload_prompt = true;
                 chrome.runtime.sendMessage({ message: "ext_reload" });
             }
         });
@@ -4062,7 +4083,7 @@ function settings_init() {
                         );
                     }
 
-                    location.reload();
+                    request_page_reload();
                 },
             );
         },
