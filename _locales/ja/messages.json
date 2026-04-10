@@ -11,12 +11,6 @@
     "ui_profile_switch_label": {
         "message": "プロファイル$1"
     },
-    "ui_profile_current_title": {
-        "message": "使用中のプロファイル"
-    },
-    "ui_profile_current_label": {
-        "message": "使用中: $1"
-    },
     "ui_column_settings_title": {
         "message": "カラム設定"
     },

@@ -56,21 +56,24 @@ const ui_icon_define = {
 function create_sidebar_button_html(id, title, icon_class, label) {
     return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
 }
-function create_profile_button_html(index) {
-    return `<div class="dsp_btn_parent" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${index}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_switch_label", [`${index}`])}</span></div>`;
+function create_profile_button_html(index, current_profile_index) {
+    const selected_profile_class =
+        index === current_profile_index ? " dsp_btn_profile_selected" : "";
+    const profile_display_number = index + 1;
+    return `<div class="dsp_btn_parent${selected_profile_class}" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">P${profile_display_number}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_switch_label", [`${profile_display_number}`])}</span></div>`;
 }
-function create_profile_list_buttons_html(profile_length) {
+function create_profile_list_buttons_html(profile_length, current_profile_index) {
     let profile_list_btn_html = "";
     for (let index = 0; index < profile_length; index++) {
-        profile_list_btn_html += create_profile_button_html(index);
+        profile_list_btn_html += create_profile_button_html(
+            index,
+            current_profile_index,
+        );
     }
     return profile_list_btn_html;
 }
-function create_current_profile_html(current_profile_index) {
-    return `<div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${current_profile_index}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_current_label", [`${current_profile_index}`])}</span>`;
-}
 function create_profile_list_html(profile_length, current_profile_index) {
-    return `<div class="dsp_profile_section"><div class="dsp_sidebar_section_label">${i18n_message("ui_profile_current_title")}</div><div class="profile_val_now" title="${i18n_message("ui_profile_current_title")}">${create_current_profile_html(current_profile_index)}</div><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length)}</div></div></div>`;
+    return `<div class="dsp_profile_section"><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length, current_profile_index)}</div></div></div>`;
 }
 // Convert UNIX timestamp to local time string.
 function unix_time_mmss(input) {
@@ -445,24 +448,6 @@ function run(settings) {
         width: 50px;
         cursor: pointer;
     }
-    .profile_val_now{
-        border-radius: 10px;
-        width: 100%;
-        min-height: 44px;
-        border: 1px solid var(--opd-focus);
-        color: var(--opd-text);
-        font-size: 0.8rem;
-        background: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0 0.7rem;
-        overflow: hidden;
-    }
-    .profile_val_now:hover{
-        background-color: var(--opd-hover);
-    }
     #main_rack_element{
         position: fixed;
         left: var(--opd-sidebar-width);
@@ -544,16 +529,8 @@ function run(settings) {
         padding: 0;
         gap: 0;
     }
-    #opd_main_element.opd_sidebar_collapsed .profile_val_now{
-        justify-content: center;
-        padding: 0;
-        gap: 0;
-    }
     #opd_main_element.opd_sidebar_collapsed .dsp_profile_section{
         align-items: center;
-    }
-    #opd_main_element.opd_sidebar_collapsed .dsp_sidebar_section_label{
-        display: none;
     }
     #opd_main_element.opd_sidebar_collapsed .main_bar_functions{
         align-items: center;
@@ -660,21 +637,24 @@ function run(settings) {
         height: 100%;
         width: 100%;
     }
+    .dsp_btn_profile_selected{
+        border: 1px solid var(--opd-focus);
+        color: var(--opd-text);
+        background: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    }
+    .dsp_btn_profile_selected:hover{
+        background: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
+        border-color: var(--opd-focus);
+    }
+    .dsp_btn_profile_selected .dsp_btn_change_profile_btn,
+    .dsp_btn_profile_selected .dsp_btn_label{
+        color: var(--opd-text);
+    }
     .dsp_profile_section{
         display: flex;
         flex-direction: column;
-        gap: 0.4rem;
         width: 100%;
-    }
-    .dsp_sidebar_section_label{
-        width: 100%;
-        padding: 0 0.2rem;
-        color: var(--opd-muted);
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-align: left;
-        text-transform: uppercase;
     }
     .dsp_profile_list{
         width: 100%;
@@ -1008,8 +988,7 @@ function run(settings) {
 
         & #api_limit_status:hover,
         & .dsp_btn_parent:hover,
-        & .dsp_column_btn:hover,
-        & .profile_val_now:hover {
+        & .dsp_column_btn:hover {
             background: #3f4752;
         }
 
@@ -2920,6 +2899,7 @@ function run(settings) {
                         document.querySelector("#profile_btn_list").innerHTML =
                             create_profile_list_buttons_html(
                                 profile_store.length,
+                                last_load_profile,
                             );
                         create_profile_list_btn();
                     },
@@ -2976,16 +2956,11 @@ function run(settings) {
                                         },
                                         function () {
                                             document.querySelector(
-                                                ".profile_val_now",
-                                            ).innerHTML =
-                                                create_current_profile_html(
-                                                    after_profile_num,
-                                                );
-                                            document.querySelector(
                                                 "#profile_btn_list",
                                             ).innerHTML =
                                                 create_profile_list_buttons_html(
                                                     profile_store.length,
+                                                    after_profile_num,
                                                 );
                                             create_profile_list_btn();
                                         },

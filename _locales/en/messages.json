@@ -11,12 +11,6 @@
     "ui_profile_switch_label": {
         "message": "Profile $1"
     },
-    "ui_profile_current_title": {
-        "message": "Current profile"
-    },
-    "ui_profile_current_label": {
-        "message": "Current profile: $1"
-    },
     "ui_column_settings_title": {
         "message": "Column settings"
     },
