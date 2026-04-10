@@ -19,6 +19,7 @@ if (is_prototype) {
 const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
 let apply_ui_color = null;
+const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
 const i18n_message = chrome.i18n.getMessage;
 let is_shift_pressed = false;
 let profile_store;
@@ -52,6 +53,7 @@ const ui_icon_define = {
     forward: "icon/forward.svg",
     next: "icon/next.svg",
     download: "icon/download.svg",
+    switch_theme: "icon/switch_theme.svg",
 };
 function create_sidebar_button_html(id, title, icon_class, label) {
     return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
@@ -266,6 +268,62 @@ function ensure_opd_dialog_style() {
     .opd_about_area2 a:hover{
         color: #1d4ed8;
     }
+    .opd_dialog_overlay.opd_dialog_theme_dark{
+        background: rgba(2, 6, 23, 0.68);
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog{
+        background: #1b2330;
+        color: #e5ebf3;
+        border-color: #4a576b;
+        box-shadow: 0 18px 44px rgba(2, 6, 23, 0.55);
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_input{
+        background: #111827;
+        color: #e5ebf3;
+        border-color: #4a576b;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions button{
+        background: #283140;
+        color: #e5ebf3;
+        border-color: #4a576b;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions button:hover{
+        background: #313c4d;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions .opd_dialog_primary{
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #ffffff;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions .opd_dialog_primary:hover{
+        background: #2563eb;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_title,
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_wordmark,
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_value,
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_area2 div{
+        color: #e5ebf3;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_close{
+        background: #283140;
+        color: #e5ebf3;
+        border-color: #4a576b;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_close:hover{
+        background: #313c4d;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_close_icon{
+        filter: brightness(0) saturate(100%) invert(98%);
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_logo{
+        filter: brightness(0) saturate(100%) invert(98%);
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_area2 a{
+        color: #7cb1ff;
+    }
+    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_area2 a:hover{
+        color: #9dc2ff;
+    }
     @media (max-width: 680px){
         .opd_about_area1{
             flex-direction: column;
@@ -290,6 +348,10 @@ function enqueue_opd_dialog(task) {
     opd_dialog_queue = dialog_task.catch(() => {});
     return dialog_task;
 }
+function is_opd_dark_theme_enabled() {
+    const main_element = document.getElementById("opd_main_element");
+    return main_element?.getAttribute("opd-dsp-theme") === "dark";
+}
 function open_opd_dialog({ message, type, defaultValue }) {
     return enqueue_opd_dialog(
         () =>
@@ -297,6 +359,9 @@ function open_opd_dialog({ message, type, defaultValue }) {
                 ensure_opd_dialog_style();
                 const overlay = document.createElement("div");
                 overlay.className = "opd_dialog_overlay";
+                if (is_opd_dark_theme_enabled()) {
+                    overlay.classList.add("opd_dialog_theme_dark");
+                }
                 const dialog = document.createElement("div");
                 dialog.className = "opd_dialog";
                 dialog.setAttribute("role", "dialog");
@@ -457,6 +522,9 @@ async function open_about_page_modal() {
                 ensure_opd_dialog_style();
                 const overlay = document.createElement("div");
                 overlay.className = "opd_dialog_overlay";
+                if (is_opd_dark_theme_enabled()) {
+                    overlay.classList.add("opd_dialog_theme_dark");
+                }
                 const dialog = document.createElement("div");
                 dialog.className = "opd_dialog opd_about_dialog";
                 dialog.setAttribute("role", "dialog");
@@ -873,6 +941,8 @@ function run(settings) {
         --opd-muted: #5f6b7a;
         --opd-hover: #e7edf4;
         --opd-focus: #3b82f6;
+        --opd-profile-selected-bg: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
+        --opd-profile-selected-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
         --opd-sidebar-width: ${opd_sidebar_width_expanded};
         --opd-sidebar-label-opacity: 1;
         --opd-sidebar-label-width: auto;
@@ -1161,6 +1231,14 @@ function run(settings) {
         height: 100%;
         width: 100%;
     }
+    .dsp_btn_switch_theme_img{
+        filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: url(${chrome.runtime.getURL(ui_icon_define.switch_theme)});
+        height: 100%;
+        width: 100%;
+    }
     .dsp_btn_change_profile_btn{
         display: flex;
         font-size: 0.95rem;
@@ -1174,11 +1252,11 @@ function run(settings) {
     .dsp_btn_profile_selected{
         border: 1px solid var(--opd-focus);
         color: var(--opd-text);
-        background: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+        background: var(--opd-profile-selected-bg);
+        box-shadow: var(--opd-profile-selected-shadow);
     }
     .dsp_btn_profile_selected:hover{
-        background: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
+        background: var(--opd-profile-selected-bg);
         border-color: var(--opd-focus);
     }
     .dsp_btn_profile_selected .dsp_btn_change_profile_btn,
@@ -1487,6 +1565,17 @@ function run(settings) {
     /* When dark mode is detected. */
     #opd_main_element[opd-dsp-theme="dark"] {
         color-scheme: dark;
+        --opd-bg: #101215;
+        --opd-surface: #181d24;
+        --opd-surface-alt: #262e3a;
+        --opd-border: #3f4a5a;
+        --opd-border-strong: #5a677c;
+        --opd-text: #e5ebf3;
+        --opd-muted: #aab5c4;
+        --opd-hover: #3b4554;
+        --opd-focus: #66a4ff;
+        --opd-profile-selected-bg: linear-gradient(180deg, #34455f 0%, #2c3a50 100%);
+        --opd-profile-selected-shadow: inset 0 0 0 1px rgba(122, 154, 195, 0.3);
 
         & #main_rack_element {
             background-color: #101215 !important;
@@ -1512,12 +1601,15 @@ function run(settings) {
         & .dsp_btn_add_explr_img,
         & .dsp_btn_add_lists_img,
         & .dsp_btn_add_custom_url_img,
+        & .opd_ui_logo,
+        & .dsp_btn_sidebar_fold_img,
         & .dsp_btn_second_rack_img,
         & .dsp_btn_profile_add_img,
         & .dsp_btn_profile_delete_img,
+        & .dsp_btn_switch_theme_img,
         & .dsp_column_move_icon,
         & .opd_ui_icon_color {
-            filter: brightness(0) saturate(100%) invert(48%) sepia(0%) saturate(93%) hue-rotate(266deg) brightness(93%) contrast(86%);
+            filter: brightness(0) saturate(100%) invert(98%);
         }
 
         & #api_limit_status:hover,
@@ -1662,7 +1754,7 @@ function run(settings) {
     ins_html.id = "opd_main_element";
     ins_html.style =
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}<hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div class="dsp_btn_parent" id="api_limit_status_button" title="${i18n_message("msg_api_limit_status_title", [i18n_message("ui_button_api_label")])}"><div class="dsp_btn_icon_wrap"><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div></div><span class="dsp_btn_label">${i18n_message("ui_button_api_label")}</span></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Switch theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Theme"))}<hr><div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="profile_load_save" value="${i18n_message("ui_button_profile_loader")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><div class="dsp_btn_parent" id="api_limit_status_button" title="${i18n_message("msg_api_limit_status_title", [i18n_message("ui_button_api_label")])}"><div class="dsp_btn_icon_wrap"><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div></div><span class="dsp_btn_label">${i18n_message("ui_button_api_label")}</span></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">XPP-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><input type="button" id="profile_load_save" value="Profile Load"/><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
@@ -1826,6 +1918,7 @@ function run(settings) {
     const sidebar_toggle_button = document.querySelector(
         "#sidebar_fold_toggle",
     );
+    const switch_theme_button = document.querySelector("#switch_theme");
     const sidebar_toggle_label =
         sidebar_toggle_button.querySelector(".dsp_btn_label");
     function apply_sidebar_collapsed_state(is_collapsed) {
@@ -1858,6 +1951,22 @@ function run(settings) {
             },
         );
     });
+    if (switch_theme_button != null) {
+        switch_theme_button.addEventListener("click", function () {
+            const next_theme_mode =
+                opd_main_element.getAttribute("opd-dsp-theme") === "dark"
+                    ? "light"
+                    : "dark";
+
+            if (is_added_system_color_mode && apply_ui_color) {
+                system_dark_query.removeEventListener("change", apply_ui_color);
+                is_added_system_color_mode = false;
+            }
+
+            document.cookie = `night_mode=${next_theme_mode === "dark" ? 1 : 0}; path=/; max-age=31536000`;
+            opd_main_element.setAttribute("opd-dsp-theme", next_theme_mode);
+        });
+    }
     // Apply Explore titles safely after DOM insertion.
     const all_columns = document.querySelectorAll(
         "#opd_main_element div[opd_column_type]",
@@ -3794,7 +3903,7 @@ function run(settings) {
     const head_observer = new MutationObserver(function () {
         document.title = "XPP-Deck";
         document.querySelector('link[rel="shortcut icon"]').href =
-            chrome.runtime.getURL("icon.png");
+            chrome.runtime.getURL("icon/logo_icon.svg");
         // Remove default CSS so it does not affect UI.
         if (!is_removed_default_style) {
             document.head.querySelectorAll("style").forEach((style) => {
@@ -3806,7 +3915,6 @@ function run(settings) {
         }
 
         // Detect and apply dark mode settings.
-        const color_scheme = window.matchMedia("(prefers-color-scheme: dark)");
         const main_element = document.getElementById("opd_main_element");
         if (!main_element) return;
 
@@ -3815,7 +3923,7 @@ function run(settings) {
         switch (color_mode) {
             case "system": {
                 apply_ui_color = () => {
-                    const currentScheme = color_scheme.matches
+                    const currentScheme = system_dark_query.matches
                         ? "dark"
                         : "light";
                     main_element.setAttribute("opd-dsp-theme", currentScheme);
@@ -3826,7 +3934,7 @@ function run(settings) {
 
                 // Follow OS color mode changes only when set to system.
                 if (!is_added_system_color_mode) {
-                    color_scheme.addEventListener("change", apply_ui_color);
+                    system_dark_query.addEventListener("change", apply_ui_color);
                     is_added_system_color_mode = true;
                 }
                 break;
@@ -3834,7 +3942,10 @@ function run(settings) {
             case "light":
                 // Remove remaining system-mode watcher if present.
                 if (is_added_system_color_mode && apply_ui_color) {
-                    color_scheme.removeEventListener("change", apply_ui_color);
+                    system_dark_query.removeEventListener(
+                        "change",
+                        apply_ui_color,
+                    );
                     is_added_system_color_mode = false;
                 }
                 main_element.setAttribute("opd-dsp-theme", "light");
@@ -3842,7 +3953,10 @@ function run(settings) {
 
             case "dark":
                 if (is_added_system_color_mode && apply_ui_color) {
-                    color_scheme.removeEventListener("change", apply_ui_color);
+                    system_dark_query.removeEventListener(
+                        "change",
+                        apply_ui_color,
+                    );
                     is_added_system_color_mode = false;
                 }
                 main_element.setAttribute("opd-dsp-theme", "dark");

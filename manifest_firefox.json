@@ -22,7 +22,6 @@
         "extensions/auto_reload_helper.js",
         "extensions/media_viewer_block_helper.js",
         "extensions/media_viewer/media_viewer.js",
-        "icon.png",
         "icon/logo_icon.svg",
         "icon/logo_v1.svg",
         "profile_debug.html",
@@ -49,7 +48,8 @@
         "icon/profile_delete.svg",
         "icon/forward.svg",
         "icon/next.svg",
-        "icon/download.svg"
+        "icon/download.svg",
+        "icon/switch_theme.svg"
     ],
     "background": {
         "scripts": ["background.js"]
