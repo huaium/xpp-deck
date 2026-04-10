@@ -20,8 +20,11 @@ const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
 let apply_ui_color = null;
 const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
-let suppress_beforeunload_prompt = false;
-let beforeunload_prompt_handler = null;
+const opd_bootstrap = window.__opdBootstrap || {};
+const beforeunload_bypass_key =
+    opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
+const opd_root_theme_attribute =
+    opd_bootstrap.rootThemeAttribute || "data-opd-theme";
 const i18n_message = chrome.i18n.getMessage;
 let is_shift_pressed = false;
 let profile_store;
@@ -31,7 +34,9 @@ let media_viewer_token = [];
 const opd_sidebar_width_expanded = "220px";
 const opd_sidebar_width_collapsed = "60px";
 function request_page_reload() {
-    suppress_beforeunload_prompt = true;
+    try {
+        sessionStorage.setItem(beforeunload_bypass_key, "1");
+    } catch (error) {}
     location.reload();
 }
 const ui_icon_define = {
@@ -916,20 +921,6 @@ function run(settings) {
             }
         }
     });
-    if (beforeunload_prompt_handler != null) {
-        window.removeEventListener(
-            "beforeunload",
-            beforeunload_prompt_handler,
-        );
-    }
-    beforeunload_prompt_handler = (event) => {
-        if (suppress_beforeunload_prompt) {
-            return;
-        }
-        event.preventDefault();
-        event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", beforeunload_prompt_handler);
     // Insert CSS tags.
     document.querySelector("head").insertAdjacentHTML(
         "afterbegin",
@@ -1946,6 +1937,7 @@ function run(settings) {
             ? i18n_message("ui_sidebar_expand_label")
             : i18n_message("ui_sidebar_collapse_label");
     }
+    apply_theme_for_main_element(opd_main_element);
     chrome.storage.local.get("opd_sidebar_collapsed", function (value) {
         apply_sidebar_collapsed_state(value.opd_sidebar_collapsed === true);
     });
@@ -1974,6 +1966,10 @@ function run(settings) {
 
             document.cookie = `night_mode=${next_theme_mode === "dark" ? 1 : 0}; path=/; max-age=31536000`;
             opd_main_element.setAttribute("opd-dsp-theme", next_theme_mode);
+            document.documentElement.setAttribute(
+                opd_root_theme_attribute,
+                next_theme_mode,
+            );
         });
     }
     // Apply Explore titles safely after DOM insertion.
@@ -3277,7 +3273,9 @@ function run(settings) {
             if (
                 await opd_confirm(i18n_message("msg_extension_reload_confirm"))
             ) {
-                suppress_beforeunload_prompt = true;
+                try {
+                    sessionStorage.setItem(beforeunload_bypass_key, "1");
+                } catch (error) {}
                 chrome.runtime.sendMessage({ message: "ext_reload" });
             }
         });
@@ -3917,80 +3915,85 @@ function run(settings) {
         const main_element = document.getElementById("opd_main_element");
         if (!main_element) return;
 
-        const color_mode = get_cookie_color_mode();
-
-        switch (color_mode) {
-            case "system": {
-                apply_ui_color = () => {
-                    const currentScheme = system_dark_query.matches
-                        ? "dark"
-                        : "light";
-                    main_element.setAttribute("opd-dsp-theme", currentScheme);
-                };
-
-                // Initial apply.
-                apply_ui_color();
-
-                // Follow OS color mode changes only when set to system.
-                if (!is_added_system_color_mode) {
-                    system_dark_query.addEventListener(
-                        "change",
-                        apply_ui_color,
-                    );
-                    is_added_system_color_mode = true;
-                }
-                break;
-            }
-            case "light":
-                // Remove remaining system-mode watcher if present.
-                if (is_added_system_color_mode && apply_ui_color) {
-                    system_dark_query.removeEventListener(
-                        "change",
-                        apply_ui_color,
-                    );
-                    is_added_system_color_mode = false;
-                }
-                main_element.setAttribute("opd-dsp-theme", "light");
-                break;
-
-            case "dark":
-                if (is_added_system_color_mode && apply_ui_color) {
-                    system_dark_query.removeEventListener(
-                        "change",
-                        apply_ui_color,
-                    );
-                    is_added_system_color_mode = false;
-                }
-                main_element.setAttribute("opd-dsp-theme", "dark");
-                break;
-
-            default:
-                break;
-        }
+        apply_theme_for_main_element(main_element);
     }).observe(document.querySelector("head"), {
         childList: true,
         characterData: true,
         subtree: false,
     });
 }
+function apply_theme_for_main_element(main_element) {
+    if (!main_element) {
+        return;
+    }
+
+    const color_mode = get_cookie_color_mode();
+
+    switch (color_mode) {
+        case "system": {
+            apply_ui_color = () => {
+                const currentScheme = system_dark_query.matches
+                    ? "dark"
+                    : "light";
+                main_element.setAttribute("opd-dsp-theme", currentScheme);
+                document.documentElement.setAttribute(
+                    opd_root_theme_attribute,
+                    currentScheme,
+                );
+            };
+
+            apply_ui_color();
+
+            if (!is_added_system_color_mode) {
+                system_dark_query.addEventListener("change", apply_ui_color);
+                is_added_system_color_mode = true;
+            }
+            break;
+        }
+        case "light":
+            if (is_added_system_color_mode && apply_ui_color) {
+                system_dark_query.removeEventListener("change", apply_ui_color);
+                is_added_system_color_mode = false;
+            }
+            main_element.setAttribute("opd-dsp-theme", "light");
+            document.documentElement.setAttribute(
+                opd_root_theme_attribute,
+                "light",
+            );
+            break;
+
+        case "dark":
+            if (is_added_system_color_mode && apply_ui_color) {
+                system_dark_query.removeEventListener("change", apply_ui_color);
+                is_added_system_color_mode = false;
+            }
+            main_element.setAttribute("opd-dsp-theme", "dark");
+            document.documentElement.setAttribute(
+                opd_root_theme_attribute,
+                "dark",
+            );
+            break;
+
+        default:
+            break;
+    }
+}
 // Get color mode from cookie.
 function get_cookie_color_mode() {
+    if (typeof opd_bootstrap.getCookieColorMode === "function") {
+        try {
+            return opd_bootstrap.getCookieColorMode();
+        } catch (error) {}
+    }
     const cookie = document.cookie
         .split(/;\s*/)
         .find((c) => c.startsWith("night_mode="));
 
-    // Return system if night_mode is missing.
     if (!cookie) return "system";
 
     const color_mode_number = Number(cookie.split("=")[1]);
-
-    // Return system when value is invalid.
     if (!Number.isInteger(color_mode_number)) return "system";
-
-    // Return light when color mode <= 0.
     if (color_mode_number <= 0) return "light";
-
-    // Return dark when color mode >= 1.
     return "dark";
 }
 // Initialize settings.

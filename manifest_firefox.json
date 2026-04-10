@@ -64,6 +64,11 @@
     "content_scripts": [
         {
             "matches": ["https://twitter.com/*", "https://x.com/*"],
+            "js": ["reload_guard.js"],
+            "run_at": "document_start"
+        },
+        {
+            "matches": ["https://twitter.com/*", "https://x.com/*"],
             "js": [
                 "content.js",
                 "extensions/text_review.js",
