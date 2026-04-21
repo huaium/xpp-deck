@@ -20,7 +20,7 @@
     "web_accessible_resources": [
         "src/extensions/auto_reload_helper.js",
         "src/extensions/media_viewer_block_helper.js",
-        "src/extensions/media_viewer/media_viewer.js",
+        "src/extensions/media_viewer.js",
         "public/icons/logo_icon.svg",
         "public/icons/settings.svg",
         "public/icons/banner_hide.svg",
@@ -48,7 +48,7 @@
         "public/icons/switch_theme.svg"
     ],
     "background": {
-        "scripts": ["background.js"]
+        "scripts": ["src/background.js"]
     },
     "permissions": [
         "storage",
@@ -72,12 +72,12 @@
                 "src/content/settings.js",
                 "src/extensions/auto_reload.js",
                 "src/extensions/media_viewer_block.js",
-                "src/extensions/media_viewer/media_viewer.js"
+                "src/extensions/media_viewer.js"
             ]
         }
     ],
     "browser_action": {
-        "default_popup": "popup.html",
+        "default_popup": "src/popup/popup.html",
         "default_icon": "icon.png"
     }
 }
