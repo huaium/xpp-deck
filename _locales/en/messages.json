@@ -140,9 +140,6 @@
     "ui_button_init_settings": {
         "message": "Reset"
     },
-    "ui_button_profile_loader": {
-        "message": "Profile loader"
-    },
     "ui_button_dnr_reload": {
         "message": "Reload dNR"
     },

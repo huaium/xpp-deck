@@ -140,9 +140,6 @@
     "ui_button_init_settings": {
         "message": "初期化"
     },
-    "ui_button_profile_loader": {
-        "message": "プロファイルローダー"
-    },
     "ui_button_dnr_reload": {
         "message": "dNR_Reload"
     },

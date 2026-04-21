@@ -22,7 +22,6 @@
         "src/extensions/media_viewer_block_helper.js",
         "src/extensions/media_viewer/media_viewer.js",
         "public/icons/logo_icon.svg",
-        "profile_debug.html",
         "public/icons/settings.svg",
         "public/icons/banner_hide.svg",
         "public/icons/top_hide.svg",
@@ -62,7 +61,7 @@
     "content_scripts": [
         {
             "matches": ["https://twitter.com/*", "https://x.com/*"],
-            "js": ["reload_guard.js"],
+            "js": ["src/content/reload_guard.js"],
             "run_at": "document_start"
         },
         {
