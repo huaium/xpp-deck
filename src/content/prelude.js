@@ -104,31 +104,31 @@ function request_page_reload() {
     location.reload();
 }
 const ui_icon_define = {
-    banner_hide: "icon/banner_hide.svg",
-    top_bar_hide: "icon/top_hide.svg",
-    column_move: "icon/column_move.svg",
-    column_close: "icon/column_close.svg",
-    column_settings: "icon/settings.svg",
-    column_pin: "icon/pin.svg",
-    column_pinned: "icon/pinned.svg",
-    column_widesize: "icon/column_w_size.svg",
-    column_add_1: "icon/column_add_1st.svg",
-    column_add_2: "icon/column_add_2nd.svg",
-    add_post_column: "icon/post.svg",
-    add_timeline_column: "icon/tl_column.svg",
-    add_notification_column: "icon/notice_column.svg",
-    add_explore_column: "icon/exp_column.svg",
-    add_lists_column: "icon/lists_column.svg",
-    add_custom_url_column: "icon/custom_url_column.svg",
-    column_single_rack: "icon/single_view.svg",
-    column_second_rack: "icon/second_view.svg",
-    profile_save: "icon/profile_save.svg",
-    profile_delete: "icon/profile_delete.svg",
-    text_review: "icon/text_review.svg",
-    forward: "icon/forward.svg",
-    next: "icon/next.svg",
-    download: "icon/download.svg",
-    switch_theme: "icon/switch_theme.svg",
+    banner_hide: "public/icons/banner_hide.svg",
+    top_bar_hide: "public/icons/top_hide.svg",
+    column_move: "public/icons/column_move.svg",
+    column_close: "public/icons/column_close.svg",
+    column_settings: "public/icons/settings.svg",
+    column_pin: "public/icons/pin.svg",
+    column_pinned: "public/icons/pinned.svg",
+    column_widesize: "public/icons/column_w_size.svg",
+    column_add_1: "public/icons/column_add_1st.svg",
+    column_add_2: "public/icons/column_add_2nd.svg",
+    add_post_column: "public/icons/post.svg",
+    add_timeline_column: "public/icons/tl_column.svg",
+    add_notification_column: "public/icons/notice_column.svg",
+    add_explore_column: "public/icons/exp_column.svg",
+    add_lists_column: "public/icons/lists_column.svg",
+    add_custom_url_column: "public/icons/custom_url_column.svg",
+    column_single_rack: "public/icons/single_view.svg",
+    column_second_rack: "public/icons/second_view.svg",
+    profile_save: "public/icons/profile_save.svg",
+    profile_delete: "public/icons/profile_delete.svg",
+    text_review: "public/icons/text_review.svg",
+    forward: "public/icons/forward.svg",
+    next: "public/icons/next.svg",
+    download: "public/icons/download.svg",
+    switch_theme: "public/icons/switch_theme.svg",
 };
 function create_sidebar_button_html(id, title, icon_class, label) {
     return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
@@ -636,7 +636,7 @@ async function open_about_page_modal() {
                 body_top.className = "opd_about_area1";
                 const logo = document.createElement("div");
                 logo.className = "opd_about_logo";
-                logo.style.backgroundImage = `url(${chrome.runtime.getURL("icon/logo_icon.svg")})`;
+                logo.style.backgroundImage = `url(${chrome.runtime.getURL("public/icons/logo_icon.svg")})`;
                 const body_top_right = document.createElement("div");
                 const wordmark = document.createElement("div");
                 wordmark.className = "opd_about_wordmark";

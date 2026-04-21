@@ -177,7 +177,7 @@ function run(settings) {
     .opd_ui_logo{
         background-size: cover;
         background-repeat: no-repeat;
-        background-image: url(${chrome.runtime.getURL("icon/logo_icon.svg")});
+        background-image: url(${chrome.runtime.getURL("public/icons/logo_icon.svg")});
         height: 50px;
         width: 50px;
         cursor: pointer;
@@ -2983,7 +2983,7 @@ function run(settings) {
     new MutationObserver(function () {
         document.title = "XPP-Deck";
         document.querySelector('link[rel="shortcut icon"]').href =
-            chrome.runtime.getURL("icon/logo_icon.svg");
+            chrome.runtime.getURL("public/icons/logo_icon.svg");
         // Remove default CSS so it does not affect UI.
         if (!is_removed_default_style) {
             document.head.querySelectorAll("style").forEach((style) => {
