@@ -10,6 +10,8 @@
         "lib": ["ES2022", "DOM"],
         "module": "ESNext",
         "moduleResolution": "Bundler",
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
         "noImplicitAny": false,
         "noImplicitThis": false,
         "strictNullChecks": false

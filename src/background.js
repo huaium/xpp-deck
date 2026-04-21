@@ -74,21 +74,22 @@ function send_content_script(value) {
 }
 chrome.webRequest.onHeadersReceived.addListener(
     function (resp) {
+        const response_headers = resp.responseHeaders ?? [];
         if (resp.url.search(/SearchTimeline/g) != -1) {
             //console.log(resp);
-            for (let index = 0; index < resp.responseHeaders.length; index++) {
-                switch (resp.responseHeaders[index].name) {
+            for (let index = 0; index < response_headers.length; index++) {
+                switch (response_headers[index].name) {
                     case "x-rate-limit-remaining":
                         access_limit.search.remaining =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     case "x-rate-limit-limit":
                         access_limit.search.limit =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     case "x-rate-limit-reset":
                         access_limit.search.reset_unix_time =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     default:
                         break;
@@ -99,19 +100,19 @@ chrome.webRequest.onHeadersReceived.addListener(
         }
         if (resp.url.search(/HomeLatestTimeline/g) != -1) {
             //console.log(resp);
-            for (let index = 0; index < resp.responseHeaders.length; index++) {
-                switch (resp.responseHeaders[index].name) {
+            for (let index = 0; index < response_headers.length; index++) {
+                switch (response_headers[index].name) {
                     case "x-rate-limit-remaining":
                         access_limit.time_line.remaining =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     case "x-rate-limit-limit":
                         access_limit.time_line.limit =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     case "x-rate-limit-reset":
                         access_limit.time_line.reset_unix_time =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     default:
                         break;
@@ -122,19 +123,19 @@ chrome.webRequest.onHeadersReceived.addListener(
         }
         if (resp.url.search(/HomeTimeline/g) != -1) {
             //console.log(resp);
-            for (let index = 0; index < resp.responseHeaders.length; index++) {
-                switch (resp.responseHeaders[index].name) {
+            for (let index = 0; index < response_headers.length; index++) {
+                switch (response_headers[index].name) {
                     case "x-rate-limit-remaining":
                         access_limit.recommend_timeline.remaining =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     case "x-rate-limit-limit":
                         access_limit.recommend_timeline.limit =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     case "x-rate-limit-reset":
                         access_limit.recommend_timeline.reset_unix_time =
-                            resp.responseHeaders[index].value;
+                            response_headers[index].value;
                         break;
                     default:
                         break;

@@ -9,7 +9,7 @@ function run(settings) {
     // Media preview panel.
     const media_viewer = new OpdExtMediaViewer();
     document.addEventListener("opd_send_media_info", (e) => {
-        const detail = JSON.parse(e.detail);
+        const detail = JSON.parse(String(e.detail));
         for (let index = 0; index < media_viewer_token.length; index++) {
             const token = media_viewer_token[index];
             if (detail.token === token) {
@@ -1044,8 +1044,8 @@ function run(settings) {
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
     const opd_main_element = document.querySelector("#opd_main_element");
-    const sidebar_toggle_button = document.querySelector(
-        "#sidebar_fold_toggle",
+    const sidebar_toggle_button = /** @type {HTMLElement} */ (
+        document.querySelector("#sidebar_fold_toggle")
     );
     const switch_theme_button = document.querySelector("#switch_theme");
     const language_select = document.querySelector("#opd_language_select");
@@ -1309,7 +1309,7 @@ function run(settings) {
                             "opd_settings",
                             function (value) {
                                 let load_setting = JSON.parse(
-                                    value.opd_settings,
+                                    String(value.opd_settings),
                                 );
                                 load_setting.last_load_profile = index;
                                 chrome.storage.local.set(
@@ -1345,16 +1345,25 @@ function run(settings) {
             column_object[index].removeAttribute("opd_init_webview");
             // Change banner/view mode.
             column_object[index].addEventListener("load", function () {
-                console.log(this.getAttribute("opd_iframe_width_only"));
-                if (this.getAttribute("opd_iframe_width_only") != "") {
+                const iframe_elem = /** @type {HTMLIFrameElement} */ (this);
+                console.log(iframe_elem.getAttribute("opd_iframe_width_only"));
+                if (iframe_elem.getAttribute("opd_iframe_width_only") != "") {
                     //console.log(this)
-                    let opd_column_div = this.closest("div[opd_column_type]");
+                    let opd_column_div = iframe_elem.closest(
+                        "div[opd_column_type]",
+                    );
                     let opd_column_banner_checkbox =
-                        opd_column_div.querySelector(".opd_banner");
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".opd_banner")
+                        );
                     let opd_column_top_visible_checkbox =
-                        opd_column_div.querySelector(".opd_top_bar");
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".opd_top_bar")
+                        );
                     let opd_column_tw_view_mode_opt =
-                        opd_column_div.querySelector(".opd_tw_view_mode");
+                        /** @type {HTMLSelectElement | null} */ (
+                            opd_column_div.querySelector(".opd_tw_view_mode")
+                        );
                     // Load and apply banner visibility settings.
                     /*if(opd_column_banner_checkbox.checked == true){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
@@ -1362,7 +1371,7 @@ function run(settings) {
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
                     // Insert shared CSS (thin scrollbar).
-                    this.contentWindow.document
+                    iframe_elem.contentWindow.document
                         .querySelector("head")
                         .insertAdjacentHTML(
                             "beforeend",
@@ -1370,11 +1379,11 @@ function run(settings) {
                         );
                     // Load banner visibility state.
                     if (
-                        this.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow.document.querySelector(
                             "head style[opd_banner_css]",
                         ) == null
                     ) {
-                        this.contentWindow.document
+                        iframe_elem.contentWindow.document
                             .querySelector("head")
                             .insertAdjacentHTML(
                                 "beforeend",
@@ -1383,22 +1392,22 @@ function run(settings) {
                     }
                     if (opd_column_banner_checkbox?.checked != true) {
                         //console.log(this)
-                        this.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow.document.querySelector(
                             "head style[opd_banner_css]",
                         ).textContent = `header[role="banner"]{display:none};`;
                     } else {
                         //console.log("else")
-                        this.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow.document.querySelector(
                             "head style[opd_banner_css]",
                         ).textContent = ``;
                     }
                     // Apply top-search-area hide setting.
                     if (
-                        this.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow.document.querySelector(
                             "head style[opd_top_visible_css]",
                         ) == null
                     ) {
-                        this.contentWindow.document
+                        iframe_elem.contentWindow.document
                             .querySelector("head")
                             .insertAdjacentHTML(
                                 "beforeend",
@@ -1407,27 +1416,27 @@ function run(settings) {
                     }
                     if (opd_column_top_visible_checkbox?.checked != true) {
                         if (
-                            this.closest("div[opd_column_type]").getAttribute(
-                                "opd_column_type",
-                            ) == "explore"
+                            iframe_elem
+                                .closest("div[opd_column_type]")
+                                .getAttribute("opd_column_type") == "explore"
                         ) {
                             //div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]){display:none;}
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_top_visible_css]",
                             ).textContent =
                                 `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)`;
                         } else {
                             if (
-                                this.closest(
-                                    "div[opd_column_type]",
-                                ).getAttribute("opd_column_type") == "home"
+                                iframe_elem
+                                    .closest("div[opd_column_type]")
+                                    .getAttribute("opd_column_type") == "home"
                             ) {
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_top_visible_css]",
                                 ).textContent =
                                     `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;} div[role="progressbar"] + div{display:none;}`;
                             } else {
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_top_visible_css]",
                                 ).textContent =
                                     `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;}`;
@@ -1435,18 +1444,18 @@ function run(settings) {
                         }
                     } else {
                         //console.log("else")
-                        this.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow.document.querySelector(
                             "head style[opd_top_visible_css]",
                         ).textContent = ``;
                     }
 
                     // Load and apply tweet view mode settings.
                     if (
-                        this.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow.document.querySelector(
                             "head style[opd_tw_view_mode_css]",
                         ) == null
                     ) {
-                        this.contentWindow.document
+                        iframe_elem.contentWindow.document
                             .querySelector("head")
                             .insertAdjacentHTML(
                                 "beforeend",
@@ -1455,24 +1464,24 @@ function run(settings) {
                     }
                     switch (opd_column_tw_view_mode_opt.value) {
                         case "0":
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_tw_view_mode_css]",
                             ).textContent = ``;
                             break;
                         case "1":
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_tw_view_mode_css]",
                             ).textContent =
                                 `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                             break;
                         case "2":
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_tw_view_mode_css]",
                             ).textContent =
                                 `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                             break;
                         default:
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_tw_view_mode_css]",
                             ).textContent = ``;
                             break;
@@ -1484,30 +1493,53 @@ function run(settings) {
             column_object[index].addEventListener(
                 "load",
                 function () {
+                    const iframe_elem = /** @type {HTMLIFrameElement} */ (this);
                     //console.log(this)
-                    let opd_column_div = this.closest("div[opd_column_type]");
-                    let opd_column_width_btn =
-                        opd_column_div.querySelector(".column_width_btn");
-                    let opd_column_width_select = opd_column_div.querySelector(
-                        ".opd_column_size_preset",
+                    let opd_column_div = iframe_elem.closest(
+                        "div[opd_column_type]",
                     );
+                    let opd_column_width_btn =
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".column_width_btn")
+                        );
+                    let opd_column_width_select =
+                        /** @type {HTMLSelectElement | null} */ (
+                            opd_column_div.querySelector(
+                                ".opd_column_size_preset",
+                            )
+                        );
                     let opd_column_banner_checkbox =
-                        opd_column_div.querySelector(".opd_banner");
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".opd_banner")
+                        );
                     let opd_column_top_visible_checkbox =
-                        opd_column_div.querySelector(".opd_top_bar");
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".opd_top_bar")
+                        );
                     let opd_column_pinned_checkbox =
-                        opd_column_div.querySelector(".opd_pinned_btn");
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".opd_pinned_btn")
+                        );
                     let opd_column_auto_reload_checkbox =
-                        opd_column_div.querySelector(".opd_a_reload_bar");
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(".opd_a_reload_bar")
+                        );
                     let opd_column_auto_reload_time_reload =
-                        opd_column_div.querySelector(
-                            ".opd_a_reload_time_setting",
+                        /** @type {HTMLInputElement | null} */ (
+                            opd_column_div.querySelector(
+                                ".opd_a_reload_time_setting",
+                            )
                         );
                     let opd_column_tw_view_mode_opt =
-                        opd_column_div.querySelector(".opd_tw_view_mode");
-                    let opd_column_scroll_to_top = opd_column_div.querySelector(
-                        ".opd_column_scroll_to_top",
-                    );
+                        /** @type {HTMLSelectElement | null} */ (
+                            opd_column_div.querySelector(".opd_tw_view_mode")
+                        );
+                    let opd_column_scroll_to_top =
+                        /** @type {HTMLElement | null} */ (
+                            opd_column_div.querySelector(
+                                ".opd_column_scroll_to_top",
+                            )
+                        );
                     let column_content_reload = null;
                     // Load column extensions.
                     if (mode != "session_set") {
@@ -1586,16 +1618,16 @@ function run(settings) {
                             opd_column_div.getAttribute("opd_column_width")
                         ) {
                             case "15":
-                                opd_column_width_select.value = 0;
+                                opd_column_width_select.value = "0";
                                 break;
                             case "20":
-                                opd_column_width_select.value = 1;
+                                opd_column_width_select.value = "1";
                                 break;
                             case "30":
-                                opd_column_width_select.value = 2;
+                                opd_column_width_select.value = "2";
                                 break;
                             default:
-                                opd_column_width_select.value = 3;
+                                opd_column_width_select.value = "3";
                                 break;
                         }
                         if (mode != "session_set") {
@@ -1621,7 +1653,7 @@ function run(settings) {
                                         "div[opd_column_type]",
                                     ).setAttribute(
                                         "opd_column_width",
-                                        preset_rem,
+                                        String(preset_rem),
                                     );
                                     this.closest(
                                         "div[opd_column_type]",
@@ -1642,6 +1674,10 @@ function run(settings) {
                                 let column_width_preset = this.closest(
                                     "div[opd_column_type]",
                                 ).querySelector(".opd_column_size_preset");
+                                const column_width_preset_select =
+                                    /** @type {HTMLSelectElement | null} */ (
+                                        column_width_preset
+                                    );
                                 let setting_width = await opd_prompt(
                                     i18n_message("msg_column_width_prompt"),
                                     now_width,
@@ -1658,7 +1694,7 @@ function run(settings) {
                                             "div[opd_column_type]",
                                         ).setAttribute(
                                             "opd_column_width",
-                                            setting_width_num,
+                                            String(setting_width_num),
                                         );
                                         this.closest(
                                             "div[opd_column_type]",
@@ -1670,16 +1706,20 @@ function run(settings) {
                                         );
                                         switch (setting_width_num) {
                                             case 15:
-                                                column_width_preset.value = 0;
+                                                column_width_preset_select.value =
+                                                    "0";
                                                 break;
                                             case 20:
-                                                column_width_preset.value = 1;
+                                                column_width_preset_select.value =
+                                                    "1";
                                                 break;
                                             case 30:
-                                                column_width_preset.value = 2;
+                                                column_width_preset_select.value =
+                                                    "2";
                                                 break;
                                             default:
-                                                column_width_preset.value = 3;
+                                                column_width_preset_select.value =
+                                                    "3";
                                                 break;
                                         }
                                     } else {
@@ -1695,7 +1735,9 @@ function run(settings) {
                     }
 
                     // Support for non-X columns.
-                    if (this.getAttribute("opd_iframe_width_only") != "") {
+                    if (
+                        iframe_elem.getAttribute("opd_iframe_width_only") != ""
+                    ) {
                         // Load and apply banner visibility settings.
                         /*if(opd_column_banner_checkbox.checked == true){
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
@@ -1703,11 +1745,11 @@ function run(settings) {
                         this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
                         if (
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_banner_css]",
                             ) == null
                         ) {
-                            this.contentWindow.document
+                            iframe_elem.contentWindow.document
                                 .querySelector("head")
                                 .insertAdjacentHTML(
                                     "beforeend",
@@ -1716,24 +1758,24 @@ function run(settings) {
                         }
                         if (opd_column_banner_checkbox?.checked != true) {
                             //console.log(this)
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_banner_css]",
                             ).textContent =
                                 `header[role="banner"]{display:none};`;
                         } else {
                             //console.log("else")
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_banner_css]",
                             ).textContent = ``;
                         }
 
                         // Apply top-search-area hide setting.
                         if (
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_top_visible_css]",
                             ) == null
                         ) {
-                            this.contentWindow.document
+                            iframe_elem.contentWindow.document
                                 .querySelector("head")
                                 .insertAdjacentHTML(
                                     "beforeend",
@@ -1743,26 +1785,28 @@ function run(settings) {
                         if (opd_column_top_visible_checkbox?.checked != true) {
                             //console.log("home_notcheck")
                             if (
-                                this.closest(
-                                    "div[opd_column_type]",
-                                ).getAttribute("opd_column_type") == "explore"
+                                iframe_elem
+                                    .closest("div[opd_column_type]")
+                                    .getAttribute("opd_column_type") ==
+                                "explore"
                             ) {
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_top_visible_css]",
                                 ).textContent =
                                     `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                             } else {
                                 if (
-                                    this.closest(
-                                        "div[opd_column_type]",
-                                    ).getAttribute("opd_column_type") == "home"
+                                    iframe_elem
+                                        .closest("div[opd_column_type]")
+                                        .getAttribute("opd_column_type") ==
+                                    "home"
                                 ) {
-                                    this.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow.document.querySelector(
                                         "head style[opd_top_visible_css]",
                                     ).textContent =
                                         `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                 } else {
-                                    this.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow.document.querySelector(
                                         "head style[opd_top_visible_css]",
                                     ).textContent =
                                         `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
@@ -1770,18 +1814,18 @@ function run(settings) {
                             }
                         } else {
                             //console.log("else")
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_top_visible_css]",
                             ).textContent = ``;
                         }
 
                         // Load and apply tweet view mode settings.
                         if (
-                            this.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow.document.querySelector(
                                 "head style[opd_tw_view_mode_css]",
                             ) == null
                         ) {
-                            this.contentWindow.document
+                            iframe_elem.contentWindow.document
                                 .querySelector("head")
                                 .insertAdjacentHTML(
                                     "beforeend",
@@ -1798,24 +1842,24 @@ function run(settings) {
                             )
                         ) {
                             case "0":
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
                                 ).textContent = ``;
                                 break;
                             case "1":
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
                                 ).textContent =
                                     `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                                 break;
                             case "2":
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
                                 ).textContent =
                                     `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                                 break;
                             default:
-                                this.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
                                 ).textContent = ``;
                                 break;
@@ -2040,7 +2084,9 @@ function run(settings) {
                                     "click",
                                     async function () {
                                         const pinned_checkbox =
-                                            /** @type {any} */ (this);
+                                            /** @type {HTMLInputElement} */ (
+                                                this
+                                            );
                                         if (pinned_checkbox.checked) {
                                             if (
                                                 await opd_confirm(
@@ -2116,12 +2162,16 @@ function run(settings) {
                                             ).querySelector(
                                                 ".opd_a_reload_time_setting",
                                             );
+                                        const auto_reload_time_input_element =
+                                            /** @type {HTMLInputElement} */ (
+                                                auto_reload_time_input
+                                            );
                                         const auto_reload_time =
                                             Number(
-                                                auto_reload_time_input.value,
+                                                auto_reload_time_input_element.value,
                                             ) * 1000;
                                         if (this.checked) {
-                                            auto_reload_time_input.disabled = true;
+                                            auto_reload_time_input_element.disabled = true;
                                             auto_reload_int = setInterval(
                                                 function () {
                                                     //console.log("update!")
@@ -2174,7 +2224,7 @@ function run(settings) {
                                                 last_load_profile,
                                             );
                                         } else {
-                                            auto_reload_time_input.disabled = false;
+                                            auto_reload_time_input_element.disabled = false;
                                             //console.log("update stop!")
                                             clearInterval(auto_reload_int);
                                             column_settings_save(
@@ -2244,7 +2294,7 @@ function run(settings) {
 
                     // Clicking column bar empty area scrolls to top.
                     opd_column_scroll_to_top.addEventListener("click", (e) => {
-                        this.contentWindow.scrollTo({
+                        iframe_elem.contentWindow.scrollTo({
                             top: 0,
                             behavior: "auto",
                         });
@@ -2383,7 +2433,7 @@ function run(settings) {
                 chrome.runtime
                     .sendMessage({ message: "dnr_upd" })
                     .then((value) => {
-                        if (value == true) {
+                        if (/** @type {boolean} */ (value) == true) {
                             request_page_reload();
                         }
                     });
@@ -2719,7 +2769,7 @@ function run(settings) {
                             function (load_value) {
                                 last_load_profile = after_profile_num;
                                 let load_setting = JSON.parse(
-                                    load_value.opd_settings,
+                                    String(load_value.opd_settings),
                                 );
                                 load_setting.last_load_profile =
                                     after_profile_num;
@@ -2858,10 +2908,14 @@ function run(settings) {
             "#opd_main_element div[opd_column_type]",
         );
         for (let index = 0; index < columns.length; index++) {
-            const banner_checked =
-                columns[index].querySelector(".opd_banner")?.checked == true;
-            const top_visible_checked =
-                columns[index].querySelector(".opd_top_bar")?.checked == true;
+            const banner_checkbox = /** @type {HTMLInputElement | null} */ (
+                columns[index].querySelector(".opd_banner")
+            );
+            const top_bar_checkbox = /** @type {HTMLInputElement | null} */ (
+                columns[index].querySelector(".opd_top_bar")
+            );
+            const banner_checked = banner_checkbox?.checked == true;
+            const top_visible_checked = top_bar_checkbox?.checked == true;
             let tw_view_type = "0";
             let column_open_path = "";
             let column_pinned_save_path = "";
@@ -2900,8 +2954,9 @@ function run(settings) {
                 columns[index].getAttribute("opd_column_type") == "home"
             ) {
                 if (
-                    columns[index].querySelector(".opd_a_reload_bar")
-                        ?.checked == true
+                    /** @type {HTMLInputElement | null} */ (
+                        columns[index].querySelector(".opd_a_reload_bar")
+                    )?.checked == true
                 ) {
                     column_auto_reload = true;
                 } else {
@@ -2953,6 +3008,7 @@ function run(settings) {
                     //console.log(settings_array);
                 },
             );
+            return null;
         }
     }
     // Create random ID.
@@ -2974,8 +3030,14 @@ function run(settings) {
     // Watch title changes.
     new MutationObserver(function () {
         document.title = "XPP-Deck";
-        document.querySelector('link[rel="shortcut icon"]').href =
-            chrome.runtime.getURL("public/icons/logo_icon.svg");
+        const shortcut_icon = /** @type {HTMLLinkElement | null} */ (
+            document.querySelector('link[rel="shortcut icon"]')
+        );
+        if (shortcut_icon) {
+            shortcut_icon.href = chrome.runtime.getURL(
+                "public/icons/logo_icon.svg",
+            );
+        }
         // Remove default CSS so it does not affect UI.
         if (!is_removed_default_style) {
             document.head.querySelectorAll("style").forEach((style) => {

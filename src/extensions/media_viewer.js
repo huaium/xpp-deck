@@ -1,15 +1,29 @@
 // Media viewer.
+/**
+ * @typedef {{ url: string }} MediaVariant
+ * @typedef {{
+ *   type: "photo" | "animated_gif" | "video";
+ *   media_url_https?: string;
+ *   id_str?: string;
+ *   video_info?: { variants: MediaVariant[] };
+ * }} MediaInfo
+ */
 class OpdExtMediaViewer {
     constructor() {
+        /** @param {MediaInfo[]} media_info @param {number} pre_index */
         this.Preview = (media_info, pre_index) => {
             let current_media_idx = pre_index;
             const media_viewer_div = document.createElement("div");
             const media_viewer_dialog = document.createElement("dialog");
+            /** @param {number} idx */
             const mediaHTMLAt = (idx) => {
                 const info = media_info[idx];
                 if (!info) return "";
 
-                if (["animated_gif", "video"].includes(info.type)) {
+                if (
+                    ["animated_gif", "video"].includes(info.type) &&
+                    info.video_info?.variants?.length
+                ) {
                     return `
                     <video data-media
                         style="width:auto;height:auto;max-width:calc(100% - 160px);max-height:100%;object-fit:contain;"
@@ -31,17 +45,20 @@ class OpdExtMediaViewer {
                 return "";
             };
 
+            /** @param {Element | null} elem */
             const stopVideo = (elem) => {
                 if (!elem || elem.tagName !== "VIDEO") return;
+                const video = /** @type {HTMLVideoElement} */ (elem);
                 try {
-                    elem.pause();
-                    elem.removeAttribute("src");
-                    elem.load();
+                    video.pause();
+                    video.removeAttribute("src");
+                    video.load();
                 } catch {
                     // no-op: media may already be detached
                 }
             };
 
+            /** @param {number} idx */
             const setMedia = (idx) => {
                 const current =
                     media_viewer_dialog.querySelector("[data-media]");
@@ -52,15 +69,22 @@ class OpdExtMediaViewer {
 
                 if (
                     ["animated_gif", "video"].includes(nextInfo.type) &&
-                    current.tagName === "VIDEO"
+                    current.tagName === "VIDEO" &&
+                    nextInfo.video_info?.variants?.length
                 ) {
-                    current.src = nextInfo.video_info.variants.at(-1).url;
-                    current.load();
-                    current.play();
+                    const video = /** @type {HTMLVideoElement} */ (current);
+                    video.src = nextInfo.video_info.variants.at(-1).url;
+                    video.load();
+                    video.play();
                     return;
                 }
-                if (nextInfo.type === "photo" && current.tagName === "IMG") {
-                    current.src = nextInfo.media_url_https + "?name=orig";
+                if (
+                    nextInfo.type === "photo" &&
+                    current.tagName === "IMG" &&
+                    nextInfo.media_url_https
+                ) {
+                    const image = /** @type {HTMLImageElement} */ (current);
+                    image.src = nextInfo.media_url_https + "?name=orig";
                     return;
                 }
 
@@ -71,10 +95,13 @@ class OpdExtMediaViewer {
 
                 current.replaceWith(next_elment);
                 if (next_elment.tagName === "VIDEO") {
+                    const next_video = /** @type {HTMLVideoElement} */ (
+                        next_elment
+                    );
                     next_elment.addEventListener(
                         "loadedmetadata",
                         () => {
-                            next_elment.volume = 0.2;
+                            next_video.volume = 0.2;
                         },
                         { once: true },
                     );
@@ -150,9 +177,17 @@ class OpdExtMediaViewer {
                 current_media_idx,
             );
 
-            media_viewer_dialog
-                .querySelector("[data-media-forward]")
-                .addEventListener("click", () => {
+            const forward_button = /** @type {HTMLButtonElement | null} */ (
+                media_viewer_dialog.querySelector("[data-media-forward]")
+            );
+            const next_button = /** @type {HTMLButtonElement | null} */ (
+                media_viewer_dialog.querySelector("[data-media-next]")
+            );
+            const download_button = /** @type {HTMLButtonElement | null} */ (
+                media_viewer_dialog.querySelector("[data-media-download]")
+            );
+            if (forward_button) {
+                forward_button.addEventListener("click", () => {
                     this.SkipBtnDisabled(
                         media_viewer_dialog,
                         media_info,
@@ -163,22 +198,34 @@ class OpdExtMediaViewer {
 
                     const current_media_elem =
                         media_viewer_dialog.querySelector("[data-media]");
-                    const forward_idx = current_media_idx - 1;
-
                     if (
-                        ["animated_gif", "video"].includes(
-                            media_info[forward_idx]?.type,
+                        !current_media_elem ||
+                        !(
+                            current_media_elem instanceof HTMLImageElement ||
+                            current_media_elem instanceof HTMLVideoElement
                         )
                     ) {
-                        current_media_elem.src =
-                            media_info[forward_idx].video_info.variants.at(
-                                -1,
-                            ).url;
+                        return;
                     }
-                    if (media_info[forward_idx]?.type === "photo") {
+                    const forward_idx = current_media_idx - 1;
+                    const forward_media = media_info[forward_idx];
+                    if (!forward_media) return;
+
+                    if (
+                        ["animated_gif", "video"].includes(forward_media.type)
+                    ) {
+                        const video_url =
+                            forward_media.video_info?.variants?.at(-1)?.url;
+                        if (video_url) {
+                            current_media_elem.src = video_url;
+                        }
+                    }
+                    if (
+                        forward_media.type === "photo" &&
+                        forward_media.media_url_https
+                    ) {
                         current_media_elem.src =
-                            media_info[forward_idx].media_url_https +
-                            "?name=orig";
+                            forward_media.media_url_https + "?name=orig";
                     }
                     current_media_idx -= 1;
 
@@ -190,10 +237,10 @@ class OpdExtMediaViewer {
                         current_media_idx,
                     );
                 });
+            }
 
-            media_viewer_dialog
-                .querySelector("[data-media-next]")
-                .addEventListener("click", () => {
+            if (next_button) {
+                next_button.addEventListener("click", () => {
                     const next_idx = current_media_idx + 1;
 
                     if (media_info.length === next_idx) return;
@@ -201,16 +248,29 @@ class OpdExtMediaViewer {
                     const current_media_elem =
                         media_viewer_dialog.querySelector("[data-media]");
                     if (
-                        ["animated_gif", "video"].includes(
-                            media_info[next_idx]?.type,
+                        !current_media_elem ||
+                        !(
+                            current_media_elem instanceof HTMLImageElement ||
+                            current_media_elem instanceof HTMLVideoElement
                         )
                     ) {
-                        current_media_elem.src =
-                            media_info[next_idx].video_info.variants.at(-1).url;
+                        return;
                     }
-                    if (media_info[next_idx]?.type === "photo") {
+                    const next_media = media_info[next_idx];
+                    if (!next_media) return;
+                    if (["animated_gif", "video"].includes(next_media.type)) {
+                        const video_url =
+                            next_media.video_info?.variants?.at(-1)?.url;
+                        if (video_url) {
+                            current_media_elem.src = video_url;
+                        }
+                    }
+                    if (
+                        next_media.type === "photo" &&
+                        next_media.media_url_https
+                    ) {
                         current_media_elem.src =
-                            media_info[next_idx].media_url_https + "?name=orig";
+                            next_media.media_url_https + "?name=orig";
                     }
                     current_media_idx += 1;
 
@@ -222,16 +282,18 @@ class OpdExtMediaViewer {
                         current_media_idx,
                     );
                 });
+            }
 
-            media_viewer_dialog
-                .querySelector("[data-media-download]")
-                .addEventListener("click", () => {
+            if (download_button) {
+                download_button.addEventListener("click", () => {
                     this.DownloadMedia(media_info[current_media_idx]);
                 });
+            }
 
             media_viewer_dialog.showModal();
         };
 
+        /** @param {HTMLDialogElement} dialog_elem @param {MediaInfo[]} media_info @param {number} current_media_idx */
         this.SkipBtnDisabled = (dialog_elem, media_info, current_media_idx) => {
             const next_btn = dialog_elem.querySelector("[data-media-next]");
             const prev_btn = dialog_elem.querySelector("[data-media-forward]");
@@ -256,14 +318,20 @@ class OpdExtMediaViewer {
                     break;
             }
         };
+        /** @param {MediaInfo | undefined} media */
         this.DownloadMedia = async (media) => {
             let media_src = null;
-            if (["animated_gif", "video"].includes(media?.type)) {
+            if (
+                media &&
+                ["animated_gif", "video"].includes(media.type) &&
+                media.video_info?.variants?.length
+            ) {
                 media_src = media.video_info.variants.at(-1).url;
             }
-            if (media?.type === "photo") {
+            if (media?.type === "photo" && media.media_url_https) {
                 media_src = media.media_url_https + "?name=orig";
             }
+            if (!media_src) return;
             const res = await fetch(media_src);
             const blob = await res.blob();
 

@@ -31,6 +31,7 @@ class OpdExtAutoReload {
                     detail: JSON.stringify({ token: this.opd_reload_token }),
                 }),
             );
+            return true;
         };
     }
 }

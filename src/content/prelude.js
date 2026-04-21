@@ -20,6 +20,7 @@ const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
 let apply_ui_color = null;
 const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
+/** @type {NonNullable<Window["__opdBootstrap"]>} */
 const opd_bootstrap = window.__opdBootstrap || {};
 const beforeunload_bypass_key =
     opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
@@ -55,6 +56,7 @@ function i18n_message(message_name, substitutions) {
     }
     return chrome.i18n.getMessage(message_name, substitutions);
 }
+/** @param {string} key @returns {Promise<Record<string, unknown>>} */
 function get_storage_local_async(key) {
     return new Promise((resolve) => {
         chrome.storage.local.get(key, (value) => resolve(value));
@@ -440,6 +442,7 @@ function is_opd_dark_theme_enabled() {
 function open_opd_dialog({ message, type, defaultValue }) {
     return enqueue_opd_dialog(
         () =>
+            /** @returns {Promise<void | boolean | string | null>} */
             new Promise((resolve) => {
                 ensure_opd_dialog_style();
                 const overlay = document.createElement("div");
@@ -455,6 +458,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                 message_elem.className = "opd_dialog_message";
                 message_elem.textContent = `${message}`;
                 dialog.appendChild(message_elem);
+                /** @type {HTMLInputElement | null} */
                 let prompt_input = null;
                 if (type == "prompt") {
                     prompt_input = document.createElement("input");
@@ -472,6 +476,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                     "OK",
                 );
                 ok_button.className = "opd_dialog_primary";
+                /** @type {HTMLButtonElement | null} */
                 let cancel_button = null;
                 if (type != "alert") {
                     cancel_button = document.createElement("button");
@@ -493,16 +498,16 @@ function open_opd_dialog({ message, type, defaultValue }) {
                             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                         ),
                     ).filter((elem) => {
-                        return !elem.hasAttribute("disabled");
+                        return (
+                            elem instanceof HTMLElement &&
+                            !elem.hasAttribute("disabled")
+                        );
                     });
 
                 const finish = (result) => {
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
-                    if (
-                        previous_active_element != null &&
-                        typeof previous_active_element.focus == "function"
-                    ) {
+                    if (previous_active_element instanceof HTMLElement) {
                         previous_active_element.focus();
                     }
                     resolve(result);
@@ -517,9 +522,12 @@ function open_opd_dialog({ message, type, defaultValue }) {
                             event.preventDefault();
                             return;
                         }
-                        const first_elem = focusable_elements[0];
-                        const last_elem =
-                            focusable_elements[focusable_elements.length - 1];
+                        const first_elem = /** @type {HTMLElement} */ (
+                            focusable_elements[0]
+                        );
+                        const last_elem = /** @type {HTMLElement} */ (
+                            focusable_elements[focusable_elements.length - 1]
+                        );
                         const active_elem = document.activeElement;
                         if (event.shiftKey) {
                             if (
@@ -593,19 +601,17 @@ async function opd_alert(message) {
 }
 /** @param {string} message @returns {Promise<boolean>} */
 async function opd_confirm(message) {
-    return /** @type {Promise<boolean>} */ (
-        open_opd_dialog({ message, type: "confirm" })
-    );
+    const result = await open_opd_dialog({ message, type: "confirm" });
+    return result === true;
 }
 /** @param {string} message @param {string} [defaultValue=""] @returns {Promise<string | null>} */
 async function opd_prompt(message, defaultValue = "") {
-    return /** @type {Promise<string | null>} */ (
-        open_opd_dialog({
-            message,
-            type: "prompt",
-            defaultValue,
-        })
-    );
+    const result = await open_opd_dialog({
+        message,
+        type: "prompt",
+        defaultValue,
+    });
+    return typeof result === "string" ? result : null;
 }
 async function open_about_page_modal() {
     return enqueue_opd_dialog(
@@ -683,15 +689,17 @@ async function open_about_page_modal() {
                         dialog.querySelectorAll(
                             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                         ),
-                    ).filter((elem) => !elem.hasAttribute("disabled"));
+                    ).filter((elem) => {
+                        return (
+                            elem instanceof HTMLElement &&
+                            !elem.hasAttribute("disabled")
+                        );
+                    });
 
                 const finish = () => {
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
-                    if (
-                        previous_active_element != null &&
-                        typeof previous_active_element.focus == "function"
-                    ) {
+                    if (previous_active_element instanceof HTMLElement) {
                         previous_active_element.focus();
                     }
                     resolve();
@@ -706,9 +714,12 @@ async function open_about_page_modal() {
                             event.preventDefault();
                             return;
                         }
-                        const first_elem = focusable_elements[0];
-                        const last_elem =
-                            focusable_elements[focusable_elements.length - 1];
+                        const first_elem = /** @type {HTMLElement} */ (
+                            focusable_elements[0]
+                        );
+                        const last_elem = /** @type {HTMLElement} */ (
+                            focusable_elements[focusable_elements.length - 1]
+                        );
                         const active_elem = document.activeElement;
                         if (event.shiftKey) {
                             if (
@@ -761,20 +772,32 @@ document.addEventListener("keyup", (event) => {
 // Watch storage updates (mainly for API rate-limit status).
 let api_limit_obj = null;
 let api_limit_dsc_obj = { time_line: "", recommend_timeline: "", search: "" };
+/**
+ * @typedef {{
+ *   search: { limit: number | string | null; remaining: number | string | null; reset_unix_time: number | string | null };
+ *   time_line: { limit: number | string | null; remaining: number | string | null; reset_unix_time: number | string | null };
+ *   recommend_timeline: { limit: number | string | null; remaining: number | string | null; reset_unix_time: number | string | null };
+ * }} ApiAccessLimit
+ */
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (changes.api_access_limit != undefined) {
         //console.log(changes)
-        api_limit_obj = changes.api_access_limit.newValue;
+        api_limit_obj = /** @type {ApiAccessLimit} */ (
+            changes.api_access_limit.newValue
+        );
         const api_linit_status_btn =
             document.querySelector("#api_limit_status");
         if (api_linit_status_btn != null) {
+            const api_limit_status_element = /** @type {HTMLElement} */ (
+                api_linit_status_btn
+            );
             let timeline_limit_percentage = 99999;
             let recommend_timeline_limit_percentage = 99999;
             let search_limit_percentage = 99999;
             if (api_limit_obj.time_line.remaining != null) {
                 timeline_limit_percentage =
-                    (api_limit_obj.time_line.remaining /
-                        api_limit_obj.time_line.limit) *
+                    (Number(api_limit_obj.time_line.remaining) /
+                        Number(api_limit_obj.time_line.limit)) *
                     100;
                 api_limit_dsc_obj.time_line = `${i18n_message("label_api_timeline")}${api_limit_obj.time_line.remaining}/${api_limit_obj.time_line.limit}-${unix_time_mmss(api_limit_obj.time_line.reset_unix_time)}\r\n`;
             } else {
@@ -782,8 +805,8 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
             }
             if (api_limit_obj.recommend_timeline.remaining != null) {
                 recommend_timeline_limit_percentage =
-                    (api_limit_obj.recommend_timeline.remaining /
-                        api_limit_obj.recommend_timeline.limit) *
+                    (Number(api_limit_obj.recommend_timeline.remaining) /
+                        Number(api_limit_obj.recommend_timeline.limit)) *
                     100;
                 api_limit_dsc_obj.recommend_timeline = `${i18n_message("label_api_recommend_timeline")}${api_limit_obj.recommend_timeline.remaining}/${api_limit_obj.recommend_timeline.limit}-${unix_time_mmss(api_limit_obj.recommend_timeline.reset_unix_time)}\r\n`;
             } else {
@@ -791,15 +814,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
             }
             if (api_limit_obj.search.remaining != null) {
                 search_limit_percentage =
-                    (api_limit_obj.search.remaining /
-                        api_limit_obj.search.limit) *
+                    (Number(api_limit_obj.search.remaining) /
+                        Number(api_limit_obj.search.limit)) *
                     100;
                 api_limit_dsc_obj.search = `${i18n_message("label_api_search")}${api_limit_obj.search.remaining}/${api_limit_obj.search.limit}-${unix_time_mmss(api_limit_obj.search.reset_unix_time)}`;
             } else {
                 // Initial state.
             }
-            api_linit_status_btn.textContent = `${Math.floor(Math.min(timeline_limit_percentage, recommend_timeline_limit_percentage, search_limit_percentage))}%`;
-            api_linit_status_btn.title = `${i18n_message("msg_api_limit_status_title", [`${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`])}`;
+            api_limit_status_element.textContent = `${Math.floor(Math.min(timeline_limit_percentage, recommend_timeline_limit_percentage, search_limit_percentage))}%`;
+            api_limit_status_element.title = `${i18n_message("msg_api_limit_status_title", [`${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`])}`;
         }
     }
 });
@@ -814,17 +837,17 @@ if (
         console.log("testmode");
         chrome.runtime
             .sendMessage({ message: "dnr_upd_internal_dsp" })
-            .then((value) => {
+            .then(() => {
                 init();
             });
     } else {
         if (navigator.brave != undefined) {
-            chrome.runtime.sendMessage({ message: "dnr_upd" }).then((value) => {
+            chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
                 init();
             });
             //init();
         } else {
-            chrome.runtime.sendMessage({ message: "dnr_upd" }).then((value) => {
+            chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
                 init();
             });
         }
@@ -838,9 +861,9 @@ if (
                 last_load_profile = 0;
                 settings_init();
             } else {
+                const opd_settings_raw = String(value.opd_settings);
                 if (
-                    JSON.parse(value.opd_settings).last_load_profile ==
-                    undefined
+                    JSON.parse(opd_settings_raw).last_load_profile == undefined
                 ) {
                     if (
                         await opd_confirm(
@@ -859,9 +882,8 @@ if (
                         last_load_profile = 0;
                     }
                 } else {
-                    last_load_profile = JSON.parse(
-                        value.opd_settings,
-                    ).last_load_profile;
+                    last_load_profile =
+                        JSON.parse(opd_settings_raw).last_load_profile;
                 }
                 //console.log(last_load_profile);
             }
@@ -871,13 +893,15 @@ if (
                 async function (store_value) {
                     //console.log(store_value)
                     //console.log(JSON.parse(store_value.opd_profile_store))
-                    profile_store = JSON.parse(store_value.opd_profile_store);
+                    profile_store = JSON.parse(
+                        String(store_value.opd_profile_store),
+                    );
                     //RUN
                     let ext_update_flag = null;
                     let ext_settings;
                     if (value.opd_settings != undefined) {
                         if (
-                            JSON.parse(value.opd_settings).version !=
+                            JSON.parse(String(value.opd_settings)).version !=
                             manifest.version
                         ) {
                             ext_update_flag = true;
@@ -896,7 +920,7 @@ if (
                             undefined
                         ) {
                             let recovery_setting = JSON.parse(
-                                value.opd_settings,
+                                String(value.opd_settings),
                             );
                             recovery_setting.last_load_profile = 0;
                             chrome.storage.local.set(
@@ -918,7 +942,9 @@ if (
 
                         // Bump settings version when the extension is updated.
                         if (ext_update_flag) {
-                            const setting = JSON.parse(value.opd_settings);
+                            const setting = JSON.parse(
+                                String(value.opd_settings),
+                            );
                             setting.version = manifest.version;
                             chrome.storage.local.set(
                                 { opd_settings: JSON.stringify(setting) },
@@ -948,7 +974,7 @@ if (
                             undefined
                         ) {
                             let recovery_setting = JSON.parse(
-                                value.opd_settings,
+                                String(value.opd_settings),
                             );
                             recovery_setting.last_load_profile = 0;
                             chrome.storage.local.set(
