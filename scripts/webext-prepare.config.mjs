@@ -1,0 +1,20 @@
+export const prepareConfig = {
+    sourceDir: ".",
+    outputDir: ".web-ext-firefox-src",
+    firefoxManifestFile: "manifest_firefox.json",
+    outputManifestFile: "manifest.json",
+    rsyncExcludes: [
+        ".git",
+        ".github",
+        ".serena",
+        ".codex",
+        ".DS_Store",
+        "package",
+        "package_tmp",
+        "web-ext-artifacts",
+        ".web-ext-firefox-src",
+        ".webext-profile",
+        "node_modules",
+        "pnpm-lock.yaml",
+    ],
+};
