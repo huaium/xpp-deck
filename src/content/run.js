@@ -19,7 +19,9 @@ function run(settings) {
         }
     });
     // Insert CSS tags.
-    document.querySelector("head").insertAdjacentHTML(
+    const document_head = document.head;
+    if (!document_head) return;
+    document_head.insertAdjacentHTML(
         "afterbegin",
         `<style second_column_css></style>
     <style opd_default_css>
@@ -1043,27 +1045,38 @@ function run(settings) {
     ins_html.innerHTML = `${side_bar}<div id="main_rack_element" style=""><div id="first_rack_element" style="height: 100%;display:flex;flex-direction:row;">${main_column_html}</div><div id="second_rack_element" style="display:flex;flex-direction:row;">${second_column_html}</div></div>`;
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
-    const opd_main_element = document.querySelector("#opd_main_element");
-    const sidebar_toggle_button = /** @type {HTMLElement} */ (
+    const opd_main_element = /** @type {HTMLElement | null} */ (
+        document.querySelector("#opd_main_element")
+    );
+    const sidebar_toggle_button = /** @type {HTMLElement | null} */ (
         document.querySelector("#sidebar_fold_toggle")
     );
-    const switch_theme_button = document.querySelector("#switch_theme");
-    const language_select = document.querySelector("#opd_language_select");
-    const sidebar_toggle_label =
-        sidebar_toggle_button.querySelector(".dsp_btn_label");
+    if (!opd_main_element || !sidebar_toggle_button) {
+        return;
+    }
+    const switch_theme_button = /** @type {HTMLElement | null} */ (
+        document.querySelector("#switch_theme")
+    );
+    const language_select = /** @type {HTMLSelectElement | null} */ (
+        document.querySelector("#opd_language_select")
+    );
+    const sidebar_toggle_label = /** @type {HTMLElement | null} */ (
+        sidebar_toggle_button.querySelector(".dsp_btn_label")
+    );
+    if (!sidebar_toggle_label) return;
+    const opd_main_root = opd_main_element;
+    const sidebar_toggle_root = sidebar_toggle_button;
+    const sidebar_toggle_text = sidebar_toggle_label;
     function apply_sidebar_collapsed_state(is_collapsed) {
-        opd_main_element.classList.toggle(
-            "opd_sidebar_collapsed",
-            is_collapsed,
-        );
-        sidebar_toggle_button.classList.toggle(
+        opd_main_root.classList.toggle("opd_sidebar_collapsed", is_collapsed);
+        sidebar_toggle_root.classList.toggle(
             "opd_sidebar_toggle_is_collapsed",
             is_collapsed,
         );
-        sidebar_toggle_button.title = is_collapsed
+        sidebar_toggle_root.title = is_collapsed
             ? i18n_message("ui_sidebar_expand_title")
             : i18n_message("ui_sidebar_collapse_title");
-        sidebar_toggle_label.textContent = is_collapsed
+        sidebar_toggle_text.textContent = is_collapsed
             ? i18n_message("ui_sidebar_expand_label")
             : i18n_message("ui_sidebar_collapse_label");
     }
@@ -1157,50 +1170,78 @@ function run(settings) {
             );
         }
     }
-    document
-        .querySelector("#api_limit_status")
-        .addEventListener("click", async function (event) {
+    const api_limit_status = document.querySelector("#api_limit_status");
+    if (api_limit_status) {
+        api_limit_status.addEventListener("click", async function (event) {
             event.stopPropagation();
             await show_api_limit_status();
         });
-    document
-        .querySelector("#api_limit_status_button")
-        .addEventListener("click", show_api_limit_status);
+    }
+    const api_limit_status_button = document.querySelector(
+        "#api_limit_status_button",
+    );
+    if (api_limit_status_button) {
+        api_limit_status_button.addEventListener(
+            "click",
+            show_api_limit_status,
+        );
+    }
     // Open About page.
-    document
-        .querySelector(".opd_ui_logo")
-        .addEventListener("click", async function () {
+    const ui_logo = document.querySelector(".opd_ui_logo");
+    if (ui_logo) {
+        ui_logo.addEventListener("click", async function () {
             await open_about_page_modal();
         });
+    }
     // Show debug menu.
     let debug_menu_click_counter = 0;
-    document
-        .querySelector(".opd_version_span")
-        .addEventListener("click", async function () {
+    const version_span = document.querySelector(".opd_version_span");
+    if (version_span) {
+        version_span.addEventListener("click", async function () {
             if (debug_menu_click_counter >= 7) {
                 await opd_alert(i18n_message("msg_debug_menu_enabled"));
-                document.querySelector(".opd_debug_menu").style.display =
-                    "block";
+                const debug_menu = document.querySelector(".opd_debug_menu");
+                if (debug_menu instanceof HTMLElement) {
+                    debug_menu.style.display = "block";
+                }
             } else {
                 debug_menu_click_counter += 1;
             }
         });
+    }
     // Handle case where second row exists.
     if (first_column_end == true && second_column_end == true) {
         second_rack_mode = true;
-        document.querySelector("#first_rack_element").style.height = "50vh";
-        document.querySelector("#second_rack_element").style.height = "50vh";
+        const first_rack_element = document.querySelector(
+            "#first_rack_element",
+        );
+        const second_rack_element = document.querySelector(
+            "#second_rack_element",
+        );
+        const second_rack_input = /** @type {HTMLInputElement | null} */ (
+            document.querySelector("#second_rack")
+        );
+        const second_rack_icon = /** @type {HTMLElement | null} */ (
+            document.querySelector(".dsp_btn_second_rack_img")
+        );
+        if (first_rack_element instanceof HTMLElement) {
+            first_rack_element.style.height = "50vh";
+        }
+        if (second_rack_element instanceof HTMLElement) {
+            second_rack_element.style.height = "50vh";
+        }
         /*for (let index = 0; index < document.querySelectorAll('.dsp_column[draggable="true"]').length; index++) {
             document.querySelectorAll('.dsp_column[draggable="true"]')[index].style.height = "calc(100% - 25px)";
         }*/
 
         //document.querySelector("style[second_column_css]").textContent = `#second_rack_element .dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
 
-        document.querySelector("#second_rack").value = "Single Rack";
-        document.querySelector(
-            ".dsp_btn_second_rack_img",
-        ).style.backgroundImage =
-            `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
+        if (second_rack_input) {
+            second_rack_input.value = "Single Rack";
+        }
+        if (second_rack_icon) {
+            second_rack_icon.style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
+        }
     }
     //
     create_profile_list_btn();
@@ -1211,128 +1252,123 @@ function run(settings) {
     function create_profile_list_btn() {
         // Initialize profile switch events.
         for (let index = 0; index < profile_store.length; index++) {
-            document
-                .querySelector(`#userProfile-${index}`)
-                .addEventListener("click", async function () {
-                    //console.log(profile_store[index].profile)
-                    const preload_array = profile_store[index].profile;
-                    let preload_desc_array = new Array();
-                    let preload_desc_count = 0;
-                    for (
-                        let preload_index = 0;
-                        preload_index < preload_array.length;
-                        preload_index++
-                    ) {
-                        switch (preload_array[preload_index].type) {
-                            case "dsp_column":
-                                preload_desc_count = 0;
-                                break;
-                            case "main_bar_empty_column":
-                                preload_desc_count = 0;
-                                break;
-                            case "empty_column":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_first_row_end",
-                                    ),
-                                );
-                                preload_desc_count = 0;
-                                break;
-                            case "second_empty_column":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_second_row_end",
-                                    ),
-                                );
-                                preload_desc_count = 0;
-                                break;
-                            case "post":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_post_column",
-                                        [preload_desc_count],
-                                    ),
-                                );
-                                break;
-                            case "home":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_timeline_column",
-                                        [preload_desc_count],
-                                    ),
-                                );
-                                break;
-                            case "notification":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_notification_column",
-                                        [preload_desc_count],
-                                    ),
-                                );
-                                break;
-                            case "explore":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_explore_column",
-                                        [
-                                            preload_desc_count,
-                                            preload_array[preload_index]
-                                                .column_save_title,
-                                        ],
-                                    ),
-                                );
-                                break;
-                            case "misskey":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_misskey_column",
-                                    ),
-                                );
-                                break;
-                            case "bsky":
-                                preload_desc_array.push(
-                                    i18n_message(
-                                        "msg_profile_desc_bluesky_column",
-                                    ),
-                                );
-                                break;
-                            default:
-                                preload_desc_count = 0;
-                                break;
-                        }
-                        preload_desc_count += 1;
+            const profile_button = document.querySelector(
+                `#userProfile-${index}`,
+            );
+            if (!profile_button) {
+                continue;
+            }
+            profile_button.addEventListener("click", async function () {
+                //console.log(profile_store[index].profile)
+                const preload_array = profile_store[index].profile;
+                let preload_desc_array = new Array();
+                let preload_desc_count = 0;
+                for (
+                    let preload_index = 0;
+                    preload_index < preload_array.length;
+                    preload_index++
+                ) {
+                    switch (preload_array[preload_index].type) {
+                        case "dsp_column":
+                            preload_desc_count = 0;
+                            break;
+                        case "main_bar_empty_column":
+                            preload_desc_count = 0;
+                            break;
+                        case "empty_column":
+                            preload_desc_array.push(
+                                i18n_message("msg_profile_desc_first_row_end"),
+                            );
+                            preload_desc_count = 0;
+                            break;
+                        case "second_empty_column":
+                            preload_desc_array.push(
+                                i18n_message("msg_profile_desc_second_row_end"),
+                            );
+                            preload_desc_count = 0;
+                            break;
+                        case "post":
+                            preload_desc_array.push(
+                                i18n_message("msg_profile_desc_post_column", [
+                                    preload_desc_count,
+                                ]),
+                            );
+                            break;
+                        case "home":
+                            preload_desc_array.push(
+                                i18n_message(
+                                    "msg_profile_desc_timeline_column",
+                                    [preload_desc_count],
+                                ),
+                            );
+                            break;
+                        case "notification":
+                            preload_desc_array.push(
+                                i18n_message(
+                                    "msg_profile_desc_notification_column",
+                                    [preload_desc_count],
+                                ),
+                            );
+                            break;
+                        case "explore":
+                            preload_desc_array.push(
+                                i18n_message(
+                                    "msg_profile_desc_explore_column",
+                                    [
+                                        preload_desc_count,
+                                        preload_array[preload_index]
+                                            .column_save_title,
+                                    ],
+                                ),
+                            );
+                            break;
+                        case "misskey":
+                            preload_desc_array.push(
+                                i18n_message("msg_profile_desc_misskey_column"),
+                            );
+                            break;
+                        case "bsky":
+                            preload_desc_array.push(
+                                i18n_message("msg_profile_desc_bluesky_column"),
+                            );
+                            break;
+                        default:
+                            preload_desc_count = 0;
+                            break;
                     }
-                    //console.log(preload_desc_array)
-                    if (
-                        await opd_confirm(
-                            `${i18n_message("msg_profile_load_confirm", [index + 1, preload_desc_array.join("\r\n")])}`,
-                        )
-                    ) {
-                        document.querySelector("#opd_main_element").remove();
-                        last_load_profile = index;
-                        chrome.storage.local.get(
-                            "opd_settings",
-                            function (value) {
-                                let load_setting = JSON.parse(
-                                    String(value.opd_settings),
-                                );
-                                load_setting.last_load_profile = index;
-                                chrome.storage.local.set(
-                                    {
-                                        opd_settings:
-                                            JSON.stringify(load_setting),
-                                    },
-                                    function () {},
-                                );
-                            },
+                    preload_desc_count += 1;
+                }
+                //console.log(preload_desc_array)
+                if (
+                    await opd_confirm(
+                        `${i18n_message("msg_profile_load_confirm", [index + 1, preload_desc_array.join("\r\n")])}`,
+                    )
+                ) {
+                    const current_main =
+                        document.querySelector("#opd_main_element");
+                    if (current_main) {
+                        current_main.remove();
+                    }
+                    last_load_profile = index;
+                    chrome.storage.local.get("opd_settings", function (value) {
+                        let load_setting = JSON.parse(
+                            String(value.opd_settings),
                         );
-                        const column_settings = {
-                            column_settings: profile_store[index].profile,
-                        };
-                        //console.log(column_settings)
-                        run(column_settings);
-                    }
-                });
+                        load_setting.last_load_profile = index;
+                        chrome.storage.local.set(
+                            {
+                                opd_settings: JSON.stringify(load_setting),
+                            },
+                            function () {},
+                        );
+                    });
+                    const column_settings = {
+                        column_settings: profile_store[index].profile,
+                    };
+                    //console.log(column_settings)
+                    run(column_settings);
+                }
+            });
         }
     }
     // Apply CSS (called on add/update).
@@ -1471,29 +1507,31 @@ function run(settings) {
                                 `<style opd_tw_view_mode_css></style>`,
                             );
                     }
-                    switch (opd_column_tw_view_mode_opt.value) {
-                        case "0":
-                            iframe_elem.contentWindow.document.querySelector(
-                                "head style[opd_tw_view_mode_css]",
-                            ).textContent = ``;
-                            break;
-                        case "1":
-                            iframe_elem.contentWindow.document.querySelector(
-                                "head style[opd_tw_view_mode_css]",
-                            ).textContent =
-                                `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
-                            break;
-                        case "2":
-                            iframe_elem.contentWindow.document.querySelector(
-                                "head style[opd_tw_view_mode_css]",
-                            ).textContent =
-                                `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
-                            break;
-                        default:
-                            iframe_elem.contentWindow.document.querySelector(
-                                "head style[opd_tw_view_mode_css]",
-                            ).textContent = ``;
-                            break;
+                    if (opd_column_tw_view_mode_opt != null) {
+                        switch (opd_column_tw_view_mode_opt.value) {
+                            case "0":
+                                iframe_elem.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent = ``;
+                                break;
+                            case "1":
+                                iframe_elem.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent =
+                                    `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
+                                break;
+                            case "2":
+                                iframe_elem.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent =
+                                    `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
+                                break;
+                            default:
+                                iframe_elem.contentWindow.document.querySelector(
+                                    "head style[opd_tw_view_mode_css]",
+                                ).textContent = ``;
+                                break;
+                        }
                     }
                     //console.log(opd_column_div.querySelector(".opd_banner").checked)
                 }
@@ -1682,15 +1720,16 @@ function run(settings) {
                                             preset_rem = 30;
                                             break;
                                     }
-                                    width_select
-                                        .closest("div[opd_column_type]")
-                                        .setAttribute(
-                                            "opd_column_width",
-                                            String(preset_rem),
+                                    const width_select_column =
+                                        width_select.closest(
+                                            "div[opd_column_type]",
                                         );
-                                    width_select.closest(
-                                        "div[opd_column_type]",
-                                    ).style.width = `${preset_rem}rem`;
+                                    if (!width_select_column) return;
+                                    width_select_column.setAttribute(
+                                        "opd_column_width",
+                                        String(preset_rem),
+                                    );
+                                    width_select_column.style.width = `${preset_rem}rem`;
                                     column_settings_save("", last_load_profile);
                                 },
                             );
@@ -1698,78 +1737,87 @@ function run(settings) {
                     }
                     if (mode != "session_set") {
                         // Column width setting events.
-                        opd_column_width_btn.addEventListener(
-                            "click",
-                            async function (ev) {
-                                const width_button =
-                                    ev.currentTarget instanceof HTMLElement
-                                        ? ev.currentTarget
-                                        : null;
-                                if (!width_button) return;
-                                const now_width = width_button
-                                    .closest("div[opd_column_type]")
-                                    .getAttribute("opd_column_width");
-                                let column_width_preset = width_button
-                                    .closest("div[opd_column_type]")
-                                    .querySelector(".opd_column_size_preset");
-                                const column_width_preset_select =
-                                    /** @type {HTMLSelectElement | null} */ (
-                                        column_width_preset
+                        if (opd_column_width_btn != null) {
+                            opd_column_width_btn.addEventListener(
+                                "click",
+                                async function (ev) {
+                                    const width_button =
+                                        ev.currentTarget instanceof HTMLElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!width_button) return;
+                                    const width_button_column =
+                                        width_button.closest(
+                                            "div[opd_column_type]",
+                                        );
+                                    if (!width_button_column) return;
+                                    const now_width =
+                                        width_button_column.getAttribute(
+                                            "opd_column_width",
+                                        );
+                                    const column_width_preset =
+                                        width_button_column.querySelector(
+                                            ".opd_column_size_preset",
+                                        );
+                                    const column_width_preset_select =
+                                        /** @type {HTMLSelectElement | null} */ (
+                                            column_width_preset
+                                        );
+                                    let setting_width = await opd_prompt(
+                                        i18n_message("msg_column_width_prompt"),
+                                        now_width ?? undefined,
                                     );
-                                let setting_width = await opd_prompt(
-                                    i18n_message("msg_column_width_prompt"),
-                                    now_width,
-                                );
-                                //console.log(setting_width);
-                                if (setting_width != null) {
-                                    const setting_width_num =
-                                        Number(setting_width);
-                                    if (
-                                        !Number.isNaN(setting_width_num) &&
-                                        setting_width_num > 11
-                                    ) {
-                                        width_button
-                                            .closest("div[opd_column_type]")
-                                            .setAttribute(
+                                    //console.log(setting_width);
+                                    if (setting_width != null) {
+                                        const setting_width_num =
+                                            Number(setting_width);
+                                        if (
+                                            !Number.isNaN(setting_width_num) &&
+                                            setting_width_num > 11
+                                        ) {
+                                            width_button_column.setAttribute(
                                                 "opd_column_width",
                                                 String(setting_width_num),
                                             );
-                                        width_button.closest(
-                                            "div[opd_column_type]",
-                                        ).style.width =
-                                            `${setting_width_num}rem`;
-                                        column_settings_save(
-                                            "",
-                                            last_load_profile,
-                                        );
-                                        switch (setting_width_num) {
-                                            case 15:
-                                                column_width_preset_select.value =
-                                                    "0";
-                                                break;
-                                            case 20:
-                                                column_width_preset_select.value =
-                                                    "1";
-                                                break;
-                                            case 30:
-                                                column_width_preset_select.value =
-                                                    "2";
-                                                break;
-                                            default:
-                                                column_width_preset_select.value =
-                                                    "3";
-                                                break;
+                                            width_button_column.style.width = `${setting_width_num}rem`;
+                                            column_settings_save(
+                                                "",
+                                                last_load_profile,
+                                            );
+                                            if (
+                                                column_width_preset_select !=
+                                                null
+                                            ) {
+                                                switch (setting_width_num) {
+                                                    case 15:
+                                                        column_width_preset_select.value =
+                                                            "0";
+                                                        break;
+                                                    case 20:
+                                                        column_width_preset_select.value =
+                                                            "1";
+                                                        break;
+                                                    case 30:
+                                                        column_width_preset_select.value =
+                                                            "2";
+                                                        break;
+                                                    default:
+                                                        column_width_preset_select.value =
+                                                            "3";
+                                                        break;
+                                                }
+                                            }
+                                        } else {
+                                            await opd_alert(
+                                                i18n_message(
+                                                    "msg_invalid_value_alert",
+                                                ),
+                                            );
                                         }
-                                    } else {
-                                        await opd_alert(
-                                            i18n_message(
-                                                "msg_invalid_value_alert",
-                                            ),
-                                        );
                                     }
-                                }
-                            },
-                        );
+                                },
+                            );
+                        }
                     }
 
                     // Support for non-X columns.
@@ -1870,37 +1918,37 @@ function run(settings) {
                                     `<style opd_tw_view_mode_css></style>`,
                                 );
                         }
-                        opd_column_tw_view_mode_opt.value =
-                            opd_column_tw_view_mode_opt.getAttribute(
-                                "column_tw_view_mode_val",
-                            );
-                        switch (
-                            opd_column_tw_view_mode_opt.getAttribute(
-                                "column_tw_view_mode_val",
-                            )
-                        ) {
-                            case "0":
-                                iframe_elem.contentWindow.document.querySelector(
-                                    "head style[opd_tw_view_mode_css]",
-                                ).textContent = ``;
-                                break;
-                            case "1":
-                                iframe_elem.contentWindow.document.querySelector(
-                                    "head style[opd_tw_view_mode_css]",
-                                ).textContent =
-                                    `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
-                                break;
-                            case "2":
-                                iframe_elem.contentWindow.document.querySelector(
-                                    "head style[opd_tw_view_mode_css]",
-                                ).textContent =
-                                    `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
-                                break;
-                            default:
-                                iframe_elem.contentWindow.document.querySelector(
-                                    "head style[opd_tw_view_mode_css]",
-                                ).textContent = ``;
-                                break;
+                        if (opd_column_tw_view_mode_opt != null) {
+                            const tw_view_mode_value =
+                                opd_column_tw_view_mode_opt.getAttribute(
+                                    "column_tw_view_mode_val",
+                                ) ?? "0";
+                            opd_column_tw_view_mode_opt.value =
+                                tw_view_mode_value;
+                            switch (tw_view_mode_value) {
+                                case "0":
+                                    iframe_elem.contentWindow.document.querySelector(
+                                        "head style[opd_tw_view_mode_css]",
+                                    ).textContent = ``;
+                                    break;
+                                case "1":
+                                    iframe_elem.contentWindow.document.querySelector(
+                                        "head style[opd_tw_view_mode_css]",
+                                    ).textContent =
+                                        `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
+                                    break;
+                                case "2":
+                                    iframe_elem.contentWindow.document.querySelector(
+                                        "head style[opd_tw_view_mode_css]",
+                                    ).textContent =
+                                        `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
+                                    break;
+                                default:
+                                    iframe_elem.contentWindow.document.querySelector(
+                                        "head style[opd_tw_view_mode_css]",
+                                    ).textContent = ``;
+                                    break;
+                            }
                         }
                         // Apply initial auto-refresh state.
                         let auto_reload_int = null; // Also reused in checkbox event handlers.
@@ -1936,7 +1984,10 @@ function run(settings) {
                                 });
                             const auto_reload_target_elem = iframe_elem;
                             //console.log(opd_column_auto_reload_checkbox)
-                            if (mode != "session_set") {
+                            if (
+                                mode != "session_set" &&
+                                opd_column_auto_reload_time_reload != null
+                            ) {
                                 opd_column_auto_reload_time_reload.addEventListener(
                                     "change",
                                     async function () {
@@ -2042,34 +2093,50 @@ function run(settings) {
                                     if (!banner_checkbox) return;
                                     column_settings_save("", last_load_profile);
                                     //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
-                                    let banner_mode_target_object =
-                                        banner_checkbox
-                                            .closest("div[opd_column_type]")
-                                            .querySelector("iframe");
+                                    const banner_column =
+                                        banner_checkbox.closest(
+                                            "div[opd_column_type]",
+                                        );
+                                    if (!banner_column) return;
+                                    const banner_mode_target_object =
+                                        banner_column.querySelector("iframe");
+                                    if (
+                                        !(
+                                            banner_mode_target_object instanceof
+                                            HTMLIFrameElement
+                                        ) ||
+                                        !banner_mode_target_object.contentWindow
+                                    ) {
+                                        return;
+                                    }
+                                    const banner_doc =
+                                        banner_mode_target_object.contentWindow
+                                            .document;
+                                    const banner_head =
+                                        banner_doc.querySelector("head");
+                                    if (!banner_head) return;
                                     //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]'))
                                     if (
-                                        banner_mode_target_object.contentWindow.document.querySelector(
+                                        banner_doc.querySelector(
                                             "head style[opd_banner_css]",
                                         ) == null
                                     ) {
-                                        banner_mode_target_object.contentWindow.document
-                                            .querySelector("head")
-                                            .insertAdjacentHTML(
-                                                "beforeend",
-                                                `<style opd_banner_css></style>`,
-                                            );
+                                        banner_head.insertAdjacentHTML(
+                                            "beforeend",
+                                            `<style opd_banner_css></style>`,
+                                        );
                                     }
+                                    const banner_style =
+                                        banner_doc.querySelector(
+                                            "head style[opd_banner_css]",
+                                        );
+                                    if (!banner_style) return;
                                     if (banner_checkbox.checked != true) {
                                         //console.log(this)
-                                        banner_mode_target_object.contentWindow.document.querySelector(
-                                            "head style[opd_banner_css]",
-                                        ).textContent =
-                                            `header[role="banner"]{visibility: hidden; width: 0;};`;
+                                        banner_style.textContent = `header[role="banner"]{visibility: hidden; width: 0;};`;
                                     } else {
                                         //console.log("else")
-                                        banner_mode_target_object.contentWindow.document.querySelector(
-                                            "head style[opd_banner_css]",
-                                        ).textContent = ``;
+                                        banner_style.textContent = ``;
                                     }
                                 },
                             );
@@ -2085,64 +2152,70 @@ function run(settings) {
                                             : null;
                                     if (!top_visible_checkbox) return;
                                     column_settings_save("", last_load_profile);
-                                    let topvisible_mode_target_object =
-                                        top_visible_checkbox
-                                            .closest("div[opd_column_type]")
-                                            .querySelector("iframe");
+                                    const topvisible_column =
+                                        top_visible_checkbox.closest(
+                                            "div[opd_column_type]",
+                                        );
+                                    if (!topvisible_column) return;
+                                    const topvisible_mode_target_object =
+                                        topvisible_column.querySelector(
+                                            "iframe",
+                                        );
+                                    if (
+                                        !(
+                                            topvisible_mode_target_object instanceof
+                                            HTMLIFrameElement
+                                        ) ||
+                                        !topvisible_mode_target_object.contentWindow
+                                    ) {
+                                        return;
+                                    }
+                                    const topvisible_doc =
+                                        topvisible_mode_target_object
+                                            .contentWindow.document;
+                                    const topvisible_head =
+                                        topvisible_doc.querySelector("head");
+                                    if (!topvisible_head) return;
                                     //console.log(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]'))
                                     if (
-                                        topvisible_mode_target_object.contentWindow.document.querySelector(
+                                        topvisible_doc.querySelector(
                                             "head style[opd_top_visible_css]",
                                         ) == null
                                     ) {
-                                        topvisible_mode_target_object.contentWindow.document
-                                            .querySelector("head")
-                                            .insertAdjacentHTML(
-                                                "beforeend",
-                                                `<style opd_top_visible_css></style>`,
-                                            );
+                                        topvisible_head.insertAdjacentHTML(
+                                            "beforeend",
+                                            `<style opd_top_visible_css></style>`,
+                                        );
                                     }
+                                    const topvisible_style =
+                                        topvisible_doc.querySelector(
+                                            "head style[opd_top_visible_css]",
+                                        );
+                                    if (!topvisible_style) return;
+                                    const topvisible_column_type =
+                                        topvisible_column.getAttribute(
+                                            "opd_column_type",
+                                        );
                                     if (top_visible_checkbox.checked != true) {
                                         //console.log(this)
                                         //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
                                         if (
-                                            top_visible_checkbox
-                                                .closest("div[opd_column_type]")
-                                                .getAttribute(
-                                                    "opd_column_type",
-                                                ) == "explore"
+                                            topvisible_column_type == "explore"
                                         ) {
-                                            topvisible_mode_target_object.contentWindow.document.querySelector(
-                                                "head style[opd_top_visible_css]",
-                                            ).textContent =
-                                                `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                                            topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                         } else {
                                             //console.log(this.closest("div[opd_column_type]").getAttribute("opd_column_type"))
                                             if (
-                                                top_visible_checkbox
-                                                    .closest(
-                                                        "div[opd_column_type]",
-                                                    )
-                                                    .getAttribute(
-                                                        "opd_column_type",
-                                                    ) == "home"
+                                                topvisible_column_type == "home"
                                             ) {
-                                                topvisible_mode_target_object.contentWindow.document.querySelector(
-                                                    "head style[opd_top_visible_css]",
-                                                ).textContent =
-                                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;} [data-testid="app-bar-back"]{visibility: visible;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                                                topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;} [data-testid="app-bar-back"]{visibility: visible;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                             } else {
-                                                topvisible_mode_target_object.contentWindow.document.querySelector(
-                                                    "head style[opd_top_visible_css]",
-                                                ).textContent =
-                                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
+                                                topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                             }
                                         }
                                     } else {
                                         //console.log("else")
-                                        topvisible_mode_target_object.contentWindow.document.querySelector(
-                                            "head style[opd_top_visible_css]",
-                                        ).textContent = ``;
+                                        topvisible_style.textContent = ``;
                                     }
                                 },
                             );
@@ -2160,6 +2233,11 @@ function run(settings) {
                                                 ? ev.currentTarget
                                                 : null;
                                         if (!pinned_checkbox) return;
+                                        const pinned_column =
+                                            pinned_checkbox.closest(
+                                                "div[opd_column_type]",
+                                            );
+                                        if (!pinned_column) return;
                                         if (pinned_checkbox.checked) {
                                             if (
                                                 await opd_confirm(
@@ -2168,21 +2246,14 @@ function run(settings) {
                                                     ),
                                                 )
                                             ) {
-                                                const now_path = pinned_checkbox
-                                                    .closest(
-                                                        "div[opd_column_type]",
-                                                    )
-                                                    .getAttribute(
+                                                const now_path =
+                                                    pinned_column.getAttribute(
                                                         "opd_explore_path",
-                                                    );
-                                                pinned_checkbox
-                                                    .closest(
-                                                        "div[opd_column_type]",
-                                                    )
-                                                    .setAttribute(
-                                                        "opd_pinned_path",
-                                                        now_path,
-                                                    );
+                                                    ) ?? "";
+                                                pinned_column.setAttribute(
+                                                    "opd_pinned_path",
+                                                    now_path,
+                                                );
                                                 column_settings_save(
                                                     "",
                                                     last_load_profile,
@@ -2198,14 +2269,10 @@ function run(settings) {
                                                     ),
                                                 )
                                             ) {
-                                                pinned_checkbox
-                                                    .closest(
-                                                        "div[opd_column_type]",
-                                                    )
-                                                    .setAttribute(
-                                                        "opd_pinned_path",
-                                                        "",
-                                                    );
+                                                pinned_column.setAttribute(
+                                                    "opd_pinned_path",
+                                                    "",
+                                                );
                                                 column_settings_save(
                                                     "",
                                                     last_load_profile,
@@ -2231,16 +2298,28 @@ function run(settings) {
                                                 ? ev.currentTarget
                                                 : null;
                                         if (!auto_reload_checkbox) return;
-                                        let auto_reload_target_object =
-                                            auto_reload_checkbox
-                                                .closest("div[opd_column_type]")
-                                                .querySelector("iframe");
+                                        const auto_reload_column =
+                                            auto_reload_checkbox.closest(
+                                                "div[opd_column_type]",
+                                            );
+                                        if (!auto_reload_column) return;
+                                        const auto_reload_target_object =
+                                            auto_reload_column.querySelector(
+                                                "iframe",
+                                            );
+                                        if (
+                                            !(
+                                                auto_reload_target_object instanceof
+                                                HTMLIFrameElement
+                                            ) ||
+                                            !auto_reload_target_object.contentWindow
+                                        ) {
+                                            return;
+                                        }
                                         const auto_reload_time_input =
-                                            auto_reload_checkbox
-                                                .closest("div[opd_column_type]")
-                                                .querySelector(
-                                                    ".opd_a_reload_time_setting",
-                                                );
+                                            auto_reload_column.querySelector(
+                                                ".opd_a_reload_time_setting",
+                                            );
                                         const auto_reload_time_input_element =
                                             /** @type {HTMLInputElement} */ (
                                                 auto_reload_time_input
@@ -2249,6 +2328,9 @@ function run(settings) {
                                             Number(
                                                 auto_reload_time_input_element.value,
                                             ) * 1000;
+                                        const auto_reload_window =
+                                            auto_reload_target_object.contentWindow;
+                                        if (!auto_reload_window) return;
                                         if (auto_reload_checkbox.checked) {
                                             auto_reload_time_input_element.disabled = true;
                                             auto_reload_int = setInterval(
@@ -2256,8 +2338,7 @@ function run(settings) {
                                                     //console.log("update!")
                                                     //console.log(auto_reload_target_object.contentWindow)
                                                     const path_name =
-                                                        auto_reload_target_object
-                                                            .contentWindow
+                                                        auto_reload_window
                                                             .location.pathname;
                                                     if (
                                                         [
@@ -2277,11 +2358,11 @@ function run(settings) {
                                                                 column_content_reload
                                                             ) {
                                                                 column_content_reload.Reload(
-                                                                    auto_reload_target_object.contentWindow,
+                                                                    auto_reload_window,
                                                                 );
                                                                 setTimeout(
                                                                     () => {
-                                                                        auto_reload_target_object.contentWindow.scrollTo(
+                                                                        auto_reload_window.scrollTo(
                                                                             {
                                                                                 top: 0,
                                                                                 behavior:
@@ -2318,7 +2399,10 @@ function run(settings) {
                         /*if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore" || this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
                     
                     }*/
-                        if (mode != "session_set") {
+                        if (
+                            mode != "session_set" &&
+                            opd_column_tw_view_mode_opt != null
+                        ) {
                             // Tweet view mode events.
                             opd_column_tw_view_mode_opt.addEventListener(
                                 "change",
@@ -2331,45 +2415,58 @@ function run(settings) {
                                     if (!tw_view_mode_select) return;
                                     column_settings_save("", last_load_profile);
                                     //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
-                                    let tw_view_mode_target_object =
-                                        tw_view_mode_select
-                                            .closest("div[opd_column_type]")
-                                            .querySelector("iframe");
+                                    const tw_view_mode_column =
+                                        tw_view_mode_select.closest(
+                                            "div[opd_column_type]",
+                                        );
+                                    if (!tw_view_mode_column) return;
+                                    const tw_view_mode_target_object =
+                                        tw_view_mode_column.querySelector(
+                                            "iframe",
+                                        );
+                                    if (
+                                        !(
+                                            tw_view_mode_target_object instanceof
+                                            HTMLIFrameElement
+                                        ) ||
+                                        !tw_view_mode_target_object.contentWindow
+                                    ) {
+                                        return;
+                                    }
+                                    const tw_view_doc =
+                                        tw_view_mode_target_object.contentWindow
+                                            .document;
+                                    const tw_view_head =
+                                        tw_view_doc.querySelector("head");
+                                    if (!tw_view_head) return;
                                     //console.log(this.value)
                                     if (
-                                        tw_view_mode_target_object.contentWindow.document.querySelector(
+                                        tw_view_doc.querySelector(
                                             "head style[opd_tw_view_mode_css]",
                                         ) == null
                                     ) {
-                                        tw_view_mode_target_object.contentWindow.document
-                                            .querySelector("head")
-                                            .insertAdjacentHTML(
-                                                "beforeend",
-                                                `<style opd_tw_view_mode_css></style>`,
-                                            );
+                                        tw_view_head.insertAdjacentHTML(
+                                            "beforeend",
+                                            `<style opd_tw_view_mode_css></style>`,
+                                        );
                                     }
+                                    const tw_view_mode_style =
+                                        tw_view_doc.querySelector(
+                                            "head style[opd_tw_view_mode_css]",
+                                        );
+                                    if (!tw_view_mode_style) return;
                                     switch (tw_view_mode_select.value) {
                                         case "0":
-                                            tw_view_mode_target_object.contentWindow.document.querySelector(
-                                                "head style[opd_tw_view_mode_css]",
-                                            ).textContent = ``;
+                                            tw_view_mode_style.textContent = ``;
                                             break;
                                         case "1":
-                                            tw_view_mode_target_object.contentWindow.document.querySelector(
-                                                "head style[opd_tw_view_mode_css]",
-                                            ).textContent =
-                                                `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
+                                            tw_view_mode_style.textContent = `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                                             break;
                                         case "2":
-                                            tw_view_mode_target_object.contentWindow.document.querySelector(
-                                                "head style[opd_tw_view_mode_css]",
-                                            ).textContent =
-                                                `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
+                                            tw_view_mode_style.textContent = `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                                             break;
                                         default:
-                                            tw_view_mode_target_object.contentWindow.document.querySelector(
-                                                "head style[opd_tw_view_mode_css]",
-                                            ).textContent = ``;
+                                            tw_view_mode_style.textContent = ``;
                                             break;
                                     }
                                 },
@@ -2378,12 +2475,17 @@ function run(settings) {
                     }
 
                     // Clicking column bar empty area scrolls to top.
-                    opd_column_scroll_to_top.addEventListener("click", (e) => {
-                        iframe_elem.contentWindow.scrollTo({
-                            top: 0,
-                            behavior: "auto",
-                        });
-                    });
+                    if (opd_column_scroll_to_top != null) {
+                        opd_column_scroll_to_top.addEventListener(
+                            "click",
+                            () => {
+                                iframe_elem.contentWindow.scrollTo({
+                                    top: 0,
+                                    behavior: "auto",
+                                });
+                            },
+                        );
+                    }
                 },
                 { once: true },
             );
@@ -2431,29 +2533,44 @@ function run(settings) {
         });
     }
     // Main bar events.
-    document
-        .getElementById("init_settings")
-        .addEventListener("click", async function () {
+    const init_settings_btn = document.getElementById("init_settings");
+    if (init_settings_btn) {
+        init_settings_btn.addEventListener("click", async function () {
             chrome.storage.local.remove("opd_settings", async function (value) {
                 await opd_alert(i18n_message("msg_settings_reset_completed"));
             });
         });
+    }
     // Prevent auto-scroll when opening media posts.
-    document
-        .querySelector("#main_rack_element")
-        .addEventListener("scrollend", function () {
-            document.querySelector("#main_rack_element").scrollTop = 0;
+    const main_rack_element = /** @type {HTMLElement | null} */ (
+        document.querySelector("#main_rack_element")
+    );
+    if (main_rack_element) {
+        main_rack_element.addEventListener("scrollend", function () {
+            main_rack_element.scrollTop = 0;
         });
+    }
     // Two-row view.
-    document
-        .getElementById("second_rack")
-        .addEventListener("click", async function () {
+    const second_rack_button = /** @type {HTMLInputElement | null} */ (
+        document.getElementById("second_rack")
+    );
+    if (second_rack_button) {
+        second_rack_button.addEventListener("click", async function () {
+            const first_rack_element = /** @type {HTMLElement | null} */ (
+                document.querySelector("#first_rack_element")
+            );
+            const second_rack_element = /** @type {HTMLElement | null} */ (
+                document.querySelector("#second_rack_element")
+            );
+            const second_rack_icon = /** @type {HTMLElement | null} */ (
+                document.querySelector(".dsp_btn_second_rack_img")
+            );
             if (second_rack_mode == false) {
                 //document.querySelector("#main_rack_element").style.height = "50vh";
-                document.querySelector("#first_rack_element").style.height =
-                    "50vh";
-                document.querySelector("#second_rack_element").style.height =
-                    "50vh";
+                if (first_rack_element)
+                    first_rack_element.style.height = "50vh";
+                if (second_rack_element)
+                    second_rack_element.style.height = "50vh";
                 //console.log(default_element.second_empty_column)
                 // Legacy second-row empty-column template (currently unused).
                 const second_rack_default_html =
@@ -2461,9 +2578,10 @@ function run(settings) {
                         .replaceAll("%column_num%", create_random_id())
                         .replace("%column_banner_ch%", "")
                         .replace("%column_tw_view_mode%", "0");
-                document
-                    .querySelector("#second_rack_element")
-                    .insertAdjacentHTML("beforeend", second_rack_default_html);
+                second_rack_element?.insertAdjacentHTML(
+                    "beforeend",
+                    second_rack_default_html,
+                );
                 /*for (let index = 0; index < document.querySelectorAll('.dsp_column[draggable="true"]').length; index++) {
                 document.querySelectorAll('.dsp_column[draggable="true"]')[index].style.height = "calc(100% - 25px)";
             }*/
@@ -2474,46 +2592,44 @@ function run(settings) {
                 column_close();
                 column_settings_save("", last_load_profile);
                 second_rack_mode = true;
-                document.querySelector("#second_rack").value = "Single Rack";
-                document.querySelector(
-                    ".dsp_btn_second_rack_img",
-                ).style.backgroundImage =
-                    `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
+                second_rack_button.value = "Single Rack";
+                if (second_rack_icon) {
+                    second_rack_icon.style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_single_rack)})`;
+                }
             } else {
                 if (
                     await opd_confirm(
                         i18n_message("msg_second_rack_to_single_confirm"),
                     )
                 ) {
-                    document.querySelector("#second_rack_element").textContent =
-                        "";
-                    document.querySelector(
+                    if (second_rack_element)
+                        second_rack_element.textContent = "";
+                    const second_column_style = document.querySelector(
                         "style[second_column_css]",
-                    ).textContent = ``;
-                    document.querySelector("#first_rack_element").style.height =
-                        "100vh";
-                    document.querySelector(
-                        "#second_rack_element",
-                    ).style.height = "0";
-                    document.querySelector(
-                        "#second_rack_element",
-                    ).style.height = "0";
+                    );
+                    if (second_column_style)
+                        second_column_style.textContent = ``;
+                    if (first_rack_element)
+                        first_rack_element.style.height = "100vh";
+                    if (second_rack_element)
+                        second_rack_element.style.height = "0";
+                    if (second_rack_element)
+                        second_rack_element.style.height = "0";
                     //append_object_css();
                     //column_dd();
                     column_settings_save("", last_load_profile);
                     second_rack_mode = false;
-                    document.querySelector("#second_rack").value =
-                        "Second Rack";
-                    document.querySelector(
-                        ".dsp_btn_second_rack_img",
-                    ).style.backgroundImage =
-                        `url(${chrome.runtime.getURL(ui_icon_define.column_second_rack)})`;
+                    second_rack_button.value = "Second Rack";
+                    if (second_rack_icon) {
+                        second_rack_icon.style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_second_rack)})`;
+                    }
                 }
             }
         });
-    document
-        .getElementById("dnr_reload")
-        .addEventListener("click", async function () {
+    }
+    const dnr_reload_btn = document.getElementById("dnr_reload");
+    if (dnr_reload_btn) {
+        dnr_reload_btn.addEventListener("click", async function () {
             if (await opd_confirm(i18n_message("msg_dnr_reload_confirm"))) {
                 chrome.runtime
                     .sendMessage({ message: "dnr_upd" })
@@ -2524,9 +2640,10 @@ function run(settings) {
                     });
             }
         });
-    document
-        .getElementById("ext_reload")
-        .addEventListener("click", async function () {
+    }
+    const ext_reload_btn = document.getElementById("ext_reload");
+    if (ext_reload_btn) {
+        ext_reload_btn.addEventListener("click", async function () {
             if (
                 await opd_confirm(i18n_message("msg_extension_reload_confirm"))
             ) {
@@ -2538,38 +2655,48 @@ function run(settings) {
                 chrome.runtime.sendMessage({ message: "ext_reload" });
             }
         });
+    }
     // Add Post column.
     // TODO: Simplify the column-addition flow.
-    document.getElementById("add_post").addEventListener("click", function () {
-        const empty_column = document.querySelector(".dsp_column_emptycolumn");
-        const first_column = empty_column
-            ?.closest("div")
-            ?.querySelector('section[draggable="true"]');
-        const add_target_column =
-            is_shift_pressed && first_column ? first_column : empty_column;
+    const add_post_btn = document.getElementById("add_post");
+    if (add_post_btn) {
+        add_post_btn.addEventListener("click", function () {
+            const empty_column = document.querySelector(
+                ".dsp_column_emptycolumn",
+            );
+            const first_column = empty_column
+                ?.closest("div")
+                ?.querySelector('section[draggable="true"]');
+            const add_target_column =
+                is_shift_pressed && first_column ? first_column : empty_column;
 
-        const new_column = default_element["post"]["html"]
-            .replaceAll("%column_num%", create_random_id())
-            .replace("%column_banner_ch%", "")
-            .replace("%column_top_bar_ch%", "checked")
-            .replace("%column_tw_view_mode%", "0")
-            .replaceAll("%column_width_num%", "30")
-            .replaceAll("%column_auto_reload_ch%", "")
-            .replaceAll("%column_auto_reload_time%", "10000");
-        add_target_column.insertAdjacentHTML("beforebegin", new_column);
-        add_target_column.scrollIntoView({ behavior: "smooth", inline: "end" });
-        const all_webview = document.querySelectorAll(
-            "#main_rack_element iframe[opd_init_webview]",
-        );
-        append_object_css("add_column", all_webview);
-        column_dd();
-        column_close();
-        column_settings_save("", last_load_profile);
-    });
+            const new_column = default_element["post"]["html"]
+                .replaceAll("%column_num%", create_random_id())
+                .replace("%column_banner_ch%", "")
+                .replace("%column_top_bar_ch%", "checked")
+                .replace("%column_tw_view_mode%", "0")
+                .replaceAll("%column_width_num%", "30")
+                .replaceAll("%column_auto_reload_ch%", "")
+                .replaceAll("%column_auto_reload_time%", "10000");
+            if (!add_target_column) return;
+            add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            add_target_column.scrollIntoView({
+                behavior: "smooth",
+                inline: "end",
+            });
+            const all_webview = document.querySelectorAll(
+                "#main_rack_element iframe[opd_init_webview]",
+            );
+            append_object_css("add_column", all_webview);
+            column_dd();
+            column_close();
+            column_settings_save("", last_load_profile);
+        });
+    }
     // Add Timeline column.
-    document
-        .getElementById("add_timeline")
-        .addEventListener("click", function () {
+    const add_timeline_btn = document.getElementById("add_timeline");
+    if (add_timeline_btn) {
+        add_timeline_btn.addEventListener("click", function () {
             const empty_column = document.querySelector(
                 ".dsp_column_emptycolumn",
             );
@@ -2587,6 +2714,7 @@ function run(settings) {
                 .replaceAll("%column_width_num%", "30")
                 .replaceAll("%column_auto_reload_ch%", "")
                 .replaceAll("%column_auto_reload_time%", "10000");
+            if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
             add_target_column.scrollIntoView({
                 behavior: "smooth",
@@ -2600,10 +2728,11 @@ function run(settings) {
             column_close();
             column_settings_save("", last_load_profile);
         });
+    }
     // Add Notification column.
-    document
-        .getElementById("add_notify")
-        .addEventListener("click", function () {
+    const add_notify_btn = document.getElementById("add_notify");
+    if (add_notify_btn) {
+        add_notify_btn.addEventListener("click", function () {
             const empty_column = document.querySelector(
                 ".dsp_column_emptycolumn",
             );
@@ -2619,6 +2748,7 @@ function run(settings) {
                 .replace("%column_top_bar_ch%", "checked")
                 .replace("%column_tw_view_mode%", "0")
                 .replaceAll("%column_width_num%", "30");
+            if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
             add_target_column.scrollIntoView({
                 behavior: "smooth",
@@ -2632,6 +2762,7 @@ function run(settings) {
             column_close();
             column_settings_save("", last_load_profile);
         });
+    }
     function normalize_custom_x_path(input_value) {
         const trimmed_value = input_value?.trim();
         if (!trimmed_value) {
@@ -2722,6 +2853,9 @@ function run(settings) {
             ?.querySelector('section[draggable="true"]');
         const add_target_column =
             is_shift_pressed && first_column ? first_column : empty_column;
+        if (!add_target_column) {
+            return;
+        }
         const column_id = create_random_id();
         const new_column = default_element["explore"]["html"]
             .replaceAll("%column_save_path%", column_path)
@@ -2763,15 +2897,16 @@ function run(settings) {
         column_settings_save("", last_load_profile);
     }
     // Add Explore (universal) column.
-    document
-        .getElementById("add_explore")
-        .addEventListener("click", function () {
+    const add_explore_button = document.getElementById("add_explore");
+    if (add_explore_button) {
+        add_explore_button.addEventListener("click", function () {
             add_explore_column_with_path("/explore");
         });
+    }
     // Add custom URL under x.com/twitter.com.
-    document
-        .getElementById("add_custom_url")
-        .addEventListener("click", async function () {
+    const add_custom_url_button = document.getElementById("add_custom_url");
+    if (add_custom_url_button) {
+        add_custom_url_button.addEventListener("click", async function () {
             const input_value = await opd_prompt(
                 i18n_message("msg_custom_x_url_prompt"),
             );
@@ -2785,10 +2920,11 @@ function run(settings) {
             }
             add_explore_column_with_path(custom_path, "Custom");
         });
+    }
     // Add your Lists column.
-    document
-        .getElementById("add_lists")
-        .addEventListener("click", async function () {
+    const add_lists_button = document.getElementById("add_lists");
+    if (add_lists_button) {
+        add_lists_button.addEventListener("click", async function () {
             const username = get_current_x_username();
             if (username == null) {
                 await opd_alert(i18n_message("msg_username_not_found_alert"));
@@ -2796,12 +2932,16 @@ function run(settings) {
             }
             add_explore_column_with_path(`/${username}/lists`, "Lists");
         });
+    }
     // Profile save button.
-    document
-        .getElementById("profile_save")
-        .addEventListener("click", async function () {
+    const profile_save_button = document.getElementById("profile_save");
+    if (profile_save_button) {
+        profile_save_button.addEventListener("click", async function () {
             if (await opd_confirm(i18n_message("msg_profile_save_confirm"))) {
-                let profile = column_settings_save("profile_out");
+                const profile = column_settings_save("profile_out");
+                if (profile == null) {
+                    return;
+                }
                 const save_object = {
                     name: "user_profile",
                     profile: profile.column_settings,
@@ -2812,20 +2952,25 @@ function run(settings) {
                 chrome.storage.local.set(
                     { opd_profile_store: JSON.stringify(profile_store) },
                     function () {
-                        document.querySelector("#profile_btn_list").innerHTML =
-                            create_profile_list_buttons_html(
-                                profile_store.length,
-                                last_load_profile,
-                            );
+                        const profile_button_list =
+                            document.querySelector("#profile_btn_list");
+                        if (profile_button_list instanceof HTMLElement) {
+                            profile_button_list.innerHTML =
+                                create_profile_list_buttons_html(
+                                    profile_store.length,
+                                    last_load_profile,
+                                );
+                        }
                         create_profile_list_btn();
                     },
                 );
             }
         });
+    }
     // Profile delete button.
-    document
-        .getElementById("profile_delete")
-        .addEventListener("click", async function () {
+    const profile_delete_button = document.getElementById("profile_delete");
+    if (profile_delete_button) {
+        profile_delete_button.addEventListener("click", async function () {
             if (profile_store.length <= 1) {
                 await opd_alert(
                     i18n_message("msg_profile_delete_current_alert"),
@@ -2864,13 +3009,20 @@ function run(settings) {
                                             JSON.stringify(load_setting),
                                     },
                                     function () {
-                                        document.querySelector(
-                                            "#profile_btn_list",
-                                        ).innerHTML =
-                                            create_profile_list_buttons_html(
-                                                profile_store.length,
-                                                after_profile_num,
+                                        const profile_button_list =
+                                            document.querySelector(
+                                                "#profile_btn_list",
                                             );
+                                        if (
+                                            profile_button_list instanceof
+                                            HTMLElement
+                                        ) {
+                                            profile_button_list.innerHTML =
+                                                create_profile_list_buttons_html(
+                                                    profile_store.length,
+                                                    after_profile_num,
+                                                );
+                                        }
                                         create_profile_list_btn();
                                     },
                                 );
@@ -2880,6 +3032,7 @@ function run(settings) {
                 );
             }
         });
+    }
     // Column move handling.
     function column_dd() {
         let column_class = document.querySelectorAll(".dsp_column");
@@ -2934,30 +3087,27 @@ function run(settings) {
                 if (!dt_id) return;
                 const dr_elem = document.getElementById(dt_id);
                 if (dr_elem != null) {
+                    const dragged_column_root = dr_elem.querySelector("div");
+                    const dragged_column_frame =
+                        dragged_column_root?.querySelector("iframe");
                     if (
-                        dr_elem
-                            ?.querySelector("div")
-                            ?.getAttribute("opd_column_type") == "explore"
+                        dragged_column_root?.getAttribute("opd_column_type") ===
+                        "explore"
                     ) {
                         // && dr_elem.querySelector("div").querySelector("iframe").src != `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`
                         //console.log(dr_elem.querySelector("div").getAttribute("opd_explore_path"))
                         //console.log(dr_elem.querySelector("div").getAttribute("opd_pinned_path"))
                         if (
-                            dr_elem
-                                .querySelector("div")
-                                .getAttribute("opd_pinned_path") != ""
+                            dragged_column_root.getAttribute(
+                                "opd_pinned_path",
+                            ) !== "" &&
+                            dragged_column_frame != null
                         ) {
                             //console.log("Pinned")
-                            dr_elem
-                                .querySelector("div")
-                                .querySelector("iframe").src =
-                                `https://x.com${dr_elem.querySelector("div").getAttribute("opd_pinned_path")}`;
-                        } else {
+                            dragged_column_frame.src = `https://x.com${dragged_column_root.getAttribute("opd_pinned_path")}`;
+                        } else if (dragged_column_frame != null) {
                             //console.log("Exp_save")
-                            dr_elem
-                                .querySelector("div")
-                                .querySelector("iframe").src =
-                                `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`;
+                            dragged_column_frame.src = `https://x.com${dragged_column_root.getAttribute("opd_explore_path")}`;
                         }
                     }
                     drop_target.parentNode?.insertBefore(dr_elem, drop_target);
@@ -3008,10 +3158,11 @@ function run(settings) {
     }
     // Save column layout.
     function column_settings_save(mode, profile_num) {
-        let settings_array = {
-            column_settings: [],
-            version: manifest.version,
-        };
+        let settings_array =
+            /** @type {{column_settings: any[]; version: string}} */ ({
+                column_settings: [],
+                version: manifest.version,
+            });
         const columns = document.querySelectorAll(
             "#opd_main_element div[opd_column_type]",
         );
@@ -3036,7 +3187,8 @@ function run(settings) {
                 undefined
             ) {
                 tw_view_type =
-                    columns[index].querySelector(".opd_tw_view_mode").value;
+                    columns[index].querySelector(".opd_tw_view_mode")?.value ??
+                    "0";
             }
             // Width setting.
             if (columns[index].getAttribute("opd_column_width") != "null") {
@@ -3048,10 +3200,10 @@ function run(settings) {
             if (columns[index].getAttribute("opd_column_type") == "explore") {
                 //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path"));
                 column_open_path =
-                    columns[index].getAttribute("opd_explore_path");
+                    columns[index].getAttribute("opd_explore_path") ?? "";
                 // Pinned state.
                 column_pinned_save_path =
-                    columns[index].getAttribute("opd_pinned_path");
+                    columns[index].getAttribute("opd_pinned_path") ?? "";
                 // Title.
                 column_page_title =
                     columns[index].getAttribute("opd_explore_title");
@@ -3072,9 +3224,11 @@ function run(settings) {
                 }
                 const column_setting_time =
                     Number(
-                        columns[index].querySelector(
-                            ".opd_a_reload_time_setting",
-                        ).value,
+                        /** @type {HTMLInputElement | null} */ (
+                            columns[index].querySelector(
+                                ".opd_a_reload_time_setting",
+                            )
+                        )?.value ?? "10",
                     ) * 1000;
                 //console.log(column_setting_time)
                 if (column_setting_time >= 1000) {
@@ -3084,7 +3238,7 @@ function run(settings) {
                 }
             }
             settings_array["column_settings"].push({
-                type: columns[index].getAttribute("opd_column_type"),
+                type: columns[index].getAttribute("opd_column_type") ?? "",
                 banner: banner_checked,
                 top_visible: top_visible_checked,
                 tw_view_mode: tw_view_type,
@@ -3125,10 +3279,13 @@ function run(settings) {
     }
     // Mask default X UI behaviors.
     function main_dsp() {
-        document.getElementById("react-root").style.visibility = "hidden";
-        document.getElementById("react-root").style.overflow = "hidden";
+        const react_root = document.getElementById("react-root");
+        if (!react_root) return;
+        react_root.style.visibility = "hidden";
+        react_root.style.overflow = "hidden";
     }
     const target_elem = document.getElementById("react-root");
+    if (!target_elem) return;
     const observer = new MutationObserver(main_dsp);
     observer.observe(target_elem, {
         childList: true,
@@ -3136,7 +3293,7 @@ function run(settings) {
         subtree: false,
     });
     // Watch title changes.
-    new MutationObserver(function () {
+    const observe_head_observer = new MutationObserver(function () {
         document.title = "XPP-Deck";
         const shortcut_icon = /** @type {HTMLLinkElement | null} */ (
             document.querySelector('link[rel="shortcut icon"]')
@@ -3161,9 +3318,13 @@ function run(settings) {
         if (!main_element) return;
 
         apply_theme_for_main_element(main_element);
-    }).observe(document.querySelector("head"), {
-        childList: true,
-        characterData: true,
-        subtree: false,
     });
+    const observe_head = document.querySelector("head");
+    if (observe_head) {
+        observe_head_observer.observe(observe_head, {
+            childList: true,
+            characterData: true,
+            subtree: false,
+        });
+    }
 }

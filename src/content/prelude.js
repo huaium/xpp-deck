@@ -563,7 +563,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                         } else if (type == "confirm") {
                             finish(true);
                         } else if (type == "prompt") {
-                            finish(prompt_input.value);
+                            finish(prompt_input?.value ?? "");
                         } else {
                             finish(undefined);
                         }
@@ -576,7 +576,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                     if (type == "confirm") {
                         finish(true);
                     } else if (type == "prompt") {
-                        finish(prompt_input.value);
+                        finish(prompt_input?.value ?? "");
                     } else {
                         finish(undefined);
                     }
@@ -702,7 +702,7 @@ async function open_about_page_modal() {
                     if (previous_active_element instanceof HTMLElement) {
                         previous_active_element.focus();
                     }
-                    resolve();
+                    resolve(undefined);
                 };
                 const key_listener = (event) => {
                     if (event.isComposing || event.keyCode == 229) {

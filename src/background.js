@@ -57,6 +57,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true;
 });
 //
+/** @type {{
+ *   search: { limit: string | null; remaining: string | null; reset_unix_time: string | null };
+ *   time_line: { limit: string | null; remaining: string | null; reset_unix_time: string | null };
+ *   recommend_timeline: { limit: string | null; remaining: string | null; reset_unix_time: string | null };
+ * }} */
 let access_limit = {
     search: { limit: null, remaining: null, reset_unix_time: null },
     time_line: { limit: null, remaining: null, reset_unix_time: null },
@@ -81,15 +86,15 @@ chrome.webRequest.onHeadersReceived.addListener(
                 switch (response_headers[index].name) {
                     case "x-rate-limit-remaining":
                         access_limit.search.remaining =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     case "x-rate-limit-limit":
                         access_limit.search.limit =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     case "x-rate-limit-reset":
                         access_limit.search.reset_unix_time =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     default:
                         break;
@@ -104,15 +109,15 @@ chrome.webRequest.onHeadersReceived.addListener(
                 switch (response_headers[index].name) {
                     case "x-rate-limit-remaining":
                         access_limit.time_line.remaining =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     case "x-rate-limit-limit":
                         access_limit.time_line.limit =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     case "x-rate-limit-reset":
                         access_limit.time_line.reset_unix_time =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     default:
                         break;
@@ -127,15 +132,15 @@ chrome.webRequest.onHeadersReceived.addListener(
                 switch (response_headers[index].name) {
                     case "x-rate-limit-remaining":
                         access_limit.recommend_timeline.remaining =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     case "x-rate-limit-limit":
                         access_limit.recommend_timeline.limit =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     case "x-rate-limit-reset":
                         access_limit.recommend_timeline.reset_unix_time =
-                            response_headers[index].value;
+                            response_headers[index].value ?? null;
                         break;
                     default:
                         break;

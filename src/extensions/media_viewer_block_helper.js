@@ -161,10 +161,13 @@
                 img instanceof HTMLImageElement ? img.src : undefined;
             for (let index = 0; index < media_details.length; index++) {
                 const media = media_details[index];
+                const media_url_prefix = media.media_url_https?.replaceAll(
+                    /.jpg|.png/g,
+                    "",
+                );
                 if (
-                    image_src?.match(
-                        media.media_url_https?.replaceAll(/.jpg|.png/g, ""),
-                    )
+                    media_url_prefix != null &&
+                    image_src?.match(media_url_prefix)
                 ) {
                     window.parent.document.dispatchEvent(
                         new CustomEvent("opd_send_media_info", {

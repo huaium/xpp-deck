@@ -24,10 +24,12 @@ class OpdExtMediaViewer {
                     ["animated_gif", "video"].includes(info.type) &&
                     info.video_info?.variants?.length
                 ) {
+                    const media_variant = info.video_info.variants.at(-1);
+                    if (!media_variant) return "";
                     return `
                     <video data-media
                         style="width:auto;height:auto;max-width:calc(100% - 160px);max-height:100%;object-fit:contain;"
-                        src="${info.video_info.variants.at(-1).url}"
+                        src="${media_variant.url}"
                         controls
                         autoplay
                         playsinline
@@ -72,8 +74,10 @@ class OpdExtMediaViewer {
                     current.tagName === "VIDEO" &&
                     nextInfo.video_info?.variants?.length
                 ) {
+                    const next_variant = nextInfo.video_info.variants.at(-1);
+                    if (!next_variant) return;
                     const video = /** @type {HTMLVideoElement} */ (current);
-                    video.src = nextInfo.video_info.variants.at(-1).url;
+                    video.src = next_variant.url;
                     video.load();
                     video.play();
                     return;
@@ -326,7 +330,8 @@ class OpdExtMediaViewer {
                 ["animated_gif", "video"].includes(media.type) &&
                 media.video_info?.variants?.length
             ) {
-                media_src = media.video_info.variants.at(-1).url;
+                const media_variant = media.video_info.variants.at(-1);
+                media_src = media_variant?.url ?? null;
             }
             if (media?.type === "photo" && media.media_url_https) {
                 media_src = media.media_url_https + "?name=orig";
@@ -339,7 +344,7 @@ class OpdExtMediaViewer {
             const objectUrl = URL.createObjectURL(blob);
 
             a.href = objectUrl;
-            a.download = media.id_str ?? "";
+            a.download = media?.id_str ?? "";
             document.body.appendChild(a);
             a.click();
 
