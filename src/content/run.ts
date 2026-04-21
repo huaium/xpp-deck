@@ -1,4 +1,3 @@
-// @ts-nocheck
 function run(settings) {
     //console.log(settings)
     let profile_list_html;
@@ -1046,28 +1045,33 @@ function run(settings) {
     ins_html.innerHTML = `${side_bar}<div id="main_rack_element" style=""><div id="first_rack_element" style="height: 100%;display:flex;flex-direction:row;">${main_column_html}</div><div id="second_rack_element" style="display:flex;flex-direction:row;">${second_column_html}</div></div>`;
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
-    const opd_main_element = /** @type {HTMLElement | null} */ (
-        document.querySelector("#opd_main_element")
-    );
-    const sidebar_toggle_button = /** @type {HTMLElement | null} */ (
-        document.querySelector("#sidebar_fold_toggle")
-    );
+    const opd_main_element =
+        /** @type {HTMLElement | null} */ document.querySelector(
+            "#opd_main_element",
+        );
+    const sidebar_toggle_button =
+        /** @type {HTMLElement | null} */ document.querySelector(
+            "#sidebar_fold_toggle",
+        );
     if (!opd_main_element || !sidebar_toggle_button) {
         return;
     }
-    const switch_theme_button = /** @type {HTMLElement | null} */ (
-        document.querySelector("#switch_theme")
-    );
-    const language_select = /** @type {HTMLSelectElement | null} */ (
-        document.querySelector("#opd_language_select")
-    );
-    const sidebar_toggle_label = /** @type {HTMLElement | null} */ (
-        sidebar_toggle_button.querySelector(".dsp_btn_label")
-    );
+    const switch_theme_button =
+        /** @type {HTMLElement | null} */ document.querySelector(
+            "#switch_theme",
+        );
+    const language_select =
+        /** @type {HTMLSelectElement | null} */ document.querySelector(
+            "#opd_language_select",
+        );
+    const sidebar_toggle_label =
+        /** @type {HTMLElement | null} */ sidebar_toggle_button.querySelector(
+            ".dsp_btn_label",
+        );
     if (!sidebar_toggle_label) return;
-    const opd_main_root = opd_main_element;
-    const sidebar_toggle_root = sidebar_toggle_button;
-    const sidebar_toggle_text = sidebar_toggle_label;
+    const opd_main_root = opd_main_element as HTMLElement;
+    const sidebar_toggle_root = sidebar_toggle_button as HTMLElement;
+    const sidebar_toggle_text = sidebar_toggle_label as HTMLElement;
     function apply_sidebar_collapsed_state(is_collapsed) {
         opd_main_root.classList.toggle("opd_sidebar_collapsed", is_collapsed);
         sidebar_toggle_root.classList.toggle(
@@ -1219,12 +1223,14 @@ function run(settings) {
         const second_rack_element = document.querySelector(
             "#second_rack_element",
         );
-        const second_rack_input = /** @type {HTMLInputElement | null} */ (
-            document.querySelector("#second_rack")
-        );
-        const second_rack_icon = /** @type {HTMLElement | null} */ (
-            document.querySelector(".dsp_btn_second_rack_img")
-        );
+        const second_rack_input =
+            /** @type {HTMLInputElement | null} */ document.querySelector(
+                "#second_rack",
+            );
+        const second_rack_icon =
+            /** @type {HTMLElement | null} */ document.querySelector(
+                ".dsp_btn_second_rack_img",
+            );
         if (first_rack_element instanceof HTMLElement) {
             first_rack_element.style.height = "50vh";
         }
@@ -1235,7 +1241,7 @@ function run(settings) {
             document.querySelectorAll('.dsp_column[draggable="true"]')[index].style.height = "calc(100% - 25px)";
         }*/
 
-        //document.querySelector("style[second_column_css]").textContent = `#second_rack_element .dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
+        //document.querySelector("style[second_column_css]")!.textContent = `#second_rack_element .dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
 
         if (second_rack_input) {
             second_rack_input.value = "Single Rack";
@@ -1291,7 +1297,7 @@ function run(settings) {
                         case "post":
                             preload_desc_array.push(
                                 i18n_message("msg_profile_desc_post_column", [
-                                    preload_desc_count,
+                                    String(preload_desc_count),
                                 ]),
                             );
                             break;
@@ -1299,7 +1305,7 @@ function run(settings) {
                             preload_desc_array.push(
                                 i18n_message(
                                     "msg_profile_desc_timeline_column",
-                                    [preload_desc_count],
+                                    [String(preload_desc_count)],
                                 ),
                             );
                             break;
@@ -1307,7 +1313,7 @@ function run(settings) {
                             preload_desc_array.push(
                                 i18n_message(
                                     "msg_profile_desc_notification_column",
-                                    [preload_desc_count],
+                                    [String(preload_desc_count)],
                                 ),
                             );
                             break;
@@ -1316,7 +1322,7 @@ function run(settings) {
                                 i18n_message(
                                     "msg_profile_desc_explore_column",
                                     [
-                                        preload_desc_count,
+                                        String(preload_desc_count),
                                         preload_array[preload_index]
                                             .column_save_title,
                                     ],
@@ -1342,7 +1348,7 @@ function run(settings) {
                 //console.log(preload_desc_array)
                 if (
                     await opd_confirm(
-                        `${i18n_message("msg_profile_load_confirm", [index + 1, preload_desc_array.join("\r\n")])}`,
+                        `${i18n_message("msg_profile_load_confirm", [String(index + 1), preload_desc_array.join("\r\n")])}`,
                     )
                 ) {
                     const current_main =
@@ -1374,10 +1380,14 @@ function run(settings) {
     }
     // Apply CSS (called on add/update).
     // Keep naming aligned with Desktop implementation for shared logic.
-    function append_object_css(mode, session_webview_obj) {
-        let column_object;
+    function append_object_css(
+        mode?: string,
+        session_webview_obj?: NodeListOf<Element>,
+    ) {
+        let column_object: NodeListOf<Element>;
         if (mode == "session_set" || mode == "add_column") {
-            column_object = session_webview_obj;
+            column_object =
+                session_webview_obj ?? document.querySelectorAll("");
         } else {
             column_object = document.querySelectorAll(
                 '.dsp_column:not([opd_column_type="dsp_column"], [opd_column_type="empty_column"], [opd_column_type="main_bar_empty_column"]) iframe',
@@ -1395,42 +1405,42 @@ function run(settings) {
                 console.log(iframe_elem.getAttribute("opd_iframe_width_only"));
                 if (iframe_elem.getAttribute("opd_iframe_width_only") != "") {
                     //console.log(this)
-                    let opd_column_div = iframe_elem.closest(
+                    const opd_column_div = iframe_elem.closest(
                         "div[opd_column_type]",
-                    );
-                    let opd_column_banner_checkbox =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".opd_banner")
+                    ) as HTMLElement;
+                    const opd_column_banner_checkbox =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_banner",
                         );
-                    let opd_column_top_visible_checkbox =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".opd_top_bar")
+                    const opd_column_top_visible_checkbox =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_top_bar",
                         );
-                    let opd_column_tw_view_mode_opt =
-                        /** @type {HTMLSelectElement | null} */ (
-                            opd_column_div.querySelector(".opd_tw_view_mode")
+                    const opd_column_tw_view_mode_opt =
+                        opd_column_div.querySelector<HTMLSelectElement>(
+                            ".opd_tw_view_mode",
                         );
                     // Load and apply banner visibility settings.
                     /*if(opd_column_banner_checkbox.checked == true){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
+                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
                     }else{
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
+                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
                     // Insert shared CSS (thin scrollbar).
-                    iframe_elem.contentWindow.document
-                        .querySelector("head")
+                    iframe_elem
+                        .contentWindow!.document.querySelector("head")!
                         .insertAdjacentHTML(
                             "beforeend",
                             `<style opd_main_css>html{scrollbar-width:thin;}</style>`,
                         );
                     // Load banner visibility state.
                     if (
-                        iframe_elem.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_banner_css]",
                         ) == null
                     ) {
-                        iframe_elem.contentWindow.document
-                            .querySelector("head")
+                        iframe_elem
+                            .contentWindow!.document.querySelector("head")!
                             .insertAdjacentHTML(
                                 "beforeend",
                                 `<style opd_banner_css></style>`,
@@ -1438,23 +1448,23 @@ function run(settings) {
                     }
                     if (opd_column_banner_checkbox?.checked != true) {
                         //console.log(this)
-                        iframe_elem.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_banner_css]",
-                        ).textContent = `header[role="banner"]{display:none};`;
+                        )!.textContent = `header[role="banner"]{display:none};`;
                     } else {
                         //console.log("else")
-                        iframe_elem.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_banner_css]",
-                        ).textContent = ``;
+                        )!.textContent = ``;
                     }
                     // Apply top-search-area hide setting.
                     if (
-                        iframe_elem.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_top_visible_css]",
                         ) == null
                     ) {
-                        iframe_elem.contentWindow.document
-                            .querySelector("head")
+                        iframe_elem
+                            .contentWindow!.document.querySelector("head")!
                             .insertAdjacentHTML(
                                 "beforeend",
                                 `<style opd_top_visible_css></style>`,
@@ -1463,46 +1473,46 @@ function run(settings) {
                     if (opd_column_top_visible_checkbox?.checked != true) {
                         if (
                             iframe_elem
-                                .closest("div[opd_column_type]")
+                                .closest("div[opd_column_type]")!
                                 .getAttribute("opd_column_type") == "explore"
                         ) {
                             //div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]){display:none;}
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_top_visible_css]",
-                            ).textContent =
+                            )!.textContent =
                                 `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)`;
                         } else {
                             if (
                                 iframe_elem
-                                    .closest("div[opd_column_type]")
+                                    .closest("div[opd_column_type]")!
                                     .getAttribute("opd_column_type") == "home"
                             ) {
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_top_visible_css]",
-                                ).textContent =
+                                )!.textContent =
                                     `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;} div[role="progressbar"] + div{display:none;}`;
                             } else {
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_top_visible_css]",
-                                ).textContent =
+                                )!.textContent =
                                     `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;}`;
                             }
                         }
                     } else {
                         //console.log("else")
-                        iframe_elem.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_top_visible_css]",
-                        ).textContent = ``;
+                        )!.textContent = ``;
                     }
 
                     // Load and apply tweet view mode settings.
                     if (
-                        iframe_elem.contentWindow.document.querySelector(
+                        iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_tw_view_mode_css]",
                         ) == null
                     ) {
-                        iframe_elem.contentWindow.document
-                            .querySelector("head")
+                        iframe_elem
+                            .contentWindow!.document.querySelector("head")!
                             .insertAdjacentHTML(
                                 "beforeend",
                                 `<style opd_tw_view_mode_css></style>`,
@@ -1511,26 +1521,26 @@ function run(settings) {
                     if (opd_column_tw_view_mode_opt != null) {
                         switch (opd_column_tw_view_mode_opt.value) {
                             case "0":
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
-                                ).textContent = ``;
+                                )!.textContent = ``;
                                 break;
                             case "1":
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
-                                ).textContent =
+                                )!.textContent =
                                     `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                                 break;
                             case "2":
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
-                                ).textContent =
+                                )!.textContent =
                                     `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                                 break;
                             default:
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_tw_view_mode_css]",
-                                ).textContent = ``;
+                                )!.textContent = ``;
                                 break;
                         }
                     }
@@ -1547,64 +1557,61 @@ function run(settings) {
                             : null;
                     if (!iframe_elem) return;
                     //console.log(this)
-                    let opd_column_div = iframe_elem.closest(
+                    const opd_column_div = iframe_elem.closest(
                         "div[opd_column_type]",
-                    );
-                    let opd_column_width_btn =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".column_width_btn")
+                    ) as HTMLElement;
+                    const opd_column_width_btn =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".column_width_btn",
                         );
-                    let opd_column_width_select =
-                        /** @type {HTMLSelectElement | null} */ (
-                            opd_column_div.querySelector(
-                                ".opd_column_size_preset",
-                            )
+                    const opd_column_width_select =
+                        opd_column_div.querySelector<HTMLSelectElement>(
+                            ".opd_column_size_preset",
                         );
-                    let opd_column_banner_checkbox =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".opd_banner")
+                    const opd_column_banner_checkbox =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_banner",
                         );
-                    let opd_column_top_visible_checkbox =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".opd_top_bar")
+                    const opd_column_top_visible_checkbox =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_top_bar",
                         );
-                    let opd_column_pinned_checkbox =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".opd_pinned_btn")
+                    const opd_column_pinned_checkbox =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_pinned_btn",
                         );
-                    let opd_column_auto_reload_checkbox =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(".opd_a_reload_bar")
+                    const opd_column_auto_reload_checkbox =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_a_reload_bar",
                         );
-                    let opd_column_auto_reload_time_reload =
-                        /** @type {HTMLInputElement | null} */ (
-                            opd_column_div.querySelector(
-                                ".opd_a_reload_time_setting",
-                            )
+                    const opd_column_auto_reload_time_reload =
+                        opd_column_div.querySelector<HTMLInputElement>(
+                            ".opd_a_reload_time_setting",
                         );
-                    let opd_column_tw_view_mode_opt =
-                        /** @type {HTMLSelectElement | null} */ (
-                            opd_column_div.querySelector(".opd_tw_view_mode")
+                    const opd_column_tw_view_mode_opt =
+                        opd_column_div.querySelector<HTMLSelectElement>(
+                            ".opd_tw_view_mode",
                         );
-                    let opd_column_scroll_to_top =
-                        /** @type {HTMLElement | null} */ (
-                            opd_column_div.querySelector(
-                                ".opd_column_scroll_to_top",
-                            )
+                    const opd_column_scroll_to_top =
+                        opd_column_div.querySelector<HTMLElement>(
+                            ".opd_column_scroll_to_top",
                         );
-                    let column_content_reload = null;
+                    let column_content_reload: OpdExtAutoReload | null = null;
                     // Load column extensions.
                     if (mode != "session_set") {
                         const column_type = iframe_elem
-                            .closest("div[opd_column_type]")
+                            .closest("div[opd_column_type]")!
                             .getAttribute("opd_column_type");
                         if (
                             column_type === "home" ||
                             column_type === "explore"
                         ) {
                             const target_column = iframe_elem
-                                .closest("div[opd_column_type]")
-                                .querySelector("iframe").contentWindow;
+                                .closest("div[opd_column_type]")!
+                                ?.querySelector("iframe")?.contentWindow;
+                            if (target_column == null) {
+                                return;
+                            }
                             // Set up auto-refresh hooks.
                             column_content_reload = new OpdExtAutoReload();
                             column_content_reload.Init(target_column);
@@ -1612,15 +1619,17 @@ function run(settings) {
                             const column_media_viewer_blocker =
                                 new OpdMediaViewerBlocker();
                             column_media_viewer_blocker.Init(target_column);
-                            media_viewer_token.push(
-                                column_media_viewer_blocker.opd_send_media_info_token,
-                            );
+                            const media_info_token =
+                                column_media_viewer_blocker.opd_send_media_info_token;
+                            if (media_info_token != null) {
+                                media_viewer_token.push(media_info_token);
+                            }
                         }
                     }
                     // Settings panel events.
                     if (mode != "session_set") {
                         opd_column_div
-                            .querySelector(".opd_settings_btn")
+                            .querySelector(".opd_settings_btn")!
                             .addEventListener("click", function (ev) {
                                 const settings_button =
                                     ev.currentTarget instanceof HTMLElement
@@ -1628,10 +1637,13 @@ function run(settings) {
                                         : null;
                                 if (!settings_button) return;
                                 const settings_panel = settings_button
-                                    .closest("div[opd_column_type]")
+                                    .closest("div[opd_column_type]")!
                                     .querySelector(
                                         ".dsp_column_settings_panel",
                                     );
+                                if (!(settings_panel instanceof HTMLElement)) {
+                                    return;
+                                }
                                 if (
                                     settings_panel.getAttribute("open") == null
                                 ) {
@@ -1647,7 +1659,7 @@ function run(settings) {
                         opd_column_div
                             .querySelector(
                                 ".dsp_column_settings_panel_close_btn",
-                            )
+                            )!
                             .addEventListener("click", function (ev) {
                                 const close_button =
                                     ev.currentTarget instanceof HTMLElement
@@ -1655,26 +1667,29 @@ function run(settings) {
                                         : null;
                                 if (!close_button) return;
                                 const settings_panel = close_button
-                                    .closest("div[opd_column_type]")
+                                    .closest("div[opd_column_type]")!
                                     .querySelector(
                                         ".dsp_column_settings_panel",
                                     );
+                                if (!(settings_panel instanceof HTMLElement)) {
+                                    return;
+                                }
                                 settings_panel.removeAttribute("open");
                                 settings_panel.style.display = "none";
                             });
                         // Settings panel and hover interactions.
                         opd_column_div
-                            .querySelector(".dsp_column_settings_panel")
+                            .querySelector(".dsp_column_settings_panel")!
                             .addEventListener("mouseover", function () {
                                 opd_column_div
-                                    .closest(".dsp_column")
+                                    .closest(".dsp_column")!
                                     .setAttribute("draggable", "false");
                             });
                         opd_column_div
-                            .querySelector(".dsp_column_settings_panel")
+                            .querySelector(".dsp_column_settings_panel")!
                             .addEventListener("mouseleave", function () {
                                 opd_column_div
-                                    .closest(".dsp_column")
+                                    .closest(".dsp_column")!
                                     .setAttribute("draggable", "true");
                             });
                     }
@@ -1761,9 +1776,7 @@ function run(settings) {
                                             ".opd_column_size_preset",
                                         );
                                     const column_width_preset_select =
-                                        /** @type {HTMLSelectElement | null} */ (
-                                            column_width_preset
-                                        );
+                                        /** @type {HTMLSelectElement | null} */ column_width_preset;
                                     let setting_width = await opd_prompt(
                                         i18n_message("msg_column_width_prompt"),
                                         now_width ?? undefined,
@@ -1827,17 +1840,17 @@ function run(settings) {
                     ) {
                         // Load and apply banner visibility settings.
                         /*if(opd_column_banner_checkbox.checked == true){
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
+                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
                     }else{
-                        this.contentWindow.document.querySelector("head").insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
+                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
                         if (
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_banner_css]",
                             ) == null
                         ) {
-                            iframe_elem.contentWindow.document
-                                .querySelector("head")
+                            iframe_elem
+                                .contentWindow!.document.querySelector("head")!
                                 .insertAdjacentHTML(
                                     "beforeend",
                                     `<style opd_banner_css></style>`,
@@ -1845,25 +1858,25 @@ function run(settings) {
                         }
                         if (opd_column_banner_checkbox?.checked != true) {
                             //console.log(this)
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_banner_css]",
-                            ).textContent =
+                            )!.textContent =
                                 `header[role="banner"]{display:none};`;
                         } else {
                             //console.log("else")
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_banner_css]",
-                            ).textContent = ``;
+                            )!.textContent = ``;
                         }
 
                         // Apply top-search-area hide setting.
                         if (
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_top_visible_css]",
                             ) == null
                         ) {
-                            iframe_elem.contentWindow.document
-                                .querySelector("head")
+                            iframe_elem
+                                .contentWindow!.document.querySelector("head")!
                                 .insertAdjacentHTML(
                                     "beforeend",
                                     `<style opd_top_visible_css></style>`,
@@ -1873,47 +1886,47 @@ function run(settings) {
                             //console.log("home_notcheck")
                             if (
                                 iframe_elem
-                                    .closest("div[opd_column_type]")
+                                    .closest("div[opd_column_type]")!
                                     .getAttribute("opd_column_type") ==
                                 "explore"
                             ) {
-                                iframe_elem.contentWindow.document.querySelector(
+                                iframe_elem.contentWindow!.document.querySelector(
                                     "head style[opd_top_visible_css]",
-                                ).textContent =
+                                )!.textContent =
                                     `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                             } else {
                                 if (
                                     iframe_elem
-                                        .closest("div[opd_column_type]")
+                                        .closest("div[opd_column_type]")!
                                         .getAttribute("opd_column_type") ==
                                     "home"
                                 ) {
-                                    iframe_elem.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow!.document.querySelector(
                                         "head style[opd_top_visible_css]",
-                                    ).textContent =
+                                    )!.textContent =
                                         `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                 } else {
-                                    iframe_elem.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow!.document.querySelector(
                                         "head style[opd_top_visible_css]",
-                                    ).textContent =
+                                    )!.textContent =
                                         `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                 }
                             }
                         } else {
                             //console.log("else")
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_top_visible_css]",
-                            ).textContent = ``;
+                            )!.textContent = ``;
                         }
 
                         // Load and apply tweet view mode settings.
                         if (
-                            iframe_elem.contentWindow.document.querySelector(
+                            iframe_elem.contentWindow!.document.querySelector(
                                 "head style[opd_tw_view_mode_css]",
                             ) == null
                         ) {
-                            iframe_elem.contentWindow.document
-                                .querySelector("head")
+                            iframe_elem
+                                .contentWindow!.document.querySelector("head")!
                                 .insertAdjacentHTML(
                                     "beforeend",
                                     `<style opd_tw_view_mode_css></style>`,
@@ -1928,35 +1941,37 @@ function run(settings) {
                                 tw_view_mode_value;
                             switch (tw_view_mode_value) {
                                 case "0":
-                                    iframe_elem.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow!.document.querySelector(
                                         "head style[opd_tw_view_mode_css]",
-                                    ).textContent = ``;
+                                    )!.textContent = ``;
                                     break;
                                 case "1":
-                                    iframe_elem.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow!.document.querySelector(
                                         "head style[opd_tw_view_mode_css]",
-                                    ).textContent =
+                                    )!.textContent =
                                         `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                                     break;
                                 case "2":
-                                    iframe_elem.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow!.document.querySelector(
                                         "head style[opd_tw_view_mode_css]",
-                                    ).textContent =
+                                    )!.textContent =
                                         `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                                     break;
                                 default:
-                                    iframe_elem.contentWindow.document.querySelector(
+                                    iframe_elem.contentWindow!.document.querySelector(
                                         "head style[opd_tw_view_mode_css]",
-                                    ).textContent = ``;
+                                    )!.textContent = ``;
                                     break;
                             }
                         }
                         // Apply initial auto-refresh state.
-                        let auto_reload_int = null; // Also reused in checkbox event handlers.
+                        let auto_reload_int: ReturnType<
+                            typeof setInterval
+                        > | null = null; // Also reused in checkbox event handlers.
                         if (opd_column_auto_reload_checkbox != null) {
                             // Pause top transition while hovering Home/Explore during auto refresh.
                             opd_column_div
-                                .querySelector("iframe")
+                                .querySelector("iframe")!
                                 .addEventListener("mouseover", function (ev) {
                                     const iframe_target =
                                         ev.currentTarget instanceof
@@ -1970,7 +1985,7 @@ function run(settings) {
                                     );
                                 });
                             opd_column_div
-                                .querySelector("iframe")
+                                .querySelector("iframe")!
                                 .addEventListener("mouseleave", function (ev) {
                                     const iframe_target =
                                         ev.currentTarget instanceof
@@ -1994,10 +2009,15 @@ function run(settings) {
                                     async function () {
                                         const auto_reload_time =
                                             auto_reload_target_elem
-                                                .closest("div[opd_column_type]")
-                                                .querySelector(
+                                                .closest(
+                                                    "div[opd_column_type]",
+                                                )!
+                                                ?.querySelector<HTMLInputElement>(
                                                     ".opd_a_reload_time_setting",
                                                 );
+                                        if (auto_reload_time == null) {
+                                            return;
+                                        }
                                         if (
                                             Number(auto_reload_time.value) >= 1
                                         ) {
@@ -2031,14 +2051,15 @@ function run(settings) {
                                 //console.log("init update!")
                                 const auto_reload_time_input =
                                     auto_reload_target_elem
-                                        .closest("div[opd_column_type]")
-                                        .querySelector(
+                                        .closest("div[opd_column_type]")!
+                                        ?.querySelector<HTMLInputElement>(
                                             ".opd_a_reload_time_setting",
                                         );
+                                if (auto_reload_time_input == null) {
+                                    return;
+                                }
                                 const auto_reload_time_input_element =
-                                    /** @type {HTMLInputElement} */ (
-                                        auto_reload_time_input
-                                    );
+                                    auto_reload_time_input;
                                 const auto_reload_load_time =
                                     Number(
                                         auto_reload_time_input_element.value,
@@ -2046,9 +2067,9 @@ function run(settings) {
                                 auto_reload_time_input_element.disabled = true;
                                 auto_reload_int = setInterval(function () {
                                     //console.log("update!")
-                                    //console.log(auto_reload_target_elem.contentWindow)
+                                    //console.log(auto_reload_target_elem.contentWindow!)
                                     const path_name =
-                                        auto_reload_target_elem.contentWindow
+                                        auto_reload_target_elem.contentWindow!
                                             .location.pathname;
                                     if (
                                         ["/home", "/search"].includes(
@@ -2063,10 +2084,10 @@ function run(settings) {
                                         ) {
                                             if (column_content_reload) {
                                                 column_content_reload.Reload(
-                                                    auto_reload_target_elem.contentWindow,
+                                                    auto_reload_target_elem.contentWindow!,
                                                 );
                                                 setTimeout(() => {
-                                                    auto_reload_target_elem.contentWindow.scrollTo(
+                                                    auto_reload_target_elem.contentWindow!.scrollTo(
                                                         {
                                                             top: 0,
                                                             behavior: "auto",
@@ -2093,7 +2114,7 @@ function run(settings) {
                                             : null;
                                     if (!banner_checkbox) return;
                                     column_settings_save("", last_load_profile);
-                                    //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
+                                    //console.log(this.closest("div[opd_column_type]")!.querySelector("iframe"))
                                     const banner_column =
                                         banner_checkbox.closest(
                                             "div[opd_column_type]",
@@ -2114,7 +2135,7 @@ function run(settings) {
                                         banner_mode_target_object.contentWindow
                                             .document;
                                     const banner_head =
-                                        banner_doc.querySelector("head");
+                                        banner_doc.querySelector("head")!;
                                     if (!banner_head) return;
                                     //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]'))
                                     if (
@@ -2175,7 +2196,7 @@ function run(settings) {
                                         topvisible_mode_target_object
                                             .contentWindow.document;
                                     const topvisible_head =
-                                        topvisible_doc.querySelector("head");
+                                        topvisible_doc.querySelector("head")!;
                                     if (!topvisible_head) return;
                                     //console.log(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]'))
                                     if (
@@ -2199,13 +2220,13 @@ function run(settings) {
                                         );
                                     if (top_visible_checkbox.checked != true) {
                                         //console.log(this)
-                                        //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
+                                        //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]')!.textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
                                         if (
                                             topvisible_column_type == "explore"
                                         ) {
                                             topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
                                         } else {
-                                            //console.log(this.closest("div[opd_column_type]").getAttribute("opd_column_type"))
+                                            //console.log(this.closest("div[opd_column_type]")!.getAttribute("opd_column_type"))
                                             if (
                                                 topvisible_column_type == "home"
                                             ) {
@@ -2318,13 +2339,14 @@ function run(settings) {
                                             return;
                                         }
                                         const auto_reload_time_input =
-                                            auto_reload_column.querySelector(
+                                            auto_reload_column.querySelector<HTMLInputElement>(
                                                 ".opd_a_reload_time_setting",
                                             );
+                                        if (auto_reload_time_input == null) {
+                                            return;
+                                        }
                                         const auto_reload_time_input_element =
-                                            /** @type {HTMLInputElement} */ (
-                                                auto_reload_time_input
-                                            );
+                                            auto_reload_time_input;
                                         const auto_reload_time =
                                             Number(
                                                 auto_reload_time_input_element.value,
@@ -2387,7 +2409,9 @@ function run(settings) {
                                         } else {
                                             auto_reload_time_input_element.disabled = false;
                                             //console.log("update stop!")
-                                            clearInterval(auto_reload_int);
+                                            if (auto_reload_int != null) {
+                                                clearInterval(auto_reload_int);
+                                            }
                                             column_settings_save(
                                                 "",
                                                 last_load_profile,
@@ -2397,7 +2421,7 @@ function run(settings) {
                                 );
                             }
                         }
-                        /*if(this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "explore" || this.closest("div[opd_column_type]").getAttribute("opd_column_type") == "home"){
+                        /*if(this.closest("div[opd_column_type]")!.getAttribute("opd_column_type") == "explore" || this.closest("div[opd_column_type]")!.getAttribute("opd_column_type") == "home"){
                     
                     }*/
                         if (
@@ -2415,7 +2439,7 @@ function run(settings) {
                                             : null;
                                     if (!tw_view_mode_select) return;
                                     column_settings_save("", last_load_profile);
-                                    //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
+                                    //console.log(this.closest("div[opd_column_type]")!.querySelector("iframe"))
                                     const tw_view_mode_column =
                                         tw_view_mode_select.closest(
                                             "div[opd_column_type]",
@@ -2438,7 +2462,7 @@ function run(settings) {
                                         tw_view_mode_target_object.contentWindow
                                             .document;
                                     const tw_view_head =
-                                        tw_view_doc.querySelector("head");
+                                        tw_view_doc.querySelector("head")!;
                                     if (!tw_view_head) return;
                                     //console.log(this.value)
                                     if (
@@ -2480,7 +2504,7 @@ function run(settings) {
                         opd_column_scroll_to_top.addEventListener(
                             "click",
                             () => {
-                                iframe_elem.contentWindow.scrollTo({
+                                iframe_elem.contentWindow!.scrollTo({
                                     top: 0,
                                     behavior: "auto",
                                 });
@@ -2494,6 +2518,9 @@ function run(settings) {
             const opd_column_mutate = column_object[index].closest(
                 "div[opd_column_type]",
             );
+            if (!opd_column_mutate) {
+                continue;
+            }
             if (
                 opd_column_mutate.getAttribute("opd_column_type") == "explore"
             ) {
@@ -2537,35 +2564,40 @@ function run(settings) {
     const init_settings_btn = document.getElementById("init_settings");
     if (init_settings_btn) {
         init_settings_btn.addEventListener("click", async function () {
-            chrome.storage.local.remove("opd_settings", async function (value) {
+            chrome.storage.local.remove("opd_settings", async function () {
                 await opd_alert(i18n_message("msg_settings_reset_completed"));
             });
         });
     }
     // Prevent auto-scroll when opening media posts.
-    const main_rack_element = /** @type {HTMLElement | null} */ (
-        document.querySelector("#main_rack_element")
-    );
+    const main_rack_element =
+        /** @type {HTMLElement | null} */ document.querySelector(
+            "#main_rack_element",
+        );
     if (main_rack_element) {
         main_rack_element.addEventListener("scrollend", function () {
             main_rack_element.scrollTop = 0;
         });
     }
     // Two-row view.
-    const second_rack_button = /** @type {HTMLInputElement | null} */ (
-        document.getElementById("second_rack")
-    );
+    const second_rack_button =
+        /** @type {HTMLInputElement | null} */ document.getElementById(
+            "second_rack",
+        );
     if (second_rack_button) {
         second_rack_button.addEventListener("click", async function () {
-            const first_rack_element = /** @type {HTMLElement | null} */ (
-                document.querySelector("#first_rack_element")
-            );
-            const second_rack_element = /** @type {HTMLElement | null} */ (
-                document.querySelector("#second_rack_element")
-            );
-            const second_rack_icon = /** @type {HTMLElement | null} */ (
-                document.querySelector(".dsp_btn_second_rack_img")
-            );
+            const first_rack_element =
+                /** @type {HTMLElement | null} */ document.querySelector(
+                    "#first_rack_element",
+                );
+            const second_rack_element =
+                /** @type {HTMLElement | null} */ document.querySelector(
+                    "#second_rack_element",
+                );
+            const second_rack_icon =
+                /** @type {HTMLElement | null} */ document.querySelector(
+                    ".dsp_btn_second_rack_img",
+                );
             if (second_rack_mode == false) {
                 //document.querySelector("#main_rack_element").style.height = "50vh";
                 if (first_rack_element)
@@ -2586,7 +2618,7 @@ function run(settings) {
                 /*for (let index = 0; index < document.querySelectorAll('.dsp_column[draggable="true"]').length; index++) {
                 document.querySelectorAll('.dsp_column[draggable="true"]')[index].style.height = "calc(100% - 25px)";
             }*/
-                //document.querySelector("style[second_column_css]").textContent = `.dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
+                //document.querySelector("style[second_column_css]")!.textContent = `.dsp_column[draggable="true"]{height:calc(100% - 25px)}`;
                 //document.querySelector(".dsp_column_second_emptycolumn").scrollIntoView({behavior: "smooth",inline: "end"});
                 //append_object_css();
                 column_dd();
@@ -2635,7 +2667,7 @@ function run(settings) {
                 chrome.runtime
                     .sendMessage({ message: "dnr_upd" })
                     .then((value) => {
-                        if (/** @type {boolean} */ (value) == true) {
+                        if (/** @type {boolean} */ value == true) {
                             request_page_reload();
                         }
                     });
@@ -2983,7 +3015,7 @@ function run(settings) {
             if (
                 await opd_confirm(
                     i18n_message("msg_profile_delete_confirm", [
-                        delete_num + 1,
+                        String(delete_num + 1),
                     ]),
                 )
             ) {
@@ -3039,7 +3071,7 @@ function run(settings) {
         let column_class = document.querySelectorAll(".dsp_column");
         for (let index = 0; index < column_class.length; index++) {
             column_class[index].addEventListener("dragstart", function (ev) {
-                const drag_event = /** @type {DragEvent} */ (ev);
+                const drag_event = ev as DragEvent;
                 const drag_target =
                     drag_event.target instanceof HTMLElement
                         ? drag_event.target
@@ -3053,7 +3085,7 @@ function run(settings) {
                 }
             });
             column_class[index].addEventListener("dragover", function (ev) {
-                const drag_event = /** @type {DragEvent} */ (ev);
+                const drag_event = ev as DragEvent;
                 drag_event.preventDefault();
                 const drop_target =
                     drag_event.currentTarget instanceof HTMLElement
@@ -3063,7 +3095,7 @@ function run(settings) {
                 drop_target.style.borderLeft = "15px solid #2e2e2e";
             });
             column_class[index].addEventListener("dragleave", function (ev) {
-                const drag_event = /** @type {DragEvent} */ (ev);
+                const drag_event = ev as DragEvent;
                 const drop_target =
                     drag_event.currentTarget instanceof HTMLElement
                         ? drag_event.currentTarget
@@ -3072,7 +3104,7 @@ function run(settings) {
                 drop_target.style.borderLeft = "";
             });
             column_class[index].addEventListener("drop", function (ev) {
-                const drag_event = /** @type {DragEvent} */ (ev);
+                const drag_event = ev as DragEvent;
                 drag_event.preventDefault();
                 const drop_target =
                     drag_event.currentTarget instanceof HTMLElement
@@ -3132,11 +3164,14 @@ function run(settings) {
                         ? ev.currentTarget
                         : null;
                 if (!close_button) return;
-                const column_element = close_button.closest(".dsp_column");
+                const column_element = close_button.closest(".dsp_column")!;
                 if (!column_element) return;
-                const pin_checkbox = /** @type {HTMLInputElement | null} */ (
-                    column_element.querySelector(".opd_pinned_btn")
-                )?.checked;
+                const pin_checkbox_element =
+                    column_element.querySelector(".opd_pinned_btn");
+                const pin_checkbox =
+                    pin_checkbox_element instanceof HTMLInputElement
+                        ? pin_checkbox_element.checked
+                        : undefined;
                 if (pin_checkbox == false || pin_checkbox == undefined) {
                     column_element.remove();
                     append_object_css();
@@ -3158,30 +3193,42 @@ function run(settings) {
         }
     }
     // Save column layout.
-    function column_settings_save(mode, profile_num) {
-        let settings_array =
-            /** @type {{column_settings: any[]; version: string}} */ ({
-                column_settings: [],
-                version: manifest.version,
-            });
+    type SavedColumnSettings = {
+        type: string;
+        banner: boolean;
+        top_visible: boolean;
+        tw_view_mode: string;
+        column_save_path: string;
+        column_save_title: string | null;
+        column_pinned_path: string;
+        auto_reload: boolean | null;
+        auto_reload_time: number;
+        column_width: string | null;
+    };
+    function column_settings_save(mode = "", profile_num = last_load_profile) {
+        const settings_array: {
+            column_settings: SavedColumnSettings[];
+            version: string;
+        } = {
+            column_settings: [],
+            version: manifest.version,
+        };
         const columns = document.querySelectorAll(
             "#opd_main_element div[opd_column_type]",
         );
         for (let index = 0; index < columns.length; index++) {
-            const banner_checkbox = /** @type {HTMLInputElement | null} */ (
-                columns[index].querySelector(".opd_banner")
-            );
-            const top_bar_checkbox = /** @type {HTMLInputElement | null} */ (
-                columns[index].querySelector(".opd_top_bar")
-            );
+            const banner_checkbox =
+                columns[index].querySelector<HTMLInputElement>(".opd_banner");
+            const top_bar_checkbox =
+                columns[index].querySelector<HTMLInputElement>(".opd_top_bar");
             const banner_checked = banner_checkbox?.checked == true;
             const top_visible_checked = top_bar_checkbox?.checked == true;
             let tw_view_type = "0";
             let column_open_path = "";
             let column_pinned_save_path = "";
-            let column_page_title = null;
-            let column_width_value = null;
-            let column_auto_reload = null;
+            let column_page_title: string | null = null;
+            let column_width_value: string | null = null;
+            let column_auto_reload: boolean | null = null;
             let column_auto_reload_time = 10000;
             if (
                 columns[index].querySelector(".opd_tw_view_mode")?.value !=
@@ -3214,22 +3261,21 @@ function run(settings) {
                 columns[index].getAttribute("opd_column_type") == "explore" ||
                 columns[index].getAttribute("opd_column_type") == "home"
             ) {
-                if (
-                    /** @type {HTMLInputElement | null} */ (
-                        columns[index].querySelector(".opd_a_reload_bar")
-                    )?.checked == true
-                ) {
+                const auto_reload_checkbox =
+                    columns[index].querySelector<HTMLInputElement>(
+                        ".opd_a_reload_bar",
+                    );
+                if (auto_reload_checkbox?.checked == true) {
                     column_auto_reload = true;
                 } else {
                     column_auto_reload = false;
                 }
                 const column_setting_time =
                     Number(
-                        /** @type {HTMLInputElement | null} */ (
-                            columns[index].querySelector(
-                                ".opd_a_reload_time_setting",
-                            )
-                        )?.value ?? "10",
+                        /** @type {HTMLInputElement | null} */ columns[
+                            index
+                        ].querySelector(".opd_a_reload_time_setting")?.value ??
+                            "10",
                     ) * 1000;
                 //console.log(column_setting_time)
                 if (column_setting_time >= 1000) {
@@ -3296,8 +3342,8 @@ function run(settings) {
     // Watch title changes.
     const observe_head_observer = new MutationObserver(function () {
         document.title = "XPP-Deck";
-        const shortcut_icon = /** @type {HTMLLinkElement | null} */ (
-            document.querySelector('link[rel="shortcut icon"]')
+        const shortcut_icon = document.querySelector<HTMLLinkElement>(
+            'link[rel="shortcut icon"]',
         );
         if (shortcut_icon) {
             shortcut_icon.href = chrome.runtime.getURL(
@@ -3320,7 +3366,7 @@ function run(settings) {
 
         apply_theme_for_main_element(main_element);
     });
-    const observe_head = document.querySelector("head");
+    const observe_head = document.querySelector("head")!;
     if (observe_head) {
         observe_head_observer.observe(observe_head, {
             childList: true,

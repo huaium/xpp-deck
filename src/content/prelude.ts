@@ -1,4 +1,3 @@
-// @ts-nocheck
 console.log("Welcome to XPP-Deck!");
 const manifest = chrome.runtime.getManifest();
 // Set to true for prototype builds.
@@ -19,7 +18,7 @@ if (is_prototype) {
 //
 const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
-let apply_ui_color = null;
+let apply_ui_color: (() => void) | null = null;
 const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
 /** @type {NonNullable<Window["__opdBootstrap"]>} */
 const opd_bootstrap = window.__opdBootstrap || {};
@@ -27,9 +26,12 @@ const beforeunload_bypass_key =
     opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
 const opd_root_theme_attribute =
     opd_bootstrap.rootThemeAttribute || "data-opd-theme";
-let opd_i18n_override_messages = null;
+type I18nOverrideMessages = Record<string, { message?: string }>;
+let opd_i18n_override_messages: I18nOverrideMessages | null = null;
 let opd_i18n_language = "browser";
-function normalize_i18n_substitutions(substitutions) {
+function normalize_i18n_substitutions(
+    substitutions?: string | string[] | null,
+) {
     if (substitutions == null) {
         return [];
     }
@@ -38,7 +40,10 @@ function normalize_i18n_substitutions(substitutions) {
     }
     return [String(substitutions)];
 }
-function apply_i18n_substitutions(message, substitutions) {
+function apply_i18n_substitutions(
+    message: string,
+    substitutions?: string | string[] | null,
+) {
     const normalized_substitutions =
         normalize_i18n_substitutions(substitutions);
     return message
@@ -49,7 +54,7 @@ function apply_i18n_substitutions(message, substitutions) {
         })
         .replace(/__OPD_DOLLAR__/g, "$");
 }
-function i18n_message(message_name, substitutions) {
+function i18n_message(message_name: string, substitutions?: string | string[]) {
     const override_message =
         opd_i18n_override_messages?.[message_name]?.message;
     if (typeof override_message === "string") {
@@ -58,7 +63,7 @@ function i18n_message(message_name, substitutions) {
     return chrome.i18n.getMessage(message_name, substitutions);
 }
 /** @param {string} key @returns {Promise<Record<string, unknown>>} */
-function get_storage_local_async(key) {
+function get_storage_local_async(key: string) {
     return new Promise((resolve) => {
         chrome.storage.local.get(key, (value) => resolve(value));
     });
@@ -67,9 +72,10 @@ async function initialize_i18n_override() {
     const language_setting = await get_storage_local_async(
         "opd_language_override",
     );
+    const language_setting_record = language_setting as Record<string, unknown>;
     const selected_language =
-        typeof language_setting.opd_language_override === "string"
-            ? language_setting.opd_language_override
+        typeof language_setting_record.opd_language_override === "string"
+            ? language_setting_record.opd_language_override
             : "browser";
     opd_i18n_language = selected_language;
     if (selected_language === "browser") {
@@ -95,7 +101,7 @@ let is_shift_pressed = false;
 let profile_store;
 let last_load_profile = 0;
 let is_removed_default_style = false;
-let media_viewer_token = [];
+let media_viewer_token: string[] = [];
 const opd_sidebar_width_expanded = "220px";
 const opd_sidebar_width_collapsed = "60px";
 function request_page_reload() {
@@ -160,11 +166,11 @@ function create_profile_list_html(profile_length, current_profile_index) {
 function create_language_select_html() {
     return `<div class="opd_language_select_wrap" title="${i18n_message_or_fallback("ui_language_selector_title", "Language")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message_or_fallback("ui_language_selector_label", "Language")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_system", "System")}</option><option value="en" ${opd_i18n_language === "en" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_english", "English")}</option><option value="ja" ${opd_i18n_language === "ja" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_japanese", "Japanese")}</option></select></div>`;
 }
-function i18n_message_or_fallback(message_id, fallback_text) {
+function i18n_message_or_fallback(message_id: string, fallback_text: string) {
     const translated = i18n_message(message_id);
     return translated == "" ? fallback_text : translated;
 }
-let opd_dialog_queue = Promise.resolve();
+let opd_dialog_queue: Promise<unknown> = Promise.resolve();
 function ensure_opd_dialog_style() {
     if (document.querySelector("style[opd_dialog_css]") != null) {
         return;
@@ -423,7 +429,7 @@ function ensure_opd_dialog_style() {
     }`;
     document.head.appendChild(style);
 }
-function enqueue_opd_dialog(task) {
+function enqueue_opd_dialog<T>(task: () => Promise<T>): Promise<T> {
     const dialog_task = opd_dialog_queue.then(task, task);
     opd_dialog_queue = dialog_task.catch(() => {});
     return dialog_task;
@@ -440,7 +446,15 @@ function is_opd_dark_theme_enabled() {
  * }} options
  * @returns {Promise<void | boolean | string | null>}
  */
-function open_opd_dialog({ message, type, defaultValue }) {
+function open_opd_dialog({
+    message,
+    type,
+    defaultValue,
+}: {
+    message: string;
+    type: "alert" | "confirm" | "prompt";
+    defaultValue?: string;
+}) {
     return enqueue_opd_dialog(
         () =>
             /** @returns {Promise<void | boolean | string | null>} */
@@ -459,8 +473,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                 message_elem.className = "opd_dialog_message";
                 message_elem.textContent = `${message}`;
                 dialog.appendChild(message_elem);
-                /** @type {HTMLInputElement | null} */
-                let prompt_input = null;
+                let prompt_input: HTMLInputElement | null = null;
                 if (type == "prompt") {
                     prompt_input = document.createElement("input");
                     prompt_input.className = "opd_dialog_input";
@@ -477,8 +490,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                     "OK",
                 );
                 ok_button.className = "opd_dialog_primary";
-                /** @type {HTMLButtonElement | null} */
-                let cancel_button = null;
+                let cancel_button: HTMLButtonElement | null = null;
                 if (type != "alert") {
                     cancel_button = document.createElement("button");
                     cancel_button.type = "button";
@@ -493,19 +505,18 @@ function open_opd_dialog({ message, type, defaultValue }) {
                 overlay.appendChild(dialog);
                 const previous_active_element = document.activeElement;
                 document.body.appendChild(overlay);
-                const get_focusable_elements = () =>
+                const get_focusable_elements = (): HTMLElement[] =>
                     Array.from(
                         dialog.querySelectorAll(
                             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                         ),
-                    ).filter((elem) => {
-                        return (
+                    ).filter(
+                        (elem): elem is HTMLElement =>
                             elem instanceof HTMLElement &&
-                            !elem.hasAttribute("disabled")
-                        );
-                    });
+                            !elem.hasAttribute("disabled"),
+                    );
 
-                const finish = (result) => {
+                const finish = (result: void | boolean | string | null) => {
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
                     if (previous_active_element instanceof HTMLElement) {
@@ -513,7 +524,7 @@ function open_opd_dialog({ message, type, defaultValue }) {
                     }
                     resolve(result);
                 };
-                const key_listener = (event) => {
+                const key_listener = (event: KeyboardEvent) => {
                     if (event.isComposing || event.keyCode == 229) {
                         return;
                     }
@@ -523,12 +534,12 @@ function open_opd_dialog({ message, type, defaultValue }) {
                             event.preventDefault();
                             return;
                         }
-                        const first_elem = /** @type {HTMLElement} */ (
-                            focusable_elements[0]
-                        );
-                        const last_elem = /** @type {HTMLElement} */ (
-                            focusable_elements[focusable_elements.length - 1]
-                        );
+                        const first_elem =
+                            /** @type {HTMLElement} */ focusable_elements[0];
+                        const last_elem =
+                            /** @type {HTMLElement} */ focusable_elements[
+                                focusable_elements.length - 1
+                            ];
                         const active_elem = document.activeElement;
                         if (event.shiftKey) {
                             if (
@@ -617,7 +628,7 @@ async function opd_prompt(message, defaultValue = "") {
 async function open_about_page_modal() {
     return enqueue_opd_dialog(
         () =>
-            new Promise((resolve) => {
+            new Promise<void>((resolve) => {
                 ensure_opd_dialog_style();
                 const overlay = document.createElement("div");
                 overlay.className = "opd_dialog_overlay";
@@ -685,17 +696,16 @@ async function open_about_page_modal() {
                 const previous_active_element = document.activeElement;
                 document.body.appendChild(overlay);
 
-                const get_focusable_elements = () =>
+                const get_focusable_elements = (): HTMLElement[] =>
                     Array.from(
                         dialog.querySelectorAll(
                             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                         ),
-                    ).filter((elem) => {
-                        return (
+                    ).filter(
+                        (elem): elem is HTMLElement =>
                             elem instanceof HTMLElement &&
-                            !elem.hasAttribute("disabled")
-                        );
-                    });
+                            !elem.hasAttribute("disabled"),
+                    );
 
                 const finish = () => {
                     document.removeEventListener("keydown", key_listener, true);
@@ -705,7 +715,7 @@ async function open_about_page_modal() {
                     }
                     resolve(undefined);
                 };
-                const key_listener = (event) => {
+                const key_listener = (event: KeyboardEvent) => {
                     if (event.isComposing || event.keyCode == 229) {
                         return;
                     }
@@ -715,12 +725,12 @@ async function open_about_page_modal() {
                             event.preventDefault();
                             return;
                         }
-                        const first_elem = /** @type {HTMLElement} */ (
-                            focusable_elements[0]
-                        );
-                        const last_elem = /** @type {HTMLElement} */ (
-                            focusable_elements[focusable_elements.length - 1]
-                        );
+                        const first_elem =
+                            /** @type {HTMLElement} */ focusable_elements[0];
+                        const last_elem =
+                            /** @type {HTMLElement} */ focusable_elements[
+                                focusable_elements.length - 1
+                            ];
                         const active_elem = document.activeElement;
                         if (event.shiftKey) {
                             if (
@@ -771,27 +781,37 @@ document.addEventListener("keyup", (event) => {
     if (event.key === "Shift") is_shift_pressed = false;
 });
 // Watch storage updates (mainly for API rate-limit status).
-let api_limit_obj = null;
+let api_limit_obj: ApiAccessLimit | null = null;
 let api_limit_dsc_obj = { time_line: "", recommend_timeline: "", search: "" };
-/**
- * @typedef {{
- *   search: { limit: number | string | null; remaining: number | string | null; reset_unix_time: number | string | null };
- *   time_line: { limit: number | string | null; remaining: number | string | null; reset_unix_time: number | string | null };
- *   recommend_timeline: { limit: number | string | null; remaining: number | string | null; reset_unix_time: number | string | null };
- * }} ApiAccessLimit
- */
+type ApiAccessLimit = {
+    search: {
+        limit: number | string | null;
+        remaining: number | string | null;
+        reset_unix_time: number | string | null;
+    };
+    time_line: {
+        limit: number | string | null;
+        remaining: number | string | null;
+        reset_unix_time: number | string | null;
+    };
+    recommend_timeline: {
+        limit: number | string | null;
+        remaining: number | string | null;
+        reset_unix_time: number | string | null;
+    };
+};
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (changes.api_access_limit != undefined) {
         //console.log(changes)
-        api_limit_obj = /** @type {ApiAccessLimit} */ (
-            changes.api_access_limit.newValue
-        );
+        api_limit_obj = (changes.api_access_limit.newValue ??
+            null) as ApiAccessLimit | null;
         const api_linit_status_btn =
             document.querySelector("#api_limit_status");
-        if (api_linit_status_btn != null) {
-            const api_limit_status_element = /** @type {HTMLElement} */ (
-                api_linit_status_btn
-            );
+        if (api_limit_obj == null) {
+            return;
+        }
+        if (api_linit_status_btn instanceof HTMLElement) {
+            const api_limit_status_element = api_linit_status_btn;
             let timeline_limit_percentage = 99999;
             let recommend_timeline_limit_percentage = 99999;
             let search_limit_percentage = 99999;
@@ -898,7 +918,7 @@ if (
                         String(store_value.opd_profile_store),
                     );
                     //RUN
-                    let ext_update_flag = null;
+                    let ext_update_flag: boolean | null = null;
                     let ext_settings;
                     if (value.opd_settings != undefined) {
                         if (
