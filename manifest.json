@@ -26,7 +26,6 @@
                 "src/content/prelude.js",
                 "src/content/run.js",
                 "src/content/settings.js",
-                "src/extensions/text_review.js",
                 "src/extensions/auto_reload.js",
                 "src/extensions/media_viewer_block.js",
                 "src/extensions/media_viewer/media_viewer.js"
@@ -37,7 +36,6 @@
         {
             "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
             "resources": [
-                "src/extensions/text_review_helper.js",
                 "src/extensions/auto_reload_helper.js",
                 "src/extensions/media_viewer_block_helper.js",
                 "src/extensions/media_viewer/media_viewer.js",
@@ -49,7 +47,6 @@
                 "public/icons/pin.svg",
                 "public/icons/pinned.svg",
                 "public/icons/post.svg",
-                "public/icons/text_review.svg",
                 "public/icons/column_move.svg",
                 "public/icons/column_close.svg",
                 "public/icons/column_w_size.svg",

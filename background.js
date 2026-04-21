@@ -51,11 +51,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             },
         );
     }
-    if (request.message == "text_review") {
-        // TODO: Re-enable text review functionality.
-        // Temporary kill switch: disable external text review API calls.
-        sendResponse(false);
-    }
     if (request.message == "ext_reload") {
         chrome.runtime.reload();
     }

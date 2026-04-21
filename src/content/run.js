@@ -1476,25 +1476,6 @@ function run(settings) {
                             break;
                     }
                     //console.log(opd_column_div.querySelector(".opd_banner").checked)
-                    // Post column behavior.
-                    if (
-                        this.closest("div[opd_column_type]").getAttribute(
-                            "opd_column_type",
-                        ) === "post"
-                    ) {
-                        const post_column_window =
-                            opd_column_div.querySelector(
-                                "iframe",
-                            ).contentWindow;
-                        // Text review feature.
-                        const ext_text_review = new OpdExtTextReview();
-                        const ui_lang = chrome.i18n.getUILanguage();
-                        ext_text_review.Init(
-                            post_column_window,
-                            ui_icon_define,
-                            ui_lang,
-                        );
-                    }
                 }
             });
             // Post-load initialization for each column.
