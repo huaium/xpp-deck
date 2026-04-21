@@ -35,4 +35,11 @@ export default [
             "use-isnan": "warn",
         },
     },
+    {
+        files: ["src/content/*.js"],
+        rules: {
+            // Content scripts are split into sequential files that share globals.
+            "no-unused-vars": "off",
+        },
+    },
 ];

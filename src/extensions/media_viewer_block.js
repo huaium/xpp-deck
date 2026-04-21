@@ -7,7 +7,7 @@ class OpdMediaViewerBlocker {
             const helper_script =
                 column_window.document.createElement("script");
             helper_script.src = chrome.runtime.getURL(
-                "extensions/media_viewer_block_helper.js",
+                "src/extensions/media_viewer_block_helper.js",
             );
 
             this.opd_send_media_info_token = crypto.randomUUID();

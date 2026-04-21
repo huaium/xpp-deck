@@ -112,7 +112,7 @@ class OpdExtTextReview {
             const helper_script =
                 column_window.document.createElement("script");
             helper_script.src = chrome.runtime.getURL(
-                "extensions/text_review_helper.js",
+                "src/extensions/text_review_helper.js",
             );
             column_window.document.head.appendChild(helper_script);
 

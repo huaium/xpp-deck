@@ -18,10 +18,10 @@
         }
     },
     "web_accessible_resources": [
-        "extensions/text_review_helper.js",
-        "extensions/auto_reload_helper.js",
-        "extensions/media_viewer_block_helper.js",
-        "extensions/media_viewer/media_viewer.js",
+        "src/extensions/text_review_helper.js",
+        "src/extensions/auto_reload_helper.js",
+        "src/extensions/media_viewer_block_helper.js",
+        "src/extensions/media_viewer/media_viewer.js",
         "icon/logo_icon.svg",
         "profile_debug.html",
         "icon/settings.svg",
@@ -70,11 +70,13 @@
         {
             "matches": ["https://twitter.com/*", "https://x.com/*"],
             "js": [
-                "content.js",
-                "extensions/text_review.js",
-                "extensions/auto_reload.js",
-                "extensions/media_viewer_block.js",
-                "extensions/media_viewer/media_viewer.js"
+                "src/content/prelude.js",
+                "src/content/run.js",
+                "src/content/settings.js",
+                "src/extensions/text_review.js",
+                "src/extensions/auto_reload.js",
+                "src/extensions/media_viewer_block.js",
+                "src/extensions/media_viewer/media_viewer.js"
             ]
         }
     ],
