@@ -4,8 +4,8 @@ set -euo pipefail
 # Settings.
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-TMP_DIR="$TARGET_DIR/package_tmp"
-OUTPUT_DIR="$TARGET_DIR/package"
+TMP_DIR="$TARGET_DIR/build/package_tmp"
+OUTPUT_DIR="$TARGET_DIR/build/package"
 
 # Read version from manifest.
 get_version() {
@@ -45,9 +45,7 @@ RSYNC_EXCLUDES=(
   --exclude=".DS_Store"
   --exclude="node_modules"
   --exclude="build"
-  --exclude="scripts"
-  --exclude="package_tmp"
-  --exclude="package"
+  --exclude="utils"
   --exclude="pnpm-lock.yaml"
   --exclude="*.sh"
 )

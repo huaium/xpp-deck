@@ -3,14 +3,7 @@ import globals from "globals";
 
 export default [
     {
-        ignores: [
-            ".git/**",
-            "build/web-ext-firefox-src/**",
-            "node_modules/**",
-            "package/**",
-            "package_tmp/**",
-            "build/web-ext-artifacts/**",
-        ],
+        ignores: [".git/**", "build/**", "node_modules/**"],
     },
     js.configs.recommended,
     {

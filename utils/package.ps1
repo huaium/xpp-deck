@@ -7,8 +7,8 @@ $ScriptRoot = if ($PSScriptRoot) {
     Split-Path -Parent $MyInvocation.MyCommand.Path
 }
 $TargetDir = (Resolve-Path (Join-Path $ScriptRoot "..")).Path
-$TmpDir = Join-Path $TargetDir "package_tmp"
-$OutputDir = Join-Path $TargetDir "package"
+$TmpDir = Join-Path $TargetDir "build/package_tmp"
+$OutputDir = Join-Path $TargetDir "build/package"
 
 # Get version.
 function Get-Version {
@@ -45,9 +45,7 @@ $ExcludeDirs = @(
     ".webext-profile",
     "node_modules",
     "build",
-    "scripts",
-    "package_tmp",
-    "package"
+    "utils"
 )
 
 # Excluded files.
