@@ -77,4 +77,4 @@ npm run webext:lint
 npm run webext:build
 ```
 
-Build artifacts are output to `web-ext-artifacts/`.
+Build artifacts are output to `build/web-ext-artifacts/`.

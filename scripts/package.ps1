@@ -1,7 +1,12 @@
 $ErrorActionPreference = "Stop"
 
 # Settings.
-$TargetDir = "."
+$ScriptRoot = if ($PSScriptRoot) {
+    $PSScriptRoot
+} else {
+    Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+$TargetDir = (Resolve-Path (Join-Path $ScriptRoot "..")).Path
 $TmpDir = Join-Path $TargetDir "package_tmp"
 $OutputDir = Join-Path $TargetDir "package"
 
@@ -36,6 +41,11 @@ New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
 $ExcludeDirs = @(
     ".git",
     ".github",
+    ".serena",
+    ".webext-profile",
+    "node_modules",
+    "build",
+    "scripts",
     "package_tmp",
     "package"
 )
@@ -45,6 +55,7 @@ $ExcludeFiles = @(
     ".gitignore",
     "README.md",
     ".DS_Store",
+    "pnpm-lock.yaml",
     "*.sh",
     "*.ps1"
 )

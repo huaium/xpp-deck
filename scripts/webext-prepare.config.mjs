@@ -1,6 +1,6 @@
 export const prepareConfig = {
     sourceDir: ".",
-    outputDir: ".web-ext-firefox-src",
+    outputDir: "build/web-ext-firefox-src",
     firefoxManifestFile: "manifest_firefox.json",
     outputManifestFile: "manifest.json",
     rsyncExcludes: [
@@ -11,8 +11,8 @@ export const prepareConfig = {
         ".DS_Store",
         "package",
         "package_tmp",
-        "web-ext-artifacts",
-        ".web-ext-firefox-src",
+        "build/web-ext-artifacts",
+        "build/web-ext-firefox-src",
         ".webext-profile",
         "node_modules",
         "pnpm-lock.yaml",

@@ -2,9 +2,10 @@
 set -euo pipefail
 
 # Settings.
-TARGET_DIR="."
-TMP_DIR="./package_tmp"
-OUTPUT_DIR="./package"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+TMP_DIR="$TARGET_DIR/package_tmp"
+OUTPUT_DIR="$TARGET_DIR/package"
 
 # Read version from manifest.
 get_version() {
@@ -37,11 +38,17 @@ mkdir -p "$TMP_DIR"
 RSYNC_EXCLUDES=(
   --exclude=".git"
   --exclude=".github"
+  --exclude=".serena"
+  --exclude=".webext-profile"
   --exclude=".gitignore"
   --exclude="README.md"
   --exclude=".DS_Store"
+  --exclude="node_modules"
+  --exclude="build"
+  --exclude="scripts"
   --exclude="package_tmp"
   --exclude="package"
+  --exclude="pnpm-lock.yaml"
   --exclude="*.sh"
 )
 
@@ -50,13 +57,13 @@ rsync -av "${RSYNC_EXCLUDES[@]}" "$TARGET_DIR/" "$TMP_DIR/"
 if [ -f "$TMP_DIR/manifest_firefox.json" ]; then
     mv "$TMP_DIR/manifest_firefox.json" "$TMP_DIR/manifest.json"
 fi
-(cd "$TMP_DIR" && zip -r "../$OUTPUT_DIR/$ZIP_FIREFOX" .)
+(cd "$TMP_DIR" && zip -r "$OUTPUT_DIR/$ZIP_FIREFOX" .)
 rm -rf "$TMP_DIR"
 
 # Chrome ZIP.
 mkdir -p "$TMP_DIR"
 rsync -av "${RSYNC_EXCLUDES[@]}" --exclude="manifest_firefox.json" "$TARGET_DIR/" "$TMP_DIR/"
-(cd "$TMP_DIR" && zip -r "../$OUTPUT_DIR/$ZIP_CHROME" .)
+(cd "$TMP_DIR" && zip -r "$OUTPUT_DIR/$ZIP_CHROME" .)
 rm -rf "$TMP_DIR"
 
 echo "ZIP packaging completed:"

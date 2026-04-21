@@ -5,11 +5,11 @@ export default [
     {
         ignores: [
             ".git/**",
-            ".web-ext-firefox-src/**",
+            "build/web-ext-firefox-src/**",
             "node_modules/**",
             "package/**",
             "package_tmp/**",
-            "web-ext-artifacts/**",
+            "build/web-ext-artifacts/**",
         ],
     },
     js.configs.recommended,
