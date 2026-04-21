@@ -25,7 +25,7 @@
             if (typeof current !== "object") {
                 return undefined;
             }
-            current = /** @type {Record<string, unknown>} */ (current)[key];
+            current = /** @type {Record<string, unknown>} */ current[key];
         }
         return current;
     }
@@ -55,7 +55,7 @@
             reload_func = () => {};
             return;
         }
-        reload_func = /** @type {() => void} */ (refresh);
+        reload_func = /** @type {() => void} */ refresh;
         path_old = path_search;
     }).observe(document, { childList: true, subtree: true });
     // Helper to get React props.
@@ -65,7 +65,7 @@
             k.includes(`__react${prop_type}$`),
         );
         if (!propsKey) return null;
-        return /** @type {Record<string, unknown>} */ (elem)[propsKey];
+        return /** @type {Record<string, unknown>} */ elem[propsKey];
     }
     // Set token for feature events.
     window.addEventListener(

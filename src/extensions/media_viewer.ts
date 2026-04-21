@@ -56,7 +56,7 @@ class OpdExtMediaViewer {
             /** @param {Element | null} elem */
             const stopVideo = (elem) => {
                 if (!elem || elem.tagName !== "VIDEO") return;
-                const video = /** @type {HTMLVideoElement} */ (elem);
+                const video = /** @type {HTMLVideoElement} */ elem;
                 try {
                     video.pause();
                     video.removeAttribute("src");
@@ -185,15 +185,18 @@ class OpdExtMediaViewer {
                 current_media_idx,
             );
 
-            const forward_button = /** @type {HTMLButtonElement | null} */ (
-                media_viewer_dialog.querySelector("[data-media-forward]")
-            );
-            const next_button = /** @type {HTMLButtonElement | null} */ (
-                media_viewer_dialog.querySelector("[data-media-next]")
-            );
-            const download_button = /** @type {HTMLButtonElement | null} */ (
-                media_viewer_dialog.querySelector("[data-media-download]")
-            );
+            const forward_button =
+                /** @type {HTMLButtonElement | null} */ media_viewer_dialog.querySelector(
+                    "[data-media-forward]",
+                );
+            const next_button =
+                /** @type {HTMLButtonElement | null} */ media_viewer_dialog.querySelector(
+                    "[data-media-next]",
+                );
+            const download_button =
+                /** @type {HTMLButtonElement | null} */ media_viewer_dialog.querySelector(
+                    "[data-media-download]",
+                );
             if (forward_button) {
                 forward_button.addEventListener("click", () => {
                     this.SkipBtnDisabled(

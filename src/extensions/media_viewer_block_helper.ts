@@ -31,7 +31,7 @@
             if (typeof current !== "object") {
                 return undefined;
             }
-            current = /** @type {Record<string, unknown>} */ (current)[key];
+            current = /** @type {Record<string, unknown>} */ current[key];
         }
         return current;
     }
@@ -77,62 +77,54 @@
             // Get current source when player exists.
             const current_video_source = /** @type {{
                 posterImage?: string;
-            } | undefined} */ (
-                read_path(video_wrapper_props, [
-                    "children",
-                    "props",
-                    "playerState",
-                ])
-            );
+            } | undefined} */ read_path(video_wrapper_props, [
+                "children",
+                "props",
+                "playerState",
+            ]);
 
             // Get media source list.
             let media_details = /** @type {Array<{
                 media_url_https?: string;
-            }> | undefined} */ (
-                read_path(root_props, [
-                    "children",
-                    0,
-                    "props",
-                    "children",
-                    0,
-                    "props",
-                    "mediaDetails",
-                ])
-            );
+            }> | undefined} */ read_path(root_props, [
+                "children",
+                0,
+                "props",
+                "children",
+                0,
+                "props",
+                "mediaDetails",
+            ]);
 
             // Get media source list for quoted posts.
             let media_details_quoted = /** @type {Array<{
                 media_url_https?: string;
-            }> | undefined} */ (
-                read_path(root_props, [
-                    "children",
-                    2,
-                    "props",
-                    "tweet",
-                    "extended_entities",
-                    "media",
-                ])
-            );
+            }> | undefined} */ read_path(root_props, [
+                "children",
+                2,
+                "props",
+                "tweet",
+                "extended_entities",
+                "media",
+            ]);
             if (quoted) {
                 media_details_quoted = /** @type {Array<{
                     media_url_https?: string;
-                }> | undefined} */ (
-                    read_path(root_props, [
-                        "children",
-                        0,
-                        0,
-                        "props",
-                        "children",
-                        1,
-                        "props",
-                        "children",
-                        4,
-                        "props",
-                        "children",
-                        "props",
-                        "mediaDetails",
-                    ])
-                );
+                }> | undefined} */ read_path(root_props, [
+                    "children",
+                    0,
+                    0,
+                    "props",
+                    "children",
+                    1,
+                    "props",
+                    "children",
+                    4,
+                    "props",
+                    "children",
+                    "props",
+                    "mediaDetails",
+                ]);
             }
 
             // Exclude TwitterCard and similar cases for now.
@@ -226,16 +218,16 @@
             k.includes(`__react${prop_type}$`),
         );
         if (!propsKey) return null;
-        return /** @type {Record<string, unknown>} */ (
-            /** @type {unknown} */ (elem)
-        )[propsKey];
+        return /** @type {Record<string, unknown>} */ /** @type {unknown} */ elem[
+            propsKey
+        ];
     }
     // Set token for feature events.
     document.addEventListener(
         "opd_send_media_info_init",
         (e) => {
-            const detail = /** @type {{ token?: string }} */ (
-                JSON.parse(String(e.detail))
+            const detail = /** @type {{ token?: string }} */ JSON.parse(
+                String(e.detail),
             );
             opd_send_media_info_token = detail.token;
         },
@@ -247,8 +239,8 @@
         (e) => {
             // When column is inactive.
             const detail =
-                /** @type {{ token?: string; keys?: { alt?: boolean } }} */ (
-                    JSON.parse(String(e.detail))
+                /** @type {{ token?: string; keys?: { alt?: boolean } }} */ JSON.parse(
+                    String(e.detail),
                 );
 
             if (detail.token !== opd_send_media_info_token) return;
