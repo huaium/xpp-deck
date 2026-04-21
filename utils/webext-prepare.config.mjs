@@ -14,5 +14,8 @@ export const prepareConfig = {
         "utils",
         "node_modules",
         "pnpm-lock.yaml",
+        "tsconfig*.json",
+        "*.ts",
+        "*.map",
     ],
 };

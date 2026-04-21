@@ -16,6 +16,6 @@
         "noImplicitThis": true,
         "strictNullChecks": true
     },
-    "include": ["src/**/*.js", "src/types/**/*.d.ts"],
+    "include": ["src/**/*.ts", "src/**/*.js", "src/types/**/*.d.ts"],
     "exclude": ["build/**", "node_modules/**", ".webext-profile/**", "utils/**"]
 }

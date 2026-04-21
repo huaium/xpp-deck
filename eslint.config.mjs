@@ -35,4 +35,13 @@ export default [
             "no-unused-vars": "off",
         },
     },
+    {
+        files: ["utils/*.mjs", "eslint.config.mjs", "web-ext-config.mjs"],
+        languageOptions: {
+            sourceType: "module",
+            globals: {
+                ...globals.node,
+            },
+        },
+    },
 ];

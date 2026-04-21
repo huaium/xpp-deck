@@ -9,6 +9,7 @@ $ScriptRoot = if ($PSScriptRoot) {
 $TargetDir = (Resolve-Path (Join-Path $ScriptRoot "..")).Path
 $TmpDir = Join-Path $TargetDir "build/package_tmp"
 $OutputDir = Join-Path $TargetDir "build/package"
+$CompiledJsDir = Join-Path $TargetDir "build/ts-out/src"
 
 # Get version.
 function Get-Version {
@@ -54,6 +55,9 @@ $ExcludeFiles = @(
     "README.md",
     ".DS_Store",
     "pnpm-lock.yaml",
+    "tsconfig*.json",
+    "*.ts",
+    "*.map",
     "*.sh",
     "*.ps1"
 )
@@ -82,8 +86,23 @@ function Invoke-RoboCopy {
     }
 }
 
+function Copy-CompiledJsOverlay {
+    param(
+        [Parameter(Mandatory=$true)][string]$Dest
+    )
+
+    if (-not (Test-Path $CompiledJsDir)) {
+        return
+    }
+
+    $destSrc = Join-Path $Dest "src"
+    New-Item -ItemType Directory -Force -Path $destSrc | Out-Null
+    Invoke-RoboCopy -Source $CompiledJsDir -Dest $destSrc -XD @() -XF @("*.map")
+}
+
 # Build Firefox ZIP.
 Invoke-RoboCopy -Source $TargetDir -Dest $TmpDir -XD $ExcludeDirs -XF $ExcludeFiles
+Copy-CompiledJsOverlay -Dest $TmpDir
 
 $ffManifest = Join-Path $TmpDir "manifest_firefox.json"
 $mainManifest = Join-Path $TmpDir "manifest.json"
@@ -100,6 +119,7 @@ New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
 
 # Build Chromium ZIP.
 Invoke-RoboCopy -Source $TargetDir -Dest $TmpDir -XD $ExcludeDirs -XF ($ExcludeFiles + @("manifest_firefox.json"))
+Copy-CompiledJsOverlay -Dest $TmpDir
 
 $chZipPath = Join-Path $OutputDir $ZipChrome
 if (Test-Path $chZipPath) { Remove-Item -Force $chZipPath }

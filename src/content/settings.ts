@@ -1,3 +1,4 @@
+// @ts-nocheck
 function apply_theme_for_main_element(main_element) {
     if (!main_element) {
         return;

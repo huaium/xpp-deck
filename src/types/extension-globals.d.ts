@@ -87,9 +87,9 @@ interface Window {
         getCookieColorMode?: () => string | null;
         applyRootThemeMarker?: (theme?: string | null) => void;
     };
-    OpdExtAutoReload?: unknown;
-    OpdExtMediaViewer?: unknown;
-    OpdMediaViewerBlocker?: unknown;
+    OpdExtAutoReload?: typeof OpdExtAutoReload;
+    OpdExtMediaViewer?: typeof OpdExtMediaViewer;
+    OpdMediaViewerBlocker?: typeof OpdMediaViewerBlocker;
 }
 
 interface Navigator {

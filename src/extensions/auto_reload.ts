@@ -1,5 +1,9 @@
 // Used by the auto-refresh feature.
 class OpdExtAutoReload {
+    opd_reload_token: string | null;
+    Init: (column_window: Window) => void;
+    Reload: (column_window: Window) => boolean;
+
     constructor() {
         this.opd_reload_token = null;
         this.Init = (column_window) => {

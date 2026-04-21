@@ -1,14 +1,20 @@
 // Media viewer.
-/**
- * @typedef {{ url: string }} MediaVariant
- * @typedef {{
- *   type: "photo" | "animated_gif" | "video";
- *   media_url_https?: string;
- *   id_str?: string;
- *   video_info?: { variants: MediaVariant[] };
- * }} MediaInfo
- */
+type MediaVariant = { url: string };
+type MediaInfo = {
+    type: "photo" | "animated_gif" | "video";
+    media_url_https?: string;
+    id_str?: string;
+    video_info?: { variants: MediaVariant[] };
+};
 class OpdExtMediaViewer {
+    Preview: (media_info: MediaInfo[], pre_index: number) => void;
+    SkipBtnDisabled: (
+        dialog_elem: HTMLDialogElement,
+        media_info: MediaInfo[],
+        current_media_idx: number,
+    ) => void;
+    DownloadMedia: (media: MediaInfo | undefined) => Promise<void>;
+
     constructor() {
         /** @param {MediaInfo[]} media_info @param {number} pre_index */
         this.Preview = (media_info, pre_index) => {
@@ -76,7 +82,7 @@ class OpdExtMediaViewer {
                 ) {
                     const next_variant = nextInfo.video_info.variants.at(-1);
                     if (!next_variant) return;
-                    const video = /** @type {HTMLVideoElement} */ (current);
+                    const video = current as HTMLVideoElement;
                     video.src = next_variant.url;
                     video.load();
                     video.play();
@@ -87,7 +93,7 @@ class OpdExtMediaViewer {
                     current.tagName === "IMG" &&
                     nextInfo.media_url_https
                 ) {
-                    const image = /** @type {HTMLImageElement} */ (current);
+                    const image = current as HTMLImageElement;
                     image.src = nextInfo.media_url_https + "?name=orig";
                     return;
                 }
@@ -99,9 +105,7 @@ class OpdExtMediaViewer {
 
                 current.replaceWith(next_elment);
                 if (next_elment.tagName === "VIDEO") {
-                    const next_video = /** @type {HTMLVideoElement} */ (
-                        next_elment
-                    );
+                    const next_video = next_elment as HTMLVideoElement;
                     next_elment.addEventListener(
                         "loadedmetadata",
                         () => {
@@ -324,7 +328,7 @@ class OpdExtMediaViewer {
         };
         /** @param {MediaInfo | undefined} media */
         this.DownloadMedia = async (media) => {
-            let media_src = null;
+            let media_src: string | null = null;
             if (
                 media &&
                 ["animated_gif", "video"].includes(media.type) &&

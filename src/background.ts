@@ -57,12 +57,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true;
 });
 //
-/** @type {{
- *   search: { limit: string | null; remaining: string | null; reset_unix_time: string | null };
- *   time_line: { limit: string | null; remaining: string | null; reset_unix_time: string | null };
- *   recommend_timeline: { limit: string | null; remaining: string | null; reset_unix_time: string | null };
- * }} */
-let access_limit = {
+type ApiRateLimit = {
+    limit: string | null;
+    remaining: string | null;
+    reset_unix_time: string | null;
+};
+
+type AccessLimit = {
+    search: ApiRateLimit;
+    time_line: ApiRateLimit;
+    recommend_timeline: ApiRateLimit;
+};
+
+let access_limit: AccessLimit = {
     search: { limit: null, remaining: null, reset_unix_time: null },
     time_line: { limit: null, remaining: null, reset_unix_time: null },
     recommend_timeline: { limit: null, remaining: null, reset_unix_time: null },

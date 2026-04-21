@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TMP_DIR="$TARGET_DIR/build/package_tmp"
 OUTPUT_DIR="$TARGET_DIR/build/package"
+COMPILED_JS_DIR="$TARGET_DIR/build/ts-out/src"
 
 # Read version from manifest.
 get_version() {
@@ -47,20 +48,34 @@ RSYNC_EXCLUDES=(
   --exclude="build"
   --exclude="utils"
   --exclude="pnpm-lock.yaml"
+  --exclude="tsconfig*.json"
+  --exclude="*.ts"
+  --exclude="*.map"
   --exclude="*.sh"
 )
 
+overlay_compiled_js() {
+    local target_path="$1"
+    if [ -d "$COMPILED_JS_DIR" ]; then
+        rsync -av --exclude="*.map" "$COMPILED_JS_DIR/" "$target_path/src/"
+    fi
+}
+
 # Firefox ZIP.
 rsync -av "${RSYNC_EXCLUDES[@]}" "$TARGET_DIR/" "$TMP_DIR/"
+overlay_compiled_js "$TMP_DIR"
 if [ -f "$TMP_DIR/manifest_firefox.json" ]; then
     mv "$TMP_DIR/manifest_firefox.json" "$TMP_DIR/manifest.json"
 fi
+rm -f "$OUTPUT_DIR/$ZIP_FIREFOX"
 (cd "$TMP_DIR" && zip -r "$OUTPUT_DIR/$ZIP_FIREFOX" .)
 rm -rf "$TMP_DIR"
 
 # Chrome ZIP.
 mkdir -p "$TMP_DIR"
 rsync -av "${RSYNC_EXCLUDES[@]}" --exclude="manifest_firefox.json" "$TARGET_DIR/" "$TMP_DIR/"
+overlay_compiled_js "$TMP_DIR"
+rm -f "$OUTPUT_DIR/$ZIP_CHROME"
 (cd "$TMP_DIR" && zip -r "$OUTPUT_DIR/$ZIP_CHROME" .)
 rm -rf "$TMP_DIR"
 

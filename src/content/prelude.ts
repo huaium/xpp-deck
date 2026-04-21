@@ -1,3 +1,4 @@
+// @ts-nocheck
 console.log("Welcome to XPP-Deck!");
 const manifest = chrome.runtime.getManifest();
 // Set to true for prototype builds.

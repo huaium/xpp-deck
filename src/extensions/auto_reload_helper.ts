@@ -1,7 +1,7 @@
 // Auto-refresh helper.
 (() => {
-    let path_old = null;
-    let opd_reload_token = null;
+    let path_old: string | null = null;
+    let opd_reload_token: string | null = null;
     let reload_func = () => {};
     /**
      * Safely read a nested value from unknown objects/arrays.

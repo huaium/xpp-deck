@@ -1,5 +1,8 @@
 // Disable native media viewer behavior.
 class OpdMediaViewerBlocker {
+    opd_send_media_info_token: string | null;
+    Init: (column_window: Window) => void;
+
     constructor() {
         this.opd_send_media_info_token = null;
         this.Init = (column_window) => {

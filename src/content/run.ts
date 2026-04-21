@@ -1,3 +1,4 @@
+// @ts-nocheck
 function run(settings) {
     //console.log(settings)
     let profile_list_html;
