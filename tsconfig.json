@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "noEmit": true,
+        "incremental": true,
+        "tsBuildInfoFile": "./build/.tsbuildinfo",
+        "skipLibCheck": true,
+        "target": "ES2022",
+        "lib": ["ES2022", "DOM"],
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "strictNullChecks": false
+    },
+    "include": ["src/**/*.js", "src/types/**/*.d.ts"],
+    "exclude": ["build/**", "node_modules/**", ".webext-profile/**", "utils/**"]
+}

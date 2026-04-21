@@ -10,13 +10,15 @@
     document.addEventListener(
         "click",
         (e) => {
+            const target = e.target instanceof Element ? e.target : null;
+            if (!target) return;
             // Disable media viewer while Alt/Option is pressed.
             if (is_alt_pressed) return;
 
             // Set when content is a quoted post.
-            const quoted = e.target.closest('div[tabindex="0"][role="link"]');
+            const quoted = target.closest('div[tabindex="0"][role="link"]');
             // Regular media tweet.
-            const img = e.target.closest(
+            const img = target.closest(
                 'img, div[data-testid="videoComponent"]',
             );
             if (!img) return;

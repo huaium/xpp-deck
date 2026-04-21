@@ -3,6 +3,7 @@
     const rootThemeAttribute = "data-opd-theme";
     const preloadStyleId = "opd_preload_theme_style";
     const systemDarkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    /** @type {NonNullable<Window["__opdBootstrap"]>} */
     const bootstrap = (window.__opdBootstrap = window.__opdBootstrap || {});
 
     function getCookieColorMode() {

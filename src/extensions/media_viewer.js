@@ -135,7 +135,9 @@ class OpdExtMediaViewer {
 
             // Allow closing by clicking background.
             media_viewer_dialog.addEventListener("click", (event) => {
-                const tag_name = event.target.tagName;
+                const target =
+                    event.target instanceof Element ? event.target : null;
+                const tag_name = target?.tagName ?? "";
                 const allowed_tag = ["IMG", "VIDEO", "SPAN", "BUTTON"];
                 if (!allowed_tag.includes(tag_name)) {
                     media_viewer_close();

@@ -891,8 +891,10 @@ function run(settings) {
     };
     let ins_html = document.createElement("div");
     ins_html.id = "opd_main_element";
-    ins_html.style =
-        "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;";
+    ins_html.setAttribute(
+        "style",
+        "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;",
+    );
     let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div><div class="dsp_btn_parent" id="api_limit_status_button" title="${i18n_message("msg_api_limit_status_title", [i18n_message("ui_button_api_label")])}"><div class="dsp_btn_icon_wrap"><div id="api_limit_status">${i18n_message("ui_button_api_label")}</div></div><span class="dsp_btn_label">${i18n_message_or_fallback("ui_button_api_usage_label", "API Usage")}</span></div>${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
     //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">XPP-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
     let main_column_html = ``;
@@ -1323,7 +1325,7 @@ function run(settings) {
                             column_settings: profile_store[index].profile,
                         };
                         //console.log(column_settings)
-                        run(column_settings, profile_store);
+                        run(column_settings);
                     }
                 });
         }
@@ -2037,7 +2039,9 @@ function run(settings) {
                                 opd_column_pinned_checkbox.addEventListener(
                                     "click",
                                     async function () {
-                                        if (this.checked) {
+                                        const pinned_checkbox =
+                                            /** @type {any} */ (this);
+                                        if (pinned_checkbox.checked) {
                                             if (
                                                 await opd_confirm(
                                                     i18n_message(
@@ -2045,23 +2049,27 @@ function run(settings) {
                                                     ),
                                                 )
                                             ) {
-                                                const now_path = this.closest(
-                                                    "div[opd_column_type]",
-                                                ).getAttribute(
-                                                    "opd_explore_path",
-                                                );
-                                                this.closest(
-                                                    "div[opd_column_type]",
-                                                ).setAttribute(
-                                                    "opd_pinned_path",
-                                                    now_path,
-                                                );
+                                                const now_path = pinned_checkbox
+                                                    .closest(
+                                                        "div[opd_column_type]",
+                                                    )
+                                                    .getAttribute(
+                                                        "opd_explore_path",
+                                                    );
+                                                pinned_checkbox
+                                                    .closest(
+                                                        "div[opd_column_type]",
+                                                    )
+                                                    .setAttribute(
+                                                        "opd_pinned_path",
+                                                        now_path,
+                                                    );
                                                 column_settings_save(
                                                     "",
                                                     last_load_profile,
                                                 );
                                             } else {
-                                                this.checked = false;
+                                                pinned_checkbox.checked = false;
                                             }
                                         } else {
                                             if (
@@ -2071,19 +2079,21 @@ function run(settings) {
                                                     ),
                                                 )
                                             ) {
-                                                this.closest(
-                                                    "div[opd_column_type]",
-                                                ).setAttribute(
-                                                    "opd_pinned_path",
-                                                    "",
-                                                );
+                                                pinned_checkbox
+                                                    .closest(
+                                                        "div[opd_column_type]",
+                                                    )
+                                                    .setAttribute(
+                                                        "opd_pinned_path",
+                                                        "",
+                                                    );
                                                 column_settings_save(
                                                     "",
                                                     last_load_profile,
                                                 );
-                                                this.checked = false;
+                                                pinned_checkbox.checked = false;
                                             } else {
-                                                this.checked = true;
+                                                pinned_checkbox.checked = true;
                                             }
                                         }
                                     },
@@ -2740,8 +2750,18 @@ function run(settings) {
         let column_class = document.querySelectorAll(".dsp_column");
         for (let index = 0; index < column_class.length; index++) {
             column_class[index].addEventListener("dragstart", function (ev) {
+                const drag_event = /** @type {DragEvent} */ (ev);
+                const drag_target =
+                    drag_event.target instanceof HTMLElement
+                        ? drag_event.target
+                        : null;
                 //console.log(this)
-                ev.dataTransfer.setData("text/plain", ev.target.id);
+                if (drag_event.dataTransfer && drag_target) {
+                    drag_event.dataTransfer.setData(
+                        "text/plain",
+                        drag_target.id,
+                    );
+                }
             });
             column_class[index].addEventListener("dragover", function (ev) {
                 ev.preventDefault();
@@ -2751,13 +2771,15 @@ function run(settings) {
                 this.style.borderLeft = "";
             });
             column_class[index].addEventListener("drop", function (ev) {
-                ev.preventDefault();
+                const drag_event = /** @type {DragEvent} */ (ev);
+                drag_event.preventDefault();
                 // Initialize display settings during move.
                 //bn_twview_mode(this.querySelector("iframe"));
                 // Set Explore URL.
                 //console.log(column_class[index])
                 // Apply move operation.
-                const dt_id = ev.dataTransfer.getData("text/plain");
+                const dt_id = drag_event.dataTransfer?.getData("text/plain");
+                if (!dt_id) return;
                 const dr_elem = document.getElementById(dt_id);
                 if (dr_elem != null) {
                     if (

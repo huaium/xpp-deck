@@ -429,6 +429,14 @@ function is_opd_dark_theme_enabled() {
     const main_element = document.getElementById("opd_main_element");
     return main_element?.getAttribute("opd-dsp-theme") === "dark";
 }
+/**
+ * @param {{
+ *   message: string;
+ *   type: "alert" | "confirm" | "prompt";
+ *   defaultValue?: string;
+ * }} options
+ * @returns {Promise<void | boolean | string | null>}
+ */
 function open_opd_dialog({ message, type, defaultValue }) {
     return enqueue_opd_dialog(
         () =>
@@ -579,18 +587,25 @@ function open_opd_dialog({ message, type, defaultValue }) {
             }),
     );
 }
+/** @param {string} message @returns {Promise<void>} */
 async function opd_alert(message) {
     await open_opd_dialog({ message, type: "alert" });
 }
+/** @param {string} message @returns {Promise<boolean>} */
 async function opd_confirm(message) {
-    return open_opd_dialog({ message, type: "confirm" });
+    return /** @type {Promise<boolean>} */ (
+        open_opd_dialog({ message, type: "confirm" })
+    );
 }
+/** @param {string} message @param {string} [defaultValue=""] @returns {Promise<string | null>} */
 async function opd_prompt(message, defaultValue = "") {
-    return open_opd_dialog({
-        message,
-        type: "prompt",
-        defaultValue,
-    });
+    return /** @type {Promise<string | null>} */ (
+        open_opd_dialog({
+            message,
+            type: "prompt",
+            defaultValue,
+        })
+    );
 }
 async function open_about_page_modal() {
     return enqueue_opd_dialog(
