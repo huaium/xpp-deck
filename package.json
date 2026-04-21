@@ -15,7 +15,6 @@
         "webext:prepare": "pnpm run build:ts && node utils/webext-prepare.mjs",
         "webext:dev": "pnpm run webext:prepare && web-ext run --config=web-ext-config.mjs",
         "webext:lint": "pnpm run webext:prepare && web-ext lint --source-dir build/web-ext-firefox-src",
-        "webext:build": "pnpm run webext:prepare && mkdir -p build/web-ext-artifacts && web-ext build --source-dir build/web-ext-firefox-src --artifacts-dir build/web-ext-artifacts --overwrite-dest",
         "webext:clean": "rm -rf build/web-ext-firefox-src"
     },
     "devDependencies": {
