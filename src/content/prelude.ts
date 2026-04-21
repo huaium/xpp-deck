@@ -133,6 +133,7 @@ const ui_icon_define = {
     column_second_rack: "public/icons/second_view.svg",
     profile_save: "public/icons/profile_save.svg",
     profile_delete: "public/icons/profile_delete.svg",
+    refresh: "public/icons/refresh.svg",
     forward: "public/icons/forward.svg",
     next: "public/icons/next.svg",
     download: "public/icons/download.svg",

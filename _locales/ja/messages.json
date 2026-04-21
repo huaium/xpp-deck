@@ -23,6 +23,9 @@
     "ui_column_close_title": {
         "message": "カラムを閉じる"
     },
+    "ui_column_refresh_title": {
+        "message": "カラムを再読み込み"
+    },
     "ui_column_pin_toggle_title": {
         "message": "ピン止め切り替え"
     },

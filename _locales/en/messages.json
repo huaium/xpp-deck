@@ -23,6 +23,9 @@
     "ui_column_close_title": {
         "message": "Close column"
     },
+    "ui_column_refresh_title": {
+        "message": "Refresh column"
+    },
     "ui_column_pin_toggle_title": {
         "message": "Toggle pin"
     },
