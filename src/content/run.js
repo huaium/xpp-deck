@@ -1084,8 +1084,13 @@ function run(settings) {
     });
     if (language_select != null) {
         language_select.value = opd_i18n_language;
-        language_select.addEventListener("change", function () {
-            const next_language = this.value;
+        language_select.addEventListener("change", function (ev) {
+            const language_select_element =
+                ev.currentTarget instanceof HTMLSelectElement
+                    ? ev.currentTarget
+                    : null;
+            if (!language_select_element) return;
+            const next_language = language_select_element.value;
             if (next_language === opd_i18n_language) {
                 return;
             }
@@ -1344,8 +1349,12 @@ function run(settings) {
         for (let index = 0; index < column_object.length; index++) {
             column_object[index].removeAttribute("opd_init_webview");
             // Change banner/view mode.
-            column_object[index].addEventListener("load", function () {
-                const iframe_elem = /** @type {HTMLIFrameElement} */ (this);
+            column_object[index].addEventListener("load", function (ev) {
+                const iframe_elem =
+                    ev.currentTarget instanceof HTMLIFrameElement
+                        ? ev.currentTarget
+                        : null;
+                if (!iframe_elem) return;
                 console.log(iframe_elem.getAttribute("opd_iframe_width_only"));
                 if (iframe_elem.getAttribute("opd_iframe_width_only") != "") {
                     //console.log(this)
@@ -1492,8 +1501,12 @@ function run(settings) {
             // Post-load initialization for each column.
             column_object[index].addEventListener(
                 "load",
-                function () {
-                    const iframe_elem = /** @type {HTMLIFrameElement} */ (this);
+                function (ev) {
+                    const iframe_elem =
+                        ev.currentTarget instanceof HTMLIFrameElement
+                            ? ev.currentTarget
+                            : null;
+                    if (!iframe_elem) return;
                     //console.log(this)
                     let opd_column_div = iframe_elem.closest(
                         "div[opd_column_type]",
@@ -1543,16 +1556,16 @@ function run(settings) {
                     let column_content_reload = null;
                     // Load column extensions.
                     if (mode != "session_set") {
-                        const column_type = this.closest(
-                            "div[opd_column_type]",
-                        ).getAttribute("opd_column_type");
+                        const column_type = iframe_elem
+                            .closest("div[opd_column_type]")
+                            .getAttribute("opd_column_type");
                         if (
                             column_type === "home" ||
                             column_type === "explore"
                         ) {
-                            const target_column = this.closest(
-                                "div[opd_column_type]",
-                            ).querySelector("iframe").contentWindow;
+                            const target_column = iframe_elem
+                                .closest("div[opd_column_type]")
+                                .querySelector("iframe").contentWindow;
                             // Set up auto-refresh hooks.
                             column_content_reload = new OpdExtAutoReload();
                             column_content_reload.Init(target_column);
@@ -1569,10 +1582,17 @@ function run(settings) {
                     if (mode != "session_set") {
                         opd_column_div
                             .querySelector(".opd_settings_btn")
-                            .addEventListener("click", function () {
-                                const settings_panel = this.closest(
-                                    "div[opd_column_type]",
-                                ).querySelector(".dsp_column_settings_panel");
+                            .addEventListener("click", function (ev) {
+                                const settings_button =
+                                    ev.currentTarget instanceof HTMLElement
+                                        ? ev.currentTarget
+                                        : null;
+                                if (!settings_button) return;
+                                const settings_panel = settings_button
+                                    .closest("div[opd_column_type]")
+                                    .querySelector(
+                                        ".dsp_column_settings_panel",
+                                    );
                                 if (
                                     settings_panel.getAttribute("open") == null
                                 ) {
@@ -1589,10 +1609,17 @@ function run(settings) {
                             .querySelector(
                                 ".dsp_column_settings_panel_close_btn",
                             )
-                            .addEventListener("click", function () {
-                                const settings_panel = this.closest(
-                                    "div[opd_column_type]",
-                                ).querySelector(".dsp_column_settings_panel");
+                            .addEventListener("click", function (ev) {
+                                const close_button =
+                                    ev.currentTarget instanceof HTMLElement
+                                        ? ev.currentTarget
+                                        : null;
+                                if (!close_button) return;
+                                const settings_panel = close_button
+                                    .closest("div[opd_column_type]")
+                                    .querySelector(
+                                        ".dsp_column_settings_panel",
+                                    );
                                 settings_panel.removeAttribute("open");
                                 settings_panel.style.display = "none";
                             });
@@ -1633,9 +1660,15 @@ function run(settings) {
                         if (mode != "session_set") {
                             opd_column_width_select.addEventListener(
                                 "change",
-                                function () {
+                                function (ev) {
+                                    const width_select =
+                                        ev.currentTarget instanceof
+                                        HTMLSelectElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!width_select) return;
                                     let preset_rem;
-                                    switch (this.value) {
+                                    switch (width_select.value) {
                                         case "0":
                                             preset_rem = 15;
                                             break;
@@ -1649,13 +1682,13 @@ function run(settings) {
                                             preset_rem = 30;
                                             break;
                                     }
-                                    this.closest(
-                                        "div[opd_column_type]",
-                                    ).setAttribute(
-                                        "opd_column_width",
-                                        String(preset_rem),
-                                    );
-                                    this.closest(
+                                    width_select
+                                        .closest("div[opd_column_type]")
+                                        .setAttribute(
+                                            "opd_column_width",
+                                            String(preset_rem),
+                                        );
+                                    width_select.closest(
                                         "div[opd_column_type]",
                                     ).style.width = `${preset_rem}rem`;
                                     column_settings_save("", last_load_profile);
@@ -1667,13 +1700,18 @@ function run(settings) {
                         // Column width setting events.
                         opd_column_width_btn.addEventListener(
                             "click",
-                            async function () {
-                                const now_width = this.closest(
-                                    "div[opd_column_type]",
-                                ).getAttribute("opd_column_width");
-                                let column_width_preset = this.closest(
-                                    "div[opd_column_type]",
-                                ).querySelector(".opd_column_size_preset");
+                            async function (ev) {
+                                const width_button =
+                                    ev.currentTarget instanceof HTMLElement
+                                        ? ev.currentTarget
+                                        : null;
+                                if (!width_button) return;
+                                const now_width = width_button
+                                    .closest("div[opd_column_type]")
+                                    .getAttribute("opd_column_width");
+                                let column_width_preset = width_button
+                                    .closest("div[opd_column_type]")
+                                    .querySelector(".opd_column_size_preset");
                                 const column_width_preset_select =
                                     /** @type {HTMLSelectElement | null} */ (
                                         column_width_preset
@@ -1690,13 +1728,13 @@ function run(settings) {
                                         !Number.isNaN(setting_width_num) &&
                                         setting_width_num > 11
                                     ) {
-                                        this.closest(
-                                            "div[opd_column_type]",
-                                        ).setAttribute(
-                                            "opd_column_width",
-                                            String(setting_width_num),
-                                        );
-                                        this.closest(
+                                        width_button
+                                            .closest("div[opd_column_type]")
+                                            .setAttribute(
+                                                "opd_column_width",
+                                                String(setting_width_num),
+                                            );
+                                        width_button.closest(
                                             "div[opd_column_type]",
                                         ).style.width =
                                             `${setting_width_num}rem`;
@@ -1870,21 +1908,33 @@ function run(settings) {
                             // Pause top transition while hovering Home/Explore during auto refresh.
                             opd_column_div
                                 .querySelector("iframe")
-                                .addEventListener("mouseover", function () {
-                                    this.setAttribute(
+                                .addEventListener("mouseover", function (ev) {
+                                    const iframe_target =
+                                        ev.currentTarget instanceof
+                                        HTMLIFrameElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!iframe_target) return;
+                                    iframe_target.setAttribute(
                                         "auto_reload_mouse_hover",
                                         "true",
                                     );
                                 });
                             opd_column_div
                                 .querySelector("iframe")
-                                .addEventListener("mouseleave", function () {
-                                    this.setAttribute(
+                                .addEventListener("mouseleave", function (ev) {
+                                    const iframe_target =
+                                        ev.currentTarget instanceof
+                                        HTMLIFrameElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!iframe_target) return;
+                                    iframe_target.setAttribute(
                                         "auto_reload_mouse_hover",
                                         "false",
                                     );
                                 });
-                            const auto_reload_target_elem = this;
+                            const auto_reload_target_elem = iframe_elem;
                             //console.log(opd_column_auto_reload_checkbox)
                             if (mode != "session_set") {
                                 opd_column_auto_reload_time_reload.addEventListener(
@@ -1933,9 +1983,15 @@ function run(settings) {
                                         .querySelector(
                                             ".opd_a_reload_time_setting",
                                         );
+                                const auto_reload_time_input_element =
+                                    /** @type {HTMLInputElement} */ (
+                                        auto_reload_time_input
+                                    );
                                 const auto_reload_load_time =
-                                    Number(auto_reload_time_input.value) * 1000;
-                                auto_reload_time_input.disabled = true;
+                                    Number(
+                                        auto_reload_time_input_element.value,
+                                    ) * 1000;
+                                auto_reload_time_input_element.disabled = true;
                                 auto_reload_int = setInterval(function () {
                                     //console.log("update!")
                                     //console.log(auto_reload_target_elem.contentWindow)
@@ -1977,13 +2033,19 @@ function run(settings) {
                             // Banner toggle event.
                             opd_column_banner_checkbox?.addEventListener(
                                 "change",
-                                function () {
+                                function (ev) {
+                                    const banner_checkbox =
+                                        ev.currentTarget instanceof
+                                        HTMLInputElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!banner_checkbox) return;
                                     column_settings_save("", last_load_profile);
                                     //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
                                     let banner_mode_target_object =
-                                        this.closest(
-                                            "div[opd_column_type]",
-                                        ).querySelector("iframe");
+                                        banner_checkbox
+                                            .closest("div[opd_column_type]")
+                                            .querySelector("iframe");
                                     //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]'))
                                     if (
                                         banner_mode_target_object.contentWindow.document.querySelector(
@@ -1997,7 +2059,7 @@ function run(settings) {
                                                 `<style opd_banner_css></style>`,
                                             );
                                     }
-                                    if (this.checked != true) {
+                                    if (banner_checkbox.checked != true) {
                                         //console.log(this)
                                         banner_mode_target_object.contentWindow.document.querySelector(
                                             "head style[opd_banner_css]",
@@ -2015,12 +2077,18 @@ function run(settings) {
                             // Top-search hide toggle event.
                             opd_column_top_visible_checkbox?.addEventListener(
                                 "change",
-                                function () {
+                                function (ev) {
+                                    const top_visible_checkbox =
+                                        ev.currentTarget instanceof
+                                        HTMLInputElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!top_visible_checkbox) return;
                                     column_settings_save("", last_load_profile);
                                     let topvisible_mode_target_object =
-                                        this.closest(
-                                            "div[opd_column_type]",
-                                        ).querySelector("iframe");
+                                        top_visible_checkbox
+                                            .closest("div[opd_column_type]")
+                                            .querySelector("iframe");
                                     //console.log(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]'))
                                     if (
                                         topvisible_mode_target_object.contentWindow.document.querySelector(
@@ -2034,14 +2102,15 @@ function run(settings) {
                                                 `<style opd_top_visible_css></style>`,
                                             );
                                     }
-                                    if (this.checked != true) {
+                                    if (top_visible_checkbox.checked != true) {
                                         //console.log(this)
                                         //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]').textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
                                         if (
-                                            this.closest(
-                                                "div[opd_column_type]",
-                                            ).getAttribute("opd_column_type") ==
-                                            "explore"
+                                            top_visible_checkbox
+                                                .closest("div[opd_column_type]")
+                                                .getAttribute(
+                                                    "opd_column_type",
+                                                ) == "explore"
                                         ) {
                                             topvisible_mode_target_object.contentWindow.document.querySelector(
                                                 "head style[opd_top_visible_css]",
@@ -2050,11 +2119,13 @@ function run(settings) {
                                         } else {
                                             //console.log(this.closest("div[opd_column_type]").getAttribute("opd_column_type"))
                                             if (
-                                                this.closest(
-                                                    "div[opd_column_type]",
-                                                ).getAttribute(
-                                                    "opd_column_type",
-                                                ) == "home"
+                                                top_visible_checkbox
+                                                    .closest(
+                                                        "div[opd_column_type]",
+                                                    )
+                                                    .getAttribute(
+                                                        "opd_column_type",
+                                                    ) == "home"
                                             ) {
                                                 topvisible_mode_target_object.contentWindow.document.querySelector(
                                                     "head style[opd_top_visible_css]",
@@ -2082,11 +2153,13 @@ function run(settings) {
                             if (mode != "session_set") {
                                 opd_column_pinned_checkbox.addEventListener(
                                     "click",
-                                    async function () {
+                                    async function (ev) {
                                         const pinned_checkbox =
-                                            /** @type {HTMLInputElement} */ (
-                                                this
-                                            );
+                                            ev.currentTarget instanceof
+                                            HTMLInputElement
+                                                ? ev.currentTarget
+                                                : null;
+                                        if (!pinned_checkbox) return;
                                         if (pinned_checkbox.checked) {
                                             if (
                                                 await opd_confirm(
@@ -2151,17 +2224,23 @@ function run(settings) {
                             if (mode != "session_set") {
                                 opd_column_auto_reload_checkbox.addEventListener(
                                     "click",
-                                    function () {
+                                    function (ev) {
+                                        const auto_reload_checkbox =
+                                            ev.currentTarget instanceof
+                                            HTMLInputElement
+                                                ? ev.currentTarget
+                                                : null;
+                                        if (!auto_reload_checkbox) return;
                                         let auto_reload_target_object =
-                                            this.closest(
-                                                "div[opd_column_type]",
-                                            ).querySelector("iframe");
+                                            auto_reload_checkbox
+                                                .closest("div[opd_column_type]")
+                                                .querySelector("iframe");
                                         const auto_reload_time_input =
-                                            this.closest(
-                                                "div[opd_column_type]",
-                                            ).querySelector(
-                                                ".opd_a_reload_time_setting",
-                                            );
+                                            auto_reload_checkbox
+                                                .closest("div[opd_column_type]")
+                                                .querySelector(
+                                                    ".opd_a_reload_time_setting",
+                                                );
                                         const auto_reload_time_input_element =
                                             /** @type {HTMLInputElement} */ (
                                                 auto_reload_time_input
@@ -2170,7 +2249,7 @@ function run(settings) {
                                             Number(
                                                 auto_reload_time_input_element.value,
                                             ) * 1000;
-                                        if (this.checked) {
+                                        if (auto_reload_checkbox.checked) {
                                             auto_reload_time_input_element.disabled = true;
                                             auto_reload_int = setInterval(
                                                 function () {
@@ -2243,13 +2322,19 @@ function run(settings) {
                             // Tweet view mode events.
                             opd_column_tw_view_mode_opt.addEventListener(
                                 "change",
-                                function () {
+                                function (ev) {
+                                    const tw_view_mode_select =
+                                        ev.currentTarget instanceof
+                                        HTMLSelectElement
+                                            ? ev.currentTarget
+                                            : null;
+                                    if (!tw_view_mode_select) return;
                                     column_settings_save("", last_load_profile);
                                     //console.log(this.closest("div[opd_column_type]").querySelector("iframe"))
                                     let tw_view_mode_target_object =
-                                        this.closest(
-                                            "div[opd_column_type]",
-                                        ).querySelector("iframe");
+                                        tw_view_mode_select
+                                            .closest("div[opd_column_type]")
+                                            .querySelector("iframe");
                                     //console.log(this.value)
                                     if (
                                         tw_view_mode_target_object.contentWindow.document.querySelector(
@@ -2263,7 +2348,7 @@ function run(settings) {
                                                 `<style opd_tw_view_mode_css></style>`,
                                             );
                                     }
-                                    switch (this.value) {
+                                    switch (tw_view_mode_select.value) {
                                         case "0":
                                             tw_view_mode_target_object.contentWindow.document.querySelector(
                                                 "head style[opd_tw_view_mode_css]",
@@ -2814,15 +2899,32 @@ function run(settings) {
                 }
             });
             column_class[index].addEventListener("dragover", function (ev) {
-                ev.preventDefault();
-                this.style.borderLeft = "15px solid #2e2e2e";
+                const drag_event = /** @type {DragEvent} */ (ev);
+                drag_event.preventDefault();
+                const drop_target =
+                    drag_event.currentTarget instanceof HTMLElement
+                        ? drag_event.currentTarget
+                        : null;
+                if (!drop_target) return;
+                drop_target.style.borderLeft = "15px solid #2e2e2e";
             });
-            column_class[index].addEventListener("dragleave", function () {
-                this.style.borderLeft = "";
+            column_class[index].addEventListener("dragleave", function (ev) {
+                const drag_event = /** @type {DragEvent} */ (ev);
+                const drop_target =
+                    drag_event.currentTarget instanceof HTMLElement
+                        ? drag_event.currentTarget
+                        : null;
+                if (!drop_target) return;
+                drop_target.style.borderLeft = "";
             });
             column_class[index].addEventListener("drop", function (ev) {
                 const drag_event = /** @type {DragEvent} */ (ev);
                 drag_event.preventDefault();
+                const drop_target =
+                    drag_event.currentTarget instanceof HTMLElement
+                        ? drag_event.currentTarget
+                        : null;
+                if (!drop_target) return;
                 // Initialize display settings during move.
                 //bn_twview_mode(this.querySelector("iframe"));
                 // Set Explore URL.
@@ -2858,13 +2960,13 @@ function run(settings) {
                                 `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`;
                         }
                     }
-                    this.parentNode.insertBefore(dr_elem, this);
-                    this.style.borderLeft = "";
+                    drop_target.parentNode?.insertBefore(dr_elem, drop_target);
+                    drop_target.style.borderLeft = "";
                     //append_object_css();
                     //column_dd();
                     column_settings_save("", last_load_profile);
                 } else {
-                    this.style.borderLeft = "";
+                    drop_target.style.borderLeft = "";
                 }
             });
         }
@@ -2873,13 +2975,19 @@ function run(settings) {
     function column_close() {
         const close_buttons = document.querySelectorAll(".column_close_btn");
         for (let index = 0; index < close_buttons.length; index++) {
-            close_buttons[index].addEventListener("click", async function () {
-                const pin_checkbox =
-                    this.closest(".dsp_column").querySelector(
-                        ".opd_pinned_btn",
-                    )?.checked;
+            close_buttons[index].addEventListener("click", async function (ev) {
+                const close_button =
+                    ev.currentTarget instanceof HTMLElement
+                        ? ev.currentTarget
+                        : null;
+                if (!close_button) return;
+                const column_element = close_button.closest(".dsp_column");
+                if (!column_element) return;
+                const pin_checkbox = /** @type {HTMLInputElement | null} */ (
+                    column_element.querySelector(".opd_pinned_btn")
+                )?.checked;
                 if (pin_checkbox == false || pin_checkbox == undefined) {
-                    this.closest(".dsp_column").remove();
+                    column_element.remove();
                     append_object_css();
                     //column_dd();
                     column_settings_save("", last_load_profile);
@@ -2889,7 +2997,7 @@ function run(settings) {
                             i18n_message("msg_pinned_column_close_confirm"),
                         )
                     ) {
-                        this.closest(".dsp_column").remove();
+                        column_element.remove();
                         append_object_css();
                         //column_dd();
                         column_settings_save("", last_load_profile);

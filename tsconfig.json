@@ -13,7 +13,7 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": false,
-        "noImplicitThis": false,
+        "noImplicitThis": true,
         "strictNullChecks": false
     },
     "include": ["src/**/*.js", "src/types/**/*.d.ts"],
