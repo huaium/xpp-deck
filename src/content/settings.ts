@@ -152,17 +152,7 @@ function settings_init() {
             chrome.storage.local.set(
                 { opd_settings: JSON.stringify(settings) },
                 async function () {
-                    if (is_prototype) {
-                        await opd_alert(
-                            i18n_message(
-                                "msg_initial_setup_completed_prototype",
-                            ),
-                        );
-                    } else {
-                        await opd_alert(
-                            i18n_message("msg_initial_setup_completed"),
-                        );
-                    }
+                    await opd_alert(i18n_message("msg_initial_setup_completed"));
 
                     request_page_reload();
                 },

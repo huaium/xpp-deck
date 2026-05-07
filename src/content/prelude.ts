@@ -1,8 +1,7 @@
 const manifest = chrome.runtime.getManifest();
-const is_prototype = false;
 // Print welcome messages to console
 console.log("Welcome to XPP-Deck!");
-console.log(`Version:${manifest.version}`);
+console.log(`Version: ${manifest.version}`);
 //
 const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
