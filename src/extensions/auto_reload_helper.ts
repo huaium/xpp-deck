@@ -3,13 +3,7 @@
     let path_old: string | null = null;
     let opd_reload_token: string | null = null;
     let reload_func = () => {};
-    /**
-     * Safely read a nested value from unknown objects/arrays.
-     * @param {unknown} source
-     * @param {(string | number)[]} path
-     * @returns {unknown}
-     */
-    function read_path(source, path) {
+    function read_path(source: unknown, path: (string | number)[]): unknown {
         let current = source;
         for (const key of path) {
             if (current == null) {
@@ -25,7 +19,7 @@
             if (typeof current !== "object") {
                 return undefined;
             }
-            current = /** @type {Record<string, unknown>} */ current[key];
+            current = (current as Record<string, unknown>)[key];
         }
         return current;
     }
@@ -55,17 +49,17 @@
             reload_func = () => {};
             return;
         }
-        reload_func = /** @type {() => void} */ refresh;
+        reload_func = refresh as () => void;
         path_old = path_search;
     }).observe(document, { childList: true, subtree: true });
     // Helper to get React props.
-    function get_props(elem, type) {
+    function get_props(elem: Element, type: "Props" | "Fiber") {
         const prop_type = type === "Props" ? type : "Fiber";
         const propsKey = Object.getOwnPropertyNames(elem).find((k) =>
             k.includes(`__react${prop_type}$`),
         );
         if (!propsKey) return null;
-        return /** @type {Record<string, unknown>} */ elem[propsKey];
+        return (elem as unknown as Record<string, unknown>)[propsKey];
     }
     // Set token for feature events.
     window.addEventListener(

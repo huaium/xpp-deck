@@ -1,21 +1,13 @@
 // Disable native media viewer behavior.
 (() => {
-    /**
-     * @typedef {{
-     *   token: string | null;
-     *   media_info: unknown[];
-     *   selected_index: number;
-     * }} SendMediaInfoDetail
-     */
-    let opd_send_media_info_token = null;
+    type SendMediaInfoDetail = {
+        token: string | null;
+        media_info: unknown[];
+        selected_index: number;
+    };
+    let opd_send_media_info_token: string | null = null;
     let is_alt_pressed = false;
-    /**
-     * Safely read a nested value from unknown objects/arrays.
-     * @param {unknown} source
-     * @param {(string | number)[]} path
-     * @returns {unknown}
-     */
-    function read_path(source, path) {
+    function read_path(source: unknown, path: (string | number)[]): unknown {
         let current = source;
         for (const key of path) {
             if (current == null) {
@@ -31,7 +23,7 @@
             if (typeof current !== "object") {
                 return undefined;
             }
-            current = /** @type {Record<string, unknown>} */ current[key];
+            current = (current as Record<string, unknown>)[key];
         }
         return current;
     }
@@ -57,7 +49,7 @@
             if (!img) return;
 
             // Get props when video player is active.
-            let video_wrapper_props = null;
+            let video_wrapper_props: unknown = null;
             if (img.getAttribute("data-testid") === "videoComponent") {
                 video_wrapper_props = get_props(
                     img.querySelector('div[tabindex="0"]'),
@@ -75,18 +67,14 @@
             }
 
             // Get current source when player exists.
-            const current_video_source = /** @type {{
-                posterImage?: string;
-            } | undefined} */ read_path(video_wrapper_props, [
+            const current_video_source = read_path(video_wrapper_props, [
                 "children",
                 "props",
                 "playerState",
-            ]);
+            ]) as { posterImage?: string } | undefined;
 
             // Get media source list.
-            let media_details = /** @type {Array<{
-                media_url_https?: string;
-            }> | undefined} */ read_path(root_props, [
+            let media_details = read_path(root_props, [
                 "children",
                 0,
                 "props",
@@ -94,23 +82,19 @@
                 0,
                 "props",
                 "mediaDetails",
-            ]);
+            ]) as Array<{ media_url_https?: string }> | undefined;
 
             // Get media source list for quoted posts.
-            let media_details_quoted = /** @type {Array<{
-                media_url_https?: string;
-            }> | undefined} */ read_path(root_props, [
+            let media_details_quoted = read_path(root_props, [
                 "children",
                 2,
                 "props",
                 "tweet",
                 "extended_entities",
                 "media",
-            ]);
+            ]) as Array<{ media_url_https?: string }> | undefined;
             if (quoted) {
-                media_details_quoted = /** @type {Array<{
-                    media_url_https?: string;
-                }> | undefined} */ read_path(root_props, [
+                media_details_quoted = read_path(root_props, [
                     "children",
                     0,
                     0,
@@ -124,7 +108,7 @@
                     "children",
                     "props",
                     "mediaDetails",
-                ]);
+                ]) as Array<{ media_url_https?: string }> | undefined;
             }
 
             // Exclude TwitterCard and similar cases for now.
@@ -210,26 +194,21 @@
         true,
     );
     // Helper to get React props.
-    /** @param {Element | null} elem @param {"Props" | "Fiber"} type @returns {unknown} */
-    function get_props(elem, type) {
+    function get_props(elem: Element | null, type: "Props" | "Fiber"): unknown {
         if (!elem) return null;
         const prop_type = type === "Props" ? type : "Fiber";
         const propsKey = Object.getOwnPropertyNames(elem).find((k) =>
             k.includes(`__react${prop_type}$`),
         );
         if (!propsKey) return null;
-        return /** @type {Record<string, unknown>} */ /** @type {unknown} */ elem[
-            propsKey
-        ];
+        return (elem as unknown as Record<string, unknown>)[propsKey];
     }
     // Set token for feature events.
     document.addEventListener(
         "opd_send_media_info_init",
         (e) => {
-            const detail = /** @type {{ token?: string }} */ JSON.parse(
-                String(e.detail),
-            );
-            opd_send_media_info_token = detail.token;
+            const detail = JSON.parse(String(e.detail)) as { token?: string };
+            opd_send_media_info_token = detail.token ?? null;
         },
         true,
     );
@@ -238,10 +217,10 @@
         "opd_media_viewer_shotcut",
         (e) => {
             // When column is inactive.
-            const detail =
-                /** @type {{ token?: string; keys?: { alt?: boolean } }} */ JSON.parse(
-                    String(e.detail),
-                );
+            const detail = JSON.parse(String(e.detail)) as {
+                token?: string;
+                keys?: { alt?: boolean };
+            };
 
             if (detail.token !== opd_send_media_info_token) return;
 

@@ -1062,28 +1062,20 @@ function run(settings) {
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
     const opd_main_element =
-        /** @type {HTMLElement | null} */ document.querySelector(
-            "#opd_main_element",
-        );
-    const sidebar_toggle_button =
-        /** @type {HTMLElement | null} */ document.querySelector(
-            "#sidebar_fold_toggle",
-        );
+        document.querySelector<HTMLElement>("#opd_main_element");
+    const sidebar_toggle_button = document.querySelector<HTMLElement>(
+        "#sidebar_fold_toggle",
+    );
     if (!opd_main_element || !sidebar_toggle_button) {
         return;
     }
     const switch_theme_button =
-        /** @type {HTMLElement | null} */ document.querySelector(
-            "#switch_theme",
-        );
-    const language_select =
-        /** @type {HTMLSelectElement | null} */ document.querySelector(
-            "#opd_language_select",
-        );
+        document.querySelector<HTMLElement>("#switch_theme");
+    const language_select = document.querySelector<HTMLSelectElement>(
+        "#opd_language_select",
+    );
     const sidebar_toggle_label =
-        /** @type {HTMLElement | null} */ sidebar_toggle_button.querySelector(
-            ".dsp_btn_label",
-        );
+        sidebar_toggle_button.querySelector<HTMLElement>(".dsp_btn_label");
     if (!sidebar_toggle_label) return;
     const opd_main_root = opd_main_element as HTMLElement;
     const sidebar_toggle_root = sidebar_toggle_button as HTMLElement;
@@ -1240,13 +1232,10 @@ function run(settings) {
             "#second_rack_element",
         );
         const second_rack_input =
-            /** @type {HTMLInputElement | null} */ document.querySelector(
-                "#second_rack",
-            );
-        const second_rack_icon =
-            /** @type {HTMLElement | null} */ document.querySelector(
-                ".dsp_btn_second_rack_img",
-            );
+            document.querySelector<HTMLInputElement>("#second_rack");
+        const second_rack_icon = document.querySelector<HTMLElement>(
+            ".dsp_btn_second_rack_img",
+        );
         if (first_rack_element instanceof HTMLElement) {
             first_rack_element.style.height = "50vh";
         }
@@ -1796,7 +1785,7 @@ function run(settings) {
                                             ".opd_column_size_preset",
                                         );
                                     const column_width_preset_select =
-                                        /** @type {HTMLSelectElement | null} */ column_width_preset;
+                                        column_width_preset as HTMLSelectElement | null;
                                     let setting_width = await opd_prompt(
                                         i18n_message("msg_column_width_prompt"),
                                         now_width ?? undefined,
@@ -2607,33 +2596,25 @@ function run(settings) {
     }
     // Prevent auto-scroll when opening media posts.
     const main_rack_element =
-        /** @type {HTMLElement | null} */ document.querySelector(
-            "#main_rack_element",
-        );
+        document.querySelector<HTMLElement>("#main_rack_element");
     if (main_rack_element) {
         main_rack_element.addEventListener("scrollend", function () {
             main_rack_element.scrollTop = 0;
         });
     }
     // Two-row view.
-    const second_rack_button =
-        /** @type {HTMLInputElement | null} */ document.getElementById(
-            "second_rack",
-        );
+    const second_rack_button = document.getElementById("second_rack");
     if (second_rack_button) {
         second_rack_button.addEventListener("click", async function () {
-            const first_rack_element =
-                /** @type {HTMLElement | null} */ document.querySelector(
-                    "#first_rack_element",
-                );
-            const second_rack_element =
-                /** @type {HTMLElement | null} */ document.querySelector(
-                    "#second_rack_element",
-                );
-            const second_rack_icon =
-                /** @type {HTMLElement | null} */ document.querySelector(
-                    ".dsp_btn_second_rack_img",
-                );
+            const first_rack_element = document.querySelector<HTMLElement>(
+                "#first_rack_element",
+            );
+            const second_rack_element = document.querySelector<HTMLElement>(
+                "#second_rack_element",
+            );
+            const second_rack_icon = document.querySelector<HTMLElement>(
+                ".dsp_btn_second_rack_img",
+            );
             if (second_rack_mode == false) {
                 //document.querySelector("#main_rack_element").style.height = "50vh";
                 if (first_rack_element)
@@ -2703,7 +2684,7 @@ function run(settings) {
                 chrome.runtime
                     .sendMessage({ message: "dnr_upd" })
                     .then((value) => {
-                        if (/** @type {boolean} */ value == true) {
+                        if ((value as boolean) == true) {
                             request_page_reload();
                         }
                     });
@@ -3308,10 +3289,9 @@ function run(settings) {
                 }
                 const column_setting_time =
                     Number(
-                        /** @type {HTMLInputElement | null} */ columns[
-                            index
-                        ].querySelector(".opd_a_reload_time_setting")?.value ??
-                            "10",
+                        columns[index].querySelector<HTMLInputElement>(
+                            ".opd_a_reload_time_setting",
+                        )?.value ?? "10",
                     ) * 1000;
                 //console.log(column_setting_time)
                 if (column_setting_time >= 1000) {

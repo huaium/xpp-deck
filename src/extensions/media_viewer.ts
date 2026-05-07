@@ -16,13 +16,11 @@ class OpdExtMediaViewer {
     DownloadMedia: (media: MediaInfo | undefined) => Promise<void>;
 
     constructor() {
-        /** @param {MediaInfo[]} media_info @param {number} pre_index */
-        this.Preview = (media_info, pre_index) => {
+        this.Preview = (media_info: MediaInfo[], pre_index: number) => {
             let current_media_idx = pre_index;
             const media_viewer_div = document.createElement("div");
             const media_viewer_dialog = document.createElement("dialog");
-            /** @param {number} idx */
-            const mediaHTMLAt = (idx) => {
+            const mediaHTMLAt = (idx: number) => {
                 const info = media_info[idx];
                 if (!info) return "";
 
@@ -53,10 +51,9 @@ class OpdExtMediaViewer {
                 return "";
             };
 
-            /** @param {Element | null} elem */
-            const stopVideo = (elem) => {
+            const stopVideo = (elem: Element | null) => {
                 if (!elem || elem.tagName !== "VIDEO") return;
-                const video = /** @type {HTMLVideoElement} */ elem;
+                const video = elem as HTMLVideoElement;
                 try {
                     video.pause();
                     video.removeAttribute("src");
@@ -66,8 +63,7 @@ class OpdExtMediaViewer {
                 }
             };
 
-            /** @param {number} idx */
-            const setMedia = (idx) => {
+            const setMedia = (idx: number) => {
                 const current =
                     media_viewer_dialog.querySelector("[data-media]");
                 const nextInfo = media_info[idx];
@@ -186,15 +182,15 @@ class OpdExtMediaViewer {
             );
 
             const forward_button =
-                /** @type {HTMLButtonElement | null} */ media_viewer_dialog.querySelector(
+                media_viewer_dialog.querySelector<HTMLButtonElement>(
                     "[data-media-forward]",
                 );
             const next_button =
-                /** @type {HTMLButtonElement | null} */ media_viewer_dialog.querySelector(
+                media_viewer_dialog.querySelector<HTMLButtonElement>(
                     "[data-media-next]",
                 );
             const download_button =
-                /** @type {HTMLButtonElement | null} */ media_viewer_dialog.querySelector(
+                media_viewer_dialog.querySelector<HTMLButtonElement>(
                     "[data-media-download]",
                 );
             if (forward_button) {
@@ -304,8 +300,11 @@ class OpdExtMediaViewer {
             media_viewer_dialog.showModal();
         };
 
-        /** @param {HTMLDialogElement} dialog_elem @param {MediaInfo[]} media_info @param {number} current_media_idx */
-        this.SkipBtnDisabled = (dialog_elem, media_info, current_media_idx) => {
+        this.SkipBtnDisabled = (
+            dialog_elem: HTMLDialogElement,
+            media_info: MediaInfo[],
+            current_media_idx: number,
+        ) => {
             const next_btn = dialog_elem.querySelector("[data-media-next]");
             const prev_btn = dialog_elem.querySelector("[data-media-forward]");
             if (!next_btn || !prev_btn) return;
@@ -329,8 +328,7 @@ class OpdExtMediaViewer {
                     break;
             }
         };
-        /** @param {MediaInfo | undefined} media */
-        this.DownloadMedia = async (media) => {
+        this.DownloadMedia = async (media: MediaInfo | undefined) => {
             let media_src: string | null = null;
             if (
                 media &&

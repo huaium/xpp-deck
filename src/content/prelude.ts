@@ -1,27 +1,15 @@
-console.log("Welcome to XPP-Deck!");
 const manifest = chrome.runtime.getManifest();
-// Set to true for prototype builds.
 const is_prototype = false;
-if (is_prototype) {
-    console.log(
-        "%cXPP-Deck Prototype",
-        "background:#a1f4ff;padding:5px;border-radius:5px",
-        `Version:${manifest.version}`,
-    );
-} else {
-    console.log(
-        "%cXPP-Deck",
-        "background:#a1f4ff;padding:5px;border-radius:5px",
-        `Version:${manifest.version}`,
-    );
-}
+// Print welcome messages to console
+console.log("Welcome to XPP-Deck!");
+console.log(`Version:${manifest.version}`);
 //
 const url_path = new URL(location.href);
 let is_added_system_color_mode = false;
 let apply_ui_color: (() => void) | null = null;
 const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
-/** @type {NonNullable<Window["__opdBootstrap"]>} */
-const opd_bootstrap = window.__opdBootstrap || {};
+const opd_bootstrap: NonNullable<Window["__opdBootstrap"]> =
+    window.__opdBootstrap || {};
 const beforeunload_bypass_key =
     opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
 const opd_root_theme_attribute =
@@ -62,8 +50,9 @@ function i18n_message(message_name: string, substitutions?: string | string[]) {
     }
     return chrome.i18n.getMessage(message_name, substitutions);
 }
-/** @param {string} key @returns {Promise<Record<string, unknown>>} */
-function get_storage_local_async(key: string) {
+function get_storage_local_async(
+    key: string,
+): Promise<Record<string, unknown>> {
     return new Promise((resolve) => {
         chrome.storage.local.get(key, (value) => resolve(value));
     });
@@ -439,14 +428,6 @@ function is_opd_dark_theme_enabled() {
     const main_element = document.getElementById("opd_main_element");
     return main_element?.getAttribute("opd-dsp-theme") === "dark";
 }
-/**
- * @param {{
- *   message: string;
- *   type: "alert" | "confirm" | "prompt";
- *   defaultValue?: string;
- * }} options
- * @returns {Promise<void | boolean | string | null>}
- */
 function open_opd_dialog({
     message,
     type,
@@ -458,7 +439,6 @@ function open_opd_dialog({
 }) {
     return enqueue_opd_dialog(
         () =>
-            /** @returns {Promise<void | boolean | string | null>} */
             new Promise((resolve) => {
                 ensure_opd_dialog_style();
                 const overlay = document.createElement("div");
@@ -535,12 +515,10 @@ function open_opd_dialog({
                             event.preventDefault();
                             return;
                         }
-                        const first_elem =
-                            /** @type {HTMLElement} */ focusable_elements[0];
-                        const last_elem =
-                            /** @type {HTMLElement} */ focusable_elements[
-                                focusable_elements.length - 1
-                            ];
+                        const first_elem = focusable_elements[0] as HTMLElement;
+                        const last_elem = focusable_elements[
+                            focusable_elements.length - 1
+                        ] as HTMLElement;
                         const active_elem = document.activeElement;
                         if (event.shiftKey) {
                             if (
@@ -608,17 +586,17 @@ function open_opd_dialog({
             }),
     );
 }
-/** @param {string} message @returns {Promise<void>} */
-async function opd_alert(message) {
+async function opd_alert(message: string): Promise<void> {
     await open_opd_dialog({ message, type: "alert" });
 }
-/** @param {string} message @returns {Promise<boolean>} */
-async function opd_confirm(message) {
+async function opd_confirm(message: string): Promise<boolean> {
     const result = await open_opd_dialog({ message, type: "confirm" });
     return result === true;
 }
-/** @param {string} message @param {string} [defaultValue=""] @returns {Promise<string | null>} */
-async function opd_prompt(message, defaultValue = "") {
+async function opd_prompt(
+    message: string,
+    defaultValue = "",
+): Promise<string | null> {
     const result = await open_opd_dialog({
         message,
         type: "prompt",
@@ -726,12 +704,10 @@ async function open_about_page_modal() {
                             event.preventDefault();
                             return;
                         }
-                        const first_elem =
-                            /** @type {HTMLElement} */ focusable_elements[0];
-                        const last_elem =
-                            /** @type {HTMLElement} */ focusable_elements[
-                                focusable_elements.length - 1
-                            ];
+                        const first_elem = focusable_elements[0] as HTMLElement;
+                        const last_elem = focusable_elements[
+                            focusable_elements.length - 1
+                        ] as HTMLElement;
                         const active_elem = document.activeElement;
                         if (event.shiftKey) {
                             if (
