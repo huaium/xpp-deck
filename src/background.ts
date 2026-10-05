@@ -53,9 +53,6 @@ export function start_background() {
                     },
                 );
             }
-            if (request.message == "ext_reload") {
-                chrome.runtime.reload();
-            }
             return true;
         },
     );

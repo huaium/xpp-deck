@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "Fechar configurações"
     },
-    "ui_debug_menu_label": {
-        "message": "Depuração"
-    },
-    "ui_button_init_settings": {
-        "message": "Redefinir"
-    },
-    "ui_button_dnr_reload": {
-        "message": "Recarregar dNR"
-    },
-    "ui_button_ext_reload": {
-        "message": "Recarregar extensão"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "Cancelar"
     },
-    "msg_debug_menu_enabled": {
-        "message": "O menu de depuração está disponível!"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "Os dados do perfil estão corrompidos.\nClique em OK para inicializar.\nClique em Cancelar para continuar sem inicializar."
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "Mudar para uma única linha.\nTodas as colunas da segunda linha serão fechadas."
     },
-    "msg_dnr_reload_confirm": {
-        "message": "Recarregar as regras declarativeNetRequest?"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "Recarregar a extensão?"
-    },
     "msg_profile_save_confirm": {
         "message": "Criar um perfil com o layout atual?"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "Digite um valor de pelo menos 1 segundo."
-    },
-    "msg_settings_reset_completed": {
-        "message": "As configurações foram redefinidas. Recarregue a página."
     },
     "msg_profile_delete_confirm": {
         "message": "Excluir o perfil \"$1\"?"

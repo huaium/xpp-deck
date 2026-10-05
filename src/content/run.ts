@@ -9,7 +9,6 @@ import {
     animate_sidebar_change,
     create_api_sidebar_html,
     update_api_sidebar,
-    beforeunload_bypass_key,
     create_language_select_html,
     create_profile_list_buttons_html,
     create_profile_list_html,
@@ -269,27 +268,6 @@ export function run(settings) {
         font-size: 0.72rem;
         white-space: nowrap;
     }
-    .opd_debug_menu{
-        display: none;
-        width: 100%;
-        padding: 0;
-        color: var(--opd-text);
-        font-size: 0.72rem;
-        text-align: left;
-    }
-    .opd_debug_menu input{
-        width: 100%;
-        margin-top: 0.2rem;
-        min-height: 24px;
-        border-radius: 6px;
-        border: 1px solid var(--opd-border);
-        background: var(--opd-surface);
-        font-size: 0.7rem;
-        cursor: pointer;
-    }
-    .opd_debug_menu input:hover{
-        background: var(--opd-hover);
-    }
     #opd_main_element{
         background: var(--opd-bg) !important;
     }
@@ -537,9 +515,6 @@ export function run(settings) {
     #opd_main_element.opd_sidebar_collapsed .opd_language_select_wrap{
         visibility: hidden;
         pointer-events: none;
-    }
-    #opd_main_element.opd_sidebar_collapsed .opd_debug_menu{
-        display: none !important;
     }
     #opd_main_element.opd_sidebar_collapsed .opd_version_span{
         display: none;
@@ -1018,7 +993,6 @@ export function run(settings) {
 
         & .dsp_column_settings_panel select,
         & .dsp_column_settings_panel input[type="number"],
-        & .opd_debug_menu input,
         & .column_width_btn,
         & .dsp_column_settings_panel_close_btn {
             background: #242b33;
@@ -1339,7 +1313,7 @@ export function run(settings) {
         "style",
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;",
     );
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_api_sidebar_html()}${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<wa-button id="init_settings">${i18n_message("ui_button_init_settings")}</wa-button><wa-button id="dnr_reload">${i18n_message("ui_button_dnr_reload")}</wa-button><wa-button id="ext_reload">${i18n_message("ui_button_ext_reload")}</wa-button></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_api_sidebar_html()}${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
     // Two-row layout settings.
@@ -1815,22 +1789,6 @@ export function run(settings) {
     if (ui_logo) {
         ui_logo.addEventListener("click", async function () {
             await open_about_page_modal();
-        });
-    }
-    // Show debug menu.
-    let debug_menu_click_counter = 0;
-    const version_span = document.querySelector(".opd_version_span");
-    if (version_span) {
-        version_span.addEventListener("click", async function () {
-            if (debug_menu_click_counter >= 7) {
-                await opd_alert(i18n_message("msg_debug_menu_enabled"));
-                const debug_menu = document.querySelector(".opd_debug_menu");
-                if (debug_menu instanceof HTMLElement) {
-                    debug_menu.style.display = "block";
-                }
-            } else {
-                debug_menu_click_counter += 1;
-            }
         });
     }
     // Handle case where second row exists.
@@ -2736,15 +2694,6 @@ export function run(settings) {
             });
         });
     }
-    // Main bar events.
-    const init_settings_btn = document.getElementById("init_settings");
-    if (init_settings_btn) {
-        init_settings_btn.addEventListener("click", async function () {
-            chrome.storage.local.remove("opd_settings", async function () {
-                await opd_alert(i18n_message("msg_settings_reset_completed"));
-            });
-        });
-    }
     // Prevent auto-scroll when opening media posts.
     const main_rack_element =
         document.querySelector<HTMLElement>("#main_rack_element");
@@ -2825,35 +2774,6 @@ export function run(settings) {
                         second_rack_icon.style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_second_rack)})`;
                     }
                 }
-            }
-        });
-    }
-    const dnr_reload_btn = document.getElementById("dnr_reload");
-    if (dnr_reload_btn) {
-        dnr_reload_btn.addEventListener("click", async function () {
-            if (await opd_confirm(i18n_message("msg_dnr_reload_confirm"))) {
-                chrome.runtime
-                    .sendMessage({ message: "dnr_upd" })
-                    .then((value) => {
-                        if ((value as boolean) == true) {
-                            request_page_reload();
-                        }
-                    });
-            }
-        });
-    }
-    const ext_reload_btn = document.getElementById("ext_reload");
-    if (ext_reload_btn) {
-        ext_reload_btn.addEventListener("click", async function () {
-            if (
-                await opd_confirm(i18n_message("msg_extension_reload_confirm"))
-            ) {
-                try {
-                    sessionStorage.setItem(beforeunload_bypass_key, "1");
-                } catch {
-                    // no-op: fallback to guarded beforeunload prompt
-                }
-                chrome.runtime.sendMessage({ message: "ext_reload" });
             }
         });
     }

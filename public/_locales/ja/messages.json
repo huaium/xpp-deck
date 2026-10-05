@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "設定を閉じる"
     },
-    "ui_debug_menu_label": {
-        "message": "Debug"
-    },
-    "ui_button_init_settings": {
-        "message": "初期化"
-    },
-    "ui_button_dnr_reload": {
-        "message": "dNR_Reload"
-    },
-    "ui_button_ext_reload": {
-        "message": "拡張機能再読み込み"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "キャンセル"
     },
-    "msg_debug_menu_enabled": {
-        "message": "デバッグメニューが利用できます!"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "プロファイルデータが壊れています。\n初期化するにはOKを押してください。\n初期化せずに続行する場合はキャンセルを押してください。"
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "1段表示にします。\n2段目のカラムは全て閉じられます"
     },
-    "msg_dnr_reload_confirm": {
-        "message": "declarativeNetRequestの再読み込みします"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "拡張機能の再読み込みします"
-    },
     "msg_profile_save_confirm": {
         "message": "現在の構成でプロファイルを作成します"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "1秒以上の秒数を入力してください"
-    },
-    "msg_settings_reset_completed": {
-        "message": "設定を初期化しました。再読み込みしてください。"
     },
     "msg_profile_delete_confirm": {
         "message": "プロファイル「$1」を削除しますか?"

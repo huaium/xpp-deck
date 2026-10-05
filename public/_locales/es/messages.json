@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "Cerrar ajustes"
     },
-    "ui_debug_menu_label": {
-        "message": "Depuración"
-    },
-    "ui_button_init_settings": {
-        "message": "Restablecer"
-    },
-    "ui_button_dnr_reload": {
-        "message": "Recargar dNR"
-    },
-    "ui_button_ext_reload": {
-        "message": "Recargar extensión"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "Cancelar"
     },
-    "msg_debug_menu_enabled": {
-        "message": "¡Menú de depuración activado!"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "Los datos del perfil están dañados.\nPulsa Aceptar para inicializar.\nPulsa Cancelar para continuar sin inicializar."
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "Cambiar a una sola fila.\nSe cerrarán todas las columnas de la segunda fila."
     },
-    "msg_dnr_reload_confirm": {
-        "message": "¿Recargar las reglas declarativeNetRequest?"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "¿Recargar la extensión?"
-    },
     "msg_profile_save_confirm": {
         "message": "¿Crear un perfil con el diseño actual?"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "Introduce un valor de al menos 1 segundo."
-    },
-    "msg_settings_reset_completed": {
-        "message": "Se han restablecido los ajustes. Recarga la página."
     },
     "msg_profile_delete_confirm": {
         "message": "¿Eliminar el perfil \"$1\"?"

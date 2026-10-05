@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "Einstellungen schließen"
     },
-    "ui_debug_menu_label": {
-        "message": "Debugging"
-    },
-    "ui_button_init_settings": {
-        "message": "Zurücksetzen"
-    },
-    "ui_button_dnr_reload": {
-        "message": "dNR neu laden"
-    },
-    "ui_button_ext_reload": {
-        "message": "Erweiterung neu laden"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "Abbrechen"
     },
-    "msg_debug_menu_enabled": {
-        "message": "Das Debug-Menü ist aktiviert!"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "Die Profildaten sind beschädigt.\nDrücke OK zum Initialisieren.\nDrücke Abbrechen, um ohne Initialisierung fortzufahren."
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "Zu einer einzelnen Reihe wechseln.\nAlle Spalten der zweiten Reihe werden geschlossen."
     },
-    "msg_dnr_reload_confirm": {
-        "message": "declarativeNetRequest-Regeln neu laden?"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "Erweiterung neu laden?"
-    },
     "msg_profile_save_confirm": {
         "message": "Profil aus dem aktuellen Layout erstellen?"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "Bitte mindestens 1 Sekunde eingeben."
-    },
-    "msg_settings_reset_completed": {
-        "message": "Die Einstellungen wurden zurückgesetzt. Bitte die Seite neu laden."
     },
     "msg_profile_delete_confirm": {
         "message": "Profil \"$1\" löschen?"

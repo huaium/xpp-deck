@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "Fermer les paramètres"
     },
-    "ui_debug_menu_label": {
-        "message": "Débogage"
-    },
-    "ui_button_init_settings": {
-        "message": "Réinitialiser"
-    },
-    "ui_button_dnr_reload": {
-        "message": "Recharger dNR"
-    },
-    "ui_button_ext_reload": {
-        "message": "Recharger l’extension"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "Annuler"
     },
-    "msg_debug_menu_enabled": {
-        "message": "Le menu de débogage est activé !"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "Les données du profil sont corrompues.\nAppuyez sur OK pour initialiser.\nAppuyez sur Annuler pour continuer sans initialiser."
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "Passer à une seule rangée.\nToutes les colonnes de la seconde rangée seront fermées."
     },
-    "msg_dnr_reload_confirm": {
-        "message": "Recharger les règles declarativeNetRequest ?"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "Recharger l’extension ?"
-    },
     "msg_profile_save_confirm": {
         "message": "Créer un profil à partir de la disposition actuelle ?"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "Saisissez une valeur d’au moins 1 seconde."
-    },
-    "msg_settings_reset_completed": {
-        "message": "Les paramètres ont été réinitialisés. Rechargez la page."
     },
     "msg_profile_delete_confirm": {
         "message": "Supprimer le profil \"$1\" ?"

@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "關閉設定"
     },
-    "ui_debug_menu_label": {
-        "message": "偵錯"
-    },
-    "ui_button_init_settings": {
-        "message": "重設"
-    },
-    "ui_button_dnr_reload": {
-        "message": "重新載入 dNR"
-    },
-    "ui_button_ext_reload": {
-        "message": "重新載入擴充功能"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "取消"
     },
-    "msg_debug_menu_enabled": {
-        "message": "偵錯選單已啟用！"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "設定檔資料已損毀。\n按確定進行初始化。\n按取消繼續使用，不進行初始化。"
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "切換為單列配置。\n第二列的所有欄位將關閉。"
     },
-    "msg_dnr_reload_confirm": {
-        "message": "重新載入 declarativeNetRequest 規則？"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "重新載入擴充功能？"
-    },
     "msg_profile_save_confirm": {
         "message": "將目前配置儲存為新設定檔？"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "請輸入至少 1 秒的值。"
-    },
-    "msg_settings_reset_completed": {
-        "message": "設定已重設。請重新載入頁面。"
     },
     "msg_profile_delete_confirm": {
         "message": "刪除設定檔「$1」？"

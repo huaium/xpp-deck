@@ -134,18 +134,6 @@
     "ui_settings_close_button": {
         "message": "关闭设置"
     },
-    "ui_debug_menu_label": {
-        "message": "调试"
-    },
-    "ui_button_init_settings": {
-        "message": "重置"
-    },
-    "ui_button_dnr_reload": {
-        "message": "重载 dNR"
-    },
-    "ui_button_ext_reload": {
-        "message": "重载扩展"
-    },
     "ui_button_api_label": {
         "message": "API"
     },
@@ -197,9 +185,6 @@
     "ui_dialog_cancel_button": {
         "message": "取消"
     },
-    "msg_debug_menu_enabled": {
-        "message": "调试菜单已启用！"
-    },
     "msg_profile_data_broken_confirm": {
         "message": "配置数据已损坏。\n点击确定进行初始化。\n点击取消继续使用，不进行初始化。"
     },
@@ -221,12 +206,6 @@
     "msg_second_rack_to_single_confirm": {
         "message": "切换为单行布局。\n第二行的所有栏目将关闭。"
     },
-    "msg_dnr_reload_confirm": {
-        "message": "重载 declarativeNetRequest 规则？"
-    },
-    "msg_extension_reload_confirm": {
-        "message": "重载扩展？"
-    },
     "msg_profile_save_confirm": {
         "message": "将当前布局保存为新配置？"
     },
@@ -247,9 +226,6 @@
     },
     "msg_auto_reload_minimum_alert": {
         "message": "请输入至少 1 秒的值。"
-    },
-    "msg_settings_reset_completed": {
-        "message": "设置已重置。请重新加载页面。"
     },
     "msg_profile_delete_confirm": {
         "message": "删除配置“$1”？"
