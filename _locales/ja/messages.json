@@ -252,7 +252,7 @@
         "message": "設定を初期化しました。再読み込みしてください。"
     },
     "msg_profile_delete_confirm": {
-        "message": "プロファイル$1を削除しますか?\n※削除後、残ったプロファイル番号は1から再度割り振られます。"
+        "message": "プロファイル「$1」を削除しますか?"
     },
     "msg_profile_delete_current_alert": {
         "message": "プロファイルが1つしかないため削除できません"

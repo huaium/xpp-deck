@@ -20,11 +20,18 @@ test("deletion offers every profile and preserves the active profile when anothe
     ]) {
         const h = profileHarness(true, active);
         let options;
+        let confirmationName;
+        h.globals.i18n_message = (key, substitutions) => {
+            if (key === "msg_profile_delete_confirm")
+                confirmationName = substitutions[0];
+            return key;
+        };
         h.globals.open_opd_dialog = async (value) => {
             options = value;
             return String(selected);
         };
         await deletion(h)();
+        assert.equal(confirmationName, `profile-${selected}`);
         assert.equal(options.type, "select");
         assert.equal(options.defaultValue, String(active));
         assert.deepEqual(

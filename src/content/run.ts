@@ -2923,7 +2923,7 @@ export function run(settings) {
             if (
                 await opd_confirm(
                     i18n_message("msg_profile_delete_confirm", [
-                        String(delete_num + 1),
+                        profile_display_name(selected_entry, delete_num),
                     ]),
                 )
             ) {

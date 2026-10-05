@@ -252,7 +252,7 @@
         "message": "Settings have been reset. Please reload the page."
     },
     "msg_profile_delete_confirm": {
-        "message": "Delete profile $1?\nAfter deletion, remaining profiles will be renumbered starting from 1."
+        "message": "Delete profile \"$1\"?"
     },
     "msg_profile_delete_current_alert": {
         "message": "Cannot delete profile because only one profile exists."
