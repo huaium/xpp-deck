@@ -12,6 +12,12 @@ creation/switching/deletion, column serialization and refresh defaults, sidebar
 state, language persistence and fallback, theme transitions, and reload guards.
 DOM adapters validate event behavior; they do not validate browser layout.
 
+Column loading uses two concurrent navigation slots, a one-second minimum start
+gap, and a 30-second slot timeout. Scheduler tests cover visibility priority,
+deduplication, failure recovery, and profile cancellation. Run
+`pnpm test:browser:loading` with the same Playwright environment overrides below
+to verify real Chromium iframe navigation and refresh pacing.
+
 Run `pnpm test:browser` with an existing Playwright installation. If it is not
 resolvable locally, set `PLAYWRIGHT_MODULE_PATH` to that package's absolute path.
 The runner never installs packages or downloads browsers.

@@ -1,4 +1,117 @@
 function run(settings) {
+    opd_column_load_scheduler?.dispose();
+    const load_scheduler = create_column_load_scheduler();
+    opd_column_load_scheduler = load_scheduler;
+
+    function column_load_priority(frame: HTMLIFrameElement) {
+        const bounds = frame.getBoundingClientRect();
+        return bounds.right > 0 &&
+            bounds.left < window.innerWidth &&
+            bounds.bottom > 0 &&
+            bounds.top < window.innerHeight
+            ? 0
+            : 1;
+    }
+    function queue_column_navigation(
+        frame: HTMLIFrameElement,
+        navigate: () => void,
+    ) {
+        if (!frame.isConnected || load_scheduler.has(frame)) return;
+        const root = frame.closest<HTMLElement>("div[opd_column_type]");
+        root?.setAttribute(
+            "opd_load_status",
+            i18n_message_or_fallback("ui_column_waiting", "Waiting to load"),
+        );
+        frame.setAttribute("aria-busy", "true");
+        load_scheduler.enqueue({
+            key: frame,
+            valid: () => frame.isConnected,
+            priority: () => column_load_priority(frame),
+            start: (done) => {
+                root?.setAttribute(
+                    "opd_load_status",
+                    i18n_message_or_fallback("ui_column_loading", "Loading..."),
+                );
+                const loaded = () => {
+                    try {
+                        if (
+                            frame.contentWindow?.location.href === "about:blank"
+                        )
+                            return;
+                    } catch {
+                        /* Cross-origin load completion is still a completion. */
+                    }
+                    done();
+                };
+                frame.addEventListener("load", loaded);
+                const cleanup = () => {
+                    frame.removeEventListener("load", loaded);
+                    root?.removeAttribute("opd_load_status");
+                    frame.removeAttribute("aria-busy");
+                };
+                try {
+                    navigate();
+                } catch (error) {
+                    cleanup();
+                    throw error;
+                }
+                return cleanup;
+            },
+        });
+    }
+    function queue_column_frames() {
+        document
+            .querySelectorAll<HTMLIFrameElement>(
+                "#opd_main_element iframe[data-opd-src]",
+            )
+            .forEach((frame) => {
+                queue_column_navigation(frame, () => {
+                    const source = frame.getAttribute("data-opd-src");
+                    frame.removeAttribute("data-opd-src");
+                    if (source) frame.src = source;
+                });
+            });
+    }
+    function column_set_interval(callback: () => void, interval: number) {
+        const timer = setInterval(callback, interval);
+        load_scheduler.onDispose(() => clearInterval(timer));
+        return timer;
+    }
+    function queue_column_auto_refresh(
+        frame: HTMLIFrameElement,
+        reload: OpdExtAutoReload,
+    ) {
+        const eligible = () => {
+            if (!frame.isConnected || !frame.contentWindow) return false;
+            const enabled = frame
+                .closest("div[opd_column_type]")
+                ?.querySelector<HTMLInputElement>(".opd_a_reload_bar")?.checked;
+            const path = frame.contentWindow.location.pathname;
+            return (
+                enabled === true &&
+                frame.getAttribute("auto_reload_mouse_hover") === "false" &&
+                (["/home", "/search"].includes(path) ||
+                    path.startsWith("/i/lists"))
+            );
+        };
+        load_scheduler.enqueue({
+            key: frame,
+            valid: eligible,
+            priority: () => column_load_priority(frame),
+            start: (done) => {
+                if (!eligible()) {
+                    done();
+                    return;
+                }
+                reload.Reload(frame.contentWindow!);
+                frame.contentWindow!.scrollTo({ top: 0, behavior: "auto" });
+                // X's refresh hook exposes no request-completion event.
+                const timer = setTimeout(done, 1000);
+                return () => clearTimeout(timer);
+            },
+        });
+    }
+
     //console.log(settings)
     let profile_list_html;
     profile_list_html = create_profile_list_html(
@@ -995,6 +1108,35 @@ function run(settings) {
             scroll-behavior: auto !important;
         }
     }
+    div[opd_load_status] { position: relative; }
+    div[opd_load_status]::after {
+        content: attr(opd_load_status);
+        position: absolute;
+        inset: 48px 0 0;
+        display: grid;
+        place-items: center;
+        color: var(--opd-muted);
+        background: var(--opd-surface);
+        pointer-events: none;
+    }
+    .opd_column_drag_active .dsp_column iframe { pointer-events: none; }
+    .opd_column_dragging { opacity: 0.55; }
+    .dsp_column.opd_drop_before, .dsp_column.opd_drop_after { position: relative; }
+    .dsp_column.opd_drop_before::after, .dsp_column.opd_drop_after::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        border-radius: 2px;
+        background: #38bdf8;
+        z-index: 10;
+        pointer-events: none;
+    }
+    .dsp_column.opd_drop_before::after { left: 0; }
+    .dsp_column.opd_drop_after::after { right: 0; }
+    .dsp_column_move_icon { cursor: grab; }
+    .opd_column_drag_active .dsp_column_move_icon { cursor: grabbing; }
     </style>`,
     );
     // Create and insert column elements.
@@ -1009,19 +1151,19 @@ function run(settings) {
             html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_emptycolumn"><div opd_column_type="empty_column" opd_column_width="%column_width_num%" style="height: 100%;min-width: 30rem;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_1)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_empty_column_message")}</p></div></div></section>`,
         },
         post: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Post</span></div></span>${post_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Post</span></div></span>${post_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         second_empty_column: {
             html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_second_emptycolumn"><div opd_column_type="second_empty_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 30rem;overflow: hidden;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_2)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_second_empty_column_message")}</p></div></div></section>`,
         },
         home: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Timeline</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Timeline</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         notification: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Notifications</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe allow="fullscreen" src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Notifications</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel_no_auto}<iframe allow="fullscreen" data-opd-src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         explore: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Explore</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span>${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>Explore</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span>${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
     };
     let ins_html = document.createElement("div");
@@ -1520,9 +1662,16 @@ function run(settings) {
                     ev.currentTarget instanceof HTMLIFrameElement
                         ? ev.currentTarget
                         : null;
-                if (!iframe_elem) return;
+                if (
+                    !iframe_elem ||
+                    iframe_elem.contentWindow?.location.href === "about:blank"
+                )
+                    return;
                 console.log(iframe_elem.getAttribute("opd_iframe_width_only"));
                 if (iframe_elem.getAttribute("opd_iframe_width_only") != "") {
+                    if (iframe_elem.hasAttribute("opd_controls_initialized"))
+                        return;
+                    iframe_elem.setAttribute("opd_controls_initialized", "");
                     //console.log(this)
                     const opd_column_div = iframe_elem.closest(
                         "div[opd_column_type]",
@@ -1623,7 +1772,12 @@ function run(settings) {
                         ev.currentTarget instanceof HTMLIFrameElement
                             ? ev.currentTarget
                             : null;
-                    if (!iframe_elem) return;
+                    if (
+                        !iframe_elem ||
+                        iframe_elem.contentWindow?.location.href ===
+                            "about:blank"
+                    )
+                        return;
                     //console.log(this)
                     const opd_column_div = iframe_elem.closest(
                         "div[opd_column_type]",
@@ -2083,39 +2237,36 @@ function run(settings) {
                                         auto_reload_time_input_element.value,
                                     ) * 1000;
                                 auto_reload_time_input_element.disabled = true;
-                                auto_reload_int = setInterval(function () {
-                                    //console.log("update!")
-                                    //console.log(auto_reload_target_elem.contentWindow!)
-                                    const path_name =
-                                        auto_reload_target_elem.contentWindow!
-                                            .location.pathname;
-                                    if (
-                                        ["/home", "/search"].includes(
-                                            path_name,
-                                        ) ||
-                                        path_name.startsWith("/i/lists")
-                                    ) {
+                                auto_reload_int = column_set_interval(
+                                    function () {
+                                        //console.log("update!")
+                                        //console.log(auto_reload_target_elem.contentWindow!)
+                                        const path_name =
+                                            auto_reload_target_elem
+                                                .contentWindow!.location
+                                                .pathname;
                                         if (
-                                            auto_reload_target_elem.getAttribute(
-                                                "auto_reload_mouse_hover",
-                                            ) == "false"
+                                            ["/home", "/search"].includes(
+                                                path_name,
+                                            ) ||
+                                            path_name.startsWith("/i/lists")
                                         ) {
-                                            if (column_content_reload) {
-                                                column_content_reload.Reload(
-                                                    auto_reload_target_elem.contentWindow!,
-                                                );
-                                                setTimeout(() => {
-                                                    auto_reload_target_elem.contentWindow!.scrollTo(
-                                                        {
-                                                            top: 0,
-                                                            behavior: "auto",
-                                                        },
+                                            if (
+                                                auto_reload_target_elem.getAttribute(
+                                                    "auto_reload_mouse_hover",
+                                                ) == "false"
+                                            ) {
+                                                if (column_content_reload) {
+                                                    queue_column_auto_refresh(
+                                                        auto_reload_target_elem,
+                                                        column_content_reload,
                                                     );
-                                                }, 100);
+                                                }
                                             }
                                         }
-                                    }
-                                }, auto_reload_load_time);
+                                    },
+                                    auto_reload_load_time,
+                                );
                             }
                         }
 
@@ -2295,51 +2446,56 @@ function run(settings) {
                                         if (!auto_reload_window) return;
                                         if (auto_reload_checkbox.checked) {
                                             auto_reload_time_input_element.disabled = true;
-                                            auto_reload_int = setInterval(
-                                                function () {
-                                                    //console.log("update!")
-                                                    //console.log(auto_reload_target_object.contentWindow)
-                                                    const path_name =
-                                                        auto_reload_window
-                                                            .location.pathname;
-                                                    if (
-                                                        [
-                                                            "/home",
-                                                            "/search",
-                                                        ].includes(path_name) ||
-                                                        path_name.startsWith(
-                                                            "/i/lists",
-                                                        )
-                                                    ) {
+                                            auto_reload_int =
+                                                column_set_interval(
+                                                    function () {
+                                                        //console.log("update!")
+                                                        //console.log(auto_reload_target_object.contentWindow)
+                                                        const path_name =
+                                                            auto_reload_window
+                                                                .location
+                                                                .pathname;
                                                         if (
-                                                            auto_reload_target_object.getAttribute(
-                                                                "auto_reload_mouse_hover",
-                                                            ) == "false"
+                                                            [
+                                                                "/home",
+                                                                "/search",
+                                                            ].includes(
+                                                                path_name,
+                                                            ) ||
+                                                            path_name.startsWith(
+                                                                "/i/lists",
+                                                            )
                                                         ) {
                                                             if (
-                                                                column_content_reload
+                                                                auto_reload_target_object.getAttribute(
+                                                                    "auto_reload_mouse_hover",
+                                                                ) == "false"
                                                             ) {
-                                                                column_content_reload.Reload(
-                                                                    auto_reload_window,
-                                                                );
-                                                                setTimeout(
-                                                                    () => {
-                                                                        auto_reload_window.scrollTo(
-                                                                            {
-                                                                                top: 0,
-                                                                                behavior:
-                                                                                    "auto",
-                                                                            },
-                                                                        );
-                                                                    },
-                                                                    500,
-                                                                );
+                                                                if (
+                                                                    column_content_reload
+                                                                ) {
+                                                                    queue_column_auto_refresh(
+                                                                        auto_reload_target_object,
+                                                                        column_content_reload,
+                                                                    );
+                                                                    setTimeout(
+                                                                        () => {
+                                                                            auto_reload_window.scrollTo(
+                                                                                {
+                                                                                    top: 0,
+                                                                                    behavior:
+                                                                                        "auto",
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                        500,
+                                                                    );
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                },
-                                                auto_reload_time,
-                                            );
+                                                    },
+                                                    auto_reload_time,
+                                                );
                                             //console.log(auto_reload_time)
                                             column_settings_save(
                                                 "",
@@ -2459,15 +2615,15 @@ function run(settings) {
                             if (!(target_iframe instanceof HTMLIFrameElement)) {
                                 return;
                             }
-                            if (target_iframe.contentWindow != null) {
-                                target_iframe.contentWindow.location.reload();
-                                return;
-                            }
-                            target_iframe.src = target_iframe.src;
+                            queue_column_navigation(target_iframe, () => {
+                                if (target_iframe.contentWindow)
+                                    target_iframe.contentWindow.location.reload();
+                                else target_iframe.src = target_iframe.src;
+                            });
                         });
                     }
                 },
-                { once: true },
+                { once: false },
             );
             // Explore URL detection logic.
             const opd_column_mutate = column_object[index].closest(
@@ -2482,11 +2638,14 @@ function run(settings) {
                 mutate_url(opd_column_mutate);
             }
         }
+        queue_column_frames();
     }
     // Monitor URL and page title changes.
     function mutate_url(element) {
         let exp_object = element.querySelector("iframe");
         exp_object.addEventListener("load", function () {
+            if (exp_object.contentWindow.location.href === "about:blank")
+                return;
             let exp_old_url = exp_object.contentWindow.location.href;
             let exp_observer = new MutationObserver(function () {
                 if (exp_old_url != exp_object.contentWindow.location.href) {
@@ -3093,66 +3252,107 @@ function run(settings) {
     }
     function column_dd() {
         column_rename();
-        let column_class = document.querySelectorAll(".dsp_column");
-        for (let index = 0; index < column_class.length; index++) {
-            column_class[index].addEventListener("dragstart", function (ev) {
-                const drag_event = ev as DragEvent;
-                const drag_target =
-                    drag_event.target instanceof HTMLElement
-                        ? drag_event.target
-                        : null;
-                //console.log(this)
-                if (drag_event.dataTransfer && drag_target) {
-                    drag_event.dataTransfer.setData(
-                        "text/plain",
-                        drag_target.id,
+        const columns = document.querySelectorAll<HTMLElement>(".dsp_column");
+        const clear_indicators = () => {
+            document
+                .querySelectorAll(".opd_drop_before, .opd_drop_after")
+                .forEach((column) => {
+                    column.classList.remove(
+                        "opd_drop_before",
+                        "opd_drop_after",
                     );
+                });
+        };
+        const finish_drag = () => {
+            clear_indicators();
+            document
+                .querySelector(".opd_column_dragging")
+                ?.classList.remove("opd_column_dragging");
+            document.body.classList.remove("opd_column_drag_active");
+        };
+        const insertion_point = (column: HTMLElement, client_x: number) => {
+            const bounds = column.getBoundingClientRect();
+            const after =
+                column.matches('[draggable="true"]') &&
+                client_x >= bounds.left + bounds.width / 2;
+            return {
+                after,
+                reference: after ? column.nextElementSibling : column,
+            };
+        };
+        for (const column of Array.from(columns)) {
+            if (column.hasAttribute("opd_drag_bound")) continue;
+            column.setAttribute("opd_drag_bound", "");
+            column.addEventListener("dragstart", (event) => {
+                if (
+                    !event.dataTransfer ||
+                    !column.matches('[draggable="true"]')
+                ) {
+                    event.preventDefault();
+                    return;
                 }
+                event.stopPropagation();
+                finish_drag();
+                event.dataTransfer.setData("text/plain", column.id);
+                event.dataTransfer.effectAllowed = "move";
+                column.classList.add("opd_column_dragging");
+                document.body.classList.add("opd_column_drag_active");
             });
-            column_class[index].addEventListener("dragover", function (ev) {
-                const drag_event = ev as DragEvent;
-                drag_event.preventDefault();
-                const drop_target =
-                    drag_event.currentTarget instanceof HTMLElement
-                        ? drag_event.currentTarget
-                        : null;
-                if (!drop_target) return;
-                drop_target.style.borderLeft = "15px solid #2e2e2e";
-            });
-            column_class[index].addEventListener("dragleave", function (ev) {
-                const drag_event = ev as DragEvent;
-                const drop_target =
-                    drag_event.currentTarget instanceof HTMLElement
-                        ? drag_event.currentTarget
-                        : null;
-                if (!drop_target) return;
-                drop_target.style.borderLeft = "";
-            });
-            column_class[index].addEventListener("drop", function (ev) {
-                const drag_event = ev as DragEvent;
-                drag_event.preventDefault();
-                const drop_target =
-                    drag_event.currentTarget instanceof HTMLElement
-                        ? drag_event.currentTarget
-                        : null;
-                if (!drop_target) return;
-                drop_target.style.borderLeft = "";
-                const dt_id = drag_event.dataTransfer?.getData("text/plain");
-                if (!dt_id) return;
-                const dr_elem = document.getElementById(dt_id);
-                const parent = drop_target.parentElement;
+            column.addEventListener("dragover", (event) => {
+                const dragged = document.querySelector(".opd_column_dragging");
                 if (
-                    !dr_elem ||
+                    !dragged ||
+                    (!column.matches('[draggable="true"]') &&
+                        !column.classList.contains("dsp_column_emptycolumn"))
+                )
+                    return;
+                event.preventDefault();
+                if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+                clear_indicators();
+                const { after, reference } = insertion_point(
+                    column,
+                    event.clientX,
+                );
+                if (
+                    dragged === column ||
+                    dragged === reference ||
+                    dragged.nextElementSibling === reference
+                )
+                    return;
+                column.classList.add(
+                    after ? "opd_drop_after" : "opd_drop_before",
+                );
+            });
+            column.addEventListener("dragleave", (event) => {
+                if (
+                    event.relatedTarget instanceof Node &&
+                    column.contains(event.relatedTarget)
+                )
+                    return;
+                column.classList.remove("opd_drop_before", "opd_drop_after");
+            });
+            column.addEventListener("dragend", finish_drag);
+            column.addEventListener("drop", (event) => {
+                const dragged = document.querySelector(".opd_column_dragging");
+                if (
+                    !dragged ||
+                    (!column.matches('[draggable="true"]') &&
+                        !column.classList.contains("dsp_column_emptycolumn"))
+                )
+                    return;
+                event.preventDefault();
+                event.stopPropagation();
+                const parent = column.parentElement;
+                const { reference } = insertion_point(column, event.clientX);
+                finish_drag();
+                if (
                     !parent ||
-                    !dr_elem.matches('.dsp_column[draggable="true"]')
+                    dragged === column ||
+                    dragged === reference ||
+                    dragged.nextElementSibling === reference
                 )
                     return;
-                if (
-                    dr_elem == drop_target ||
-                    dr_elem.nextElementSibling == drop_target
-                )
-                    return;
-                // Re-inserting an iframe disconnects it and reloads its document.
+                // Atomic moves preserve the iframe document and its current state.
                 if (typeof parent.moveBefore !== "function") {
                     void opd_alert(
                         i18n_message_or_fallback(
@@ -3162,7 +3362,7 @@ function run(settings) {
                     );
                     return;
                 }
-                parent.moveBefore(dr_elem, drop_target);
+                parent.moveBefore(dragged, reference);
                 column_settings_save("", last_load_profile);
             });
         }

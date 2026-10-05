@@ -69,6 +69,7 @@
             "matches": ["https://twitter.com/*", "https://x.com/*"],
             "js": [
                 "src/content/prelude.js",
+                "src/content/loading.js",
                 "src/content/run.js",
                 "src/content/settings.js",
                 "src/extensions/auto_reload.js",
