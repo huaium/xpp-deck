@@ -36,6 +36,7 @@ import { create_column_load_scheduler } from "./loading";
 import {
     apply_theme_for_main_element,
     stop_system_theme_listener,
+    get_cookie_color_mode,
 } from "./settings";
 import { OpdExtAutoReload } from "../extensions/auto_reload";
 import { OpdExtMediaViewer } from "../extensions/media_viewer";
@@ -320,13 +321,52 @@ export function run(settings) {
         display: flex;
         width: 100%;
         align-content: center;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         flex-direction: row;
         gap: 0.75rem;
         min-height: 52px;
-        padding: 0.1rem 0;
+        box-sizing: border-box;
+        padding: 0.1rem 16px;
     }
+    .opd_global_settings_button{
+        margin-left:auto; flex-shrink:0; width:36px; height:36px;
+        border:0; border-radius:8px; background:transparent; cursor:pointer;
+        display:grid; place-items:center;
+    }
+    .opd_global_settings_button:hover{background:var(--opd-hover);}
+    .opd_global_settings_button img{width:24px;height:24px;}
+    .opd_global_settings_controls{--opd-text:inherit;--opd-muted:inherit;--opd-border:#87919c;--opd-hover:rgba(128,128,128,.12);}
+    .opd_dialog_theme_dark .opd_global_settings_controls .dsp_btn_icon_wrap{filter:invert(1);}
+    .opd_global_settings_controls .opd_language_separator{display:none;}
+    .opd_global_settings_controls .opd_language_select{color:inherit;background:transparent;}
+    .opd_global_settings_dialog{width: min(420px, calc(100vw - 32px));}
+    .opd_global_settings_dialog .opd_dialog_message{font-size:1.15rem;font-weight:700;margin-bottom:20px;}
+    .opd_global_settings_controls .opd_global_setting_row,
+    .opd_global_settings_controls .opd_language_select_wrap{
+        display:grid;grid-template-columns:minmax(0,1fr) minmax(0,55%);gap:16px;align-items:center;
+        margin:0;padding:6px 0;min-width:0;
+    }
+    .opd_global_settings_controls select,
+    .opd_global_settings_controls .opd_language_select{
+        box-sizing:border-box;min-width:0;width:100%;min-height:40px;
+        border:1px solid #87919c;border-radius:8px;padding:0 40px 0 12px;
+        appearance:none;background-color:transparent;color:inherit;font:inherit;color-scheme:light;
+    }
+    .opd_dialog_theme_dark .opd_global_settings_controls select{
+        color-scheme:dark;
+    }
+    .opd_global_settings_controls .opd_language_select_label{font:inherit;padding:0;}
+    .opd_global_settings_controls #second_rack{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:0 12px;border:1px solid #87919c;border-radius:8px;}
+    .opd_global_settings_controls #second_rack .dsp_btn_icon_wrap{display:none;}
+    .opd_global_settings_controls #second_rack .dsp_btn_label{font:inherit;color:inherit;}
+    .opd_global_settings_dialog .opd_dialog_actions{margin-top:16px;}
+    #opd_main_element[opd-dsp-theme="dark"] .opd_global_settings_button img{filter:invert(1);}
+    #opd_main_element #switch_theme,
+    #opd_main_element #second_rack,
+    #opd_main_element .opd_language_select_wrap{display:none;}
+    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo_parent{gap:2px;}
+    #opd_main_element.opd_sidebar_collapsed .opd_global_settings_button{display:none;}
     .opd_language_select_wrap{
         display: flex;
         flex-direction: column;
@@ -360,9 +400,10 @@ export function run(settings) {
         cursor: pointer;
     }
     .opd_language_select:hover{
-        background: var(--opd-hover);
+        background-color: var(--opd-hover);
     }
     .opd_ui_logo{
+        flex-shrink: 0;
         background-size: cover;
         background-repeat: no-repeat;
         background-image: url(${chrome.runtime.getURL("public/icons/logo_icon.svg")});
@@ -1419,6 +1460,169 @@ export function run(settings) {
     }
     const switch_theme_button =
         document.querySelector<HTMLElement>("#switch_theme");
+    const settings_button = document.createElement("button");
+    settings_button.type = "button";
+    settings_button.className = "opd_global_settings_button";
+    const settings_title = i18n_message_or_fallback(
+        "ui_global_settings_title",
+        "Settings",
+    );
+    settings_button.setAttribute("aria-label", settings_title);
+    settings_button.title = settings_title;
+    const settings_icon = document.createElement("img");
+    settings_icon.src = chrome.runtime.getURL(ui_icon_define.column_settings);
+    settings_icon.alt = "";
+    settings_button.appendChild(settings_icon);
+    document.querySelector(".opd_ui_logo_parent")?.appendChild(settings_button);
+    settings_button.addEventListener("click", () => {
+        void open_opd_dialog({
+            type: "alert",
+            message: settings_title,
+            mount(dialog) {
+                const controls = [
+                    document.getElementById("second_rack"),
+                    document.querySelector<HTMLElement>(
+                        ".opd_language_select_wrap",
+                    ),
+                ].filter((control): control is HTMLElement => control !== null);
+                const parents = controls.map(
+                    (control) => control.parentElement,
+                );
+                const body = document.createElement("div");
+                body.className = "opd_global_settings_controls";
+                body.style.cssText =
+                    "display:grid;gap:6px;text-align:left;min-width:0";
+                const theme_row = document.createElement("label");
+                theme_row.className = "opd_global_setting_row";
+                const theme_label = document.createElement("span");
+                theme_label.textContent = i18n_message_or_fallback(
+                    "ui_theme_label",
+                    "Theme",
+                );
+                const theme_select = document.createElement("select");
+                theme_select.id = "opd_theme_select";
+                for (const [value, fallback] of [
+                    ["system", "System"],
+                    ["light", "Light"],
+                    ["dark", "Dark"],
+                ]) {
+                    const option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = i18n_message_or_fallback(
+                        "ui_theme_" + value,
+                        fallback,
+                    );
+                    theme_select.appendChild(option);
+                }
+                theme_select.value = get_cookie_color_mode() ?? "system";
+                theme_select.addEventListener("change", () => {
+                    stop_system_theme_listener();
+                    document.cookie = `opd_theme=${theme_select.value}; path=/; max-age=31536000; SameSite=Lax; Secure`;
+                    apply_theme_for_main_element(opd_main_element);
+                    dialog
+                        .closest(".opd_dialog_overlay")
+                        ?.classList.toggle(
+                            "opd_dialog_theme_dark",
+                            opd_main_element.getAttribute("opd-dsp-theme") ===
+                                "dark",
+                        );
+                });
+                theme_row.append(theme_label, theme_select);
+                body.appendChild(theme_row);
+                for (const control of controls) {
+                    if (control.id === "second_rack") {
+                        const row = document.createElement("div");
+                        row.className = "opd_global_setting_row";
+                        const label = document.createElement("span");
+                        label.textContent = i18n_message_or_fallback(
+                            "ui_layout_label",
+                            "Layout",
+                        );
+                        const select = document.createElement("select");
+                        select.id = "opd_layout_select";
+                        select.setAttribute("aria-label", label.textContent);
+                        for (const [value, fallback] of [
+                            ["single", "One row"],
+                            ["double", "Two rows"],
+                        ]) {
+                            const option = document.createElement("option");
+                            option.value = value;
+                            option.textContent = i18n_message_or_fallback(
+                                "ui_layout_" + value,
+                                fallback,
+                            );
+                            select.appendChild(option);
+                        }
+                        select.value = second_rack_mode ? "double" : "single";
+                        select.addEventListener("change", () => {
+                            if (
+                                (select.value === "double") ===
+                                second_rack_mode
+                            )
+                                return;
+                            control.click();
+                        });
+                        row.append(label, select);
+                        body.appendChild(row);
+                    } else body.appendChild(control);
+                }
+                dialog.classList.add("opd_global_settings_dialog");
+                const theme_observer = new MutationObserver(() => {
+                    dialog
+                        .closest(".opd_dialog_overlay")
+                        ?.classList.toggle(
+                            "opd_dialog_theme_dark",
+                            opd_main_element.getAttribute("opd-dsp-theme") ===
+                                "dark",
+                        );
+                });
+                theme_observer.observe(opd_main_element, {
+                    attributes: true,
+                    attributeFilter: ["opd-dsp-theme"],
+                });
+                queueMicrotask(() => {
+                    const close = dialog.querySelector<HTMLButtonElement>(
+                        ".opd_dialog_primary",
+                    );
+                    if (close)
+                        close.textContent = i18n_message_or_fallback(
+                            "ui_settings_close",
+                            "Close",
+                        );
+                });
+                dialog.appendChild(body);
+                const layout = document.getElementById("second_rack");
+                const close_before_layout = () =>
+                    dialog
+                        .querySelector<HTMLButtonElement>(".opd_dialog_primary")
+                        ?.click();
+                const close_on_escape = (event: KeyboardEvent) => {
+                    if (event.key !== "Escape") return;
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    close_before_layout();
+                };
+                document.addEventListener("keydown", close_on_escape, true);
+                layout?.addEventListener("click", close_before_layout, {
+                    capture: true,
+                });
+                return () => {
+                    theme_observer.disconnect();
+                    document.removeEventListener(
+                        "keydown",
+                        close_on_escape,
+                        true,
+                    );
+                    layout?.removeEventListener("click", close_before_layout, {
+                        capture: true,
+                    });
+                    controls.forEach((control, index) =>
+                        parents[index]?.appendChild(control),
+                    );
+                };
+            },
+        });
+    });
     const language_select = document.querySelector<HTMLSelectElement>(
         "#opd_language_select",
     );
@@ -1496,6 +1700,13 @@ export function run(settings) {
 
             document.cookie = `night_mode=${next_theme_mode === "dark" ? 1 : 0}; path=/; max-age=31536000`;
             opd_main_element.setAttribute("opd-dsp-theme", next_theme_mode);
+            document
+                .querySelector(".opd_global_settings_controls")
+                ?.closest(".opd_dialog_overlay")
+                ?.classList.toggle(
+                    "opd_dialog_theme_dark",
+                    next_theme_mode === "dark",
+                );
             document.documentElement.setAttribute(
                 opd_root_theme_attribute,
                 next_theme_mode,

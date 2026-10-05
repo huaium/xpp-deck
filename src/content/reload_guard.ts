@@ -9,23 +9,14 @@ export function start_reload_guard() {
     function getCookieColorMode() {
         const cookie = document.cookie
             .split(/;\s*/)
-            .find((c) => c.startsWith("night_mode="));
+            .find((c) => c.startsWith("opd_theme="));
 
         if (!cookie) {
             return "system";
         }
 
-        const colorModeNumber = Number(cookie.split("=")[1]);
-
-        if (!Number.isInteger(colorModeNumber)) {
-            return "system";
-        }
-
-        if (colorModeNumber <= 0) {
-            return "light";
-        }
-
-        return "dark";
+        const mode = cookie.split("=")[1];
+        return mode === "light" || mode === "dark" ? mode : "system";
     }
 
     function applyRootThemeMarker() {

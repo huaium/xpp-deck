@@ -385,5 +385,32 @@
     },
     "ui_welcome_error_description": {
         "message": "La comprobación falló. Reintenta sin modificar tus perfiles."
+    },
+    "ui_global_settings_title": {
+        "message": "Configuración"
+    },
+    "ui_theme_label": {
+        "message": "Tema"
+    },
+    "ui_theme_system": {
+        "message": "Sistema"
+    },
+    "ui_theme_light": {
+        "message": "Claro"
+    },
+    "ui_theme_dark": {
+        "message": "Oscuro"
+    },
+    "ui_settings_close": {
+        "message": "Cerrar"
+    },
+    "ui_layout_label": {
+        "message": "Diseño"
+    },
+    "ui_layout_single": {
+        "message": "Una fila"
+    },
+    "ui_layout_double": {
+        "message": "Dos filas"
     }
 }

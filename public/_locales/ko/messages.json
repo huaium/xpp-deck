@@ -385,5 +385,32 @@
     },
     "ui_welcome_error_description": {
         "message": "확인에 실패했습니다. 프로필을 변경하지 않고 다시 시도하세요."
+    },
+    "ui_global_settings_title": {
+        "message": "설정"
+    },
+    "ui_theme_label": {
+        "message": "테마"
+    },
+    "ui_theme_system": {
+        "message": "시스템"
+    },
+    "ui_theme_light": {
+        "message": "밝게"
+    },
+    "ui_theme_dark": {
+        "message": "어둡게"
+    },
+    "ui_settings_close": {
+        "message": "닫기"
+    },
+    "ui_layout_label": {
+        "message": "레이아웃"
+    },
+    "ui_layout_single": {
+        "message": "한 행"
+    },
+    "ui_layout_double": {
+        "message": "두 행"
     }
 }

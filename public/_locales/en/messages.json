@@ -385,5 +385,32 @@
     },
     "ui_welcome_error_description": {
         "message": "The session check failed. Try again without changing your profiles."
+    },
+    "ui_global_settings_title": {
+        "message": "Settings"
+    },
+    "ui_theme_label": {
+        "message": "Theme"
+    },
+    "ui_theme_system": {
+        "message": "System"
+    },
+    "ui_theme_light": {
+        "message": "Light"
+    },
+    "ui_theme_dark": {
+        "message": "Dark"
+    },
+    "ui_settings_close": {
+        "message": "Close"
+    },
+    "ui_layout_label": {
+        "message": "Layout"
+    },
+    "ui_layout_single": {
+        "message": "One row"
+    },
+    "ui_layout_double": {
+        "message": "Two rows"
     }
 }

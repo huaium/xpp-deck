@@ -76,14 +76,12 @@ export function get_cookie_color_mode() {
     }
     const cookie = document.cookie
         .split(/;\s*/)
-        .find((c) => c.startsWith("night_mode="));
+        .find((c) => c.startsWith("opd_theme="));
 
     if (!cookie) return "system";
 
-    const color_mode_number = Number(cookie.split("=")[1]);
-    if (!Number.isInteger(color_mode_number)) return "system";
-    if (color_mode_number <= 0) return "light";
-    return "dark";
+    const mode = cookie.split("=")[1];
+    return mode === "light" || mode === "dark" ? mode : "system";
 }
 // Initialize settings.
 export function settings_init() {

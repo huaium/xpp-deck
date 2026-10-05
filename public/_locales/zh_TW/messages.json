@@ -385,5 +385,32 @@
     },
     "ui_welcome_error_description": {
         "message": "檢查失敗，請重試。你的設定不會被更改。"
+    },
+    "ui_global_settings_title": {
+        "message": "設定"
+    },
+    "ui_theme_label": {
+        "message": "主題"
+    },
+    "ui_theme_system": {
+        "message": "跟隨系統"
+    },
+    "ui_theme_light": {
+        "message": "淺色"
+    },
+    "ui_theme_dark": {
+        "message": "深色"
+    },
+    "ui_settings_close": {
+        "message": "關閉"
+    },
+    "ui_layout_label": {
+        "message": "版面配置"
+    },
+    "ui_layout_single": {
+        "message": "單列"
+    },
+    "ui_layout_double": {
+        "message": "雙列"
     }
 }

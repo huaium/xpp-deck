@@ -61,11 +61,11 @@ function bootstrap(cookie, dark = false, storageThrows = false) {
 
 test("bootstrap respects explicit cookie themes and falls back to system theme", () => {
     for (const [cookie, dark, expected] of [
-        ["night_mode=0", true, "light"],
-        ["other=1; night_mode=1", false, "dark"],
-        ["night_mode=2", false, "dark"],
+        ["opd_theme=light", true, "light"],
+        ["other=1; opd_theme=dark", false, "dark"],
+        ["opd_theme=dark", false, "dark"],
         ["", true, "dark"],
-        ["night_mode=invalid", false, "light"],
+        ["opd_theme=invalid", false, "light"],
     ]) {
         assert.equal(
             bootstrap(cookie, dark).attributes["data-opd-theme"],
@@ -73,7 +73,7 @@ test("bootstrap respects explicit cookie themes and falls back to system theme",
         );
     }
     assert.equal(typeof bootstrap("").themeListener, "function");
-    assert.equal(bootstrap("night_mode=1").themeListener, undefined);
+    assert.equal(bootstrap("opd_theme=dark").themeListener, undefined);
 });
 
 test("intentional reload bypass is consumed once; later navigation warns", () => {
