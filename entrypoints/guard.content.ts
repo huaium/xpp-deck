@@ -4,6 +4,6 @@ export default defineContentScript({
     matches: ["https://*.twitter.com/*", "https://*.x.com/*"],
     runAt: "document_start",
     main(ctx) {
-        ctx.onInvalidated(start_reload_guard());
+        ctx.onInvalidated(start_reload_guard(import.meta.env.DEV));
     },
 });

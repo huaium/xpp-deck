@@ -1,4 +1,4 @@
-export function start_reload_guard() {
+export function start_reload_guard(development = false) {
     const bypassKey = "opd_beforeunload_bypass_once";
     const rootThemeAttribute = "data-opd-theme";
     const preloadStyleId = "opd_preload_theme_style";
@@ -85,7 +85,7 @@ html[data-opd-theme="light"] body {
         event.preventDefault();
         event.returnValue = "";
     };
-    window.addEventListener("beforeunload", beforeUnload);
+    if (!development) window.addEventListener("beforeunload", beforeUnload);
     return () => {
         systemDarkQuery.removeEventListener("change", applyRootThemeMarker);
         window.removeEventListener("beforeunload", beforeUnload);

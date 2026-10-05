@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { URL } from "node:url";
 import vm from "node:vm";
 
-function bootstrap(cookie, dark = false, storageThrows = false) {
+function bootstrap(cookie, dark = false, storageThrows = false, development = false) {
     const listeners = {};
     const attributes = {};
     const storage = new Map();
@@ -53,11 +53,20 @@ function bootstrap(cookie, dark = false, storageThrows = false) {
         "utf8",
     );
     cleanup = vm.runInNewContext(
-        transpile(source) + "\nstart_reload_guard();",
+        transpile(source) + `\nstart_reload_guard(${development});`,
         context,
     );
     return { listeners, attributes, storage, themeListener, cleanup };
 }
+
+test("development skips leave-page confirmation but retains theme initialization", () => {
+    const h = bootstrap("", true, false, true);
+    assert.equal(h.listeners.beforeunload, undefined);
+    assert.equal(h.attributes["data-opd-theme"], "dark");
+    assert.equal(typeof h.themeListener, "function");
+    h.cleanup();
+    assert.equal(typeof bootstrap("").listeners.beforeunload, "function");
+});
 
 test("bootstrap respects explicit cookie themes and falls back to system theme", () => {
     for (const [cookie, dark, expected] of [
