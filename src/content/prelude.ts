@@ -233,6 +233,8 @@ function ensure_opd_dialog_style() {
     .opd_api_cards{display:grid;gap:12px;margin:16px 0;}
     .opd_api_card{border:1px solid #cbd5e1;border-radius:10px;padding:14px;background:linear-gradient(135deg,#f8fafc,#fff);}
     .opd_api_heading{display:flex;justify-content:space-between;gap:12px;font-weight:700;}
+    .opd_api_name{display:flex;align-items:center;gap:8px;}
+    .opd_api_icon{width:18px;height:18px;flex-shrink:0;}
     .opd_api_detail{margin:8px 0 0;font-size:13px;opacity:.8;}
     .opd_api_track{height:8px;margin-top:12px;border-radius:8px;background:#e2e8f0;overflow:hidden;}
     .opd_api_fill{height:100%;background:#16834a;}
@@ -833,13 +835,16 @@ document.addEventListener("keyup", (event) => {
 });
 // Watch storage updates (mainly for API rate-limit status).
 export let api_limit_obj: ApiAccessLimit | null = null;
-export function create_api_sidebar_html() {
+function api_icon_path(index: number) {
     const paths = [
         "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
         "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z",
         "M21 21l-5-5M17 10a7 7 0 1 0-14 0 7 7 0 0 0 14 0",
     ];
-    return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<button type="button" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[index]}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></button>`).join("")}</div>`;
+    return paths[index];
+}
+export function create_api_sidebar_html() {
+    return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<button type="button" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${api_icon_path(index)}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></button>`).join("")}</div>`;
 }
 export function update_api_sidebar() {
     for (const [key, label] of [["time_line", "ui_api_following"], ["recommend_timeline", "ui_api_for_you"], ["search", "ui_api_search"]] as const) {
@@ -883,7 +888,16 @@ export async function open_api_limits_dialog() {
                     const heading = document.createElement("div");
                     heading.className = "opd_api_heading";
                     const name = document.createElement("span");
+                    name.className = "opd_api_name";
+                    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    for (const [attribute, value] of Object.entries({class: "opd_api_icon", viewBox: "0 0 24 24", "aria-hidden": "true", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round"})) {
+                        icon.setAttribute(attribute, value);
+                    }
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    path.setAttribute("d", api_icon_path(["time_line", "recommend_timeline", "search"].indexOf(key)));
+                    icon.appendChild(path);
                     name.textContent = i18n_message(label);
+                    name.prepend(icon);
                     const status = document.createElement("span");
                     const value = api_limit_obj?.[key];
                     const quota = api_quota_state(value);

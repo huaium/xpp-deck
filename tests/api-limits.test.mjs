@@ -26,14 +26,15 @@ test("API cards show unknown data, update live, and release their listener", asy
         attributes = {};
         append(...children) { this.children.push(...children); }
         appendChild(child) { this.append(child); }
+        prepend(child) { this.children.unshift(child); }
         replaceChildren() { this.children = []; }
         setAttribute(key, value) { this.attributes[key] = value; }
     }
     const dialog = new Element();
     let listener;
     let cleanup;
-    const { open_api_limits_dialog } = loadFunctions("../src/content/prelude.ts", ["api_quota_state", "open_api_limits_dialog"], "let api_limit_obj = null;", {
-        document: { createElement: () => new Element() },
+    const { open_api_limits_dialog } = loadFunctions("../src/content/prelude.ts", ["api_quota_state", "open_api_limits_dialog", "api_icon_path"], "let api_limit_obj = null;", {
+        document: { createElement: () => new Element(), createElementNS: () => new Element() },
         i18n_message: (key, values = []) => `${key}:${values.join("/")}`,
         open_opd_dialog: (options) => { cleanup = options.mount(dialog); },
         chrome: { storage: { onChanged: {
@@ -44,6 +45,9 @@ test("API cards show unknown data, update live, and release their listener", asy
     await open_api_limits_dialog();
     const cards = dialog.children[1];
     assert.equal(cards.children.length, 3);
+    const icons = cards.children.map((card) => card.children[0].children[0].children[0]);
+    for (const icon of icons) assert.equal(icon.attributes["aria-hidden"], "true");
+    assert.equal(new Set(icons.map((icon) => icon.children[0].attributes.d)).size, 3);
     assert.equal(cards.children[0].children[0].children[1].textContent, "ui_api_no_data:");
     listener({ api_access_limit: { newValue: { recommend_timeline: { limit: 500, remaining: 492, reset_unix_time: 1800000000 } } } });
     const card = cards.children[1];

@@ -451,7 +451,7 @@ export function run(settings) {
     .opd_api_sidebar_row[data-level="amber"] .opd_api_sidebar_value{color:#b77909;}
     .opd_api_sidebar_row[data-level="red"] .opd_api_sidebar_value{color:#d33b36;}
     #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar{padding:8px 0;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_heading,
+    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_heading{display:block;text-align:center;font-size:9px;line-height:1.3;margin:0 2px 6px;overflow-wrap:anywhere;}
     #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_label{display:none;}
     #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_row{flex-direction:column;gap:3px;padding:7px 0;min-height:48px;}
     #api_limit_status_button .dsp_btn_label{

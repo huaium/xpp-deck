@@ -3,7 +3,7 @@ import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 
 test("sidebar renders three keyboard-accessible API rows with icons", () => {
-    const { create_api_sidebar_html } = loadFunctions("../src/content/prelude.ts", ["create_api_sidebar_html", "escape_profile_name"], "", {
+    const { create_api_sidebar_html } = loadFunctions("../src/content/prelude.ts", ["create_api_sidebar_html", "escape_profile_name", "api_icon_path"], "", {
         i18n_message_or_fallback: () => "API Usage",
     });
     const html = create_api_sidebar_html();
