@@ -3165,7 +3165,10 @@ function run(settings) {
             wrapper.appendChild(label);
             bar.insertBefore(
                 wrapper,
-                bar.querySelector(".dsp_column_close_btn_wrap"),
+                bar
+                    .querySelector(".column_refresh_btn")
+                    ?.closest(".dsp_column_btn") ??
+                    bar.querySelector(".dsp_column_close_btn_wrap"),
             );
         }
         checkbox.checked = Boolean(column.getAttribute("opd_pinned_path"));

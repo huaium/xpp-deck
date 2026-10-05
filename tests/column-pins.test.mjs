@@ -24,11 +24,14 @@ test("every content column can pin and unpin its current URL", async () => {
             appendChild(child) {
                 this.children.push(child);
             }
-            insertBefore(child) {
+            insertBefore(child, reference) {
+                assert.equal(reference, refreshWrapper);
                 this.children.push(child);
             }
-            querySelector() {
-                return null;
+            querySelector(selector) {
+                return selector === ".column_refresh_btn"
+                    ? { closest: () => refreshWrapper }
+                    : null;
             }
             hasAttribute(key) {
                 return this.attributes.has(key);
@@ -40,6 +43,7 @@ test("every content column can pin and unpin its current URL", async () => {
                 this.handlers.set(name, handler);
             }
         }
+        const refreshWrapper = {};
         const bar = new Element();
         const frame = {
             contentWindow: {
