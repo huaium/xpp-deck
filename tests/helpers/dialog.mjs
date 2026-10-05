@@ -65,12 +65,12 @@ export function dialogHarness() {
     trigger.focus();
     const { open_opd_dialog: open } = loadFunctions(
         "../src/content/prelude.ts",
-        ["enqueue_opd_dialog", "open_opd_dialog"],
+        ["enqueue_opd_dialog", "open_opd_dialog", "animate_dialog_exit"],
         `let opd_dialog_queue = Promise.resolve();
          function ensure_opd_dialog_style() {}
          function is_opd_dark_theme_enabled() { return false; }
          function i18n_message_or_fallback(key, fallback) { return fallback; }`,
-        { document, HTMLElement: Element },
+        { document, HTMLElement: Element, window: { matchMedia: () => ({ matches: true }) } },
     );
     return {
         document,

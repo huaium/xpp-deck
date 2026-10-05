@@ -94,6 +94,57 @@ export let last_load_profile = 0;
 export let media_viewer_token: string[] = [];
 export const opd_sidebar_width_expanded = "208px";
 export const opd_sidebar_width_collapsed = "64px";
+const ui_animations = new WeakMap<HTMLElement, Animation>();
+export async function animate_sidebar_change(element: HTMLElement, apply: () => void) {
+    const opacity = window.getComputedStyle(element).opacity;
+    ui_animations.get(element)?.cancel();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !element.animate) {
+        element.style.opacity = "";
+        apply();
+        return;
+    }
+    const fade = element.animate([{ opacity }, { opacity: 0 }], { duration: 70, fill: "forwards" });
+    ui_animations.set(element, fade);
+    try { await fade.finished; } catch { return; }
+    if (ui_animations.get(element) !== fade) return;
+    element.style.opacity = "0";
+    fade.cancel();
+    apply();
+    // Keep layout changes invisible until the existing width transition settles.
+    const reveal = element.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 180, duration: 100, easing: "ease-out", fill: "forwards" });
+    ui_animations.set(element, reveal);
+    try { await reveal.finished; } catch { return; }
+    if (ui_animations.get(element) !== reveal) return;
+    element.style.opacity = "";
+    reveal.cancel();
+    ui_animations.delete(element);
+}
+export async function animate_dialog_exit(overlay: HTMLElement, dialog: HTMLElement) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !overlay.animate || !dialog.animate) return;
+    overlay.style.animation = "none";
+    dialog.style.animation = "none";
+    const options: KeyframeAnimationOptions = { duration: 160, easing: "ease-in", fill: "forwards" };
+    const animations = [
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], options),
+        dialog.animate([{ opacity: 1, transform: "translateY(0)" }, { opacity: 0, transform: "translateY(6px)" }], options),
+    ];
+    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+}
+export function animate_ui_entrance(element: HTMLElement | null, duration = 180, distance = 8) {
+    if (!element) return;
+    ui_animations.get(element)?.cancel();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !element.animate) return;
+    const animation = element.animate([
+        { opacity: 0, transform: `translateY(${distance}px)` },
+        { opacity: 1, transform: "translateY(0)" },
+    ], { duration, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" });
+    ui_animations.set(element, animation);
+    const cleanup = () => {
+        if (ui_animations.get(element) === animation) ui_animations.delete(element);
+    };
+    animation.onfinish = cleanup;
+    animation.oncancel = cleanup;
+}
 export function request_page_reload() {
     try {
         sessionStorage.setItem(beforeunload_bypass_key, "1");
@@ -200,6 +251,7 @@ function ensure_opd_dialog_style() {
     style.setAttribute("opd_dialog_css", "");
     style.textContent = `
     .opd_dialog_overlay{
+        animation: opd_overlay_enter 160ms ease-out;
         box-sizing: border-box;
         position: fixed;
         inset: 0;
@@ -211,6 +263,7 @@ function ensure_opd_dialog_style() {
         padding: 16px;
     }
     .opd_dialog{
+        animation: opd_dialog_enter 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
         box-sizing: border-box;
         max-height: calc(100dvh - 32px);
         overflow-y: auto;
@@ -223,6 +276,9 @@ function ensure_opd_dialog_style() {
         padding: 24px;
         font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
+    @keyframes opd_overlay_enter{from{opacity:0;}to{opacity:1;}}
+    @keyframes opd_dialog_enter{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+    @media(prefers-reduced-motion:reduce){.opd_dialog_overlay,.opd_dialog{animation:none;}}
     .opd_dialog_message{
         margin: 0 0 12px;
         white-space: pre-wrap;
@@ -564,8 +620,12 @@ export function open_opd_dialog({
                             !elem.hasAttribute("disabled"),
                     );
 
-                const finish = (result: void | boolean | string | null) => {
+                let closing = false;
+                const finish = async (result: void | boolean | string | null) => {
+                    if (closing) return;
+                    closing = true;
                     cleanup_content?.();
+                    await animate_dialog_exit(overlay, dialog);
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
                     if (previous_active_element instanceof HTMLElement) {
@@ -574,6 +634,11 @@ export function open_opd_dialog({
                     resolve(result);
                 };
                 const key_listener = (event: KeyboardEvent) => {
+                    if (closing) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    }
                     if (event.isComposing || event.keyCode == 229) {
                         return;
                     }
@@ -762,7 +827,11 @@ export async function open_about_page_modal() {
                             !elem.hasAttribute("disabled"),
                     );
 
-                const finish = () => {
+                let closing = false;
+                const finish = async () => {
+                    if (closing) return;
+                    closing = true;
+                    await animate_dialog_exit(overlay, dialog);
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
                     if (previous_active_element instanceof HTMLElement) {
@@ -771,6 +840,11 @@ export async function open_about_page_modal() {
                     resolve(undefined);
                 };
                 const key_listener = (event: KeyboardEvent) => {
+                    if (closing) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    }
                     if (event.isComposing || event.keyCode == 229) {
                         return;
                     }

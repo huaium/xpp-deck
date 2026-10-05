@@ -1,5 +1,7 @@
 import {
     open_api_limits_dialog,
+    animate_ui_entrance,
+    animate_sidebar_change,
     create_api_sidebar_html,
     update_api_sidebar,
     beforeunload_bypass_key,
@@ -420,7 +422,7 @@ export function run(settings) {
         text-overflow: ellipsis;
         opacity: var(--opd-sidebar-label-opacity);
         width: var(--opd-sidebar-label-width);
-        transition: opacity 0.15s ease;
+        transition: opacity 120ms ease-out;
     }
     .dsp_btn_sidebar_fold_img{
         display: block;
@@ -440,8 +442,8 @@ export function run(settings) {
         min-width: 48px;
     }
     .opd_api_sidebar{padding:12px 8px;margin:4px 0;border-block:1px solid var(--opd-border);}
-    .opd_api_sidebar_heading{display:block;text-align:left;font-size:11px;font-weight:700;color:var(--opd-muted);margin:0 8px 8px;}
-    .opd_api_sidebar_row{display:flex;align-items:center;gap:8px;width:100%;min-height:38px;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:var(--opd-text);cursor:pointer;font:inherit;}
+    .opd_api_sidebar_heading{display:flex;align-items:center;text-align:left;height:24px;font-size:11px;font-weight:700;color:var(--opd-muted);margin:0 8px 8px;}
+    .opd_api_sidebar_row{display:flex;align-items:center;gap:8px;width:100%;height:48px;min-height:48px;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:var(--opd-text);cursor:pointer;font:inherit;}
     .opd_api_sidebar_row:hover{background:var(--opd-hover);}
     .opd_api_sidebar_row:focus-visible{outline:2px solid var(--opd-muted);outline-offset:1px;}
     .opd_api_sidebar_icon{width:18px;height:18px;flex-shrink:0;}
@@ -450,8 +452,8 @@ export function run(settings) {
     .opd_api_sidebar_row[data-level="green"] .opd_api_sidebar_value{color:#16834a;}
     .opd_api_sidebar_row[data-level="amber"] .opd_api_sidebar_value{color:#b77909;}
     .opd_api_sidebar_row[data-level="red"] .opd_api_sidebar_value{color:#d33b36;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar{padding:8px 0;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_heading{display:block;text-align:center;font-size:9px;line-height:1.3;margin:0 2px 6px;overflow-wrap:anywhere;}
+    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar{padding:12px 0;}
+    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_heading{justify-content:center;text-align:center;font-size:9px;line-height:1.3;margin:0 2px 8px;overflow-wrap:anywhere;}
     #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_label{display:none;}
     #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_row{flex-direction:column;gap:3px;padding:7px 0;min-height:48px;}
     #api_limit_status_button .dsp_btn_label{
@@ -461,6 +463,12 @@ export function run(settings) {
         justify-content: center;
         padding: 0;
         gap: 0;
+    }
+    #opd_main_element.opd_sidebar_collapsed .dsp_btn_label{opacity:0;pointer-events:none;}
+    @media(prefers-reduced-motion:reduce){
+        #opd_main_element .dsp_btn_label,
+        #opd_main_element .dsp_column_draggable_false,
+        #opd_main_element{transition:none !important;}
     }
     #opd_main_element.opd_sidebar_collapsed .dsp_profile_section{
         align-items: center;
@@ -473,10 +481,11 @@ export function run(settings) {
     #opd_main_element.opd_sidebar_collapsed .opd_ui_logo_parent{
         justify-content: center;
         padding: 0;
-        min-height: 44px;
+        min-height: 52px;
     }
     #opd_main_element.opd_sidebar_collapsed .opd_language_select_wrap{
-        display: none;
+        visibility: hidden;
+        pointer-events: none;
     }
     #opd_main_element.opd_sidebar_collapsed .opd_debug_menu{
         display: none !important;
@@ -947,12 +956,12 @@ export function run(settings) {
         }
 
         & .dsp_column_settings_panel {
-            background: #2b3139;
+            background: var(--opd-surface);
             border: 1px solid #4f5a68;
         }
 
         & .dsp_column_settings_list {
-            background: #353d47;
+            background: transparent;
             border-color: #4f5a68;
         }
 
@@ -1135,6 +1144,7 @@ export function run(settings) {
         border-radius: 8px;
     }
     #opd_main_element .dsp_column_settings_panel{
+        background: var(--opd-surface);
         width: 100%;
         max-height: min(480px, 60dvh);
         overflow-y: auto;
@@ -1153,6 +1163,7 @@ export function run(settings) {
     #opd_main_element .dsp_column_settings_list{
         padding: 0;
         border: 0;
+        border-radius: 0;
         background: transparent;
     }
     #opd_main_element .dsp_column_settings_content_div{
@@ -1422,7 +1433,12 @@ export function run(settings) {
         chrome.storage.local.set(
             { opd_sidebar_collapsed: next_sidebar_state },
             function () {
-                apply_sidebar_collapsed_state(next_sidebar_state);
+                const contents = opd_main_element.querySelector<HTMLElement>(".main_bar_functions");
+                if (contents) {
+                    void animate_sidebar_change(contents, () => apply_sidebar_collapsed_state(next_sidebar_state));
+                } else {
+                    apply_sidebar_collapsed_state(next_sidebar_state);
+                }
             },
         );
     });
@@ -2589,6 +2605,7 @@ export function run(settings) {
                 .replaceAll("%column_auto_reload_time%", "10");
             if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
             add_target_column.scrollIntoView({
                 behavior: "smooth",
                 inline: "end",
@@ -2624,6 +2641,7 @@ export function run(settings) {
                 .replaceAll("%column_auto_reload_time%", "10");
             if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
             add_target_column.scrollIntoView({
                 behavior: "smooth",
                 inline: "end",
@@ -2659,6 +2677,7 @@ export function run(settings) {
                 .replaceAll("%column_auto_reload_time%", "10");
             if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
             add_target_column.scrollIntoView({
                 behavior: "smooth",
                 inline: "end",
@@ -2776,6 +2795,7 @@ export function run(settings) {
             .replaceAll("%column_auto_reload_ch%", "")
             .replaceAll("%column_auto_reload_time%", "10");
         add_target_column.insertAdjacentHTML("beforebegin", new_column);
+            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
         const inserted_column = document.querySelector(`#column_${column_id}`);
         const inserted_column_root = inserted_column?.querySelector(
             "div[opd_column_type='explore']",
