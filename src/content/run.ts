@@ -3139,6 +3139,10 @@ function run(settings) {
         column_width: string | null;
     };
     function column_settings_save(mode = "", profile_num = last_load_profile) {
+        const milliseconds_per_second = 1000;
+        const default_reload_seconds = 10;
+        const default_reload_time =
+            default_reload_seconds * milliseconds_per_second;
         const settings_array: {
             column_settings: SavedColumnSettings[];
             version: string;
@@ -3150,103 +3154,60 @@ function run(settings) {
             "#opd_main_element div[opd_column_type]",
         );
         for (let index = 0; index < columns.length; index++) {
-            const banner_checkbox =
-                columns[index].querySelector<HTMLInputElement>(".opd_banner");
-            const banner_checked = banner_checkbox?.checked == true;
-            let tw_view_type = "0";
-            let column_open_path = "";
-            let column_pinned_save_path = "";
-            let column_page_title: string | null = null;
-            let column_width_value: string | null = null;
-            let column_auto_reload: boolean | null = null;
-            let column_auto_reload_time = 10000;
-            if (
-                columns[index].querySelector(".opd_tw_view_mode")?.value !=
-                undefined
-            ) {
-                tw_view_type =
-                    columns[index].querySelector(".opd_tw_view_mode")?.value ??
-                    "0";
-            }
-            // Width setting.
-            if (columns[index].getAttribute("opd_column_width") != "null") {
-                //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_column_width"))
-                column_width_value =
-                    columns[index].getAttribute("opd_column_width");
-            }
-            // Explore-specific processing.
-            if (columns[index].getAttribute("opd_column_type") == "explore") {
-                //console.log(document.querySelectorAll("#opd_main_element div[opd_column_type]")[index].getAttribute("opd_explore_path"));
-                column_open_path =
-                    columns[index].getAttribute("opd_explore_path") ?? "";
-                // Pinned state.
-                column_pinned_save_path =
-                    columns[index].getAttribute("opd_pinned_path") ?? "";
-                // Title.
-                column_page_title =
-                    columns[index].getAttribute("opd_explore_title");
-            }
-            // Auto refresh.
-            if (
-                columns[index].getAttribute("opd_column_type") == "explore" ||
-                columns[index].getAttribute("opd_column_type") == "home"
-            ) {
-                const auto_reload_checkbox =
-                    columns[index].querySelector<HTMLInputElement>(
-                        ".opd_a_reload_bar",
-                    );
-                if (auto_reload_checkbox?.checked == true) {
-                    column_auto_reload = true;
-                } else {
-                    column_auto_reload = false;
-                }
-                const column_setting_time =
-                    Number(
-                        columns[index].querySelector<HTMLInputElement>(
-                            ".opd_a_reload_time_setting",
-                        )?.value ?? "10",
-                    ) * 1000;
-                //console.log(column_setting_time)
-                if (column_setting_time >= 1000) {
-                    column_auto_reload_time = column_setting_time;
-                } else {
-                    column_auto_reload_time = 10000;
-                }
-            }
-            settings_array["column_settings"].push({
-                type: columns[index].getAttribute("opd_column_type") ?? "",
-                banner: banner_checked,
-                tw_view_mode: tw_view_type,
-                column_save_path: column_open_path,
-                column_save_title: column_page_title,
-                column_pinned_path: column_pinned_save_path,
-                auto_reload: column_auto_reload,
-                auto_reload_time: column_auto_reload_time,
-                column_width: column_width_value,
+            const column = columns[index];
+            const column_type = column.getAttribute("opd_column_type") ?? "";
+            const is_explore = column_type == "explore";
+            const supports_reload = is_explore || column_type == "home";
+            const column_width = column.getAttribute("opd_column_width");
+            const reload_time = supports_reload
+                ? Number(
+                      column.querySelector<HTMLInputElement>(
+                          ".opd_a_reload_time_setting",
+                      )?.value ?? String(default_reload_seconds),
+                  ) * milliseconds_per_second
+                : default_reload_time;
+
+            settings_array.column_settings.push({
+                type: column_type,
+                banner:
+                    column.querySelector<HTMLInputElement>(".opd_banner")
+                        ?.checked == true,
+                tw_view_mode:
+                    column.querySelector<HTMLSelectElement>(".opd_tw_view_mode")
+                        ?.value ?? "0",
+                column_save_path: is_explore
+                    ? (column.getAttribute("opd_explore_path") ?? "")
+                    : "",
+                column_save_title: is_explore
+                    ? column.getAttribute("opd_explore_title")
+                    : null,
+                column_pinned_path: is_explore
+                    ? (column.getAttribute("opd_pinned_path") ?? "")
+                    : "",
+                auto_reload: supports_reload
+                    ? column.querySelector<HTMLInputElement>(
+                          ".opd_a_reload_bar",
+                      )?.checked == true
+                    : null,
+                auto_reload_time:
+                    reload_time >= milliseconds_per_second
+                        ? reload_time
+                        : default_reload_time,
+                column_width: column_width == "null" ? null : column_width,
             });
         }
         if (mode == "profile_out") {
             return settings_array;
-        } else {
-            //console.log(settings_array);
-            /*chrome.storage.local.set({'opd_settings': JSON.stringify(settings_array)}, function () {
-                console.log(settings_array);
-            });*/
-            const save_object = {
-                name: "user_profile",
-                profile: settings_array.column_settings,
-            };
-            //profile_store.push(save_object);
-            Object.assign(profile_store[profile_num], save_object);
-            //console.log(profile_store);
-            chrome.storage.local.set(
-                { opd_profile_store: JSON.stringify(profile_store) },
-                function () {
-                    //console.log(settings_array);
-                },
-            );
-            return null;
         }
+        Object.assign(profile_store[profile_num], {
+            name: "user_profile",
+            profile: settings_array.column_settings,
+        });
+        chrome.storage.local.set(
+            { opd_profile_store: JSON.stringify(profile_store) },
+            function () {},
+        );
+        return null;
     }
     // Create random ID.
     function create_random_id() {
