@@ -157,3 +157,7 @@ build/
 
 # Serena
 .serena/
+
+# WXT
+.wxt/
+.webext-chromium-profile/

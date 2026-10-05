@@ -1,4 +1,4 @@
-(() => {
+export function start_reload_guard() {
     const bypassKey = "opd_beforeunload_bypass_once";
     const rootThemeAttribute = "data-opd-theme";
     const preloadStyleId = "opd_preload_theme_style";
@@ -74,7 +74,7 @@ html[data-opd-theme="light"] body {
         systemDarkQuery.addEventListener("change", applyRootThemeMarker);
     }
 
-    window.addEventListener("beforeunload", (event) => {
+    const beforeUnload = (event: BeforeUnloadEvent) => {
         try {
             if (sessionStorage.getItem(bypassKey) === "1") {
                 sessionStorage.removeItem(bypassKey);
@@ -86,5 +86,10 @@ html[data-opd-theme="light"] body {
 
         event.preventDefault();
         event.returnValue = "";
-    });
-})();
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    return () => {
+        systemDarkQuery.removeEventListener("change", applyRootThemeMarker);
+        window.removeEventListener("beforeunload", beforeUnload);
+    };
+}

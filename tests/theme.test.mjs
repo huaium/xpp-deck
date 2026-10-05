@@ -10,6 +10,7 @@ function bootstrap(cookie, dark = false, storageThrows = false) {
     const attributes = {};
     const storage = new Map();
     let themeListener;
+    let cleanup;
     const context = {
         document: {
             cookie,
@@ -28,9 +29,15 @@ function bootstrap(cookie, dark = false, storageThrows = false) {
                 addEventListener: (_name, fn) => {
                     themeListener = fn;
                 },
+                removeEventListener: () => {
+                    themeListener = undefined;
+                },
             }),
             addEventListener: (name, fn) => {
                 listeners[name] = fn;
+            },
+            removeEventListener: (name) => {
+                delete listeners[name];
             },
         },
         sessionStorage: {
@@ -45,8 +52,11 @@ function bootstrap(cookie, dark = false, storageThrows = false) {
         new URL("../src/content/reload_guard.ts", import.meta.url),
         "utf8",
     );
-    vm.runInNewContext(transpile(source), context);
-    return { listeners, attributes, storage, themeListener };
+    cleanup = vm.runInNewContext(
+        transpile(source) + "\nstart_reload_guard();",
+        context,
+    );
+    return { listeners, attributes, storage, themeListener, cleanup };
 }
 
 test("bootstrap respects explicit cookie themes and falls back to system theme", () => {
@@ -135,4 +145,11 @@ test("theme follows system changes and removes the listener when an explicit the
     apply(element);
     assert.equal(root.get("data-opd-theme"), "dark");
     apply(null);
+});
+
+test("reload guard releases listeners when its WXT context is invalidated", () => {
+    const guard = bootstrap("");
+    assert.equal(typeof guard.listeners.beforeunload, "function");
+    guard.cleanup();
+    assert.equal(guard.listeners.beforeunload, undefined);
 });

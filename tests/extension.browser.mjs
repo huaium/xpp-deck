@@ -8,7 +8,7 @@ import { URL } from "node:url";
 
 const require = createRequire(import.meta.url);
 const playwright = require(process.env.PLAYWRIGHT_MODULE_PATH ?? "playwright");
-const directory = "build/web-ext-chromium-src/";
+const directory = ".output/chrome-mv3/";
 const browser = await playwright.chromium.launch({
     headless: true,
     ...(process.env.CHROMIUM_EXECUTABLE_PATH
@@ -89,13 +89,10 @@ try {
         };
     });
     await page.addScriptTag({
-        content: await readFile(
-            directory + "src/content/reload_guard.js",
-            "utf8",
-        ),
+        content: await readFile(directory + "content-scripts/guard.js", "utf8"),
     });
     await page.addScriptTag({
-        content: await readFile(directory + "src/content/index.js", "utf8"),
+        content: await readFile(directory + "content-scripts/deck.js", "utf8"),
     });
     await page.waitForFunction(
         () =>
@@ -162,6 +159,12 @@ try {
         "W",
     );
     await page.locator("#sidebar_fold_toggle").click();
+    await page.waitForFunction(
+        () =>
+            document
+                .querySelector("#userProfile-1 .dsp_btn_label")
+                .getBoundingClientRect().width === 0,
+    );
     assert.equal(
         await page
             .locator("#userProfile-1 .dsp_btn_label")

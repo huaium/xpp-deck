@@ -55,57 +55,64 @@ then click the **Add to Firefox** button to install it easily.
 
 ## Development
 
-Vite builds TypeScript modules into standalone classic-script bundles. The early
-reload guard, main content script, background script, popup, and two injected page
-helpers have separate entry points. Page helpers remain web-accessible resources
-and communicate with the content script through DOM events.
+WXT manages the Vite build, entrypoints, manifests, development browser runner,
+and packaging. Chrome uses Manifest V3; Firefox retains Manifest V2. The early
+reload guard runs at document start. Injected X-page helpers remain standalone
+classic scripts and communicate through DOM events.
 
-Use Node.js 22.13+ (or a supported newer release) and pnpm. TypeScript checks types
-separately; Vite handles transpilation and bundling.
+Use Node.js 22.13+ (or a supported newer release) and pnpm.
 
-### 1) Install dependencies
+### Install
 
-```
+```sh
 pnpm install
+pnpm run prepare
 ```
 
-### 2) Watch development in Firefox
+### Develop
 
+```sh
+pnpm run dev
+pnpm run dev:firefox
 ```
-pnpm run webext:dev
+
+Chrome development uses Chromium or Chrome for Testing. To select its executable:
+
+```sh
+CHROMIUM_BINARY="/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing" pnpm run dev
 ```
 
-Vite watches module dependencies, manifests, locale files, popup HTML, and public
-assets. Changes are debounced and synchronized only after successful builds;
-compilation errors leave the last working extension in place. `web-ext` reloads
-Firefox's extension after synchronization finishes. Refresh the X page manually
-to apply content-script changes; this is extension reload, not state-preserving
-HMR. Ctrl+C stops both the watcher and the browser runner.
+WXT opens the target browser and watches source files and public assets. Popup
+modules use Vite HMR. The existing deck is not state-preserving HMR: Chrome deck
+reinjection reloads the X page to avoid duplicate listeners, observers and timers.
+Firefox MV2 uses extension reload; refresh existing X pages after updates.
+Helper and background changes can also require an X-page refresh.
+Ctrl+C stops development. Type checking remains separate from watch transpilation.
 
-Watch mode transpiles without checking types on each save. Run `pnpm run typecheck`
-or `pnpm run lint` to check types. A changed Vite configuration requires restarting
-the development command.
+Development output is in `.output/chrome-mv3-dev/` and
+`.output/firefox-mv2-dev/`. Separate browser profiles retain logins.
+The existing `webext:dev` and `webext:dev:chromium` commands are aliases.
 
-### 3) Validate
+### Validate
 
-```
+```sh
 pnpm test
 pnpm run lint
+pnpm run test:watch
 pnpm run webext:lint
 ```
 
-### 4) Build and package
+### Build
 
-```
+```sh
+pnpm run build:bundle
 pnpm run build
 ```
 
-Browser-specific ZIPs are written to `build/package/`. Prepared extensions are in
-`build/web-ext-firefox-src/` and `build/web-ext-chromium-src/`; each contains the
-correct `manifest.json` and only runtime assets. `pnpm run build:bundle` prepares
-these directories without creating ZIPs. `build:ts` remains a compatibility alias
-for that command, but no longer emits the old `build/ts-out` tree.
+Production bundles are in `.output/chrome-mv3/` and `.output/firefox-mv2/`.
+WXT ZIP packages are written to `.output/`; the Firefox build also produces a
+source archive. `build:ts` and `webext:build` remain compatibility aliases.
 
-Obsolete generated files and `pnpm run webext:clean` use the `trash` command so
-deletions are recoverable. If `trash` is unavailable, cleanup stops rather than
-permanently deleting files.
+Previous build output is moved to Trash before WXT rebuilds it.
+`pnpm run webext:clean` moves generated output to Trash without deleting browser
+profiles. Cleanup stops if `trash` is unavailable or cannot access the files.

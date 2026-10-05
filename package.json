@@ -9,20 +9,24 @@
         "test:browser:loading": "node tests/loading.browser.mjs",
         "format": "prettier . --write",
         "format:check": "prettier . --check",
-        "typecheck": "tsc -p tsconfig.json",
+        "typecheck": "wxt prepare && tsc -p tsconfig.json",
         "build:ts": "pnpm run build:bundle",
         "lint": "pnpm run typecheck && eslint .",
         "lint:fix": "eslint . --fix",
-        "build": "pnpm run typecheck && node utils/package.mjs",
+        "build": "pnpm run typecheck && wxt zip -b chrome && wxt zip -b firefox --mv2",
         "build:win": "pnpm run build",
         "webext:prepare": "pnpm run build:bundle",
-        "webext:dev": "pnpm run typecheck && node utils/webext-dev.mjs",
-        "webext:lint": "pnpm run webext:prepare && web-ext lint --source-dir build/web-ext-firefox-src",
-        "webext:clean": "node utils/webext-clean.mjs",
-        "build:bundle": "pnpm run typecheck && node utils/build.mjs",
+        "webext:dev": "pnpm run dev:firefox",
+        "webext:lint": "pnpm run build:bundle && web-ext lint --source-dir .output/firefox-mv2 --no-config-discovery",
+        "webext:clean": "node utils/wxt-clean.mjs",
+        "build:bundle": "pnpm run typecheck && wxt build -b chrome && wxt build -b firefox --mv2",
         "webext:build": "pnpm run build",
-        "test:watch": "node tests/extension-watch.integration.mjs",
-        "test:browser:extension": "node tests/extension.browser.mjs"
+        "test:watch": "node tests/wxt-watch.integration.mjs",
+        "test:browser:extension": "node tests/extension.browser.mjs",
+        "dev": "wxt -b chrome",
+        "dev:firefox": "wxt -b firefox --mv2",
+        "webext:dev:chromium": "pnpm run dev",
+        "prepare": "wxt prepare"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
@@ -31,7 +35,8 @@
         "prettier": "^3.9.9",
         "typescript": "^7.0.2",
         "vite": "^8.3.2",
-        "web-ext": "latest"
+        "web-ext": "latest",
+        "wxt": "^0.21.4"
     },
     "packageManager": "pnpm@12.9.1+sha512.06b055fff5cd20dc12781de173ced3310ce0951bf2ec620211a16045d5444d5c93a663210764ef29a653a610459ba0368f0e74f84d80c54723cf95aae7bc0d6d"
 }

@@ -11,7 +11,7 @@ export class OpdExtAutoReload {
             const helper_script =
                 column_window.document.createElement("script");
             helper_script.src = chrome.runtime.getURL(
-                "src/extensions/auto_reload_helper.js",
+                "auto_reload_helper.js",
             );
             column_window.document.head.appendChild(helper_script);
 

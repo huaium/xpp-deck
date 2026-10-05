@@ -1,112 +1,104 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import fs from "node:fs/promises";
+import path from "node:path";
 import vm from "node:vm";
-import { URL } from "node:url";
-import { setTimeout } from "node:timers/promises";
-import { build } from "vite";
-import { extensionConfig, extensionEntries } from "../vite.config.mjs";
-import {
-    browserArtifacts,
-    createPublishQueue,
-} from "../utils/extension-build.mjs";
+import process from "node:process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath, URL } from "node:url";
 
-test("Vite produces standalone classic scripts and complete browser distributions", async () => {
-    const artifacts = [];
-    for (const name of Object.keys(extensionEntries)) {
-        const config = extensionConfig(name, {
-            onBundle: (output) => artifacts.push(...output),
-        });
-        config.logLevel = "silent";
-        await build(config);
-    }
-    for (const artifact of artifacts.filter((item) =>
-        item.fileName.endsWith(".js"),
-    )) {
-        assert.doesNotThrow(() => new vm.Script(artifact.source));
-        assert.doesNotMatch(artifact.source, /\bimport\s*\(/);
-    }
-    for (const browser of ["firefox", "chromium"]) {
-        const files = new Map(
-            browserArtifacts(artifacts, browser).map((item) => [
-                item.fileName,
-                item.source,
-            ]),
-        );
-        const manifest = JSON.parse(files.get("manifest.json"));
-        assert.equal(manifest.manifest_version, browser === "firefox" ? 2 : 3);
-        const scripts = manifest.content_scripts.flatMap((entry) => entry.js);
-        assert.deepEqual(scripts, [
-            "src/content/reload_guard.js",
-            "src/content/index.js",
+const execute = promisify(execFile);
+const cli = fileURLToPath(
+    new URL("../node_modules/wxt/bin/wxt.mjs", import.meta.url),
+);
+
+test("WXT builds complete Chrome MV3 and Firefox MV2 distributions", async () => {
+    for (const browser of ["chrome", "firefox"]) {
+        await execute(process.execPath, [
+            cli,
+            "build",
+            "-b",
+            browser,
+            ...(browser === "firefox" ? ["--mv2"] : []),
         ]);
+        const root =
+            ".output/" + browser + (browser === "firefox" ? "-mv2" : "-mv3");
+        const manifest = JSON.parse(
+            await fs.readFile(path.join(root, "manifest.json"), "utf8"),
+        );
+        assert.equal(manifest.manifest_version, browser === "firefox" ? 2 : 3);
+        assert.equal(manifest.version, "0.1.0");
+        assert.equal(
+            manifest.action?.default_popup ??
+                manifest.browser_action?.default_popup,
+            "popup.html",
+        );
+        const early = manifest.content_scripts.find(
+            (entry) => entry.run_at === "document_start",
+        );
+        const deck = manifest.content_scripts.find(
+            (entry) => entry.run_at === "document_idle",
+        );
+        assert.deepEqual(early.js, ["content-scripts/guard.js"]);
+        assert.deepEqual(deck.js, ["content-scripts/deck.js"]);
+        const background =
+            manifest.background.service_worker ??
+            manifest.background.scripts[0];
+        for (const file of [
+            ...early.js,
+            ...deck.js,
+            background,
+            "auto_reload_helper.js",
+            "media_viewer_block_helper.js",
+        ]) {
+            const source = await fs.readFile(path.join(root, file), "utf8");
+            assert.doesNotThrow(() => new vm.Script(source), file);
+            assert.doesNotMatch(source, /\bimport\s*\(/, file);
+        }
+        for (const locale of [
+            "en",
+            "ja",
+            "zh_CN",
+            "zh_TW",
+            "ko",
+            "es",
+            "fr",
+            "de",
+            "pt_BR",
+        ]) {
+            await fs.access(
+                path.join(root, "_locales", locale, "messages.json"),
+            );
+        }
+        for (const file of [
+            "icon.png",
+            "public/icons/column_close.svg",
+            "popup.html",
+            "LICENSE",
+            "LICENSE.original",
+        ]) {
+            await fs.access(path.join(root, file));
+        }
         const resources =
-            browser === "firefox"
+            manifest.manifest_version === 2
                 ? manifest.web_accessible_resources
                 : manifest.web_accessible_resources.flatMap(
                       (entry) => entry.resources,
                   );
-        for (const file of [
-            ...scripts,
-            ...resources,
-            "src/background.js",
-            "src/popup/popup.html",
-            "src/popup/popup.js",
-        ]) {
-            assert.ok(files.has(file), `Missing ${browser} resource ${file}`);
+        for (const resource of [
+            "auto_reload_helper.js",
+            "media_viewer_block_helper.js",
+            "public/icons/*.svg",
+            "_locales/*/messages.json",
+        ])
+            assert.ok(resources.includes(resource));
+        if (browser === "firefox") {
+            assert.equal(
+                manifest.browser_specific_settings.gecko.id,
+                "opd_release@kwdev",
+            );
+            assert.ok(manifest.permissions.includes("*://*.x.com/*"));
         }
-        assert.ok(files.has("_locales/en/messages.json"));
-        for (const locale of ["ja", "zh_CN", "zh_TW", "ko", "es", "fr", "de", "pt_BR"]) {
-            assert.ok(files.has(`_locales/${locale}/messages.json`));
-            assert.ok(resources.includes(`_locales/${locale}/messages.json`));
-        }
-        assert.ok(!files.has("package.json"));
-        assert.ok(!files.has("manifest_firefox.json"));
-        const context = {
-            URL,
-            console: { log() {} },
-            location: { href: "https://x.com/home" },
-            document: { addEventListener() {} },
-            window: { matchMedia: () => ({ matches: false }) },
-            chrome: {
-                runtime: { getManifest: () => ({ version: "1" }) },
-                storage: { local: { get(key, callback) { callback({}); } }, onChanged: { addListener() {} } },
-            },
-        };
-        assert.doesNotThrow(() =>
-            vm.runInNewContext(files.get("src/content/index.js"), context),
-        );
     }
-});
-
-test("watch publication is debounced and waits for successful builds of every entry", async () => {
-    const published = [];
-    const queue = createPublishQueue(
-        async (artifacts) => published.push(artifacts),
-        5,
-    );
-    const names = Object.keys(extensionEntries);
-    for (const name of names) {
-        queue.event(name, { code: "START" });
-        queue.output(name, [{ fileName: `${name}.js`, source: "good" }]);
-        queue.event(name, { code: "BUNDLE_END" });
-    }
-    queue.event(names[0], { code: "START" });
-    queue.event(names[0], { code: "ERROR" });
-    await setTimeout(30);
-    assert.equal(published.length, 0);
-    queue.event(names[0], { code: "START" });
-    queue.event(names[0], { code: "BUNDLE_END" });
-    await setTimeout(30);
-    assert.equal(published.length, 1);
-    assert.equal(published[0].length, names.length);
-    for (let i = 0; i < 3; i++) {
-        queue.event(names[0], { code: "START" });
-        queue.event(names[0], { code: "BUNDLE_END" });
-    }
-    await setTimeout(30);
-    assert.equal(published.length, 2);
-    queue.event(names[0], { code: "BUNDLE_END" });
-    await queue.close();
-    await setTimeout(30);
-    assert.equal(published.length, 2);
 });

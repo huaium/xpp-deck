@@ -1,4 +1,0 @@
-// Compatibility entry point; Vite now prepares both browser distributions.
-import { buildExtensions } from "./extension-build.mjs";
-
-await buildExtensions();

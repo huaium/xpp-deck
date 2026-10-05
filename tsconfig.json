@@ -14,8 +14,21 @@
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": false,
         "noImplicitThis": true,
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "noUncheckedIndexedAccess": false,
+        "types": ["vite/client"]
     },
-    "include": ["src/**/*.ts", "src/**/*.js", "src/types/**/*.d.ts"],
-    "exclude": ["build/**", "node_modules/**", ".webext-profile/**", "utils/**"]
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.js",
+        "src/types/**/*.d.ts",
+        "entrypoints/**/*.ts"
+    ],
+    "exclude": [
+        "build/**",
+        "node_modules/**",
+        ".webext-profile/**",
+        "utils/**"
+    ],
+    "extends": "./.wxt/tsconfig.json"
 }
