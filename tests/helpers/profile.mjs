@@ -30,6 +30,7 @@ export function profileHarness(confirmed, active = 1, count = 3) {
             },
         },
         opd_confirm: async () => confirmed,
+        open_opd_dialog: async () => String(active),
         opd_alert: async (message) => alerts.push(message),
         i18n_message: (key) => key,
         column_settings_save: () => ({

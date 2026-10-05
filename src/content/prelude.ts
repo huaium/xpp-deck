@@ -434,10 +434,12 @@ function open_opd_dialog({
     message,
     type,
     defaultValue,
+    choices,
 }: {
     message: string;
-    type: "alert" | "confirm" | "prompt";
+    type: "alert" | "confirm" | "prompt" | "select";
     defaultValue?: string;
+    choices?: { value: string; label: string }[];
 }) {
     return enqueue_opd_dialog(
         () =>
@@ -456,13 +458,28 @@ function open_opd_dialog({
                 message_elem.className = "opd_dialog_message";
                 message_elem.textContent = `${message}`;
                 dialog.appendChild(message_elem);
-                let prompt_input: HTMLInputElement | null = null;
+                let prompt_input: HTMLInputElement | HTMLSelectElement | null =
+                    null;
                 if (type == "prompt") {
                     prompt_input = document.createElement("input");
                     prompt_input.className = "opd_dialog_input";
                     prompt_input.type = "text";
                     prompt_input.value = defaultValue ?? "";
                     dialog.appendChild(prompt_input);
+                }
+                if (type == "select") {
+                    const select = document.createElement("select");
+                    select.className = "opd_dialog_input";
+                    select.setAttribute("aria-label", message);
+                    for (const choice of choices ?? []) {
+                        const option = document.createElement("option");
+                        option.value = choice.value;
+                        option.textContent = choice.label;
+                        select.appendChild(option);
+                    }
+                    select.value = defaultValue ?? choices?.[0]?.value ?? "";
+                    prompt_input = select;
+                    dialog.appendChild(select);
                 }
                 const action_row = document.createElement("div");
                 action_row.className = "opd_dialog_actions";
@@ -546,6 +563,12 @@ function open_opd_dialog({
                         event.stopPropagation();
                         finish(type == "confirm" ? false : null);
                     } else if (event.key == "Enter") {
+                        if (
+                            type == "select" &&
+                            document.activeElement == prompt_input
+                        ) {
+                            return;
+                        }
                         event.preventDefault();
                         event.stopPropagation();
                         if (
@@ -555,7 +578,7 @@ function open_opd_dialog({
                             finish(type == "confirm" ? false : null);
                         } else if (type == "confirm") {
                             finish(true);
-                        } else if (type == "prompt") {
+                        } else if (type == "prompt" || type == "select") {
                             finish(prompt_input?.value ?? "");
                         } else {
                             finish(undefined);
@@ -568,7 +591,7 @@ function open_opd_dialog({
                 ok_button.addEventListener("click", () => {
                     if (type == "confirm") {
                         finish(true);
-                    } else if (type == "prompt") {
+                    } else if (type == "prompt" || type == "select") {
                         finish(prompt_input?.value ?? "");
                     } else {
                         finish(undefined);
@@ -581,7 +604,9 @@ function open_opd_dialog({
                 }
                 if (prompt_input != null) {
                     prompt_input.focus();
-                    prompt_input.select();
+                    if (type == "prompt") {
+                        (prompt_input as HTMLInputElement).select();
+                    }
                 } else {
                     ok_button.focus();
                 }

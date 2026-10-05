@@ -2945,7 +2945,38 @@ function run(settings) {
                 return;
             }
 
-            const delete_num = last_load_profile;
+            const available_profiles = profile_store.slice();
+            const selected_profile = await open_opd_dialog({
+                type: "select",
+                message: i18n_message("ui_profile_delete_title"),
+                defaultValue: String(last_load_profile),
+                choices: available_profiles.map((_profile, index) => ({
+                    value: String(index),
+                    label: i18n_message("ui_profile_switch_label", [
+                        String(index + 1),
+                    ]),
+                })),
+            });
+            if (typeof selected_profile !== "string") {
+                return;
+            }
+            const selected_index = Number(selected_profile);
+            if (
+                !Number.isInteger(selected_index) ||
+                selected_index < 0 ||
+                selected_index >= available_profiles.length
+            ) {
+                return;
+            }
+            const selected_entry = available_profiles[selected_index];
+            let delete_num = profile_store.indexOf(selected_entry);
+            if (delete_num < 0) return;
+            if (profile_store.length <= 1) {
+                await opd_alert(
+                    i18n_message("msg_profile_delete_current_alert"),
+                );
+                return;
+            }
             if (
                 await opd_confirm(
                     i18n_message("msg_profile_delete_confirm", [
@@ -2953,10 +2984,14 @@ function run(settings) {
                     ]),
                 )
             ) {
-                let after_profile_num = delete_num - 1;
-                if (after_profile_num < 0) {
-                    after_profile_num = 0;
+                delete_num = profile_store.indexOf(selected_entry);
+                if (profile_store.length <= 1 || delete_num < 0) {
+                    return;
                 }
+                const after_profile_num =
+                    delete_num <= last_load_profile
+                        ? Math.max(0, last_load_profile - 1)
+                        : last_load_profile;
                 profile_store.splice(delete_num, 1);
                 chrome.storage.local.set(
                     { opd_profile_store: JSON.stringify(profile_store) },

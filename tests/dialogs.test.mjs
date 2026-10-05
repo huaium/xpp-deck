@@ -3,6 +3,43 @@ import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 import { dialogHarness } from "./helpers/dialog.mjs";
 
+test("selection dialogs submit the chosen option and allow native Enter navigation", async () => {
+    const h = dialogHarness();
+    const result = h.open({
+        type: "select",
+        message: "Delete Profile",
+        defaultValue: "0",
+        choices: [
+            { value: "0", label: "Profile 1" },
+            { value: "1", label: "Profile 2" },
+        ],
+    });
+    await Promise.resolve();
+    const [select, , ok] = h.controls();
+    assert.equal(h.document.activeElement, select);
+    assert.equal(select.children[1].textContent, "Profile 2");
+    assert.equal(h.key("Enter").prevented, undefined);
+    select.value = "1";
+    ok.click();
+    assert.equal(await result, "1");
+    assert.equal(h.document.activeElement, h.trigger);
+});
+
+test("selection dialogs cancel with Escape or Cancel without submitting", async () => {
+    for (const escape of [true, false]) {
+        const h = dialogHarness();
+        const result = h.open({
+            type: "select",
+            message: "Delete Profile",
+            choices: [{ value: "0", label: "Profile 1" }],
+        });
+        await Promise.resolve();
+        if (escape) h.key("Escape");
+        else h.controls()[1].click();
+        assert.equal(await result, null);
+    }
+});
+
 test("prompt selects its default input, submits edits, and restores focus", async () => {
     const h = dialogHarness();
     const result = h.open({
