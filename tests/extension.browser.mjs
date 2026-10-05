@@ -25,6 +25,9 @@ try {
         errors.push(error.message);
         console.error(error.message);
     });
+    page.on("console", (message) => {
+        if (message.type() === "error") errors.push(message.text());
+    });
     await context.route("https://x.com/**", async (route) => {
         const url = new URL(route.request().url());
         if (url.pathname.startsWith("/__extension__/")) {

@@ -351,16 +351,15 @@ export function run(settings) {
         display:grid;grid-template-columns:minmax(0,1fr) minmax(0,55%);gap:16px;align-items:center;
         margin:0;padding:6px 0;min-width:0;
     }
-    .opd_global_settings_controls select,
-    .opd_global_settings_controls .opd_language_select{
+    .opd_global_settings_controls wa-select{
         box-sizing:border-box;min-width:0;width:100%;min-height:40px;
-        border:1px solid #87919c;border-radius:8px;padding:0 40px 0 12px;
-        appearance:none;background-color:transparent;color:inherit;font:inherit;color-scheme:light;
+        border:0;padding:0;background-color:transparent;color:inherit;font:inherit;
     }
     .opd_dialog_theme_dark .opd_global_settings_controls select{
         color-scheme:dark;
     }
-    .opd_global_settings_controls .opd_language_select_label{font:inherit;padding:0;}
+    .opd_global_settings_controls .opd_language_select_wrap,
+    .opd_global_settings_controls .opd_language_select_label{color:inherit;font:inherit;padding:0;}
     .opd_global_settings_controls #second_rack{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:0 12px;border:1px solid #87919c;border-radius:8px;}
     .opd_global_settings_controls #second_rack .dsp_btn_icon_wrap{display:none;}
     .opd_global_settings_controls #second_rack .dsp_btn_label{font:inherit;color:inherit;}

@@ -12,6 +12,16 @@ import "@awesome.me/webawesome/dist/components/dialog/dialog.js";
 export function mount_webawesome_controls() {
     const upgrade = () => {
         for (const control of document.querySelectorAll<HTMLElement>(
+            ".dsp_column_settings_panel wa-input, .dsp_column_settings_panel wa-select, .dsp_column_settings_panel wa-checkbox",
+        )) {
+            if (!control.hasAttribute("aria-label")) {
+                const label = control
+                    .closest(".dsp_column_settings_content_div")
+                    ?.firstElementChild?.textContent?.trim();
+                if (label) control.setAttribute("aria-label", label);
+            }
+        }
+        for (const control of document.querySelectorAll<HTMLElement>(
             "#opd_main_element wa-button[title], #opd_main_element wa-checkbox[title]",
         )) {
             if (!control.hasAttribute("aria-label"))
