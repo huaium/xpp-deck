@@ -1143,6 +1143,22 @@ export function run(settings) {
         padding: 8px;
         font-weight: 500;
     }
+    #opd_main_element:not(.opd_sidebar_collapsed) .main_bar_functions{
+        padding-inline: 6px;
+    }
+    #opd_main_element:not(.opd_sidebar_collapsed) .opd_ui_logo_parent{
+        padding-inline: 0;
+        justify-content: space-evenly;
+        gap: 0;
+    }
+    .opd_ui_brand{display:flex;align-items:center;gap:0.75rem;}
+    #opd_main_element .opd_ui_logo_parent .opd_global_settings_button{margin-left:0;}
+    #opd_main_element:not(.opd_sidebar_collapsed) .dsp_btn_parent{
+        padding-inline: 10px;
+    }
+    #opd_main_element:not(.opd_sidebar_collapsed) .opd_api_sidebar{
+        padding-inline: 6px;
+    }
     #opd_main_element .main_bar_functions hr{
         border: 0;
         border-top: 1px solid var(--opd-border);
@@ -1475,7 +1491,15 @@ export function run(settings) {
     settings_icon.src = chrome.runtime.getURL(ui_icon_define.column_settings);
     settings_icon.alt = "";
     settings_button.appendChild(settings_icon);
-    document.querySelector(".opd_ui_logo_parent")?.appendChild(settings_button);
+    const logo_parent = document.querySelector(".opd_ui_logo_parent");
+    if (logo_parent) {
+        const brand = document.createElement("div");
+        brand.className = "opd_ui_brand";
+        for (const child of Array.from(logo_parent.children)) {
+            brand.appendChild(child);
+        }
+        logo_parent.append(brand, settings_button);
+    }
     settings_button.addEventListener("click", () => {
         void open_opd_dialog({
             type: "alert",
