@@ -230,6 +230,16 @@ function ensure_opd_dialog_style() {
         font-size: 14px;
         line-height: 1.5;
     }
+    .opd_api_cards{display:grid;gap:12px;margin:16px 0;}
+    .opd_api_card{border:1px solid #cbd5e1;border-radius:10px;padding:14px;background:linear-gradient(135deg,#f8fafc,#fff);}
+    .opd_api_heading{display:flex;justify-content:space-between;gap:12px;font-weight:700;}
+    .opd_api_detail{margin:8px 0 0;font-size:13px;opacity:.8;}
+    .opd_api_track{height:8px;margin-top:12px;border-radius:8px;background:#e2e8f0;overflow:hidden;}
+    .opd_api_fill{height:100%;background:#16834a;}
+    .opd_api_fill[data-level="amber"]{background:#b77909;}
+    .opd_api_fill[data-level="red"]{background:#d33b36;}
+    .opd_dialog_theme_dark .opd_api_card{border-color:#475569;background:linear-gradient(135deg,#243044,#1e293b);}
+    .opd_dialog_theme_dark .opd_api_track{background:#475569;}
     .opd_dialog_input{
         width: 100%;
         box-sizing: border-box;
@@ -468,11 +478,13 @@ export function open_opd_dialog({
     type,
     defaultValue,
     choices,
+    mount,
 }: {
     message: string;
     type: "alert" | "confirm" | "prompt" | "select";
     defaultValue?: string;
     choices?: { value: string; label: string }[];
+    mount?: (dialog: HTMLDivElement) => (() => void);
 }) {
     return enqueue_opd_dialog(
         () =>
@@ -491,6 +503,7 @@ export function open_opd_dialog({
                 message_elem.className = "opd_dialog_message";
                 message_elem.textContent = `${message}`;
                 dialog.appendChild(message_elem);
+                const cleanup_content = mount?.(dialog);
                 let prompt_input: HTMLInputElement | HTMLSelectElement | null =
                     null;
                 if (type == "prompt") {
@@ -550,6 +563,7 @@ export function open_opd_dialog({
                     );
 
                 const finish = (result: void | boolean | string | null) => {
+                    cleanup_content?.();
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
                     if (previous_active_element instanceof HTMLElement) {
@@ -819,6 +833,82 @@ document.addEventListener("keyup", (event) => {
 });
 // Watch storage updates (mainly for API rate-limit status).
 export let api_limit_obj: ApiAccessLimit | null = null;
+export function api_quota_state(value: ApiAccessLimit["search"] | undefined) {
+    if (value?.limit == null || value.remaining == null) return null;
+    const limit = Number(value.limit);
+    const remaining = Number(value.remaining);
+    if (!Number.isFinite(limit) || limit <= 0 || !Number.isFinite(remaining) || remaining < 0) return null;
+    const percentage = Math.min(100, Math.max(0, remaining / limit * 100));
+    return { limit, remaining, percentage, level: percentage > 50 ? "green" : percentage >= 20 ? "amber" : "red" };
+}
+export async function open_api_limits_dialog() {
+    await open_opd_dialog({
+        type: "alert",
+        message: i18n_message("ui_api_limits_title"),
+        mount: (dialog) => {
+            const description = document.createElement("p");
+            description.className = "opd_api_detail";
+            description.textContent = i18n_message("ui_api_limits_description");
+            dialog.appendChild(description);
+            const cards = document.createElement("div");
+            cards.className = "opd_api_cards";
+            dialog.appendChild(cards);
+            const render = () => {
+                cards.replaceChildren();
+                for (const [key, label] of [["time_line", "ui_api_following"], ["recommend_timeline", "ui_api_for_you"], ["search", "ui_api_search"]] as const) {
+                    const card = document.createElement("section");
+                    card.className = "opd_api_card";
+                    const heading = document.createElement("div");
+                    heading.className = "opd_api_heading";
+                    const name = document.createElement("span");
+                    name.textContent = i18n_message(label);
+                    const status = document.createElement("span");
+                    const value = api_limit_obj?.[key];
+                    const quota = api_quota_state(value);
+                    status.textContent = quota ? i18n_message("ui_api_percent_left", [String(Math.floor(quota.percentage))]) : i18n_message("ui_api_no_data");
+                    heading.append(name, status);
+                    card.appendChild(heading);
+                    if (quota) {
+                        const track = document.createElement("div");
+                        track.className = "opd_api_track";
+                        track.setAttribute("role", "progressbar");
+                        track.setAttribute("aria-label", i18n_message(label));
+                        track.setAttribute("aria-valuemin", "0");
+                        track.setAttribute("aria-valuemax", String(quota.limit));
+                        track.setAttribute("aria-valuenow", String(Math.min(quota.remaining, quota.limit)));
+                        const fill = document.createElement("div");
+                        fill.className = "opd_api_fill";
+                        fill.dataset.level = quota.level;
+                        fill.style.width = `${quota.percentage}%`;
+                        track.appendChild(fill);
+                        const detail = document.createElement("p");
+                        detail.className = "opd_api_detail";
+                        detail.textContent = i18n_message("ui_api_remaining", [quota.remaining.toLocaleString(), quota.limit.toLocaleString()]);
+                        card.append(track, detail);
+                        const reset = value?.reset_unix_time;
+                        const date = new Date(Number(reset) * 1000);
+                        if (reset != null && Number.isFinite(date.getTime())) {
+                            const time = document.createElement("p");
+                            time.className = "opd_api_detail";
+                            time.textContent = i18n_message("ui_api_reset", [date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })]);
+                            card.appendChild(time);
+                        }
+                    }
+                    cards.appendChild(card);
+                }
+            };
+            const listener = (changes: ChromeStorageChanges) => {
+                if (changes.api_access_limit) {
+                    api_limit_obj = (changes.api_access_limit.newValue ?? null) as ApiAccessLimit | null;
+                    render();
+                }
+            };
+            render();
+            chrome.storage.onChanged.addListener(listener);
+            return () => chrome.storage.onChanged.removeListener(listener);
+        },
+    });
+}
 export let api_limit_dsc_obj = {
     time_line: "",
     recommend_timeline: "",

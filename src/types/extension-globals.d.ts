@@ -64,6 +64,7 @@ interface Chrome {
     storage: {
         local: ChromeStorageArea;
         onChanged: {
+            removeListener(callback: (changes: ChromeStorageChanges, namespace: string) => void): void;
             addListener(
                 callback: (
                     changes: ChromeStorageChanges,

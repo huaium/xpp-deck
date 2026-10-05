@@ -210,7 +210,7 @@
         "message": "Corrupted settings data has been repaired.\nThe page will be reloaded."
     },
     "msg_api_limit_status_alert": {
-        "message": "Current API limits\nUsage (used/total) - reset time\n$1"
+        "message": "Current API limits\nTracks Following, For You, and Search.\nQuota (remaining/total) - reset time\n$1"
     },
     "msg_api_limit_status_title": {
         "message": "API usage\n$1"
@@ -310,5 +310,32 @@
     },
     "msg_profile_name_prompt": {
         "message": "Name this profile:"
+    },
+    "ui_api_limits_title": {
+        "message": "Current API Limits"
+    },
+    "ui_api_limits_description": {
+        "message": "Tracks Following, For You, and Search."
+    },
+    "ui_api_following": {
+        "message": "Following"
+    },
+    "ui_api_for_you": {
+        "message": "For You"
+    },
+    "ui_api_search": {
+        "message": "Search"
+    },
+    "ui_api_percent_left": {
+        "message": "$1% left"
+    },
+    "ui_api_no_data": {
+        "message": "No data yet"
+    },
+    "ui_api_remaining": {
+        "message": "$1 of $2 requests remaining"
+    },
+    "ui_api_reset": {
+        "message": "Resets at $1"
     }
 }

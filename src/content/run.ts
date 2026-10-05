@@ -1,6 +1,5 @@
 import {
-    api_limit_dsc_obj,
-    api_limit_obj,
+    open_api_limits_dialog,
     beforeunload_bypass_key,
     create_language_select_html,
     create_profile_list_buttons_html,
@@ -1488,13 +1487,7 @@ export function run(settings) {
     }
     // Used for API limit display.
     async function show_api_limit_status() {
-        if (api_limit_obj != null) {
-            await opd_alert(
-                i18n_message("msg_api_limit_status_alert", [
-                    `${api_limit_dsc_obj.time_line}${api_limit_dsc_obj.recommend_timeline}${api_limit_dsc_obj.search}`,
-                ]),
-            );
-        }
+        await open_api_limits_dialog();
     }
     const api_limit_status = document.querySelector("#api_limit_status");
     if (api_limit_status) {

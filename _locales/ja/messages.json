@@ -210,7 +210,7 @@
         "message": "破損した設定データの自動修復を行いました\n再読み込みします"
     },
     "msg_api_limit_status_alert": {
-        "message": "現在のAPIリミット状況\n回数(使用回数/総使用可能数)-完全回復時間\n$1"
+        "message": "現在のAPIリミット状況\nフォロー中・おすすめ・検索が対象です。\n回数(残り回数/総使用可能数)-完全回復時間\n$1"
     },
     "msg_api_limit_status_title": {
         "message": "API使用状況\n$1"
@@ -310,5 +310,32 @@
     },
     "msg_profile_name_prompt": {
         "message": "プロファイル名を入力してください:"
+    },
+    "ui_api_limits_title": {
+        "message": "現在のAPIリミット"
+    },
+    "ui_api_limits_description": {
+        "message": "フォロー中・おすすめ・検索が対象です。"
+    },
+    "ui_api_following": {
+        "message": "フォロー中"
+    },
+    "ui_api_for_you": {
+        "message": "おすすめ"
+    },
+    "ui_api_search": {
+        "message": "検索"
+    },
+    "ui_api_percent_left": {
+        "message": "残り$1%"
+    },
+    "ui_api_no_data": {
+        "message": "データなし"
+    },
+    "ui_api_remaining": {
+        "message": "$2回中、残り$1回"
+    },
+    "ui_api_reset": {
+        "message": "リセット時刻: $1"
     }
 }
