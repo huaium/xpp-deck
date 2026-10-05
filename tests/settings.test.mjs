@@ -44,7 +44,7 @@ test("initial setup persists a default profile before acknowledgement and reload
     assert.equal(writes.length, 2);
     const profiles = JSON.parse(writes[0].opd_profile_store);
     assert.equal(profiles.length, 1);
-    assert.equal(profiles[0].name, "default");
+    assert.equal(profiles[0].name, "ui_profile_switch_label");
     assert.ok(profiles[0].profile.some((column) => column.type === "home"));
     assert.ok(
         profiles[0].profile.every((column) => !("top_visible" in column)),

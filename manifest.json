@@ -12,24 +12,41 @@
         "*://*.twimg.com/*",
         "*://*.x.com/*"
     ],
-    "permissions": ["storage", "webRequest", "declarativeNetRequest"],
+    "permissions": [
+        "storage",
+        "webRequest",
+        "declarativeNetRequest"
+    ],
     "background": {
         "service_worker": "src/background.js"
     },
     "content_scripts": [
         {
-            "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
-            "js": ["src/content/reload_guard.js"],
+            "matches": [
+                "https://*.twitter.com/*",
+                "https://*.x.com/*"
+            ],
+            "js": [
+                "src/content/reload_guard.js"
+            ],
             "run_at": "document_start"
         },
         {
-            "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
-            "js": ["src/content/index.js"]
+            "matches": [
+                "https://*.twitter.com/*",
+                "https://*.x.com/*"
+            ],
+            "js": [
+                "src/content/index.js"
+            ]
         }
     ],
     "web_accessible_resources": [
         {
-            "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
+            "matches": [
+                "https://*.twitter.com/*",
+                "https://*.x.com/*"
+            ],
             "resources": [
                 "src/extensions/auto_reload_helper.js",
                 "src/extensions/media_viewer_block_helper.js",
@@ -58,7 +75,16 @@
                 "public/icons/forward.svg",
                 "public/icons/next.svg",
                 "public/icons/download.svg",
-                "public/icons/switch_theme.svg"
+                "public/icons/switch_theme.svg",
+                "_locales/en/messages.json",
+                "_locales/ja/messages.json",
+                "_locales/zh_CN/messages.json",
+                "_locales/zh_TW/messages.json",
+                "_locales/ko/messages.json",
+                "_locales/es/messages.json",
+                "_locales/fr/messages.json",
+                "_locales/de/messages.json",
+                "_locales/pt_BR/messages.json"
             ]
         }
     ],

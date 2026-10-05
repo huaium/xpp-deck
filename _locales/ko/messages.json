@@ -1,0 +1,362 @@
+{
+    "app_console_welcome": {
+        "message": "XPP-Deck에 오신 것을 환영합니다!"
+    },
+    "app_update": {
+        "message": "XPP-Deck이 업데이트되었습니다. 변경 사항을 볼까요?"
+    },
+    "ui_profile_switch_title": {
+        "message": "프로필 전환"
+    },
+    "ui_profile_switch_label": {
+        "message": "프로필 $1"
+    },
+    "ui_column_settings_title": {
+        "message": "열 설정"
+    },
+    "ui_column_banner_toggle_title": {
+        "message": "배너 표시 전환"
+    },
+    "ui_column_close_title": {
+        "message": "열 닫기"
+    },
+    "ui_column_refresh_title": {
+        "message": "열 새로 고침"
+    },
+    "ui_column_pin_toggle_title": {
+        "message": "위치 고정 전환"
+    },
+    "ui_sidebar_logo_title": {
+        "message": "XPP-Deck\nv$1"
+    },
+    "ui_sidebar_collapse_title": {
+        "message": "접기"
+    },
+    "ui_sidebar_collapse_label": {
+        "message": "접기"
+    },
+    "ui_sidebar_expand_title": {
+        "message": "사이드바 펼치기"
+    },
+    "ui_sidebar_expand_label": {
+        "message": "사이드바 펼치기"
+    },
+    "ui_add_post_column_title": {
+        "message": "게시물 추가"
+    },
+    "ui_add_timeline_column_title": {
+        "message": "타임라인 추가"
+    },
+    "ui_add_notification_column_title": {
+        "message": "알림 추가"
+    },
+    "ui_add_explore_column_title": {
+        "message": "탐색 추가"
+    },
+    "ui_add_custom_url_column_title": {
+        "message": "사용자 지정 URL 추가"
+    },
+    "ui_add_lists_column_title": {
+        "message": "리스트 추가"
+    },
+    "ui_toggle_second_rack_title": {
+        "message": "레이아웃 전환"
+    },
+    "ui_profile_save_title": {
+        "message": "프로필 저장"
+    },
+    "ui_profile_delete_title": {
+        "message": "프로필 삭제"
+    },
+    "ui_empty_column_message": {
+        "message": "왼쪽 사이드바에서 열을 추가하세요"
+    },
+    "ui_second_empty_column_message": {
+        "message": "첫 번째 행의 열을 여기에 배치할 수 있습니다"
+    },
+    "ui_column_post_title": {
+        "message": "게시물"
+    },
+    "ui_column_timeline_title": {
+        "message": "타임라인"
+    },
+    "ui_column_notifications_title": {
+        "message": "알림"
+    },
+    "ui_column_explore_title": {
+        "message": "탐색"
+    },
+    "ui_settings_header": {
+        "message": "설정"
+    },
+    "ui_settings_view_mode_label": {
+        "message": "보기 모드"
+    },
+    "ui_settings_view_mode_all": {
+        "message": "전체"
+    },
+    "ui_settings_view_mode_text_only": {
+        "message": "텍스트만"
+    },
+    "ui_settings_view_mode_media_only": {
+        "message": "미디어 포함만"
+    },
+    "ui_settings_column_width_label": {
+        "message": "열 너비"
+    },
+    "ui_settings_column_width_small": {
+        "message": "작게"
+    },
+    "ui_settings_column_width_medium": {
+        "message": "중간"
+    },
+    "ui_settings_column_width_large": {
+        "message": "크게"
+    },
+    "ui_settings_column_width_custom": {
+        "message": "사용자 지정"
+    },
+    "ui_settings_column_width_custom_label": {
+        "message": "사용자 지정 열 너비"
+    },
+    "ui_settings_column_width_custom_button": {
+        "message": "사용자 지정"
+    },
+    "ui_settings_auto_reload_label": {
+        "message": "자동 로드"
+    },
+    "ui_settings_auto_reload_interval_label": {
+        "message": "자동 로드 간격"
+    },
+    "ui_settings_seconds_suffix": {
+        "message": "초"
+    },
+    "ui_settings_close_button": {
+        "message": "설정 닫기"
+    },
+    "ui_debug_menu_label": {
+        "message": "디버그"
+    },
+    "ui_button_init_settings": {
+        "message": "초기화"
+    },
+    "ui_button_dnr_reload": {
+        "message": "dNR 다시 로드"
+    },
+    "ui_button_ext_reload": {
+        "message": "확장 프로그램 다시 로드"
+    },
+    "ui_button_api_label": {
+        "message": "API"
+    },
+    "ui_button_api_usage_label": {
+        "message": "API 사용량"
+    },
+    "ui_theme_switch_title": {
+        "message": "테마 전환"
+    },
+    "ui_theme_switch_label": {
+        "message": "테마 전환"
+    },
+    "ui_language_selector_title": {
+        "message": "언어"
+    },
+    "ui_language_selector_label": {
+        "message": "언어"
+    },
+    "ui_language_option_system": {
+        "message": "브라우저 언어 따르기"
+    },
+    "ui_language_option_english": {
+        "message": "영어"
+    },
+    "ui_language_option_japanese": {
+        "message": "일본어"
+    },
+    "ui_about_title": {
+        "message": "정보"
+    },
+    "ui_about_original_dev_label": {
+        "message": "원 개발자"
+    },
+    "ui_about_version_label": {
+        "message": "버전"
+    },
+    "ui_about_github_label": {
+        "message": "GitHub"
+    },
+    "ui_about_changelog_label": {
+        "message": "변경 기록"
+    },
+    "ui_about_releases_label": {
+        "message": "릴리스"
+    },
+    "ui_dialog_ok_button": {
+        "message": "확인"
+    },
+    "ui_dialog_cancel_button": {
+        "message": "취소"
+    },
+    "msg_debug_menu_enabled": {
+        "message": "디버그 메뉴가 활성화되었습니다!"
+    },
+    "msg_profile_data_broken_confirm": {
+        "message": "프로필 데이터가 손상되었습니다.\n확인을 눌러 초기화하세요.\n취소를 누르면 초기화하지 않고 계속합니다."
+    },
+    "msg_profile_init_completed": {
+        "message": "초기화가 완료되었습니다."
+    },
+    "msg_settings_auto_repair": {
+        "message": "손상된 설정 데이터를 복구했습니다.\n페이지를 다시 로드합니다."
+    },
+    "msg_api_limit_status_alert": {
+        "message": "현재 API 한도\n팔로잉, 추천, 검색을 추적합니다.\n할당량(남은 횟수/총횟수) - 초기화 시간\n$1"
+    },
+    "msg_api_limit_status_title": {
+        "message": "API 사용량\n$1"
+    },
+    "msg_profile_load_confirm": {
+        "message": "프로필 \"$1\"을 불러올까요?\n열 레이아웃\n$2"
+    },
+    "msg_second_rack_to_single_confirm": {
+        "message": "한 행 레이아웃으로 전환합니다.\n두 번째 행의 모든 열이 닫힙니다."
+    },
+    "msg_dnr_reload_confirm": {
+        "message": "declarativeNetRequest 규칙을 다시 로드할까요?"
+    },
+    "msg_extension_reload_confirm": {
+        "message": "확장 프로그램을 다시 로드할까요?"
+    },
+    "msg_profile_save_confirm": {
+        "message": "현재 레이아웃으로 프로필을 만들까요?"
+    },
+    "msg_column_width_prompt": {
+        "message": "열 너비를 rem 단위로 입력하세요(숫자만).\n참고: 작게 15 / 중간 20 / 크게 30 / 기본 30\n11 이하의 값은 사용할 수 없습니다."
+    },
+    "msg_custom_x_url_prompt": {
+        "message": "X/Twitter URL 또는 경로를 입력하세요.\n예:\nhttps://x.com/i/bookmarks\nhttps://twitter.com/home\n/i/bookmarks"
+    },
+    "msg_invalid_value_alert": {
+        "message": "유효한 값을 입력하세요."
+    },
+    "msg_username_not_found_alert": {
+        "message": "사용자 이름을 찾을 수 없습니다. 프로필을 한 번 연 후 다시 시도하세요."
+    },
+    "msg_auto_reload_set": {
+        "message": "자동 로드 간격을 $1초로 설정했습니다."
+    },
+    "msg_auto_reload_minimum_alert": {
+        "message": "1초 이상의 값을 입력하세요."
+    },
+    "msg_settings_reset_completed": {
+        "message": "설정이 초기화되었습니다. 페이지를 다시 로드하세요."
+    },
+    "msg_profile_delete_confirm": {
+        "message": "프로필 \"$1\"을 삭제할까요?"
+    },
+    "msg_profile_delete_current_alert": {
+        "message": "프로필이 하나뿐이므로 삭제할 수 없습니다."
+    },
+    "msg_explore_pin_confirm": {
+        "message": "이 위치를 고정할까요?\n\n다시 로드하거나 이 프로필을 열면 열이 현재 URL에서 시작합니다. 다른 페이지를 탐색할 수 있으며 열의 위치는 잠기지 않습니다."
+    },
+    "msg_explore_unpin_confirm": {
+        "message": "이 위치의 고정을 해제할까요?"
+    },
+    "msg_column_close_confirm": {
+        "message": "이 열을 닫을까요?"
+    },
+    "msg_pinned_column_close_confirm": {
+        "message": "이 열은 고정되어 있습니다.\n열을 닫을까요?"
+    },
+    "msg_initial_setup_completed_prototype": {
+        "message": "초기 설정이 완료되었습니다.\nXPP-Deck 프로토타입에 오신 것을 환영합니다!"
+    },
+    "msg_initial_setup_completed": {
+        "message": "초기 설정이 완료되었습니다!\nXPP-Deck에 오신 것을 환영합니다!"
+    },
+    "msg_profile_desc_post_column": {
+        "message": "$1-게시물 열"
+    },
+    "msg_profile_desc_timeline_column": {
+        "message": "$1-타임라인 열"
+    },
+    "msg_profile_desc_notification_column": {
+        "message": "$1-알림 열"
+    },
+    "msg_profile_desc_explore_column": {
+        "message": "$1-[$2]-범용(탐색) 열"
+    },
+    "msg_profile_desc_misskey_column": {
+        "message": "Misskey 열"
+    },
+    "msg_profile_desc_bluesky_column": {
+        "message": "Bluesky 열"
+    },
+    "msg_profile_desc_first_row_end": {
+        "message": "<!-첫 번째 행 끝-!>"
+    },
+    "msg_profile_desc_second_row_end": {
+        "message": "<!-두 번째 행 끝-!>"
+    },
+    "label_api_timeline": {
+        "message": "타임라인:"
+    },
+    "label_api_recommend_timeline": {
+        "message": "타임라인(추천):"
+    },
+    "label_api_search": {
+        "message": "검색:"
+    },
+    "msg_profile_name_prompt": {
+        "message": "프로필 이름:"
+    },
+    "msg_custom_column_title_prompt": {
+        "message": "열 이름:"
+    },
+    "ui_api_limits_title": {
+        "message": "현재 API 한도"
+    },
+    "ui_api_limits_description": {
+        "message": "팔로잉, 추천, 검색을 추적합니다.\n이 API 한도는 X가 설정합니다."
+    },
+    "ui_api_following": {
+        "message": "팔로잉"
+    },
+    "ui_api_for_you": {
+        "message": "추천"
+    },
+    "ui_api_search": {
+        "message": "검색"
+    },
+    "ui_api_percent_left": {
+        "message": "$1% 남음"
+    },
+    "ui_api_no_data": {
+        "message": "아직 데이터 없음"
+    },
+    "ui_api_remaining": {
+        "message": "총 $2회 중 $1회 요청 가능"
+    },
+    "ui_api_reset": {
+        "message": "초기화 시간: $1"
+    },
+    "ui_column_lists_title": {
+        "message": "리스트"
+    },
+    "ui_column_custom_title": {
+        "message": "사용자 지정"
+    },
+    "ui_column_rename": {
+        "message": "열 이름 변경"
+    },
+    "ui_column_waiting": {
+        "message": "로드 대기 중"
+    },
+    "ui_column_loading": {
+        "message": "로드 중..."
+    },
+    "msg_column_move_browser_update": {
+        "message": "새로 고침 없이 열을 이동하려면 브라우저를 업데이트하세요."
+    }
+}

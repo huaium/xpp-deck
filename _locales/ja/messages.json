@@ -66,7 +66,7 @@
         "message": "プロファイル保存"
     },
     "ui_profile_delete_title": {
-        "message": "プロファイル削除"
+        "message": "プロファイルを削除"
     },
     "ui_empty_column_message": {
         "message": "左のバーからカラムを追加"
@@ -340,5 +340,23 @@
     },
     "ui_api_reset": {
         "message": "リセット時刻: $1"
+    },
+    "ui_column_lists_title": {
+        "message": "リスト"
+    },
+    "ui_column_custom_title": {
+        "message": "カスタム"
+    },
+    "ui_column_rename": {
+        "message": "カラム名を変更"
+    },
+    "ui_column_waiting": {
+        "message": "読み込み待ち"
+    },
+    "ui_column_loading": {
+        "message": "読み込み中..."
+    },
+    "msg_column_move_browser_update": {
+        "message": "カラムを再読み込みせずに移動するには、ブラウザーを更新してください。"
     }
 }

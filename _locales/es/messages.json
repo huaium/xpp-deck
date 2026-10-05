@@ -1,0 +1,362 @@
+{
+    "app_console_welcome": {
+        "message": "¡Bienvenido a XPP-Deck!"
+    },
+    "app_update": {
+        "message": "XPP-Deck se ha actualizado. ¿Ver las novedades?"
+    },
+    "ui_profile_switch_title": {
+        "message": "Cambiar perfil"
+    },
+    "ui_profile_switch_label": {
+        "message": "Perfil $1"
+    },
+    "ui_column_settings_title": {
+        "message": "Ajustes de columna"
+    },
+    "ui_column_banner_toggle_title": {
+        "message": "Mostrar u ocultar el banner"
+    },
+    "ui_column_close_title": {
+        "message": "Cerrar columna"
+    },
+    "ui_column_refresh_title": {
+        "message": "Actualizar columna"
+    },
+    "ui_column_pin_toggle_title": {
+        "message": "Fijar o desfijar ubicación"
+    },
+    "ui_sidebar_logo_title": {
+        "message": "XPP-Deck\nv$1"
+    },
+    "ui_sidebar_collapse_title": {
+        "message": "Contraer"
+    },
+    "ui_sidebar_collapse_label": {
+        "message": "Contraer"
+    },
+    "ui_sidebar_expand_title": {
+        "message": "Expandir barra lateral"
+    },
+    "ui_sidebar_expand_label": {
+        "message": "Expandir barra lateral"
+    },
+    "ui_add_post_column_title": {
+        "message": "Añadir publicación"
+    },
+    "ui_add_timeline_column_title": {
+        "message": "Añadir cronología"
+    },
+    "ui_add_notification_column_title": {
+        "message": "Añadir notificaciones"
+    },
+    "ui_add_explore_column_title": {
+        "message": "Añadir Explorar"
+    },
+    "ui_add_custom_url_column_title": {
+        "message": "Añadir URL personalizada"
+    },
+    "ui_add_lists_column_title": {
+        "message": "Añadir listas"
+    },
+    "ui_toggle_second_rack_title": {
+        "message": "Cambiar diseño"
+    },
+    "ui_profile_save_title": {
+        "message": "Guardar perfil"
+    },
+    "ui_profile_delete_title": {
+        "message": "Eliminar perfil"
+    },
+    "ui_empty_column_message": {
+        "message": "Añade una columna desde la barra izquierda"
+    },
+    "ui_second_empty_column_message": {
+        "message": "Puedes colocar aquí columnas de la primera fila"
+    },
+    "ui_column_post_title": {
+        "message": "Publicación"
+    },
+    "ui_column_timeline_title": {
+        "message": "Cronología"
+    },
+    "ui_column_notifications_title": {
+        "message": "Notificaciones"
+    },
+    "ui_column_explore_title": {
+        "message": "Explorar"
+    },
+    "ui_settings_header": {
+        "message": "Ajustes"
+    },
+    "ui_settings_view_mode_label": {
+        "message": "Modo de vista"
+    },
+    "ui_settings_view_mode_all": {
+        "message": "Todo"
+    },
+    "ui_settings_view_mode_text_only": {
+        "message": "Solo texto"
+    },
+    "ui_settings_view_mode_media_only": {
+        "message": "Solo con contenido multimedia"
+    },
+    "ui_settings_column_width_label": {
+        "message": "Ancho de columna"
+    },
+    "ui_settings_column_width_small": {
+        "message": "Pequeño"
+    },
+    "ui_settings_column_width_medium": {
+        "message": "Mediano"
+    },
+    "ui_settings_column_width_large": {
+        "message": "Grande"
+    },
+    "ui_settings_column_width_custom": {
+        "message": "Personalizado"
+    },
+    "ui_settings_column_width_custom_label": {
+        "message": "Ancho personalizado"
+    },
+    "ui_settings_column_width_custom_button": {
+        "message": "Personalizado"
+    },
+    "ui_settings_auto_reload_label": {
+        "message": "Carga automática"
+    },
+    "ui_settings_auto_reload_interval_label": {
+        "message": "Intervalo de carga automática"
+    },
+    "ui_settings_seconds_suffix": {
+        "message": "s"
+    },
+    "ui_settings_close_button": {
+        "message": "Cerrar ajustes"
+    },
+    "ui_debug_menu_label": {
+        "message": "Depuración"
+    },
+    "ui_button_init_settings": {
+        "message": "Restablecer"
+    },
+    "ui_button_dnr_reload": {
+        "message": "Recargar dNR"
+    },
+    "ui_button_ext_reload": {
+        "message": "Recargar extensión"
+    },
+    "ui_button_api_label": {
+        "message": "API"
+    },
+    "ui_button_api_usage_label": {
+        "message": "Uso de API"
+    },
+    "ui_theme_switch_title": {
+        "message": "Cambiar tema"
+    },
+    "ui_theme_switch_label": {
+        "message": "Cambiar tema"
+    },
+    "ui_language_selector_title": {
+        "message": "Idioma"
+    },
+    "ui_language_selector_label": {
+        "message": "Idioma"
+    },
+    "ui_language_option_system": {
+        "message": "Idioma del navegador"
+    },
+    "ui_language_option_english": {
+        "message": "Inglés"
+    },
+    "ui_language_option_japanese": {
+        "message": "Japonés"
+    },
+    "ui_about_title": {
+        "message": "Acerca de"
+    },
+    "ui_about_original_dev_label": {
+        "message": "Desarrollador original"
+    },
+    "ui_about_version_label": {
+        "message": "Versión"
+    },
+    "ui_about_github_label": {
+        "message": "GitHub"
+    },
+    "ui_about_changelog_label": {
+        "message": "Historial de cambios"
+    },
+    "ui_about_releases_label": {
+        "message": "Versiones"
+    },
+    "ui_dialog_ok_button": {
+        "message": "Aceptar"
+    },
+    "ui_dialog_cancel_button": {
+        "message": "Cancelar"
+    },
+    "msg_debug_menu_enabled": {
+        "message": "¡Menú de depuración activado!"
+    },
+    "msg_profile_data_broken_confirm": {
+        "message": "Los datos del perfil están dañados.\nPulsa Aceptar para inicializar.\nPulsa Cancelar para continuar sin inicializar."
+    },
+    "msg_profile_init_completed": {
+        "message": "Inicialización completada."
+    },
+    "msg_settings_auto_repair": {
+        "message": "Se han reparado los ajustes dañados.\nLa página se recargará."
+    },
+    "msg_api_limit_status_alert": {
+        "message": "Límites actuales de API\nSeguimiento de Siguiendo, Para ti y Búsqueda.\nCuota (restante/total) - hora de restablecimiento\n$1"
+    },
+    "msg_api_limit_status_title": {
+        "message": "Uso de API\n$1"
+    },
+    "msg_profile_load_confirm": {
+        "message": "¿Cargar el perfil \"$1\"?\nDiseño de columnas\n$2"
+    },
+    "msg_second_rack_to_single_confirm": {
+        "message": "Cambiar a una sola fila.\nSe cerrarán todas las columnas de la segunda fila."
+    },
+    "msg_dnr_reload_confirm": {
+        "message": "¿Recargar las reglas declarativeNetRequest?"
+    },
+    "msg_extension_reload_confirm": {
+        "message": "¿Recargar la extensión?"
+    },
+    "msg_profile_save_confirm": {
+        "message": "¿Crear un perfil con el diseño actual?"
+    },
+    "msg_column_width_prompt": {
+        "message": "Introduce el ancho en rem (solo números).\nGuía: pequeño 15 / mediano 20 / grande 30 / predeterminado 30\nEl valor debe ser mayor que 11."
+    },
+    "msg_custom_x_url_prompt": {
+        "message": "Introduce una URL o ruta de X/Twitter.\nEjemplos:\nhttps://x.com/i/bookmarks\nhttps://twitter.com/home\n/i/bookmarks"
+    },
+    "msg_invalid_value_alert": {
+        "message": "Introduce un valor válido."
+    },
+    "msg_username_not_found_alert": {
+        "message": "No se pudo detectar tu nombre de usuario. Abre tu perfil y vuelve a intentarlo."
+    },
+    "msg_auto_reload_set": {
+        "message": "Intervalo de carga automática: $1 segundos."
+    },
+    "msg_auto_reload_minimum_alert": {
+        "message": "Introduce un valor de al menos 1 segundo."
+    },
+    "msg_settings_reset_completed": {
+        "message": "Se han restablecido los ajustes. Recarga la página."
+    },
+    "msg_profile_delete_confirm": {
+        "message": "¿Eliminar el perfil \"$1\"?"
+    },
+    "msg_profile_delete_current_alert": {
+        "message": "No se puede eliminar el único perfil existente."
+    },
+    "msg_explore_pin_confirm": {
+        "message": "¿Fijar esta ubicación?\n\nAl recargar o abrir este perfil, la columna comenzará en la URL actual. Puedes seguir navegando; la posición de la columna no se bloquea."
+    },
+    "msg_explore_unpin_confirm": {
+        "message": "¿Desfijar esta ubicación?"
+    },
+    "msg_column_close_confirm": {
+        "message": "¿Cerrar esta columna?"
+    },
+    "msg_pinned_column_close_confirm": {
+        "message": "Esta columna está fijada.\n¿Cerrar la columna?"
+    },
+    "msg_initial_setup_completed_prototype": {
+        "message": "Configuración inicial completada.\n¡Bienvenido al prototipo de XPP-Deck!"
+    },
+    "msg_initial_setup_completed": {
+        "message": "¡Configuración inicial completada!\n¡Bienvenido a XPP-Deck!"
+    },
+    "msg_profile_desc_post_column": {
+        "message": "$1-Columna de publicación"
+    },
+    "msg_profile_desc_timeline_column": {
+        "message": "$1-Columna de cronología"
+    },
+    "msg_profile_desc_notification_column": {
+        "message": "$1-Columna de notificaciones"
+    },
+    "msg_profile_desc_explore_column": {
+        "message": "$1-[$2]-Columna universal (Explorar)"
+    },
+    "msg_profile_desc_misskey_column": {
+        "message": "Columna de Misskey"
+    },
+    "msg_profile_desc_bluesky_column": {
+        "message": "Columna de Bluesky"
+    },
+    "msg_profile_desc_first_row_end": {
+        "message": "<!-Fin de la primera fila-!>"
+    },
+    "msg_profile_desc_second_row_end": {
+        "message": "<!-Fin de la segunda fila-!>"
+    },
+    "label_api_timeline": {
+        "message": "Cronología:"
+    },
+    "label_api_recommend_timeline": {
+        "message": "Cronología (Para ti):"
+    },
+    "label_api_search": {
+        "message": "Búsqueda:"
+    },
+    "msg_profile_name_prompt": {
+        "message": "Nombre del perfil:"
+    },
+    "msg_custom_column_title_prompt": {
+        "message": "Nombre de la columna:"
+    },
+    "ui_api_limits_title": {
+        "message": "Límites actuales de API"
+    },
+    "ui_api_limits_description": {
+        "message": "Seguimiento de Siguiendo, Para ti y Búsqueda.\nX establece estos límites de API."
+    },
+    "ui_api_following": {
+        "message": "Siguiendo"
+    },
+    "ui_api_for_you": {
+        "message": "Para ti"
+    },
+    "ui_api_search": {
+        "message": "Búsqueda"
+    },
+    "ui_api_percent_left": {
+        "message": "$1% restante"
+    },
+    "ui_api_no_data": {
+        "message": "Aún no hay datos"
+    },
+    "ui_api_remaining": {
+        "message": "Quedan $1 de $2 solicitudes"
+    },
+    "ui_api_reset": {
+        "message": "Se restablece a las $1"
+    },
+    "ui_column_lists_title": {
+        "message": "Listas"
+    },
+    "ui_column_custom_title": {
+        "message": "Personalizada"
+    },
+    "ui_column_rename": {
+        "message": "Renombrar columna"
+    },
+    "ui_column_waiting": {
+        "message": "Esperando para cargar"
+    },
+    "ui_column_loading": {
+        "message": "Cargando..."
+    },
+    "msg_column_move_browser_update": {
+        "message": "Actualiza el navegador para mover columnas sin recargarlas."
+    }
+}

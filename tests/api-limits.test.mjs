@@ -36,6 +36,7 @@ test("API cards show unknown data, update live, and release their listener", asy
     const { open_api_limits_dialog } = loadFunctions("../src/content/prelude.ts", ["api_quota_state", "open_api_limits_dialog", "api_icon_path"], "let api_limit_obj = null;", {
         document: { createElement: () => new Element(), createElementNS: () => new Element() },
         i18n_message: (key, values = []) => `${key}:${values.join("/")}`,
+        formatting_locale: () => "en-US",
         open_opd_dialog: (options) => { cleanup = options.mount(dialog); },
         chrome: { storage: { onChanged: {
             addListener: (value) => { listener = value; },

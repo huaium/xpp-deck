@@ -8,15 +8,25 @@ function names(globals = {}) {
         "../src/content/prelude.ts",
         [
             "profile_display_name",
+            "default_profile_name",
             "next_profile_name",
             "escape_profile_name",
             "create_profile_button_html",
             "create_profile_list_buttons_html",
         ],
         "",
-        globals,
+        { i18n_message: () => "", ...globals },
     );
 }
+
+test("localized defaults avoid collisions without renaming user profiles", () => {
+    const { next_profile_name, profile_display_name } = names({
+        i18n_message: (key, values) => `配置 ${values[0]}`,
+    });
+    const profiles = [{ name: "配置 1" }, { name: "Work" }];
+    assert.equal(next_profile_name(profiles), "配置 2");
+    assert.equal(profile_display_name(profiles[1], 1), "Work");
+});
 
 test("default profile names choose the first unused number", () => {
     const { next_profile_name } = names();

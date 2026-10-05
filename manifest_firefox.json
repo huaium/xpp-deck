@@ -45,10 +45,21 @@
         "public/icons/forward.svg",
         "public/icons/next.svg",
         "public/icons/download.svg",
-        "public/icons/switch_theme.svg"
+        "public/icons/switch_theme.svg",
+        "_locales/en/messages.json",
+        "_locales/ja/messages.json",
+        "_locales/zh_CN/messages.json",
+        "_locales/zh_TW/messages.json",
+        "_locales/ko/messages.json",
+        "_locales/es/messages.json",
+        "_locales/fr/messages.json",
+        "_locales/de/messages.json",
+        "_locales/pt_BR/messages.json"
     ],
     "background": {
-        "scripts": ["src/background.js"]
+        "scripts": [
+            "src/background.js"
+        ]
     },
     "permissions": [
         "storage",
@@ -60,13 +71,23 @@
     ],
     "content_scripts": [
         {
-            "matches": ["https://twitter.com/*", "https://x.com/*"],
-            "js": ["src/content/reload_guard.js"],
+            "matches": [
+                "https://twitter.com/*",
+                "https://x.com/*"
+            ],
+            "js": [
+                "src/content/reload_guard.js"
+            ],
             "run_at": "document_start"
         },
         {
-            "matches": ["https://twitter.com/*", "https://x.com/*"],
-            "js": ["src/content/index.js"]
+            "matches": [
+                "https://twitter.com/*",
+                "https://x.com/*"
+            ],
+            "js": [
+                "src/content/index.js"
+            ]
         }
     ],
     "browser_action": {

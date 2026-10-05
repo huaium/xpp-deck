@@ -15,7 +15,19 @@ export const opd_root_theme_attribute =
     opd_bootstrap.rootThemeAttribute || "data-opd-theme";
 type I18nOverrideMessages = Record<string, { message?: string }>;
 let opd_i18n_override_messages: I18nOverrideMessages | null = null;
+let opd_english_messages: I18nOverrideMessages = {};
 export let opd_i18n_language = "browser";
+export const supported_languages = { en: "English", ja: "日本語", zh_CN: "简体中文", zh_TW: "繁體中文", ko: "한국어", es: "Español", fr: "Français", de: "Deutsch", pt_BR: "Português (Brasil)" };
+export function resolve_language(language: string) {
+    const tag = language.replaceAll("_", "-").toLowerCase();
+    if (tag.startsWith("zh")) return /(?:tw|hk|mo|hant)/.test(tag) ? "zh_TW" : "zh_CN";
+    if (tag.startsWith("pt")) return "pt_BR";
+    const base = tag.split("-")[0];
+    return Object.hasOwn(supported_languages, base) ? base : "en";
+}
+export function formatting_locale() {
+    return opd_i18n_language === "browser" ? navigator.language : opd_i18n_language.replaceAll("_", "-");
+}
 function normalize_i18n_substitutions(
     substitutions?: string | string[] | null,
 ) {
@@ -50,7 +62,8 @@ export function i18n_message(
     if (typeof override_message === "string") {
         return apply_i18n_substitutions(override_message, substitutions);
     }
-    return chrome.i18n.getMessage(message_name, substitutions);
+    const fallback = opd_english_messages[message_name]?.message;
+    return typeof fallback === "string" ? apply_i18n_substitutions(fallback, substitutions) : chrome.i18n.getMessage(message_name, substitutions);
 }
 function get_storage_local_async(
     key: string,
@@ -68,15 +81,14 @@ async function initialize_i18n_override() {
         typeof language_setting_record.opd_language_override === "string"
             ? language_setting_record.opd_language_override
             : "browser";
-    opd_i18n_language = selected_language;
-    if (selected_language === "browser") {
-        opd_i18n_override_messages = null;
-        return;
-    }
+    opd_i18n_language = selected_language === "browser" ? "browser" : resolve_language(selected_language);
+    const locale = resolve_language(selected_language === "browser" ? navigator.language : selected_language);
     try {
+        const english = await fetch(chrome.runtime.getURL("_locales/en/messages.json"));
+        if (english.ok) opd_english_messages = await english.json();
         const response = await fetch(
             chrome.runtime.getURL(
-                `_locales/${selected_language}/messages.json`,
+                `_locales/${locale}/messages.json`,
             ),
         );
         if (!response.ok) {
@@ -184,13 +196,16 @@ export function create_sidebar_button_html(id, title, icon_class, label) {
 }
 export function profile_display_name(profile, index: number): string {
     const name = typeof profile?.name === "string" ? profile.name.trim() : "";
-    return name || `Profile ${index + 1}`;
+    return name || default_profile_name(index + 1);
+}
+function default_profile_name(number: number) {
+    return i18n_message("ui_profile_switch_label", [String(number)]) || `Profile ${number}`;
 }
 export function next_profile_name(profiles): string {
     const names = new Set(profiles.map(profile_display_name));
     let number = 1;
-    while (names.has(`Profile ${number}`)) number++;
-    return `Profile ${number}`;
+    while (names.has(default_profile_name(number))) number++;
+    return default_profile_name(number);
 }
 function escape_profile_name(value: string): string {
     return value.replace(
@@ -233,7 +248,8 @@ export function create_profile_list_html(
     return `<div class="dsp_profile_section"><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length, current_profile_index)}</div></div></div>`;
 }
 export function create_language_select_html() {
-    return `<div class="opd_language_select_wrap" title="${i18n_message_or_fallback("ui_language_selector_title", "Language")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message_or_fallback("ui_language_selector_label", "Language")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_system", "System")}</option><option value="en" ${opd_i18n_language === "en" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_english", "English")}</option><option value="ja" ${opd_i18n_language === "ja" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_japanese", "Japanese")}</option></select></div>`;
+    const options = Object.entries(supported_languages).map(([code, name]) => `<option value="${code}" ${opd_i18n_language === code ? "selected" : ""}>${name}</option>`).join("");
+    return `<div class="opd_language_select_wrap" title="${i18n_message("ui_language_selector_title")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message("ui_language_selector_label")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message("ui_language_option_system")}</option>${options}</select></div>`;
 }
 export function i18n_message_or_fallback(
     message_id: string,
@@ -898,7 +914,7 @@ export async function open_about_page_modal() {
 // Convert UNIX timestamp to local time string.
 function unix_time_mmss(input) {
     const date = new Date(input * 1000);
-    return date.toLocaleTimeString();
+    return date.toLocaleTimeString(formatting_locale());
 }
 // Track whether the Shift key is pressed for shortcuts.
 document.addEventListener("keydown", (event) => {
@@ -1001,14 +1017,14 @@ export async function open_api_limits_dialog() {
                         track.appendChild(fill);
                         const detail = document.createElement("p");
                         detail.className = "opd_api_detail";
-                        detail.textContent = i18n_message("ui_api_remaining", [quota.remaining.toLocaleString(), quota.limit.toLocaleString()]);
+                        detail.textContent = i18n_message("ui_api_remaining", [quota.remaining.toLocaleString(formatting_locale()), quota.limit.toLocaleString(formatting_locale())]);
                         card.append(track, detail);
                         const reset = value?.reset_unix_time;
                         const date = new Date(Number(reset) * 1000);
                         if (reset != null && Number.isFinite(date.getTime())) {
                             const time = document.createElement("p");
                             time.className = "opd_api_detail";
-                            time.textContent = i18n_message("ui_api_reset", [date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })]);
+                            time.textContent = i18n_message("ui_api_reset", [date.toLocaleTimeString(formatting_locale(), { hour: "numeric", minute: "2-digit" })]);
                             card.appendChild(time);
                         }
                     }

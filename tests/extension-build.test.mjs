@@ -55,6 +55,10 @@ test("Vite produces standalone classic scripts and complete browser distribution
             assert.ok(files.has(file), `Missing ${browser} resource ${file}`);
         }
         assert.ok(files.has("_locales/en/messages.json"));
+        for (const locale of ["ja", "zh_CN", "zh_TW", "ko", "es", "fr", "de", "pt_BR"]) {
+            assert.ok(files.has(`_locales/${locale}/messages.json`));
+            assert.ok(resources.includes(`_locales/${locale}/messages.json`));
+        }
         assert.ok(!files.has("package.json"));
         assert.ok(!files.has("manifest_firefox.json"));
         const context = {

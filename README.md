@@ -18,6 +18,12 @@
 **If you use Firefox ESR115 (including ESR-based builds), Tweet Type Display Mode does not work.  
 This is because ESR does not support the CSS selectors used by this extension.**
 
+## Languages
+The sidebar language selector supports English, Japanese, Simplified Chinese,
+Traditional Chinese, Korean, Spanish, French, German, and Brazilian Portuguese.
+It follows the browser language by default and falls back to English.
+Changing the extension language does not change embedded X pages or user-entered names.
+
 ## Screenshots
 
 <img width="960" alt="image" src="https://github.com/kawa-nobu/Open-Deck/assets/44832116/0970c89f-d099-4d8e-ac84-54037d8c9868">  

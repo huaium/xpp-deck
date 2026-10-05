@@ -340,5 +340,23 @@
     },
     "ui_api_reset": {
         "message": "Resets at $1"
+    },
+    "ui_column_lists_title": {
+        "message": "Lists"
+    },
+    "ui_column_custom_title": {
+        "message": "Custom"
+    },
+    "ui_column_rename": {
+        "message": "Rename column"
+    },
+    "ui_column_waiting": {
+        "message": "Waiting to load"
+    },
+    "ui_column_loading": {
+        "message": "Loading..."
+    },
+    "msg_column_move_browser_update": {
+        "message": "Please update your browser to move columns without refreshing them."
     }
 }
