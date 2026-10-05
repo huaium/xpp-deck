@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { defineConfig } from "wxt";
-import { trashPaths } from "./utils/trash.mjs";
 
 const matches = ["https://*.twitter.com/*", "https://*.x.com/*"];
 export default defineConfig({
@@ -67,10 +66,6 @@ export default defineConfig({
                     ? ".wxt-profiles/firefox"
                     : ".wxt-profiles/chrome";
             await fs.mkdir(path.resolve(profile), { recursive: true });
-        },
-        // WXT cleans its output after this hook; preserve previous output first.
-        "build:before": async (wxt) => {
-            await trashPaths([wxt.config.outDir]);
         },
         "build:publicAssets": async (_, assets) => {
             for (const asset of assets) {

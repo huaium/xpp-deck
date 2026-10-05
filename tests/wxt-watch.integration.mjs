@@ -5,7 +5,6 @@ import os from "node:os";
 import console from "node:console";
 import { setTimeout } from "node:timers/promises";
 import { createServer } from "wxt";
-import { trashPaths } from "../utils/trash.mjs";
 
 const fixture = await fs.mkdtemp(path.join(os.tmpdir(), "xpp-wxt-watch-"));
 let server;
@@ -22,7 +21,6 @@ try {
         "src",
         "entrypoints",
         "public",
-        "utils/trash.mjs",
         "wxt.config.mjs",
         "package.json",
         "LICENSE",
@@ -85,5 +83,5 @@ try {
     );
 } finally {
     await server?.stop();
-    await trashPaths([fixture]);
+    await fs.rm(fixture, { recursive: true, force: true });
 }

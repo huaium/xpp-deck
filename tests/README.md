@@ -17,7 +17,7 @@ The behavior suite also builds all six Vite entry points, checks classic-script
 syntax and manifest resource paths, and tests coordinated watch publication.
 Run `pnpm run test:watch` for native filesystem watcher integration in an isolated
 temporary project. It checks syntax-error recovery, asset additions/deletions,
-and shutdown; cleanup uses `trash`.
+and shutdown; temporary fixtures are removed automatically.
 
 Run `pnpm run test:browser:extension` after `pnpm run build:bundle` to exercise the
 actual bundled deck in Chromium with local X-page fixtures. It checks module

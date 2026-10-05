@@ -31,14 +31,6 @@ jobs:
             - name: Install Dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Set Up Recoverable Build Cleanup
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install --yes trash-cli
-                  mkdir -p "$RUNNER_TEMP/bin"
-                  ln -s "$(command -v trash-put)" "$RUNNER_TEMP/bin/trash"
-                  echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-
             - name: Validate and Package With WXT
               run: |
                   pnpm run lint

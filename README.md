@@ -114,9 +114,8 @@ Production bundles are in `.output/chrome-mv3/` and `.output/firefox-mv2/`.
 WXT ZIP packages are written to `.output/`; the Firefox build also produces a
 source archive.
 
-Previous build output is moved to Trash before WXT rebuilds it.
-`pnpm run clean` moves generated output to Trash without deleting browser
-profiles. Cleanup stops if `trash` is unavailable or cannot access the files.
+WXT manages build output cleanup automatically.
+`pnpm run clean` removes generated output without deleting browser profiles.
 
 WXT uses `web-ext` internally to launch development browsers. The dependency
 and WXT-native `webExt` runner options are retained for automatic browser startup;
