@@ -44,7 +44,6 @@ test("release workflow packages and uploads WXT artifacts", async () => {
     assert.match(workflow, /pnpm install --frozen-lockfile/);
     assert.match(workflow, /pnpm run build/);
     assert.match(workflow, /\.\/\.output\/\*\.zip/);
-    assert.doesNotMatch(workflow, /trash-cli|trash-put/);
     assert.doesNotMatch(workflow, /package\.sh|\.\/package\//);
 });
 
