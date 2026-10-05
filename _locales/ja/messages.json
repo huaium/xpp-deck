@@ -311,6 +311,9 @@
     "msg_profile_name_prompt": {
         "message": "プロファイル名を入力してください:"
     },
+    "msg_custom_column_title_prompt": {
+        "message": "カラム名を入力してください:"
+    },
     "ui_api_limits_title": {
         "message": "現在のAPIリミット"
     },

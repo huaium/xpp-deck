@@ -2400,7 +2400,7 @@ export function run(settings) {
         }
         queue_column_frames();
     }
-    // Monitor URL and page title changes.
+    // Track navigation without changing the user-facing column title.
     function mutate_url(element) {
         let exp_object = element.querySelector("iframe");
         exp_object.addEventListener("load", function () {
@@ -2412,19 +2412,12 @@ export function run(settings) {
                     let exp_url = new URL(
                         exp_object.contentWindow.location.href,
                     );
-                    let exp_title =
-                        exp_object.contentWindow.document.title.replace(
-                            " / X",
-                            "",
-                        );
                     //console.log(`${exp_url.pathname}${exp_url.search}`);
                     element.setAttribute(
                         "opd_explore_path",
                         `${exp_url.pathname}${exp_url.search}`,
                     );
                     exp_old_url = exp_object.contentWindow.location.href;
-                    element.setAttribute("opd_explore_title", exp_title);
-                    //console.log(exp_title);
                     column_settings_save("", last_load_profile);
                 }
             });
@@ -2773,6 +2766,7 @@ export function run(settings) {
             ".dsp_column_title .dsp_column_move_icon_parent span:last-child",
         );
         if (inserted_column_root != null) {
+            inserted_column_root.setAttribute("opd_custom_title", column_title);
             inserted_column_root.setAttribute(
                 "opd_explore_title",
                 column_title,
@@ -2815,7 +2809,17 @@ export function run(settings) {
                 await opd_alert(i18n_message("msg_invalid_value_alert"));
                 return;
             }
-            add_explore_column_with_path(custom_path, "Custom");
+            const requested_title = await opd_prompt(
+                i18n_message("msg_custom_column_title_prompt"),
+                "Custom",
+            );
+            if (requested_title == null) return;
+            const column_title = requested_title.trim();
+            if (!column_title) {
+                await opd_alert(i18n_message("msg_invalid_value_alert"));
+                return;
+            }
+            add_explore_column_with_path(custom_path, column_title);
         });
     }
     // Add your Lists column.

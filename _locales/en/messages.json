@@ -311,6 +311,9 @@
     "msg_profile_name_prompt": {
         "message": "Name this profile:"
     },
+    "msg_custom_column_title_prompt": {
+        "message": "Name this column:"
+    },
     "ui_api_limits_title": {
         "message": "Current API Limits"
     },
