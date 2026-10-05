@@ -41,9 +41,9 @@ export function mount_webawesome_controls() {
                 content.querySelector(".opd_dialog_message, .opd_about_title")
                     ?.textContent ?? "XPP-Deck";
             // Existing controllers own queue resolution and exit animations.
-            modal.addEventListener("wa-hide", (event) =>
-                event.preventDefault(),
-            );
+            modal.addEventListener("wa-hide", (event) => {
+                if (event.target === modal) event.preventDefault();
+            });
             modal.appendChild(content);
             overlay.appendChild(modal);
             modal.open = true;

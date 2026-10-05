@@ -253,6 +253,16 @@ try {
     assert.ok(Math.abs(themeBounds.width - layoutBounds.width) < 1);
     assert.ok(Math.abs(themeBounds.x - languageBounds.x) < 1);
     assert.ok(Math.abs(themeBounds.width - languageBounds.width) < 1);
+    const languageSelect = globalSettings.locator("#opd_language_select");
+    await languageSelect.click();
+    await page.waitForFunction(
+        () => document.querySelector("#opd_language_select").open,
+    );
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(
+        () => !document.querySelector("#opd_language_select").open,
+    );
+    assert.equal(await globalSettings.isVisible(), true);
     await page.locator("wa-button.opd_dialog_primary").click();
     await globalSettings.waitFor({ state: "detached" });
     await page.locator("wa-button.opd_global_settings_button").click();
