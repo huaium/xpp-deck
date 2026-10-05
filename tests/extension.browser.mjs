@@ -253,6 +253,12 @@ try {
     assert.ok(Math.abs(themeBounds.width - layoutBounds.width) < 1);
     assert.ok(Math.abs(themeBounds.x - languageBounds.x) < 1);
     assert.ok(Math.abs(themeBounds.width - languageBounds.width) < 1);
+    assert.ok(
+        Math.abs(
+            (layoutBounds.y - themeBounds.y - themeBounds.height) -
+                (languageBounds.y - layoutBounds.y - layoutBounds.height),
+        ) < 1,
+    );
     const languageSelect = globalSettings.locator("#opd_language_select");
     await languageSelect.click();
     await page.waitForFunction(

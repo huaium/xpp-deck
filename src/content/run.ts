@@ -336,7 +336,7 @@ export function run(settings) {
     .opd_dialog_theme_dark .opd_global_settings_controls select{
         color-scheme:dark;
     }
-    .opd_global_settings_controls .opd_language_select_wrap,
+    .opd_global_settings_controls .opd_language_select_wrap{color:inherit;font:inherit;}
     .opd_global_settings_controls .opd_language_select_label{color:inherit;font:inherit;padding:0;}
     .opd_global_settings_controls #second_rack{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:0 12px;border:1px solid #87919c;border-radius:8px;}
     .opd_global_settings_controls #second_rack .dsp_btn_icon_wrap{display:none;}
