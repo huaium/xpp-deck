@@ -318,7 +318,7 @@
         "message": "Current API Limits"
     },
     "ui_api_limits_description": {
-        "message": "Tracks Following, For You, and Search."
+        "message": "Tracks Following, For You, and Search.\nThese API limits are set by X."
     },
     "ui_api_following": {
         "message": "Following"

@@ -318,7 +318,7 @@
         "message": "現在のAPIリミット"
     },
     "ui_api_limits_description": {
-        "message": "フォロー中・おすすめ・検索が対象です。"
+        "message": "フォロー中・おすすめ・検索が対象です。\nAPIの利用制限はXが設定しています。"
     },
     "ui_api_following": {
         "message": "フォロー中"

@@ -875,6 +875,7 @@ export async function open_api_limits_dialog() {
         mount: (dialog) => {
             const description = document.createElement("p");
             description.className = "opd_api_detail";
+            description.style.whiteSpace = "pre-line";
             description.textContent = i18n_message("ui_api_limits_description");
             dialog.appendChild(description);
             const cards = document.createElement("div");
