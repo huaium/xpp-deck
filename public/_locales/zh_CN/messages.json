@@ -1,4 +1,13 @@
 {
+    "ui_column_copy_link_title": {
+        "message": "复制链接"
+    },
+    "ui_column_link_copied": {
+        "message": "链接已复制"
+    },
+    "msg_column_copy_link_failed": {
+        "message": "无法复制链接，请重试。"
+    },
     "app_console_welcome": {
         "message": "欢迎使用 XPP-Deck！"
     },
@@ -238,6 +247,9 @@
     },
     "msg_explore_unpin_confirm": {
         "message": "取消固定此位置？"
+    },
+    "msg_column_add_confirm": {
+        "message": "确认$1？"
     },
     "msg_column_close_confirm": {
         "message": "关闭此栏目？"

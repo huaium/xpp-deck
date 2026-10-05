@@ -742,6 +742,13 @@ export function run(settings) {
     .dsp_column_refresh_btn:hover{
         cursor: pointer;
     }
+    .dsp_column_copy_link_btn{
+        display:block;
+        width:22px;
+        height:22px;
+        background:url(${chrome.runtime.getURL("public/icons/copy_link.svg")}) center / contain no-repeat;
+        cursor:pointer;
+    }
     .dsp_column_refresh_btn input{
         display: none;
     }
@@ -1332,7 +1339,7 @@ export function run(settings) {
     );
     // Create and insert column elements.
     let default_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_settings_btn opd_ui_icon_color opd_settings_btn" title="${i18n_message("ui_column_settings_title")}"></wa-button></span><span class="dsp_column_btn"><wa-checkbox class="opd_banner" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%></wa-checkbox><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span>`;
-    let refresh_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_refresh_btn opd_ui_icon_color column_refresh_btn" title="${i18n_message("ui_column_refresh_title")}"></wa-button></span>`;
+    let refresh_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_refresh_btn opd_ui_icon_color column_refresh_btn" title="${i18n_message("ui_column_refresh_title")}"></wa-button></span><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_copy_link_btn opd_ui_icon_color" title="${i18n_message("ui_column_copy_link_title")}"></wa-button></span>`;
     let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><wa-select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><wa-option value="0">${i18n_message("ui_settings_view_mode_all")}</wa-option><wa-option value="1">${i18n_message("ui_settings_view_mode_text_only")}</wa-option><wa-option value="2">${i18n_message("ui_settings_view_mode_media_only")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><wa-select class="opd_column_size_preset"><wa-option value="0">${i18n_message("ui_settings_column_width_small")}</wa-option><wa-option value="1">${i18n_message("ui_settings_column_width_medium")}</wa-option><wa-option value="2">${i18n_message("ui_settings_column_width_large")}</wa-option><wa-option value="3">${i18n_message("ui_settings_column_width_custom")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><wa-button class="column_width_btn">${i18n_message("ui_settings_column_width_custom_button")}</wa-button></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><wa-checkbox class="opd_a_reload_bar" %column_auto_reload_ch%></wa-checkbox></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><wa-input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%"></wa-input>${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><wa-button class="dsp_column_settings_panel_close_btn">${i18n_message("ui_settings_close_button")}</wa-button></div></div></div>`;
     let default_element = {
         /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" opd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
@@ -2831,7 +2838,15 @@ export function run(settings) {
     // TODO: Simplify the column-addition flow.
     const add_post_btn = document.getElementById("add_post");
     if (add_post_btn) {
-        add_post_btn.addEventListener("click", function () {
+        add_post_btn.addEventListener("click", async function () {
+            if (
+                !(await opd_confirm(
+                    i18n_message("msg_column_add_confirm", [
+                        i18n_message("ui_add_post_column_title"),
+                    ]),
+                ))
+            )
+                return;
             const empty_column = document.querySelector(
                 ".dsp_column_emptycolumn",
             );
@@ -2871,7 +2886,15 @@ export function run(settings) {
     // Add Timeline column.
     const add_timeline_btn = document.getElementById("add_timeline");
     if (add_timeline_btn) {
-        add_timeline_btn.addEventListener("click", function () {
+        add_timeline_btn.addEventListener("click", async function () {
+            if (
+                !(await opd_confirm(
+                    i18n_message("msg_column_add_confirm", [
+                        i18n_message("ui_add_timeline_column_title"),
+                    ]),
+                ))
+            )
+                return;
             const empty_column = document.querySelector(
                 ".dsp_column_emptycolumn",
             );
@@ -2911,7 +2934,15 @@ export function run(settings) {
     // Add Notification column.
     const add_notify_btn = document.getElementById("add_notify");
     if (add_notify_btn) {
-        add_notify_btn.addEventListener("click", function () {
+        add_notify_btn.addEventListener("click", async function () {
+            if (
+                !(await opd_confirm(
+                    i18n_message("msg_column_add_confirm", [
+                        i18n_message("ui_add_notification_column_title"),
+                    ]),
+                ))
+            )
+                return;
             const empty_column = document.querySelector(
                 ".dsp_column_emptycolumn",
             );
@@ -3089,7 +3120,15 @@ export function run(settings) {
     // Add Explore (universal) column.
     const add_explore_button = document.getElementById("add_explore");
     if (add_explore_button) {
-        add_explore_button.addEventListener("click", function () {
+        add_explore_button.addEventListener("click", async function () {
+            if (
+                !(await opd_confirm(
+                    i18n_message("msg_column_add_confirm", [
+                        i18n_message("ui_add_explore_column_title"),
+                    ]),
+                ))
+            )
+                return;
             add_explore_column_with_path("/explore");
         });
     }
@@ -3125,6 +3164,14 @@ export function run(settings) {
     const add_lists_button = document.getElementById("add_lists");
     if (add_lists_button) {
         add_lists_button.addEventListener("click", async function () {
+            if (
+                !(await opd_confirm(
+                    i18n_message("msg_column_add_confirm", [
+                        i18n_message("ui_add_lists_column_title"),
+                    ]),
+                ))
+            )
+                return;
             const username = get_current_x_username();
             if (username == null) {
                 await opd_alert(i18n_message("msg_username_not_found_alert"));
@@ -3574,7 +3621,32 @@ export function run(settings) {
         }
     }
     // Close column.
+    function bind_column_copy_links() {
+        for (const button of document.querySelectorAll<WaButton>(
+            ".dsp_column_copy_link_btn",
+        )) {
+            if (button.hasAttribute("opd_copy_link_bound")) continue;
+            button.setAttribute("opd_copy_link_bound", "");
+            button.addEventListener("click", async () => {
+                try {
+                    const frame = button
+                        .closest("div[opd_column_type]")
+                        ?.querySelector("iframe");
+                    const url = frame?.contentWindow?.location.href;
+                    if (!url || url === "about:blank")
+                        throw new Error("Column has no active page");
+                    await navigator.clipboard.writeText(url);
+                    await opd_alert(i18n_message("ui_column_link_copied"));
+                } catch {
+                    await opd_alert(
+                        i18n_message("msg_column_copy_link_failed"),
+                    );
+                }
+            });
+        }
+    }
     function column_close() {
+        bind_column_copy_links();
         const close_buttons = document.querySelectorAll(".column_close_btn");
         for (let index = 0; index < close_buttons.length; index++) {
             if (close_buttons[index].hasAttribute("opd_close_bound")) continue;

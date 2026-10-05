@@ -1,4 +1,13 @@
 {
+    "ui_column_copy_link_title": {
+        "message": "リンクをコピー"
+    },
+    "ui_column_link_copied": {
+        "message": "リンクをコピーしました"
+    },
+    "msg_column_copy_link_failed": {
+        "message": "リンクをコピーできませんでした。もう一度お試しください。"
+    },
     "app_console_welcome": {
         "message": "XPP-Deckへようこそ！"
     },
@@ -238,6 +247,9 @@
     },
     "msg_explore_unpin_confirm": {
         "message": "ピン止めを解除します"
+    },
+    "msg_column_add_confirm": {
+        "message": "「$1」を実行しますか?"
     },
     "msg_column_close_confirm": {
         "message": "このカラムを閉じますか？"

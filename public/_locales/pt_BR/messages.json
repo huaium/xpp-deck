@@ -1,4 +1,13 @@
 {
+    "ui_column_copy_link_title": {
+        "message": "Copiar link"
+    },
+    "ui_column_link_copied": {
+        "message": "Link copiado"
+    },
+    "msg_column_copy_link_failed": {
+        "message": "Não foi possível copiar o link. Tente novamente."
+    },
     "app_console_welcome": {
         "message": "Bem-vindo ao XPP-Deck!"
     },
@@ -238,6 +247,9 @@
     },
     "msg_explore_unpin_confirm": {
         "message": "Desafixar esta localização?"
+    },
+    "msg_column_add_confirm": {
+        "message": "$1?"
     },
     "msg_column_close_confirm": {
         "message": "Fechar esta coluna?"

@@ -1,4 +1,13 @@
 {
+    "ui_column_copy_link_title": {
+        "message": "링크 복사"
+    },
+    "ui_column_link_copied": {
+        "message": "링크 복사됨"
+    },
+    "msg_column_copy_link_failed": {
+        "message": "링크를 복사하지 못했습니다. 다시 시도하세요."
+    },
     "app_console_welcome": {
         "message": "XPP-Deck에 오신 것을 환영합니다!"
     },
@@ -238,6 +247,9 @@
     },
     "msg_explore_unpin_confirm": {
         "message": "이 위치의 고정을 해제할까요?"
+    },
+    "msg_column_add_confirm": {
+        "message": "$1 작업을 진행할까요?"
     },
     "msg_column_close_confirm": {
         "message": "이 열을 닫을까요?"

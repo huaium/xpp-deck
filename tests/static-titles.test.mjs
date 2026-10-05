@@ -63,6 +63,8 @@ for (const title of [null, "   ", "  My Search  "]) {
             ["add_custom_url_button_handler", "normalize_custom_x_path"],
             "",
             {
+                opd_confirm: async () =>
+                    assert.fail("custom URL must not ask for confirmation"),
                 opd_prompt: async () => prompts.shift(),
                 opd_alert: async () => {
                     alerts++;

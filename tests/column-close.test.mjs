@@ -40,10 +40,13 @@ function harness(pinned = false) {
     const button = new Button();
     const { column_close } = loadFunctions(
         "../src/content/run.ts",
-        ["column_close"],
+        ["column_close", "bind_column_copy_links"],
         "",
         {
-            document: { querySelectorAll: () => [button] },
+            document: {
+                querySelectorAll: (selector) =>
+                    selector === ".column_close_btn" ? [button] : [],
+            },
             HTMLElement: Button,
             HTMLInputElement: Input,
             i18n_message: (key) => key,

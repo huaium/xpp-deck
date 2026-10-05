@@ -1,4 +1,13 @@
 {
+    "ui_column_copy_link_title": {
+        "message": "Link kopieren"
+    },
+    "ui_column_link_copied": {
+        "message": "Link kopiert"
+    },
+    "msg_column_copy_link_failed": {
+        "message": "Link konnte nicht kopiert werden. Bitte erneut versuchen."
+    },
     "app_console_welcome": {
         "message": "Willkommen bei XPP-Deck!"
     },
@@ -238,6 +247,9 @@
     },
     "msg_explore_unpin_confirm": {
         "message": "Diese Position lösen?"
+    },
+    "msg_column_add_confirm": {
+        "message": "$1?"
     },
     "msg_column_close_confirm": {
         "message": "Diese Spalte schließen?"
