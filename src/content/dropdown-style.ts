@@ -24,6 +24,7 @@ export function ensure_dropdown_style() {
     .wa-dark .opd_global_settings_button img{filter:invert(1);}
     #opd_main_element.opd_sidebar_collapsed .opd_global_settings_button{display:none;}
     .opd_wa_dialog{--width: min(560px, calc(100vw - 32px));--spacing:0;--show-duration:120ms;}
+    .opd_wa_dialog:has(.opd_about_dialog){--width:min(760px,calc(100vw - 32px));}
     .opd_wa_dialog::part(dialog){background:transparent;border:0;box-shadow:none;padding:0;}
     .opd_wa_dialog::part(body){padding:0;overflow:visible;}
     .opd_wa_dialog .opd_dialog{box-sizing:border-box;width:100%;max-width:100%;animation:none;}
