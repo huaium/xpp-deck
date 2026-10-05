@@ -310,16 +310,20 @@ try {
     await page.keyboard.press("Escape");
     await globalSettings.waitFor({ state: "detached" });
     const post = page.locator('[opd_column_type="post"]');
+    assert.equal(await page.locator(".column_bar wa-checkbox").count(), 0);
+    for (const control of [".opd_banner", ".opd_pinned_btn"]) {
+        assert.equal(
+            await home.locator(control).evaluate((input) => input.hidden),
+            false,
+        );
+    }
+    assert.equal(await home.locator(".dsp_column_pin_btn").isVisible(), true);
     assert.equal(
-        await home
-            .locator('wa-checkbox[data-native-class~="opd_banner"]')
-            .isVisible(),
+        await home.locator(".dsp_column_banner_btn").isVisible(),
         true,
     );
     assert.equal(
-        await post
-            .locator('wa-checkbox[data-native-class~="opd_banner"]')
-            .isVisible(),
+        await post.locator(".dsp_column_banner_btn").isVisible(),
         false,
     );
     await post.locator("iframe").evaluate((frame) => {

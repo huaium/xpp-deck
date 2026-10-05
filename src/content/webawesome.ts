@@ -17,6 +17,8 @@ export function mount_webawesome_controls() {
         for (const native of document.querySelectorAll<HTMLInputElement>(
             '#opd_main_element input[type="checkbox"], #opd_main_element input[type="number"], .opd_dialog_overlay input',
         )) {
+            // Header toggles use adjacent labels to render their SVG icons.
+            if (native.closest(".column_bar")) continue;
             if (enhanced.has(native)) continue;
             enhanced.add(native);
             const checkbox = native.type === "checkbox";
