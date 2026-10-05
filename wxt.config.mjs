@@ -49,6 +49,7 @@ export default defineConfig({
     }),
     webExt: {
         binaries: { chrome: process.env.CHROMIUM_BINARY },
+        chromiumArgs: ["--disable-infobars"],
         firefoxProfile: path.resolve(".wxt-profiles/firefox"),
         chromiumProfile: path.resolve(".wxt-profiles/chrome"),
         keepProfileChanges: true,

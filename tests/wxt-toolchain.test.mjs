@@ -5,6 +5,10 @@ import { URL } from "node:url";
 import config from "../wxt.config.mjs";
 
 const root = new URL("../", import.meta.url);
+test("Chrome development launches include the requested infobar flag", () => {
+    assert.ok(config.webExt.chromiumArgs.includes("--disable-infobars"));
+});
+
 test("development and packaging expose only WXT commands", async () => {
     const pkg = JSON.parse(
         await fs.readFile(new URL("package.json", root), "utf8"),
