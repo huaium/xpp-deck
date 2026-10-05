@@ -135,7 +135,12 @@ export function run(settings) {
     ) {
         const eligible = () => {
             if (!frame.isConnected || !frame.contentWindow) return false;
-            if (document.hidden || api_refresh_paused() || column_load_priority(frame) !== 0) return false;
+            if (
+                document.hidden ||
+                api_refresh_paused() ||
+                column_load_priority(frame) !== 0
+            )
+                return false;
             const enabled = frame
                 .closest("div[opd_column_type]")
                 ?.querySelector<HTMLInputElement>(".opd_a_reload_bar")?.checked;
@@ -1447,9 +1452,13 @@ export function run(settings) {
         chrome.storage.local.set(
             { opd_sidebar_collapsed: next_sidebar_state },
             function () {
-                const contents = opd_main_element.querySelector<HTMLElement>(".main_bar_functions");
+                const contents = opd_main_element.querySelector<HTMLElement>(
+                    ".main_bar_functions",
+                );
                 if (contents) {
-                    void animate_sidebar_change(contents, () => apply_sidebar_collapsed_state(next_sidebar_state));
+                    void animate_sidebar_change(contents, () =>
+                        apply_sidebar_collapsed_state(next_sidebar_state),
+                    );
                 } else {
                     apply_sidebar_collapsed_state(next_sidebar_state);
                 }
@@ -1522,7 +1531,8 @@ export function run(settings) {
         if (settings.column_settings[index].type === "explore") {
             all_columns[index].setAttribute(
                 "opd_explore_title",
-                settings.column_settings[index].column_save_title || i18n_message("ui_column_explore_title"),
+                settings.column_settings[index].column_save_title ||
+                    i18n_message("ui_column_explore_title"),
             );
         }
         const title_node = all_columns[index].querySelector(
@@ -2619,7 +2629,11 @@ export function run(settings) {
                 .replaceAll("%column_auto_reload_time%", "10");
             if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
-            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
+            animate_ui_entrance(
+                add_target_column.previousElementSibling?.querySelector<HTMLElement>(
+                    ".column_bar",
+                ) ?? null,
+            );
             add_target_column.scrollIntoView({
                 behavior: "smooth",
                 inline: "end",
@@ -2655,7 +2669,11 @@ export function run(settings) {
                 .replaceAll("%column_auto_reload_time%", "10");
             if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
-            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
+            animate_ui_entrance(
+                add_target_column.previousElementSibling?.querySelector<HTMLElement>(
+                    ".column_bar",
+                ) ?? null,
+            );
             add_target_column.scrollIntoView({
                 behavior: "smooth",
                 inline: "end",
@@ -2691,7 +2709,11 @@ export function run(settings) {
                 .replaceAll("%column_auto_reload_time%", "10");
             if (!add_target_column) return;
             add_target_column.insertAdjacentHTML("beforebegin", new_column);
-            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
+            animate_ui_entrance(
+                add_target_column.previousElementSibling?.querySelector<HTMLElement>(
+                    ".column_bar",
+                ) ?? null,
+            );
             add_target_column.scrollIntoView({
                 behavior: "smooth",
                 inline: "end",
@@ -2809,7 +2831,11 @@ export function run(settings) {
             .replaceAll("%column_auto_reload_ch%", "")
             .replaceAll("%column_auto_reload_time%", "10");
         add_target_column.insertAdjacentHTML("beforebegin", new_column);
-            animate_ui_entrance(add_target_column.previousElementSibling?.querySelector<HTMLElement>(".column_bar") ?? null);
+        animate_ui_entrance(
+            add_target_column.previousElementSibling?.querySelector<HTMLElement>(
+                ".column_bar",
+            ) ?? null,
+        );
         const inserted_column = document.querySelector(`#column_${column_id}`);
         const inserted_column_root = inserted_column?.querySelector(
             "div[opd_column_type='explore']",
@@ -2883,7 +2909,10 @@ export function run(settings) {
                 await opd_alert(i18n_message("msg_username_not_found_alert"));
                 return;
             }
-            add_explore_column_with_path(`/${username}/lists`, i18n_message("ui_column_lists_title"));
+            add_explore_column_with_path(
+                `/${username}/lists`,
+                i18n_message("ui_column_lists_title"),
+            );
         });
     }
     // Profile save button.
@@ -3350,13 +3379,14 @@ export function run(settings) {
                 confirmation_pending = true;
                 try {
                     if (
-                        await opd_confirm(
+                        (await opd_confirm(
                             i18n_message(
                                 pin_checkbox
                                     ? "msg_pinned_column_close_confirm"
                                     : "msg_column_close_confirm",
                             ),
-                        ) && column_element.isConnected
+                        )) &&
+                        column_element.isConnected
                     ) {
                         column_element.remove();
                         append_object_css();

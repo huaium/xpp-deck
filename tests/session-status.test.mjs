@@ -5,11 +5,17 @@ import { loadFunctions } from "./helpers/source.mjs";
 const { AbortController } = globalThis;
 
 test("current X onboarding URLs identify login, not signup or external links", () => {
-    let href = "/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-opdeck";
+    let href =
+        "/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-opdeck";
     let ownLink = false;
     const querySelectorAll = (selector) =>
         selector.includes("/i/jf/onboarding/web")
-            ? [{ closest: () => ownLink ? {} : null, getAttribute: () => href }]
+            ? [
+                  {
+                      closest: () => (ownLink ? {} : null),
+                      getAttribute: () => href,
+                  },
+              ]
             : [];
     const { read_x_session } = loadFunctions(
         "../src/content/session.ts",
@@ -27,7 +33,8 @@ test("current X onboarding URLs identify login, not signup or external links", (
     ownLink = true;
     assert.equal(read_x_session(), "unknown");
     ownLink = false;
-    href = "https://x.com/i/jf/onboarding/web?redirect_after_login=%2Fhome&mode=login";
+    href =
+        "https://x.com/i/jf/onboarding/web?redirect_after_login=%2Fhome&mode=login";
     assert.equal(read_x_session(), "signed-out");
     for (const other of [
         "/i/jf/onboarding/web?mode=signup",

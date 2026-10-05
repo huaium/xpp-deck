@@ -10,9 +10,7 @@ export class OpdExtAutoReload {
             // Inject helper script.
             const helper_script =
                 column_window.document.createElement("script");
-            helper_script.src = chrome.runtime.getURL(
-                "auto_reload_helper.js",
-            );
+            helper_script.src = chrome.runtime.getURL("auto_reload_helper.js");
             column_window.document.head.appendChild(helper_script);
 
             this.opd_reload_token = crypto.randomUUID();

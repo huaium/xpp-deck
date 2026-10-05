@@ -19,7 +19,10 @@ export function read_x_session(): SessionStatus {
     const page = document.getElementById("react-root") ?? document;
     const has = (selector: string) =>
         Array.from(page.querySelectorAll(selector)).some(
-            (element) => !element.closest('#opd_welcome, [hidden], [aria-hidden="true"]'),
+            (element) =>
+                !element.closest(
+                    '#opd_welcome, [hidden], [aria-hidden="true"]',
+                ),
         );
     if (
         has(
@@ -34,24 +37,25 @@ export function read_x_session(): SessionStatus {
     )
         return "signed-out";
     if (
-        Array.from(page.querySelectorAll('a[href*="/i/jf/onboarding/web"]')).some(
-            (element) => {
-                if (element.closest('#opd_welcome, [hidden], [aria-hidden="true"]')) return false;
-                const href = element.getAttribute("href");
-                if (!href) return false;
-                try {
-                    const url = new URL(href, "https://x.com");
-                    return (
-                        url.protocol === "https:" &&
-                        ["x.com", "twitter.com"].includes(url.hostname) &&
-                        url.pathname === "/i/jf/onboarding/web" &&
-                        url.searchParams.get("mode") === "login"
-                    );
-                } catch {
-                    return false;
-                }
-            },
-        )
+        Array.from(
+            page.querySelectorAll('a[href*="/i/jf/onboarding/web"]'),
+        ).some((element) => {
+            if (element.closest('#opd_welcome, [hidden], [aria-hidden="true"]'))
+                return false;
+            const href = element.getAttribute("href");
+            if (!href) return false;
+            try {
+                const url = new URL(href, "https://x.com");
+                return (
+                    url.protocol === "https:" &&
+                    ["x.com", "twitter.com"].includes(url.hostname) &&
+                    url.pathname === "/i/jf/onboarding/web" &&
+                    url.searchParams.get("mode") === "login"
+                );
+            } catch {
+                return false;
+            }
+        })
     )
         return "signed-out";
     return "unknown";

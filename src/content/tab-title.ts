@@ -2,9 +2,10 @@ export function keep_deck_tab_title(iconUrl?: string) {
     const restore = () => {
         if (document.title !== "XPP-Deck") document.title = "XPP-Deck";
         if (!iconUrl) return;
-        const icons = document.head.querySelectorAll<HTMLLinkElement>(
-            'link[rel~="icon"]',
-        );
+        const icons =
+            document.head.querySelectorAll<HTMLLinkElement>(
+                'link[rel~="icon"]',
+            );
         if (icons.length === 0) {
             const icon = document.createElement("link");
             icon.rel = "icon";

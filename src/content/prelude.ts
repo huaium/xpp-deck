@@ -18,16 +18,29 @@ type I18nOverrideMessages = Record<string, { message?: string }>;
 let opd_i18n_override_messages: I18nOverrideMessages | null = null;
 let opd_english_messages: I18nOverrideMessages = {};
 export let opd_i18n_language = "browser";
-export const supported_languages = { en: "English", ja: "日本語", zh_CN: "简体中文", zh_TW: "繁體中文", ko: "한국어", es: "Español", fr: "Français", de: "Deutsch", pt_BR: "Português (Brasil)" };
+export const supported_languages = {
+    en: "English",
+    ja: "日本語",
+    zh_CN: "简体中文",
+    zh_TW: "繁體中文",
+    ko: "한국어",
+    es: "Español",
+    fr: "Français",
+    de: "Deutsch",
+    pt_BR: "Português (Brasil)",
+};
 export function resolve_language(language: string) {
     const tag = language.replaceAll("_", "-").toLowerCase();
-    if (tag.startsWith("zh")) return /(?:tw|hk|mo|hant)/.test(tag) ? "zh_TW" : "zh_CN";
+    if (tag.startsWith("zh"))
+        return /(?:tw|hk|mo|hant)/.test(tag) ? "zh_TW" : "zh_CN";
     if (tag.startsWith("pt")) return "pt_BR";
     const base = tag.split("-")[0];
     return Object.hasOwn(supported_languages, base) ? base : "en";
 }
 export function formatting_locale() {
-    return opd_i18n_language === "browser" ? navigator.language : opd_i18n_language.replaceAll("_", "-");
+    return opd_i18n_language === "browser"
+        ? navigator.language
+        : opd_i18n_language.replaceAll("_", "-");
 }
 function normalize_i18n_substitutions(
     substitutions?: string | string[] | null,
@@ -64,7 +77,9 @@ export function i18n_message(
         return apply_i18n_substitutions(override_message, substitutions);
     }
     const fallback = opd_english_messages[message_name]?.message;
-    return typeof fallback === "string" ? apply_i18n_substitutions(fallback, substitutions) : chrome.i18n.getMessage(message_name, substitutions);
+    return typeof fallback === "string"
+        ? apply_i18n_substitutions(fallback, substitutions)
+        : chrome.i18n.getMessage(message_name, substitutions);
 }
 function get_storage_local_async(
     key: string,
@@ -82,15 +97,22 @@ export async function initialize_i18n_override() {
         typeof language_setting_record.opd_language_override === "string"
             ? language_setting_record.opd_language_override
             : "browser";
-    opd_i18n_language = selected_language === "browser" ? "browser" : resolve_language(selected_language);
-    const locale = resolve_language(selected_language === "browser" ? navigator.language : selected_language);
+    opd_i18n_language =
+        selected_language === "browser"
+            ? "browser"
+            : resolve_language(selected_language);
+    const locale = resolve_language(
+        selected_language === "browser"
+            ? navigator.language
+            : selected_language,
+    );
     try {
-        const english = await fetch(chrome.runtime.getURL("_locales/en/messages.json"));
+        const english = await fetch(
+            chrome.runtime.getURL("_locales/en/messages.json"),
+        );
         if (english.ok) opd_english_messages = await english.json();
         const response = await fetch(
-            chrome.runtime.getURL(
-                `_locales/${locale}/messages.json`,
-            ),
+            chrome.runtime.getURL(`_locales/${locale}/messages.json`),
         );
         if (!response.ok) {
             opd_i18n_override_messages = null;
@@ -108,52 +130,108 @@ export let media_viewer_token: string[] = [];
 export const opd_sidebar_width_expanded = "208px";
 export const opd_sidebar_width_collapsed = "64px";
 const ui_animations = new WeakMap<HTMLElement, Animation>();
-export async function animate_sidebar_change(element: HTMLElement, apply: () => void) {
+export async function animate_sidebar_change(
+    element: HTMLElement,
+    apply: () => void,
+) {
     const opacity = window.getComputedStyle(element).opacity;
     ui_animations.get(element)?.cancel();
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !element.animate) {
+    if (
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        !element.animate
+    ) {
         element.style.opacity = "";
         apply();
         return;
     }
-    const fade = element.animate([{ opacity }, { opacity: 0 }], { duration: 70, fill: "forwards" });
+    const fade = element.animate([{ opacity }, { opacity: 0 }], {
+        duration: 70,
+        fill: "forwards",
+    });
     ui_animations.set(element, fade);
-    try { await fade.finished; } catch { return; }
+    try {
+        await fade.finished;
+    } catch {
+        return;
+    }
     if (ui_animations.get(element) !== fade) return;
     element.style.opacity = "0";
     fade.cancel();
     apply();
     // Keep layout changes invisible until the existing width transition settles.
-    const reveal = element.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 180, duration: 100, easing: "ease-out", fill: "forwards" });
+    const reveal = element.animate([{ opacity: 0 }, { opacity: 1 }], {
+        delay: 180,
+        duration: 100,
+        easing: "ease-out",
+        fill: "forwards",
+    });
     ui_animations.set(element, reveal);
-    try { await reveal.finished; } catch { return; }
+    try {
+        await reveal.finished;
+    } catch {
+        return;
+    }
     if (ui_animations.get(element) !== reveal) return;
     element.style.opacity = "";
     reveal.cancel();
     ui_animations.delete(element);
 }
-export async function animate_dialog_exit(overlay: HTMLElement, dialog: HTMLElement) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !overlay.animate || !dialog.animate) return;
+export async function animate_dialog_exit(
+    overlay: HTMLElement,
+    dialog: HTMLElement,
+) {
+    if (
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        !overlay.animate ||
+        !dialog.animate
+    )
+        return;
     overlay.style.animation = "none";
     dialog.style.animation = "none";
-    const options: KeyframeAnimationOptions = { duration: 160, easing: "ease-in", fill: "forwards" };
+    const options: KeyframeAnimationOptions = {
+        duration: 160,
+        easing: "ease-in",
+        fill: "forwards",
+    };
     const animations = [
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], options),
-        dialog.animate([{ opacity: 1, transform: "translateY(0)" }, { opacity: 0, transform: "translateY(6px)" }], options),
+        dialog.animate(
+            [
+                { opacity: 1, transform: "translateY(0)" },
+                { opacity: 0, transform: "translateY(6px)" },
+            ],
+            options,
+        ),
     ];
-    await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+    await Promise.all(
+        animations.map((animation) =>
+            animation.finished.catch(() => undefined),
+        ),
+    );
 }
-export function animate_ui_entrance(element: HTMLElement | null, duration = 180, distance = 8) {
+export function animate_ui_entrance(
+    element: HTMLElement | null,
+    duration = 180,
+    distance = 8,
+) {
     if (!element) return;
     ui_animations.get(element)?.cancel();
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !element.animate) return;
-    const animation = element.animate([
-        { opacity: 0, transform: `translateY(${distance}px)` },
-        { opacity: 1, transform: "translateY(0)" },
-    ], { duration, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" });
+    if (
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        !element.animate
+    )
+        return;
+    const animation = element.animate(
+        [
+            { opacity: 0, transform: `translateY(${distance}px)` },
+            { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+    );
     ui_animations.set(element, animation);
     const cleanup = () => {
-        if (ui_animations.get(element) === animation) ui_animations.delete(element);
+        if (ui_animations.get(element) === animation)
+            ui_animations.delete(element);
     };
     animation.onfinish = cleanup;
     animation.oncancel = cleanup;
@@ -200,7 +278,10 @@ export function profile_display_name(profile, index: number): string {
     return name || default_profile_name(index + 1);
 }
 function default_profile_name(number: number) {
-    return i18n_message("ui_profile_switch_label", [String(number)]) || `Profile ${number}`;
+    return (
+        i18n_message("ui_profile_switch_label", [String(number)]) ||
+        `Profile ${number}`
+    );
 }
 export function next_profile_name(profiles): string {
     const names = new Set(profiles.map(profile_display_name));
@@ -249,7 +330,12 @@ export function create_profile_list_html(
     return `<div class="dsp_profile_section"><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length, current_profile_index)}</div></div></div>`;
 }
 export function create_language_select_html() {
-    const options = Object.entries(supported_languages).map(([code, name]) => `<option value="${code}" ${opd_i18n_language === code ? "selected" : ""}>${name}</option>`).join("");
+    const options = Object.entries(supported_languages)
+        .map(
+            ([code, name]) =>
+                `<option value="${code}" ${opd_i18n_language === code ? "selected" : ""}>${name}</option>`,
+        )
+        .join("");
     return `<div class="opd_language_select_wrap" title="${i18n_message("ui_language_selector_title")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message("ui_language_selector_label")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message("ui_language_option_system")}</option>${options}</select></div>`;
 }
 export function i18n_message_or_fallback(
@@ -559,7 +645,7 @@ export function open_opd_dialog({
     type: "alert" | "confirm" | "prompt" | "select";
     defaultValue?: string;
     choices?: { value: string; label: string }[];
-    mount?: (dialog: HTMLDivElement) => (() => void);
+    mount?: (dialog: HTMLDivElement) => () => void;
 }) {
     return enqueue_opd_dialog(
         () =>
@@ -638,7 +724,9 @@ export function open_opd_dialog({
                     );
 
                 let closing = false;
-                const finish = async (result: void | boolean | string | null) => {
+                const finish = async (
+                    result: void | boolean | string | null,
+                ) => {
                     if (closing) return;
                     closing = true;
                     cleanup_content?.();
@@ -928,7 +1016,10 @@ document.addEventListener("keyup", (event) => {
 export let api_limit_obj: ApiAccessLimit | null = null;
 let rate_limit_until = 0;
 chrome.storage.local.get("opd_rate_limit_until", (value) => {
-    rate_limit_until = Math.max(rate_limit_until, Number(value.opd_rate_limit_until) || 0);
+    rate_limit_until = Math.max(
+        rate_limit_until,
+        Number(value.opd_rate_limit_until) || 0,
+    );
 });
 export function api_refresh_paused() {
     return Date.now() < rate_limit_until;
@@ -945,14 +1036,26 @@ export function create_api_sidebar_html() {
     return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<button type="button" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${api_icon_path(index)}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></button>`).join("")}</div>`;
 }
 export function update_api_sidebar() {
-    for (const [key, label] of [["time_line", "ui_api_following"], ["recommend_timeline", "ui_api_for_you"], ["search", "ui_api_search"]] as const) {
-        const row = document.querySelector<HTMLElement>(`[data-api-key="${key}"]`);
+    for (const [key, label] of [
+        ["time_line", "ui_api_following"],
+        ["recommend_timeline", "ui_api_for_you"],
+        ["search", "ui_api_search"],
+    ] as const) {
+        const row = document.querySelector<HTMLElement>(
+            `[data-api-key="${key}"]`,
+        );
         if (!row) continue;
         const name = i18n_message(label);
         const quota = api_quota_state(api_limit_obj?.[key]);
-        const status = quota ? i18n_message("ui_api_percent_left", [String(Math.floor(quota.percentage))]) : i18n_message("ui_api_no_data");
+        const status = quota
+            ? i18n_message("ui_api_percent_left", [
+                  String(Math.floor(quota.percentage)),
+              ])
+            : i18n_message("ui_api_no_data");
         row.querySelector(".opd_api_sidebar_label")!.textContent = name;
-        row.querySelector(".opd_api_sidebar_value")!.textContent = quota ? `${Math.floor(quota.percentage)}%` : "—";
+        row.querySelector(".opd_api_sidebar_value")!.textContent = quota
+            ? `${Math.floor(quota.percentage)}%`
+            : "—";
         row.dataset.level = quota?.level ?? "unknown";
         row.title = `${name}: ${status}`;
         row.setAttribute("aria-label", row.title);
@@ -962,9 +1065,20 @@ export function api_quota_state(value: ApiAccessLimit["search"] | undefined) {
     if (value?.limit == null || value.remaining == null) return null;
     const limit = Number(value.limit);
     const remaining = Number(value.remaining);
-    if (!Number.isFinite(limit) || limit <= 0 || !Number.isFinite(remaining) || remaining < 0) return null;
-    const percentage = Math.min(100, Math.max(0, remaining / limit * 100));
-    return { limit, remaining, percentage, level: percentage > 50 ? "green" : percentage >= 20 ? "amber" : "red" };
+    if (
+        !Number.isFinite(limit) ||
+        limit <= 0 ||
+        !Number.isFinite(remaining) ||
+        remaining < 0
+    )
+        return null;
+    const percentage = Math.min(100, Math.max(0, (remaining / limit) * 100));
+    return {
+        limit,
+        remaining,
+        percentage,
+        level: percentage > 50 ? "green" : percentage >= 20 ? "amber" : "red",
+    };
 }
 export async function open_api_limits_dialog() {
     await open_opd_dialog({
@@ -981,26 +1095,58 @@ export async function open_api_limits_dialog() {
             dialog.appendChild(cards);
             const render = () => {
                 cards.replaceChildren();
-                for (const [key, label] of [["time_line", "ui_api_following"], ["recommend_timeline", "ui_api_for_you"], ["search", "ui_api_search"]] as const) {
+                for (const [key, label] of [
+                    ["time_line", "ui_api_following"],
+                    ["recommend_timeline", "ui_api_for_you"],
+                    ["search", "ui_api_search"],
+                ] as const) {
                     const card = document.createElement("section");
                     card.className = "opd_api_card";
                     const heading = document.createElement("div");
                     heading.className = "opd_api_heading";
                     const name = document.createElement("span");
                     name.className = "opd_api_name";
-                    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    for (const [attribute, value] of Object.entries({class: "opd_api_icon", viewBox: "0 0 24 24", "aria-hidden": "true", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round"})) {
+                    const icon = document.createElementNS(
+                        "http://www.w3.org/2000/svg",
+                        "svg",
+                    );
+                    for (const [attribute, value] of Object.entries({
+                        class: "opd_api_icon",
+                        viewBox: "0 0 24 24",
+                        "aria-hidden": "true",
+                        fill: "none",
+                        stroke: "currentColor",
+                        "stroke-width": "1.8",
+                        "stroke-linecap": "round",
+                        "stroke-linejoin": "round",
+                    })) {
                         icon.setAttribute(attribute, value);
                     }
-                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    path.setAttribute("d", api_icon_path(["time_line", "recommend_timeline", "search"].indexOf(key)));
+                    const path = document.createElementNS(
+                        "http://www.w3.org/2000/svg",
+                        "path",
+                    );
+                    path.setAttribute(
+                        "d",
+                        api_icon_path(
+                            [
+                                "time_line",
+                                "recommend_timeline",
+                                "search",
+                            ].indexOf(key),
+                        ),
+                    );
                     icon.appendChild(path);
                     name.textContent = i18n_message(label);
                     name.prepend(icon);
                     const status = document.createElement("span");
                     const value = api_limit_obj?.[key];
                     const quota = api_quota_state(value);
-                    status.textContent = quota ? i18n_message("ui_api_percent_left", [String(Math.floor(quota.percentage))]) : i18n_message("ui_api_no_data");
+                    status.textContent = quota
+                        ? i18n_message("ui_api_percent_left", [
+                              String(Math.floor(quota.percentage)),
+                          ])
+                        : i18n_message("ui_api_no_data");
                     heading.append(name, status);
                     card.appendChild(heading);
                     if (quota) {
@@ -1009,8 +1155,14 @@ export async function open_api_limits_dialog() {
                         track.setAttribute("role", "progressbar");
                         track.setAttribute("aria-label", i18n_message(label));
                         track.setAttribute("aria-valuemin", "0");
-                        track.setAttribute("aria-valuemax", String(quota.limit));
-                        track.setAttribute("aria-valuenow", String(Math.min(quota.remaining, quota.limit)));
+                        track.setAttribute(
+                            "aria-valuemax",
+                            String(quota.limit),
+                        );
+                        track.setAttribute(
+                            "aria-valuenow",
+                            String(Math.min(quota.remaining, quota.limit)),
+                        );
                         const fill = document.createElement("div");
                         fill.className = "opd_api_fill";
                         fill.dataset.level = quota.level;
@@ -1018,14 +1170,22 @@ export async function open_api_limits_dialog() {
                         track.appendChild(fill);
                         const detail = document.createElement("p");
                         detail.className = "opd_api_detail";
-                        detail.textContent = i18n_message("ui_api_remaining", [quota.remaining.toLocaleString(formatting_locale()), quota.limit.toLocaleString(formatting_locale())]);
+                        detail.textContent = i18n_message("ui_api_remaining", [
+                            quota.remaining.toLocaleString(formatting_locale()),
+                            quota.limit.toLocaleString(formatting_locale()),
+                        ]);
                         card.append(track, detail);
                         const reset = value?.reset_unix_time;
                         const date = new Date(Number(reset) * 1000);
                         if (reset != null && Number.isFinite(date.getTime())) {
                             const time = document.createElement("p");
                             time.className = "opd_api_detail";
-                            time.textContent = i18n_message("ui_api_reset", [date.toLocaleTimeString(formatting_locale(), { hour: "numeric", minute: "2-digit" })]);
+                            time.textContent = i18n_message("ui_api_reset", [
+                                date.toLocaleTimeString(formatting_locale(), {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                }),
+                            ]);
                             card.appendChild(time);
                         }
                     }
@@ -1034,7 +1194,8 @@ export async function open_api_limits_dialog() {
             };
             const listener = (changes: ChromeStorageChanges) => {
                 if (changes.api_access_limit) {
-                    api_limit_obj = (changes.api_access_limit.newValue ?? null) as ApiAccessLimit | null;
+                    api_limit_obj = (changes.api_access_limit.newValue ??
+                        null) as ApiAccessLimit | null;
                     render();
                 }
             };
@@ -1068,7 +1229,10 @@ type ApiAccessLimit = {
 };
 chrome.storage.onChanged.addListener((changes, namespace) => {
     if (changes.opd_rate_limit_until) {
-        rate_limit_until = Math.max(rate_limit_until, Number(changes.opd_rate_limit_until.newValue) || 0);
+        rate_limit_until = Math.max(
+            rate_limit_until,
+            Number(changes.opd_rate_limit_until.newValue) || 0,
+        );
     }
     if (changes.api_access_limit != undefined) {
         //console.log(changes)

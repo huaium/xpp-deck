@@ -70,7 +70,11 @@ export function dialogHarness() {
          function ensure_opd_dialog_style() {}
          function is_opd_dark_theme_enabled() { return false; }
          function i18n_message_or_fallback(key, fallback) { return fallback; }`,
-        { document, HTMLElement: Element, window: { matchMedia: () => ({ matches: true }) } },
+        {
+            document,
+            HTMLElement: Element,
+            window: { matchMedia: () => ({ matches: true }) },
+        },
     );
     return {
         document,

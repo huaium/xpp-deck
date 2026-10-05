@@ -12,7 +12,9 @@ test("deck favicon is created and restored after X changes or removes it", () =>
             appendChild: (icon) => icons.push(icon),
         },
         createElement: () => ({
-            href: "", type: "", sizes: { length: 0 },
+            href: "",
+            type: "",
+            sizes: { length: 0 },
             removeAttribute(name) {
                 if (name === "type") this.type = "";
                 if (name === "sizes") this.sizes.length = 0;
@@ -20,11 +22,15 @@ test("deck favicon is created and restored after X changes or removes it", () =>
         }),
     };
     const { keep_deck_tab_title } = loadFunctions(
-        "../src/content/tab-title.ts", ["keep_deck_tab_title"], "",
+        "../src/content/tab-title.ts",
+        ["keep_deck_tab_title"],
+        "",
         {
             document,
             MutationObserver: class {
-                constructor(fn) { callback = fn; }
+                constructor(fn) {
+                    callback = fn;
+                }
                 observe() {}
                 disconnect() {}
             },
@@ -53,8 +59,13 @@ test("deck title survives X updates without redundant writes and releases its ob
     let disconnected = false;
     const document = {
         head: {},
-        get title() { return title; },
-        set title(value) { title = value; writes++; },
+        get title() {
+            return title;
+        },
+        set title(value) {
+            title = value;
+            writes++;
+        },
     };
     const { keep_deck_tab_title } = loadFunctions(
         "../src/content/tab-title.ts",
@@ -63,16 +74,22 @@ test("deck title survives X updates without redundant writes and releases its ob
         {
             document,
             MutationObserver: class {
-                constructor(fn) { callback = fn; }
+                constructor(fn) {
+                    callback = fn;
+                }
                 observe(target, options) {
                     assert.equal(target, document.head);
                     assert.deepEqual(JSON.parse(JSON.stringify(options)), {
-                        childList: true, subtree: true, characterData: true,
+                        childList: true,
+                        subtree: true,
+                        characterData: true,
                         attributes: true,
                         attributeFilter: ["rel", "href", "type", "sizes"],
                     });
                 }
-                disconnect() { disconnected = true; }
+                disconnect() {
+                    disconnected = true;
+                }
             },
         },
     );

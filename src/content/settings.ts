@@ -150,7 +150,12 @@ export function settings_init() {
         //column_settings:[{type:"main_bar_empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"home", banner:true, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"notification", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"explore", banner:false, top_visible:true, tw_view_mode:"0", exp_type:"", column_save_path:"/explore", column_pinned_path:"", column_width:null}, {type:"empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}],
         version: manifest.version,
     };
-    let profile = [{ name: i18n_message("ui_profile_switch_label", ["1"]), profile: profile_store_default }];
+    let profile = [
+        {
+            name: i18n_message("ui_profile_switch_label", ["1"]),
+            profile: profile_store_default,
+        },
+    ];
     //console.log(profile);
     chrome.storage.local.set(
         { opd_profile_store: JSON.stringify(profile) },
