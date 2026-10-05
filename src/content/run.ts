@@ -444,7 +444,7 @@ export function run(settings) {
         min-width: 48px;
     }
     .opd_api_sidebar{padding:12px 8px;margin:4px 0;border-block:1px solid var(--opd-border);}
-    .opd_api_sidebar_heading{display:flex;align-items:center;justify-content:center;text-align:center;height:24px;font-size:11px;font-weight:700;color:var(--opd-muted);margin:0 8px 8px;}
+    .opd_api_sidebar_heading{display:flex;align-items:center;justify-content:flex-start;text-align:left;height:24px;font-size:0.72rem;font-weight:400;line-height:1;color:var(--opd-muted);padding:0 0.15rem;margin:0 0 8px;}
     .opd_api_sidebar_row{display:flex;align-items:center;gap:8px;width:100%;height:48px;min-height:48px;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:var(--opd-text);cursor:pointer;font:inherit;}
     .opd_api_sidebar_row:hover{background:var(--opd-hover);}
     .opd_api_sidebar_row:focus-visible{outline:2px solid var(--opd-muted);outline-offset:1px;}
