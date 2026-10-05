@@ -444,7 +444,7 @@ export function run(settings) {
         min-width: 48px;
     }
     .opd_api_sidebar{padding:12px 8px;margin:4px 0;border-block:1px solid var(--opd-border);}
-    .opd_api_sidebar_heading{display:flex;align-items:center;text-align:left;height:24px;font-size:11px;font-weight:700;color:var(--opd-muted);margin:0 8px 8px;}
+    .opd_api_sidebar_heading{display:flex;align-items:center;justify-content:center;text-align:center;height:24px;font-size:11px;font-weight:700;color:var(--opd-muted);margin:0 8px 8px;}
     .opd_api_sidebar_row{display:flex;align-items:center;gap:8px;width:100%;height:48px;min-height:48px;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:var(--opd-text);cursor:pointer;font:inherit;}
     .opd_api_sidebar_row:hover{background:var(--opd-hover);}
     .opd_api_sidebar_row:focus-visible{outline:2px solid var(--opd-muted);outline-offset:1px;}
@@ -1070,8 +1070,8 @@ export function run(settings) {
         --opd-muted: #687180;
         --opd-hover: #edf0f5;
         --opd-focus: #2563eb;
-        --opd-profile-selected-bg: #eaf1ff;
-        --opd-profile-selected-shadow: inset 3px 0 0 var(--opd-focus);
+        --opd-profile-selected-bg: #f0f1f2;
+        --opd-profile-selected-shadow: none;
     }
     #opd_main_element[opd-dsp-theme="dark"]{
         --opd-bg: #101216;
@@ -1083,8 +1083,8 @@ export function run(settings) {
         --opd-muted: #a4adbc;
         --opd-hover: #282e38;
         --opd-focus: #78a6ff;
-        --opd-profile-selected-bg: #24334b;
-        --opd-profile-selected-shadow: inset 3px 0 0 var(--opd-focus);
+        --opd-profile-selected-bg: #25292f;
+        --opd-profile-selected-shadow: none;
     }
     #opd_main_element *{
         font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -1096,7 +1096,15 @@ export function run(settings) {
     }
     #opd_main_element .main_bar_functions hr{
         border: 0;
+        border-top: 1px solid var(--opd-border);
+        width: 100%;
+        flex-shrink: 0;
         margin: 6px 0;
+    }
+    #opd_main_element .main_bar_functions > .opd_api_sidebar,
+    #opd_main_element .main_bar_functions > hr{
+        width: 100%;
+        align-self: stretch;
     }
     #opd_main_element .dsp_btn_parent{
         height: 40px;
@@ -1113,7 +1121,11 @@ export function run(settings) {
     }
     #opd_main_element .dsp_btn_profile_selected{
         border-color: transparent;
+        border-radius: 8px;
         box-shadow: var(--opd-profile-selected-shadow);
+    }
+    #opd_main_element .dsp_profile_list .dsp_btn_parent{
+        border-radius: 8px;
     }
     #opd_main_element .dsp_btn_profile_selected .dsp_btn_label{
         font-weight: 600;
