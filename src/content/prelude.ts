@@ -734,8 +734,8 @@ export function open_opd_dialog({
                 ) => {
                     if (closing) return;
                     closing = true;
-                    cleanup_content?.();
                     await animate_dialog_exit(overlay, dialog);
+                    cleanup_content?.();
                     document.removeEventListener("keydown", key_listener, true);
                     overlay.remove();
                     if (previous_active_element instanceof HTMLElement) {

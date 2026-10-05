@@ -976,7 +976,6 @@ export function run(settings) {
         }
 
         & #api_limit_status:hover,
-        & .dsp_btn_parent:hover,
         & .dsp_column_btn:hover {
             background: #3f4752;
         }
@@ -1126,9 +1125,13 @@ export function run(settings) {
         gap: 0;
     }
     .opd_ui_brand{display:flex;align-items:center;gap:0.75rem;}
+    .opd_ui_brand::part(base){padding:0;border:0;background:transparent;color:inherit;gap:0.75rem;border-radius:8px;}
+    .opd_ui_brand::part(label){display:contents;}
     #opd_main_element .opd_ui_logo_parent .opd_global_settings_button{margin-left:0;}
     #opd_main_element:not(.opd_sidebar_collapsed) .dsp_btn_parent{
-        padding-inline: 10px;
+        padding-inline: 8px;
+        margin-inline: 6px;
+        width: calc(100% - 12px);
     }
     #opd_main_element:not(.opd_sidebar_collapsed) .opd_api_sidebar{
         padding-inline: 6px;
@@ -1148,15 +1151,28 @@ export function run(settings) {
     #opd_main_element .dsp_btn_parent{
         height: 40px;
         border-radius: 8px;
-        gap: 12px;
+        gap: 8px;
         transition: background-color 140ms ease;
     }
     #opd_main_element .dsp_btn_parent:hover{
         border-color: transparent;
+        background: var(--opd-hover);
     }
     #opd_main_element .dsp_btn_label{
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
+    }
+    #opd_main_element .dsp_btn_parent .dsp_btn_icon_wrap{
+        width:18px;
+        min-width:18px;
+        height:18px;
+    }
+    #opd_main_element .dsp_btn_parent .dsp_btn_icon_wrap > div:not(.dsp_btn_change_profile_btn){
+        width:18px;
+        height:18px;
+        background-size:contain;
+        background-position:center;
+        flex-shrink:0;
     }
     #opd_main_element .dsp_btn_profile_selected{
         border-color: transparent;
@@ -1499,8 +1515,10 @@ export function run(settings) {
     settings_button.appendChild(settings_icon);
     const logo_parent = document.querySelector(".opd_ui_logo_parent");
     if (logo_parent) {
-        const brand = document.createElement("div");
+        const brand = document.createElement("wa-button");
         brand.className = "opd_ui_brand";
+        brand.setAttribute("aria-label", i18n_message("ui_about_title"));
+        brand.setAttribute("appearance", "plain");
         for (const child of Array.from(logo_parent.children)) {
             brand.appendChild(child);
         }
@@ -1817,7 +1835,7 @@ export function run(settings) {
         );
     }
     // Open About page.
-    const ui_logo = document.querySelector(".opd_ui_logo");
+    const ui_logo = document.querySelector(".opd_ui_brand");
     if (ui_logo) {
         ui_logo.addEventListener("click", async function () {
             await open_about_page_modal();
