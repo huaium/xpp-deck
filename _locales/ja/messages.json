@@ -263,6 +263,9 @@
     "msg_explore_unpin_confirm": {
         "message": "ピン止めを解除します"
     },
+    "msg_column_close_confirm": {
+        "message": "このカラムを閉じますか？"
+    },
     "msg_pinned_column_close_confirm": {
         "message": "ピン止めされているカラムです\nカラムを閉じますか？"
     },

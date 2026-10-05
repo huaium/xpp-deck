@@ -263,6 +263,9 @@
     "msg_explore_unpin_confirm": {
         "message": "Unpin this location?"
     },
+    "msg_column_close_confirm": {
+        "message": "Close this column?"
+    },
     "msg_pinned_column_close_confirm": {
         "message": "This column is pinned.\nClose the column?"
     },

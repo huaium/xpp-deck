@@ -3281,12 +3281,15 @@ export function run(settings) {
     function column_close() {
         const close_buttons = document.querySelectorAll(".column_close_btn");
         for (let index = 0; index < close_buttons.length; index++) {
+            if (close_buttons[index].hasAttribute("opd_close_bound")) continue;
+            close_buttons[index].setAttribute("opd_close_bound", "");
+            let confirmation_pending = false;
             close_buttons[index].addEventListener("click", async function (ev) {
                 const close_button =
                     ev.currentTarget instanceof HTMLElement
                         ? ev.currentTarget
                         : null;
-                if (!close_button) return;
+                if (!close_button || confirmation_pending) return;
                 const column_element = close_button.closest(".dsp_column")!;
                 if (!column_element) return;
                 const pin_checkbox_element =
@@ -3295,22 +3298,23 @@ export function run(settings) {
                     pin_checkbox_element instanceof HTMLInputElement
                         ? pin_checkbox_element.checked
                         : undefined;
-                if (pin_checkbox == false || pin_checkbox == undefined) {
-                    column_element.remove();
-                    append_object_css();
-                    //column_dd();
-                    column_settings_save("", last_load_profile);
-                } else {
+                confirmation_pending = true;
+                try {
                     if (
                         await opd_confirm(
-                            i18n_message("msg_pinned_column_close_confirm"),
-                        )
+                            i18n_message(
+                                pin_checkbox
+                                    ? "msg_pinned_column_close_confirm"
+                                    : "msg_column_close_confirm",
+                            ),
+                        ) && column_element.isConnected
                     ) {
                         column_element.remove();
                         append_object_css();
-                        //column_dd();
                         column_settings_save("", last_load_profile);
                     }
+                } finally {
+                    confirmation_pending = false;
                 }
             });
         }
