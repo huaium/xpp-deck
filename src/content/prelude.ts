@@ -909,6 +909,13 @@ document.addEventListener("keyup", (event) => {
 });
 // Watch storage updates (mainly for API rate-limit status).
 export let api_limit_obj: ApiAccessLimit | null = null;
+let rate_limit_until = 0;
+chrome.storage.local.get("opd_rate_limit_until", (value) => {
+    rate_limit_until = Math.max(rate_limit_until, Number(value.opd_rate_limit_until) || 0);
+});
+export function api_refresh_paused() {
+    return Date.now() < rate_limit_until;
+}
 function api_icon_path(index: number) {
     const paths = [
         "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
@@ -1043,6 +1050,9 @@ type ApiAccessLimit = {
     };
 };
 chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (changes.opd_rate_limit_until) {
+        rate_limit_until = Math.max(rate_limit_until, Number(changes.opd_rate_limit_until.newValue) || 0);
+    }
     if (changes.api_access_limit != undefined) {
         //console.log(changes)
         api_limit_obj = (changes.api_access_limit.newValue ??

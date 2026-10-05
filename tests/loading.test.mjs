@@ -301,6 +301,8 @@ test("auto-refresh rechecks enabled and hover state before a paced dispatch", ()
             "",
             {
                 load_scheduler: h.scheduler,
+                document: { hidden: false },
+                api_refresh_paused: () => false,
                 column_load_priority: () => 0,
                 setTimeout: h.setTimeout,
                 clearTimeout: h.clearTimeout,

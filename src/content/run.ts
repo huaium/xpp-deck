@@ -1,5 +1,6 @@
 import {
     open_api_limits_dialog,
+    api_refresh_paused,
     animate_ui_entrance,
     animate_sidebar_change,
     create_api_sidebar_html,
@@ -134,6 +135,7 @@ export function run(settings) {
     ) {
         const eligible = () => {
             if (!frame.isConnected || !frame.contentWindow) return false;
+            if (document.hidden || api_refresh_paused() || column_load_priority(frame) !== 0) return false;
             const enabled = frame
                 .closest("div[opd_column_type]")
                 ?.querySelector<HTMLInputElement>(".opd_a_reload_bar")?.checked;

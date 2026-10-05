@@ -65,7 +65,7 @@ test("Vite produces standalone classic scripts and complete browser distribution
             window: { matchMedia: () => ({ matches: false }) },
             chrome: {
                 runtime: { getManifest: () => ({ version: "1" }) },
-                storage: { onChanged: { addListener() {} } },
+                storage: { local: { get(key, callback) { callback({}); } }, onChanged: { addListener() {} } },
             },
         };
         assert.doesNotThrow(() =>

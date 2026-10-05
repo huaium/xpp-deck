@@ -44,6 +44,7 @@ interface ChromeWebRequest {
         addListener(
             callback: (details: {
                 url: string;
+                statusCode?: number;
                 responseHeaders?: Array<{
                     name?: string;
                     value?: string;

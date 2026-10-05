@@ -57,6 +57,9 @@ test("pages without an in-place refresh hook use queued reloads and pause while 
             ["queue_column_auto_refresh"],
             "",
             {
+                document: { hidden: false },
+                api_refresh_paused: () => false,
+                column_load_priority: () => 0,
                 queue_column_navigation: (_frame, start, valid) => {
                     assert.equal(valid(), true);
                     queued++;
