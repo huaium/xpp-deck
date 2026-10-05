@@ -150,11 +150,11 @@ try {
     await login.waitForLoadState();
     assert.equal(login.url(), "https://x.com/i/flow/login");
     await login.close();
-    await page.locator("#opd_welcome button").waitFor({ state: "visible" });
+    await page.locator("#opd_welcome wa-button").waitFor({ state: "visible" });
     await page.evaluate(() => {
         document.getElementById("react-root").replaceChildren();
     });
-    await page.locator("#opd_welcome button").click();
+    await page.locator("#opd_welcome wa-button").click();
     await page.waitForFunction(
         () =>
             document.querySelector("#opd_welcome h1")?.textContent ===
@@ -180,37 +180,35 @@ try {
     assert.equal(await page.locator("#switch_theme").isVisible(), false);
     assert.equal(await page.locator("#second_rack").isVisible(), false);
     assert.equal(await page.locator("#opd_language_select").isVisible(), false);
-    await page
-        .locator('wa-button[data-native-class="opd_global_settings_button"]')
-        .click();
+    await page.locator("wa-button.opd_global_settings_button").click();
     const globalSettings = page.locator(".opd_global_settings_controls");
     await globalSettings.waitFor({ state: "visible" });
     assert.equal(
-        await globalSettings
-            .locator('wa-select[data-native-id="opd_theme_select"]')
-            .isVisible(),
+        await page
+            .locator("wa-dialog.opd_wa_dialog")
+            .evaluate((dialog) => dialog.open),
+        true,
+    );
+    assert.equal(
+        await globalSettings.locator("wa-select#opd_theme_select").isVisible(),
         true,
     );
     assert.equal(
         await globalSettings
-            .locator('wa-select[data-native-id="opd_theme_select"]')
+            .locator("wa-select#opd_theme_select")
             .evaluate((control) => control.value),
         "system",
     );
+    await globalSettings.locator("wa-select#opd_theme_select").click();
     await globalSettings
-        .locator('wa-select[data-native-id="opd_theme_select"]')
-        .click();
-    await globalSettings
-        .locator(
-            'wa-select[data-native-id="opd_theme_select"] wa-option[value="dark"]',
-        )
+        .locator('wa-select#opd_theme_select wa-option[value="dark"]')
         .click();
     assert.equal(
         await page.locator("#opd_main_element").getAttribute("opd-dsp-theme"),
         "dark",
     );
     await globalSettings
-        .locator('wa-select[data-native-id="opd_theme_select"]')
+        .locator("wa-select#opd_theme_select")
         .evaluate((control, value) => {
             control.value = value;
             control.dispatchEvent(
@@ -222,7 +220,7 @@ try {
         "light",
     );
     await globalSettings
-        .locator('wa-select[data-native-id="opd_theme_select"]')
+        .locator("wa-select#opd_theme_select")
         .evaluate((control, value) => {
             control.value = value;
             control.dispatchEvent(
@@ -230,45 +228,37 @@ try {
             );
         }, "system");
     assert.equal(
-        await globalSettings
-            .locator('wa-select[data-native-id="opd_layout_select"]')
-            .isVisible(),
+        await globalSettings.locator("wa-select#opd_layout_select").isVisible(),
         true,
     );
     assert.equal(
         await globalSettings
-            .locator('wa-select[data-native-id="opd_language_select"]')
+            .locator("wa-select#opd_language_select")
             .isVisible(),
         true,
     );
     const themeBounds = await globalSettings
-        .locator('wa-select[data-native-id="opd_theme_select"]')
+        .locator("wa-select#opd_theme_select")
         .boundingBox();
     const layoutBounds = await globalSettings
-        .locator('wa-select[data-native-id="opd_layout_select"]')
+        .locator("wa-select#opd_layout_select")
         .boundingBox();
     const languageBounds = await globalSettings
-        .locator('wa-select[data-native-id="opd_language_select"]')
+        .locator("wa-select#opd_language_select")
         .boundingBox();
     assert.ok(Math.abs(themeBounds.x - layoutBounds.x) < 1);
     assert.ok(Math.abs(themeBounds.width - layoutBounds.width) < 1);
     assert.ok(Math.abs(themeBounds.x - languageBounds.x) < 1);
     assert.ok(Math.abs(themeBounds.width - languageBounds.width) < 1);
-    await page
-        .locator('wa-button[data-native-class="opd_dialog_primary"]')
-        .click();
+    await page.locator("wa-button.opd_dialog_primary").click();
     await globalSettings.waitFor({ state: "detached" });
-    await page
-        .locator('wa-button[data-native-class="opd_global_settings_button"]')
-        .click();
+    await page.locator("wa-button.opd_global_settings_button").click();
     await globalSettings.waitFor({ state: "visible" });
     await page.keyboard.press("Escape");
     await globalSettings.waitFor({ state: "detached" });
-    await page
-        .locator('wa-button[data-native-class="opd_global_settings_button"]')
-        .click();
+    await page.locator("wa-button.opd_global_settings_button").click();
     await globalSettings
-        .locator('wa-select[data-native-id="opd_layout_select"]')
+        .locator("wa-select#opd_layout_select")
         .evaluate((control, value) => {
             control.value = value;
             control.dispatchEvent(
@@ -276,17 +266,15 @@ try {
             );
         }, "double");
     await globalSettings.waitFor({ state: "detached" });
-    await page
-        .locator('wa-button[data-native-class="opd_global_settings_button"]')
-        .click();
+    await page.locator("wa-button.opd_global_settings_button").click();
     assert.equal(
         await globalSettings
-            .locator('wa-select[data-native-id="opd_layout_select"]')
+            .locator("wa-select#opd_layout_select")
             .evaluate((control) => control.value),
         "double",
     );
     await globalSettings
-        .locator('wa-select[data-native-id="opd_layout_select"]')
+        .locator("wa-select#opd_layout_select")
         .evaluate((control, value) => {
             control.value = value;
             control.dispatchEvent(
@@ -294,23 +282,28 @@ try {
             );
         }, "single");
     await globalSettings.waitFor({ state: "detached" });
-    await page
-        .locator('wa-button[data-native-class="opd_dialog_primary"]')
-        .click();
+    await page.locator("wa-button.opd_dialog_primary").click();
     await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
-    await page
-        .locator('wa-button[data-native-class="opd_global_settings_button"]')
-        .click();
+    await page.locator("wa-button.opd_global_settings_button").click();
     assert.equal(
         await globalSettings
-            .locator('wa-select[data-native-id="opd_layout_select"]')
+            .locator("wa-select#opd_layout_select")
             .evaluate((control) => control.value),
         "single",
     );
     await page.keyboard.press("Escape");
     await globalSettings.waitFor({ state: "detached" });
     const post = page.locator('[opd_column_type="post"]');
-    assert.equal(await page.locator(".column_bar wa-checkbox").count(), 0);
+    assert.ok((await page.locator(".column_bar wa-checkbox").count()) > 0);
+    assert.equal(
+        await page.evaluate(
+            () =>
+                document.querySelectorAll(
+                    "#opd_main_element input, #opd_main_element select, .opd_dialog_overlay input, .opd_dialog_overlay select",
+                ).length,
+        ),
+        0,
+    );
     for (const control of [".opd_banner", ".opd_pinned_btn"]) {
         assert.equal(
             await home.locator(control).evaluate((input) => input.hidden),
@@ -318,6 +311,14 @@ try {
         );
     }
     assert.equal(await home.locator(".dsp_column_pin_btn").isVisible(), true);
+    await home.locator("wa-checkbox.opd_pinned_btn").click();
+    await page.locator(".opd_dialog wa-button.opd_dialog_primary").click();
+    await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
+    assert.equal(await home.getAttribute("opd_pinned_path"), "/home");
+    await home.locator("wa-checkbox.opd_pinned_btn").click();
+    await page.locator(".opd_dialog wa-button.opd_dialog_primary").click();
+    await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
+    assert.equal(await home.getAttribute("opd_pinned_path"), "");
     assert.equal(
         await home.locator(".dsp_column_banner_btn").isVisible(),
         true,
@@ -338,15 +339,11 @@ try {
                 .closest(".dsp_column_btn").style.display !== "none",
     );
     await home.locator(".dsp_column_settings_btn").click();
-    await home
-        .locator('wa-select[data-native-class~="opd_tw_view_mode"]')
-        .evaluate((control) => {
-            control.value = "2";
-            control.dispatchEvent(
-                new window.Event("change", { bubbles: true }),
-            );
-        });
-    await home.locator(".dsp_column_settings_panel_close_btn").click();
+    await home.locator("wa-select.opd_tw_view_mode").evaluate((control) => {
+        control.value = "2";
+        control.dispatchEvent(new window.Event("change", { bubbles: true }));
+    });
+    await home.locator("wa-button.dsp_column_settings_panel_close_btn").click();
     await page.waitForFunction(
         () =>
             document.querySelector(
@@ -381,9 +378,7 @@ try {
         "Profile 1",
     );
     await page.locator(".opd_dialog wa-input input").fill("Work");
-    await page
-        .locator('wa-button[data-native-class="opd_dialog_primary"]')
-        .click();
+    await page.locator("wa-button.opd_dialog_primary").click();
     assert.equal(
         await page.locator("#userProfile-1 .dsp_btn_label").textContent(),
         "Work",
@@ -415,9 +410,7 @@ try {
     );
     await page.locator("#sidebar_fold_toggle").click();
     await page.locator("#profile_save").click();
-    await page
-        .locator('wa-button[data-native-class="opd_dialog_primary"]')
-        .click();
+    await page.locator("wa-button.opd_dialog_primary").click();
     await page.locator("#profile_save").click();
     assert.equal(
         await page
@@ -426,9 +419,7 @@ try {
         "Profile 2",
     );
     await page
-        .locator(
-            '.opd_dialog_actions wa-button:not([data-native-class="opd_dialog_primary"])',
-        )
+        .locator(".opd_dialog_actions wa-button:not(.opd_dialog_primary)")
         .click();
     assert.deepEqual(errors, []);
     console.log(

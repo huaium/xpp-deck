@@ -1,3 +1,6 @@
+import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
+import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js";
+import type WaButton from "@awesome.me/webawesome/dist/components/button/button.js";
 import { is_deck_location } from "./session";
 
 export const manifest = chrome.runtime.getManifest();
@@ -271,7 +274,7 @@ export const ui_icon_define = {
     switch_theme: "public/icons/switch_theme.svg",
 };
 export function create_sidebar_button_html(id, title, icon_class, label) {
-    return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
+    return `<wa-button appearance="plain" class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></wa-button>`;
 }
 export function profile_display_name(profile, index: number): string {
     const name = typeof profile?.name === "string" ? profile.name.trim() : "";
@@ -307,7 +310,7 @@ function create_profile_button_html(index, current_profile_index, profile) {
         index === current_profile_index ? " dsp_btn_profile_selected" : "";
     const name = profile_display_name(profile, index);
     const initial = Array.from(name)[0];
-    return `<div class="dsp_btn_parent${selected_profile_class}" title="${escape_profile_name(name)}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${escape_profile_name(initial)}</div></div><span class="dsp_btn_label">${escape_profile_name(name)}</span></div>`;
+    return `<wa-button appearance="plain" class="dsp_btn_parent${selected_profile_class}" title="${escape_profile_name(name)}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${escape_profile_name(initial)}</div></div><span class="dsp_btn_label">${escape_profile_name(name)}</span></wa-button>`;
 }
 export function create_profile_list_buttons_html(
     profile_length,
@@ -333,10 +336,10 @@ export function create_language_select_html() {
     const options = Object.entries(supported_languages)
         .map(
             ([code, name]) =>
-                `<option value="${code}" ${opd_i18n_language === code ? "selected" : ""}>${name}</option>`,
+                `<wa-option value="${code}" ${opd_i18n_language === code ? "selected" : ""}>${name}</wa-option>`,
         )
         .join("");
-    return `<div class="opd_language_select_wrap" title="${i18n_message("ui_language_selector_title")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message("ui_language_selector_label")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message("ui_language_option_system")}</option>${options}</select></div>`;
+    return `<div class="opd_language_select_wrap" title="${i18n_message("ui_language_selector_title")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message("ui_language_selector_label")}</div><wa-select id="opd_language_select" class="opd_language_select"><wa-option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message("ui_language_option_system")}</wa-option>${options}</wa-select></div>`;
 }
 export function i18n_message_or_fallback(
     message_id: string,
@@ -665,21 +668,21 @@ export function open_opd_dialog({
                 message_elem.textContent = `${message}`;
                 dialog.appendChild(message_elem);
                 const cleanup_content = mount?.(dialog);
-                let prompt_input: HTMLInputElement | HTMLSelectElement | null =
-                    null;
+                let prompt_input: WaInput | WaSelect | null = null;
                 if (type == "prompt") {
-                    prompt_input = document.createElement("input");
+                    prompt_input = document.createElement("wa-input");
                     prompt_input.className = "opd_dialog_input";
+                    prompt_input.setAttribute("aria-label", message);
                     prompt_input.type = "text";
                     prompt_input.value = defaultValue ?? "";
                     dialog.appendChild(prompt_input);
                 }
                 if (type == "select") {
-                    const select = document.createElement("select");
+                    const select = document.createElement("wa-select");
                     select.className = "opd_dialog_input";
                     select.setAttribute("aria-label", message);
                     for (const choice of choices ?? []) {
-                        const option = document.createElement("option");
+                        const option = document.createElement("wa-option");
                         option.value = choice.value;
                         option.textContent = choice.label;
                         select.appendChild(option);
@@ -690,16 +693,17 @@ export function open_opd_dialog({
                 }
                 const action_row = document.createElement("div");
                 action_row.className = "opd_dialog_actions";
-                const ok_button = document.createElement("button");
+                const ok_button = document.createElement("wa-button");
                 ok_button.type = "button";
                 ok_button.textContent = i18n_message_or_fallback(
                     "ui_dialog_ok_button",
                     "OK",
                 );
                 ok_button.className = "opd_dialog_primary";
-                let cancel_button: HTMLButtonElement | null = null;
+                ok_button.variant = "brand";
+                let cancel_button: WaButton | null = null;
                 if (type != "alert") {
-                    cancel_button = document.createElement("button");
+                    cancel_button = document.createElement("wa-button");
                     cancel_button.type = "button";
                     cancel_button.textContent = i18n_message_or_fallback(
                         "ui_dialog_cancel_button",
@@ -740,6 +744,16 @@ export function open_opd_dialog({
                     resolve(result);
                 };
                 const key_listener = (event: KeyboardEvent) => {
+                    if (
+                        event.key === "Escape" &&
+                        (event.composedPath?.() ?? []).some(
+                            (node) =>
+                                node instanceof HTMLElement &&
+                                node.tagName === "WA-SELECT" &&
+                                (node as WaSelect).open,
+                        )
+                    )
+                        return;
                     if (closing) {
                         event.preventDefault();
                         event.stopPropagation();
@@ -808,7 +822,7 @@ export function open_opd_dialog({
                         } else if (type == "confirm") {
                             finish(true);
                         } else if (type == "prompt" || type == "select") {
-                            finish(prompt_input?.value ?? "");
+                            finish(String(prompt_input?.value ?? ""));
                         } else {
                             finish(undefined);
                         }
@@ -821,7 +835,7 @@ export function open_opd_dialog({
                     if (type == "confirm") {
                         finish(true);
                     } else if (type == "prompt" || type == "select") {
-                        finish(prompt_input?.value ?? "");
+                        finish(String(prompt_input?.value ?? ""));
                     } else {
                         finish(undefined);
                     }
@@ -831,14 +845,15 @@ export function open_opd_dialog({
                         finish(type == "confirm" ? false : null);
                     });
                 }
-                if (prompt_input != null) {
-                    prompt_input.focus();
-                    if (type == "prompt") {
-                        (prompt_input as HTMLInputElement).select();
-                    }
-                } else {
-                    ok_button.focus();
-                }
+                const initial_focus = prompt_input ?? ok_button;
+                const focus = () => {
+                    if (closing) return;
+                    initial_focus.focus();
+                    if (type === "prompt") (prompt_input as WaInput).select();
+                };
+                if (initial_focus.updateComplete)
+                    void initial_focus.updateComplete.then(focus);
+                else focus();
             }),
     );
 }
@@ -882,9 +897,10 @@ export async function open_about_page_modal() {
                     "ui_about_title",
                     "About",
                 );
-                const close_button = document.createElement("button");
+                const close_button = document.createElement("wa-button");
                 close_button.type = "button";
                 close_button.className = "opd_about_close";
+                close_button.appearance = "plain";
                 close_button.setAttribute(
                     "aria-label",
                     i18n_message_or_fallback(
@@ -934,12 +950,13 @@ export async function open_about_page_modal() {
                 const get_focusable_elements = (): HTMLElement[] =>
                     Array.from(
                         dialog.querySelectorAll(
-                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                            'button, wa-button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                         ),
                     ).filter(
                         (elem): elem is HTMLElement =>
                             elem instanceof HTMLElement &&
-                            !elem.hasAttribute("disabled"),
+                            !elem.hasAttribute("disabled") &&
+                            !elem.hidden,
                     );
 
                 let closing = false;
@@ -1006,7 +1023,11 @@ export async function open_about_page_modal() {
                         finish();
                     }
                 });
-                close_button.focus();
+                if (close_button.updateComplete)
+                    void close_button.updateComplete.then(() => {
+                        if (!closing) close_button.focus();
+                    });
+                else close_button.focus();
             }),
     );
 }
@@ -1043,7 +1064,7 @@ function api_icon_path(index: number) {
     return paths[index];
 }
 export function create_api_sidebar_html() {
-    return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<button type="button" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${api_icon_path(index)}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></button>`).join("")}</div>`;
+    return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<wa-button appearance="plain" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${api_icon_path(index)}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></wa-button>`).join("")}</div>`;
 }
 export function update_api_sidebar() {
     for (const [key, label] of [

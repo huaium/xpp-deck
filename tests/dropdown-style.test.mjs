@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 
-test("shared dropdown arrows cover deck and dialog controls without duplicate styles", () => {
+test("shared Web Awesome styling covers deck and dialog controls without duplicate styles", () => {
     const styles = [];
     const { ensure_dropdown_style } = loadFunctions(
         "../src/content/dropdown-style.ts",
@@ -21,9 +21,11 @@ test("shared dropdown arrows cover deck and dialog controls without duplicate st
     assert.equal(styles.length, 1);
     assert.match(
         styles[0].textContent,
-        /#opd_main_element select, \.opd_dialog_overlay select/,
+        /#opd_main_element wa-select,\.opd_dialog_overlay wa-select/,
     );
-    assert.match(styles[0].textContent, /right 12px center/);
-    assert.match(styles[0].textContent, /padding-right:40px/);
-    assert.match(styles[0].textContent, /\.opd_dialog_theme_dark select/);
+    assert.match(styles[0].textContent, /wa-select::part\(combobox\)/);
+    assert.doesNotMatch(
+        styles[0].textContent,
+        /data:image\/svg|appearance:none/,
+    );
 });

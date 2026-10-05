@@ -39,7 +39,14 @@ export function dialogHarness() {
             return this.children
                 .flatMap((child) => [child, ...child.querySelectorAll()])
                 .filter((child) =>
-                    ["button", "input", "select"].includes(child.tag),
+                    [
+                        "button",
+                        "input",
+                        "select",
+                        "wa-button",
+                        "wa-input",
+                        "wa-select",
+                    ].includes(child.tag),
                 );
         }
         addEventListener(name, fn) {

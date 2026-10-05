@@ -69,7 +69,7 @@ test("language selection saves changes before reload and ignores unchanged value
             ["language_select_handler"],
             "",
             {
-                HTMLSelectElement: Select,
+                HTMLElement: Select,
                 opd_i18n_language: "browser",
                 request_page_reload: () => {
                     reloads++;
@@ -89,6 +89,7 @@ test("language selection saves changes before reload and ignores unchanged value
         );
         const select = new Select();
         select.value = language;
+        select.tagName = "WA-SELECT";
         change({ currentTarget: select });
         assert.equal(reloads, language === "browser" ? 0 : 1);
         assert.equal(writes.length, reloads);

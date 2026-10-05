@@ -1,3 +1,7 @@
+import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
+import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js";
+import type WaCheckbox from "@awesome.me/webawesome/dist/components/checkbox/checkbox.js";
+import type WaButton from "@awesome.me/webawesome/dist/components/button/button.js";
 import {
     open_api_limits_dialog,
     api_refresh_paused,
@@ -144,7 +148,7 @@ export function run(settings) {
                 return false;
             const enabled = frame
                 .closest("div[opd_column_type]")
-                ?.querySelector<HTMLInputElement>(".opd_a_reload_bar")?.checked;
+                ?.querySelector<WaCheckbox>(".opd_a_reload_bar")?.checked;
             return (
                 enabled === true &&
                 frame.getAttribute("auto_reload_mouse_hover") !== "true"
@@ -796,10 +800,10 @@ export function run(settings) {
         width: 22px;
         height: 22px;
     }
-    input:checked + .dsp_column_banner_btn{
+    wa-checkbox[checked] + .dsp_column_banner_btn{
         transform: rotate(0deg);
     }
-    .dsp_column_btn input{
+    .dsp_column_btn wa-checkbox{
         opacity: 0;
         position: absolute;
         z-index: 10;
@@ -825,7 +829,7 @@ export function run(settings) {
         width: 18px;
         height: 18px;    
     }
-    input:checked + .dsp_column_pin_btn{
+    wa-checkbox[checked] + .dsp_column_pin_btn{
         background-image: url(${chrome.runtime.getURL(ui_icon_define.column_pinned)});
     }
     .dsp_column_pin_btn input{
@@ -1290,28 +1294,28 @@ export function run(settings) {
     </style>`,
     );
     // Create and insert column elements.
-    let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span>`;
-    let refresh_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_refresh_btn opd_ui_icon_color" title="${i18n_message("ui_column_refresh_title")}"><input class="column_refresh_btn" type="button" value="R"></label></span>`;
-    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
+    let default_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_settings_btn opd_ui_icon_color opd_settings_btn" title="${i18n_message("ui_column_settings_title")}"></wa-button></span><span class="dsp_column_btn"><wa-checkbox class="opd_banner" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%></wa-checkbox><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span>`;
+    let refresh_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_refresh_btn opd_ui_icon_color column_refresh_btn" title="${i18n_message("ui_column_refresh_title")}"></wa-button></span>`;
+    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><wa-select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><wa-option value="0">${i18n_message("ui_settings_view_mode_all")}</wa-option><wa-option value="1">${i18n_message("ui_settings_view_mode_text_only")}</wa-option><wa-option value="2">${i18n_message("ui_settings_view_mode_media_only")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><wa-select class="opd_column_size_preset"><wa-option value="0">${i18n_message("ui_settings_column_width_small")}</wa-option><wa-option value="1">${i18n_message("ui_settings_column_width_medium")}</wa-option><wa-option value="2">${i18n_message("ui_settings_column_width_large")}</wa-option><wa-option value="3">${i18n_message("ui_settings_column_width_custom")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><wa-button class="column_width_btn">${i18n_message("ui_settings_column_width_custom_button")}</wa-button></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><wa-checkbox class="opd_a_reload_bar" %column_auto_reload_ch%></wa-checkbox></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><wa-input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%"></wa-input>${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><wa-button class="dsp_column_settings_panel_close_btn">${i18n_message("ui_settings_close_button")}</wa-button></div></div></div>`;
     let default_element = {
         /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" opd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
         empty_column: {
             html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_emptycolumn"><div opd_column_type="empty_column" opd_column_width="%column_width_num%" style="height: 100%;min-width: 30rem;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_1)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_empty_column_message")}</p></div></div></section>`,
         },
         post: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_post_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_post_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         second_empty_column: {
             html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_second_emptycolumn"><div opd_column_type="second_empty_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 30rem;overflow: hidden;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_2)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_second_empty_column_message")}</p></div></div></section>`,
         },
         home: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_timeline_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_timeline_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         notification: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_notifications_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe allow="fullscreen" data-opd-src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_notifications_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe allow="fullscreen" data-opd-src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         explore: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_explore_title")}</span></div></span>${default_element_bar}<span class="dsp_column_btn"><input class="opd_pinned_btn" type="checkbox" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span>${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><label class="dsp_column_close_btn opd_ui_icon_color" title="${i18n_message("ui_column_close_title")}"><input type="button" class="column_close_btn" value="X"/></label></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_explore_title")}</span></div></span>${default_element_bar}<span class="dsp_column_btn"><wa-checkbox class="opd_pinned_btn" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%></wa-checkbox><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span>${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
     };
     let ins_html = document.createElement("div");
@@ -1320,8 +1324,7 @@ export function run(settings) {
         "style",
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;",
     );
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_api_sidebar_html()}${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<input type="button" id="init_settings" value="${i18n_message("ui_button_init_settings")}" /><input type="button" id="dnr_reload" value="${i18n_message("ui_button_dnr_reload")}" /><input type="button" id="ext_reload" value="${i18n_message("ui_button_ext_reload")}" /></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
-    //let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 100px;text-align: center;background-color: white;"><div><p style="margin-top:0;padding-top:1em;">XPP-Deck<br>Prototype<br>v${manifest.version}</p><hr><p>Debug<br><input type="button" id="init_settings" value="init settings"/><br><br><input type="button" id="dnr_reload" value="dNR_Reload"/><br><input type="button" id="ext_reload" value="Ext_Reload"/></p><hr><p><input type="button" id="add_timeline" value="Add TimeLine"/> <div class="dsp_btn_parent"><div class="dsp_btn_add_tl_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_ntfc_img"></div></div><div class="dsp_btn_parent"><div class="dsp_btn_add_explr_img"></div></div> </p><p><input type="button" id="add_notify" value="Add Notification"/></p><p><input type="button" id="add_explore" value="Add Explore"/><hr><input type="button" id="second_rack" value="Second Rack"/><hr><input type="button" id="profile_save" value="Profile_Save"/><br><input type="button" id="profile_delete" value="Profile_Delete"/><br>${profile_list_html}</p></div></div></section><section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: 110px;"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_api_sidebar_html()}${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<div class="opd_debug_menu">${i18n_message("ui_debug_menu_label")}<wa-button id="init_settings">${i18n_message("ui_button_init_settings")}</wa-button><wa-button id="dnr_reload">${i18n_message("ui_button_dnr_reload")}</wa-button><wa-button id="ext_reload">${i18n_message("ui_button_ext_reload")}</wa-button></div><hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
     // Two-row layout settings.
@@ -1460,8 +1463,8 @@ export function run(settings) {
     }
     const switch_theme_button =
         document.querySelector<HTMLElement>("#switch_theme");
-    const settings_button = document.createElement("button");
-    settings_button.type = "button";
+    const settings_button = document.createElement("wa-button");
+    settings_button.appearance = "plain";
     settings_button.className = "opd_global_settings_button";
     const settings_title = i18n_message_or_fallback(
         "ui_global_settings_title",
@@ -1499,14 +1502,14 @@ export function run(settings) {
                     "ui_theme_label",
                     "Theme",
                 );
-                const theme_select = document.createElement("select");
+                const theme_select = document.createElement("wa-select");
                 theme_select.id = "opd_theme_select";
                 for (const [value, fallback] of [
                     ["system", "System"],
                     ["light", "Light"],
                     ["dark", "Dark"],
                 ]) {
-                    const option = document.createElement("option");
+                    const option = document.createElement("wa-option");
                     option.value = value;
                     option.textContent = i18n_message_or_fallback(
                         "ui_theme_" + value,
@@ -1538,14 +1541,14 @@ export function run(settings) {
                             "ui_layout_label",
                             "Layout",
                         );
-                        const select = document.createElement("select");
+                        const select = document.createElement("wa-select");
                         select.id = "opd_layout_select";
                         select.setAttribute("aria-label", label.textContent);
                         for (const [value, fallback] of [
                             ["single", "One row"],
                             ["double", "Two rows"],
                         ]) {
-                            const option = document.createElement("option");
+                            const option = document.createElement("wa-option");
                             option.value = value;
                             option.textContent = i18n_message_or_fallback(
                                 "ui_layout_" + value,
@@ -1581,7 +1584,7 @@ export function run(settings) {
                     attributeFilter: ["opd-dsp-theme"],
                 });
                 queueMicrotask(() => {
-                    const close = dialog.querySelector<HTMLButtonElement>(
+                    const close = dialog.querySelector<WaButton>(
                         ".opd_dialog_primary",
                     );
                     if (close)
@@ -1594,10 +1597,19 @@ export function run(settings) {
                 const layout = document.getElementById("second_rack");
                 const close_before_layout = () =>
                     dialog
-                        .querySelector<HTMLButtonElement>(".opd_dialog_primary")
+                        .querySelector<WaButton>(".opd_dialog_primary")
                         ?.click();
                 const close_on_escape = (event: KeyboardEvent) => {
                     if (event.key !== "Escape") return;
+                    if (
+                        (event.composedPath?.() ?? []).some(
+                            (node) =>
+                                node instanceof HTMLElement &&
+                                node.tagName === "WA-SELECT" &&
+                                (node as WaSelect).open,
+                        )
+                    )
+                        return;
                     event.preventDefault();
                     event.stopImmediatePropagation();
                     close_before_layout();
@@ -1623,7 +1635,7 @@ export function run(settings) {
             },
         });
     });
-    const language_select = document.querySelector<HTMLSelectElement>(
+    const language_select = document.querySelector<WaSelect>(
         "#opd_language_select",
     );
     const sidebar_toggle_label =
@@ -1673,7 +1685,8 @@ export function run(settings) {
         language_select.value = opd_i18n_language;
         language_select.addEventListener("change", function (ev) {
             const language_select_element =
-                ev.currentTarget instanceof HTMLSelectElement
+                ev.currentTarget instanceof HTMLElement &&
+                ev.currentTarget.tagName === "WA-SELECT"
                     ? ev.currentTarget
                     : null;
             if (!language_select_element) return;
@@ -1807,7 +1820,7 @@ export function run(settings) {
             "#second_rack_element",
         );
         const second_rack_input =
-            document.querySelector<HTMLInputElement>("#second_rack");
+            document.querySelector<WaButton>("#second_rack");
         const second_rack_icon = document.querySelector<HTMLElement>(
             ".dsp_btn_second_rack_img",
         );
@@ -2054,8 +2067,7 @@ export function run(settings) {
         )
             return;
         const column = frame.closest("div[opd_column_type]");
-        const view =
-            column?.querySelector<HTMLSelectElement>(".opd_tw_view_mode");
+        const view = column?.querySelector<WaSelect>(".opd_tw_view_mode");
         if (view && !view.hasAttribute("opd_view_initialized")) {
             view.value = view.getAttribute("column_tw_view_mode_val") ?? "0";
             view.setAttribute("opd_view_initialized", "");
@@ -2064,9 +2076,8 @@ export function run(settings) {
         if (!head) return;
         const styles: Record<string, string> = {
             opd_main_css: "html{scrollbar-width:thin;}",
-            opd_banner_css: column?.querySelector<HTMLInputElement>(
-                ".opd_banner",
-            )?.checked
+            opd_banner_css: column?.querySelector<WaCheckbox>(".opd_banner")
+                ?.checked
                 ? ""
                 : 'header[role="banner"]{display:none;}',
             opd_tw_view_mode_css:
@@ -2148,20 +2159,18 @@ export function run(settings) {
                         "div[opd_column_type]",
                     ) as HTMLElement;
                     const opd_column_width_btn =
-                        opd_column_div.querySelector<HTMLInputElement>(
+                        opd_column_div.querySelector<WaButton>(
                             ".column_width_btn",
                         );
                     const opd_column_width_select =
-                        opd_column_div.querySelector<HTMLSelectElement>(
+                        opd_column_div.querySelector<WaSelect>(
                             ".opd_column_size_preset",
                         );
                     const opd_column_banner_checkbox =
-                        opd_column_div.querySelector<HTMLInputElement>(
-                            ".opd_banner",
-                        );
+                        opd_column_div.querySelector<WaCheckbox>(".opd_banner");
 
                     const opd_column_tw_view_mode_opt =
-                        opd_column_div.querySelector<HTMLSelectElement>(
+                        opd_column_div.querySelector<WaSelect>(
                             ".opd_tw_view_mode",
                         );
                     const opd_column_scroll_to_top =
@@ -2169,7 +2178,7 @@ export function run(settings) {
                             ".opd_column_scroll_to_top",
                         );
                     const opd_column_refresh_btn =
-                        opd_column_div.querySelector<HTMLInputElement>(
+                        opd_column_div.querySelector<WaButton>(
                             ".column_refresh_btn",
                         );
                     let column_content_reload: OpdExtAutoReload | null = null;
@@ -2288,7 +2297,8 @@ export function run(settings) {
                                 function (ev) {
                                     const width_select =
                                         ev.currentTarget instanceof
-                                        HTMLSelectElement
+                                            HTMLElement &&
+                                        ev.currentTarget.tagName === "WA-SELECT"
                                             ? ev.currentTarget
                                             : null;
                                     if (!width_select) return;
@@ -2347,7 +2357,7 @@ export function run(settings) {
                                             ".opd_column_size_preset",
                                         );
                                     const column_width_preset_select =
-                                        column_width_preset as HTMLSelectElement | null;
+                                        column_width_preset as WaSelect | null;
                                     let setting_width = await opd_prompt(
                                         i18n_message("msg_column_width_prompt"),
                                         now_width ?? undefined,
@@ -2490,7 +2500,9 @@ export function run(settings) {
                                 function (ev) {
                                     const banner_checkbox =
                                         ev.currentTarget instanceof
-                                        HTMLInputElement
+                                            HTMLElement &&
+                                        ev.currentTarget.tagName ===
+                                            "WA-CHECKBOX"
                                             ? ev.currentTarget
                                             : null;
                                     if (!banner_checkbox) return;
@@ -2534,7 +2546,10 @@ export function run(settings) {
                                             "head style[opd_banner_css]",
                                         );
                                     if (!banner_style) return;
-                                    if (banner_checkbox.checked != true) {
+                                    if (
+                                        (banner_checkbox as WaCheckbox)
+                                            .checked != true
+                                    ) {
                                         //console.log(this)
                                         banner_style.textContent = `header[role="banner"]{visibility: hidden; width: 0;};`;
                                     } else {
@@ -2558,7 +2573,8 @@ export function run(settings) {
                                 function (ev) {
                                     const tw_view_mode_select =
                                         ev.currentTarget instanceof
-                                        HTMLSelectElement
+                                            HTMLElement &&
+                                        ev.currentTarget.tagName === "WA-SELECT"
                                             ? ev.currentTarget
                                             : null;
                                     if (!tw_view_mode_select) return;
@@ -3273,9 +3289,8 @@ export function run(settings) {
         reload: OpdExtAutoReload | null,
     ) {
         const column = frame.closest("div[opd_column_type]");
-        const enabled =
-            column?.querySelector<HTMLInputElement>(".opd_a_reload_bar");
-        const interval = column?.querySelector<HTMLInputElement>(
+        const enabled = column?.querySelector<WaCheckbox>(".opd_a_reload_bar");
+        const interval = column?.querySelector<WaInput>(
             ".opd_a_reload_time_setting",
         );
         if (
@@ -3331,15 +3346,13 @@ export function run(settings) {
         update();
     }
     function bind_column_pin(column: HTMLElement) {
-        let checkbox =
-            column.querySelector<HTMLInputElement>(".opd_pinned_btn");
+        let checkbox = column.querySelector<WaCheckbox>(".opd_pinned_btn");
         if (!checkbox) {
             const bar = column.querySelector(".column_bar");
             if (!bar) return;
             const wrapper = document.createElement("span");
             wrapper.className = "dsp_column_btn";
-            checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
+            checkbox = document.createElement("wa-checkbox");
             checkbox.className = "opd_pinned_btn";
             checkbox.title = i18n_message("ui_column_pin_toggle_title");
             const label = document.createElement("label");
@@ -3358,7 +3371,7 @@ export function run(settings) {
         if (checkbox.hasAttribute("opd_pin_bound")) return;
         checkbox.setAttribute("opd_pin_bound", "");
         const control = checkbox;
-        control.addEventListener("click", async () => {
+        control.addEventListener("change", async () => {
             control.disabled = true;
             try {
                 let path = "";
@@ -3584,8 +3597,8 @@ export function run(settings) {
                 const pin_checkbox_element =
                     column_element.querySelector(".opd_pinned_btn");
                 const pin_checkbox =
-                    pin_checkbox_element instanceof HTMLInputElement
-                        ? pin_checkbox_element.checked
+                    pin_checkbox_element?.tagName === "WA-CHECKBOX"
+                        ? (pin_checkbox_element as WaCheckbox).checked
                         : undefined;
                 confirmation_pending = true;
                 try {
@@ -3646,7 +3659,7 @@ export function run(settings) {
             const column_width = column.getAttribute("opd_column_width");
             const reload_time = supports_reload
                 ? Number(
-                      column.querySelector<HTMLInputElement>(
+                      column.querySelector<WaInput>(
                           ".opd_a_reload_time_setting",
                       )?.value ?? String(default_reload_seconds),
                   ) * milliseconds_per_second
@@ -3658,11 +3671,12 @@ export function run(settings) {
                     : {}),
                 type: column_type,
                 banner:
-                    column.querySelector<HTMLInputElement>(".opd_banner")
-                        ?.checked == true,
-                tw_view_mode:
-                    column.querySelector<HTMLSelectElement>(".opd_tw_view_mode")
+                    column.querySelector<WaCheckbox>(".opd_banner")?.checked ==
+                    true,
+                tw_view_mode: String(
+                    column.querySelector<WaSelect>(".opd_tw_view_mode")
                         ?.value ?? "0",
+                ),
                 column_save_path: is_explore
                     ? (column.getAttribute("opd_explore_path") ?? "")
                     : "",
@@ -3672,9 +3686,8 @@ export function run(settings) {
                 column_pinned_path:
                     column.getAttribute("opd_pinned_path") ?? "",
                 auto_reload: supports_reload
-                    ? column.querySelector<HTMLInputElement>(
-                          ".opd_a_reload_bar",
-                      )?.checked == true
+                    ? column.querySelector<WaCheckbox>(".opd_a_reload_bar")
+                          ?.checked == true
                     : null,
                 auto_reload_time:
                     reload_time >= milliseconds_per_second

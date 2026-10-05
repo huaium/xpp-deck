@@ -8,6 +8,7 @@ function harness(pinned = false) {
     let saves = 0;
     let updates = 0;
     class Input {
+        tagName = "WA-CHECKBOX";
         checked = pinned;
     }
     const column = {

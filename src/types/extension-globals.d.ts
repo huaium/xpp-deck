@@ -101,7 +101,7 @@ interface Navigator {
 }
 
 interface Element {
-    value?: string;
+    value?: string | string[] | null;
     style: CSSStyleDeclaration;
 }
 

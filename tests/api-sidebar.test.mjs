@@ -12,7 +12,7 @@ test("sidebar renders three keyboard-accessible API rows with icons", () => {
         },
     );
     const html = create_api_sidebar_html();
-    assert.equal((html.match(/<button /g) ?? []).length, 3);
+    assert.equal((html.match(/<wa-button /g) ?? []).length, 3);
     assert.equal((html.match(/<svg /g) ?? []).length, 3);
     for (const key of ["time_line", "recommend_timeline", "search"])
         assert.ok(html.includes(`data-api-key="${key}"`));

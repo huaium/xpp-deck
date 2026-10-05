@@ -143,8 +143,8 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
     signIn.href = "https://x.com/i/flow/login";
     signIn.target = "_blank";
     signIn.rel = "noopener noreferrer";
-    const retry = document.createElement("button");
-    retry.type = "button";
+    const retry = document.createElement("wa-button");
+    retry.setAttribute("type", "button");
     const note = document.createElement("p");
     note.className = "welcome-note";
     actions.append(signIn, retry);
