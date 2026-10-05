@@ -54,6 +54,7 @@ test("column drops preserve iframe state and save the new order", () => {
                 },
                 HTMLElement: Element,
                 last_load_profile: 1,
+                column_rename: () => {},
                 column_settings_save: () => saves++,
                 opd_alert: () => alerts++,
                 i18n_message_or_fallback: (_key, fallback) => fallback,

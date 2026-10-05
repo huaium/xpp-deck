@@ -1253,7 +1253,7 @@ function run(settings) {
             );
         });
     }
-    // Apply Explore titles safely after DOM insertion.
+    // Restore custom titles and Explore titles safely after DOM insertion.
     const all_columns = document.querySelectorAll(
         "#opd_main_element div[opd_column_type]",
     );
@@ -1262,15 +1262,24 @@ function run(settings) {
         index < settings.column_settings.length && index < all_columns.length;
         index++
     ) {
-        if (settings.column_settings[index].type !== "explore") {
+        const custom_title = settings.column_settings[index].custom_title;
+        if (typeof custom_title === "string" && custom_title.trim() !== "") {
+            all_columns[index].setAttribute("opd_custom_title", custom_title);
+        } else if (settings.column_settings[index].type !== "explore") {
             continue;
         }
         const safe_title =
-            settings.column_settings[index].column_save_title &&
+            custom_title ||
+            (settings.column_settings[index].column_save_title &&
             settings.column_settings[index].column_save_title !== ""
                 ? settings.column_settings[index].column_save_title
-                : "Explore";
-        all_columns[index].setAttribute("opd_explore_title", safe_title);
+                : "Explore");
+        if (settings.column_settings[index].type === "explore") {
+            all_columns[index].setAttribute(
+                "opd_explore_title",
+                settings.column_settings[index].column_save_title || "Explore",
+            );
+        }
         const title_node = all_columns[index].querySelector(
             ".dsp_column_title .dsp_column_move_icon_parent span:last-child",
         );
@@ -3036,7 +3045,54 @@ function run(settings) {
         });
     }
     // Column move handling.
+    function column_rename() {
+        const titles = document.querySelectorAll<HTMLElement>(
+            '#opd_main_element .dsp_column[draggable="true"] .dsp_column_title .dsp_column_move_icon_parent span:last-child',
+        );
+        for (const title of Array.from(titles)) {
+            if (title.hasAttribute("opd_rename_bound")) continue;
+            title.setAttribute("opd_rename_bound", "");
+            title.setAttribute("role", "button");
+            title.setAttribute("tabindex", "0");
+            title.setAttribute("draggable", "false");
+            title.title = i18n_message_or_fallback(
+                "ui_column_rename",
+                "Rename column",
+            );
+            title.style.cursor = "pointer";
+            const rename = async () => {
+                const column = title.closest("div[opd_column_type]");
+                if (!column) return;
+                const value = await opd_prompt(
+                    i18n_message_or_fallback(
+                        "ui_column_rename",
+                        "Rename column",
+                    ),
+                    title.textContent ?? "",
+                );
+                if (value == null || value.trim() === "" || !title.isConnected)
+                    return;
+                const custom_title = value.trim();
+                if (custom_title === title.textContent) return;
+                column.setAttribute("opd_custom_title", custom_title);
+                title.textContent = custom_title;
+                column_settings_save("", last_load_profile);
+            };
+            title.addEventListener("click", (event) => {
+                event.stopPropagation();
+                void rename();
+            });
+            title.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void rename();
+                }
+            });
+        }
+    }
     function column_dd() {
+        column_rename();
         let column_class = document.querySelectorAll(".dsp_column");
         for (let index = 0; index < column_class.length; index++) {
             column_class[index].addEventListener("dragstart", function (ev) {
@@ -3160,6 +3216,7 @@ function run(settings) {
         auto_reload: boolean | null;
         auto_reload_time: number;
         column_width: string | null;
+        custom_title?: string;
     };
     function column_settings_save(mode = "", profile_num = last_load_profile) {
         const milliseconds_per_second = 1000;
@@ -3191,6 +3248,9 @@ function run(settings) {
                 : default_reload_time;
 
             settings_array.column_settings.push({
+                ...(column.getAttribute("opd_custom_title") != null
+                    ? { custom_title: column.getAttribute("opd_custom_title")! }
+                    : {}),
                 type: column_type,
                 banner:
                     column.querySelector<HTMLInputElement>(".opd_banner")
