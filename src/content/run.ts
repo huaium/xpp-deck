@@ -11,6 +11,7 @@ import {
     is_shift_pressed,
     last_load_profile,
     manifest,
+    next_profile_name,
     media_viewer_token,
     opd_alert,
     opd_confirm,
@@ -22,6 +23,7 @@ import {
     open_about_page_modal,
     open_opd_dialog,
     profile_store,
+    profile_display_name,
     request_page_reload,
     set_last_load_profile,
     ui_icon_define,
@@ -2839,13 +2841,21 @@ export function run(settings) {
     const profile_save_button = document.getElementById("profile_save");
     if (profile_save_button) {
         profile_save_button.addEventListener("click", async function () {
-            if (await opd_confirm(i18n_message("msg_profile_save_confirm"))) {
+            const default_name = next_profile_name(profile_store);
+            const requested_name = await opd_prompt(
+                i18n_message_or_fallback(
+                    "msg_profile_name_prompt",
+                    "Name this profile:",
+                ),
+                default_name,
+            );
+            if (requested_name !== null) {
                 const profile = column_settings_save("profile_out");
                 if (profile == null) {
                     return;
                 }
                 const save_object = {
-                    name: "user_profile",
+                    name: requested_name.trim() || default_name,
                     profile: profile.column_settings,
                 };
                 //console.log(profile)
@@ -2885,11 +2895,9 @@ export function run(settings) {
                 type: "select",
                 message: i18n_message("ui_profile_delete_title"),
                 defaultValue: String(last_load_profile),
-                choices: available_profiles.map((_profile, index) => ({
+                choices: available_profiles.map((profile, index) => ({
                     value: String(index),
-                    label: i18n_message("ui_profile_switch_label", [
-                        String(index + 1),
-                    ]),
+                    label: profile_display_name(profile, index),
                 })),
             });
             if (typeof selected_profile !== "string") {
@@ -3385,7 +3393,6 @@ export function run(settings) {
             return settings_array;
         }
         Object.assign(profile_store[profile_num], {
-            name: "user_profile",
             profile: settings_array.column_settings,
         });
         chrome.storage.local.set(

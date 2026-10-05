@@ -3,7 +3,7 @@ import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 import { profileHarness } from "./helpers/profile.mjs";
 
-test("profile saving persists a snapshot only after confirmation", async () => {
+test("profile saving persists a snapshot only after the name prompt is submitted", async () => {
     for (const confirmed of [false, true]) {
         const h = profileHarness(confirmed);
         const { profile_save_button_handler: save } = loadFunctions(

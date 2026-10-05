@@ -144,6 +144,47 @@ try {
     );
     await home.locator(".dsp_column_settings_btn").click();
     assert.equal(await home.locator(".opd_tw_view_mode").inputValue(), "2");
+    await page.locator("#profile_save").click();
+    assert.equal(
+        await page.locator(".opd_dialog_input").inputValue(),
+        "Profile 1",
+    );
+    await page.locator(".opd_dialog_input").fill("Work");
+    await page.locator(".opd_dialog_primary").click();
+    assert.equal(
+        await page.locator("#userProfile-1 .dsp_btn_label").textContent(),
+        "Work",
+    );
+    assert.equal(
+        await page
+            .locator("#userProfile-1 .dsp_btn_change_profile_btn")
+            .textContent(),
+        "W",
+    );
+    await page.locator("#sidebar_fold_toggle").click();
+    assert.equal(
+        await page
+            .locator("#userProfile-1 .dsp_btn_label")
+            .evaluate((label) => label.getBoundingClientRect().width),
+        0,
+    );
+    assert.equal(
+        await page
+            .locator("#userProfile-1 .dsp_btn_change_profile_btn")
+            .isVisible(),
+        true,
+    );
+    await page.locator("#sidebar_fold_toggle").click();
+    await page.locator("#profile_save").click();
+    await page.locator(".opd_dialog_primary").click();
+    await page.locator("#profile_save").click();
+    assert.equal(
+        await page.locator(".opd_dialog_input").inputValue(),
+        "Profile 2",
+    );
+    await page
+        .locator(".opd_dialog_actions button:not(.opd_dialog_primary)")
+        .click();
     assert.deepEqual(errors, []);
     console.log(
         "Built extension Chromium smoke test passed: initialization, iframe helpers, dynamic banner controls, settings animation and refresh persistence.",

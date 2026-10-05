@@ -304,5 +304,8 @@
     },
     "label_api_search": {
         "message": "検索:"
+    },
+    "msg_profile_name_prompt": {
+        "message": "プロファイル名を入力してください:"
     }
 }

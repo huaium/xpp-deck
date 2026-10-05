@@ -131,11 +131,35 @@ export const ui_icon_define = {
 export function create_sidebar_button_html(id, title, icon_class, label) {
     return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
 }
-function create_profile_button_html(index, current_profile_index) {
+export function profile_display_name(profile, index: number): string {
+    const name = typeof profile?.name === "string" ? profile.name.trim() : "";
+    return name || `Profile ${index + 1}`;
+}
+export function next_profile_name(profiles): string {
+    const names = new Set(profiles.map(profile_display_name));
+    let number = 1;
+    while (names.has(`Profile ${number}`)) number++;
+    return `Profile ${number}`;
+}
+function escape_profile_name(value: string): string {
+    return value.replace(
+        /[&<>"']/g,
+        (character) =>
+            ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+            })[character]!,
+    );
+}
+function create_profile_button_html(index, current_profile_index, profile) {
     const selected_profile_class =
         index === current_profile_index ? " dsp_btn_profile_selected" : "";
-    const profile_display_number = index + 1;
-    return `<div class="dsp_btn_parent${selected_profile_class}" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">P${profile_display_number}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_switch_label", [`${profile_display_number}`])}</span></div>`;
+    const name = profile_display_name(profile, index);
+    const initial = Array.from(name)[0];
+    return `<div class="dsp_btn_parent${selected_profile_class}" title="${escape_profile_name(name)}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">${escape_profile_name(initial)}</div></div><span class="dsp_btn_label">${escape_profile_name(name)}</span></div>`;
 }
 export function create_profile_list_buttons_html(
     profile_length,
@@ -146,6 +170,7 @@ export function create_profile_list_buttons_html(
         profile_list_btn_html += create_profile_button_html(
             index,
             current_profile_index,
+            profile_store[index],
         );
     }
     return profile_list_btn_html;

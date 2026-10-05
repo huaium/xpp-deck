@@ -304,5 +304,8 @@
     },
     "label_api_search": {
         "message": "Search:"
+    },
+    "msg_profile_name_prompt": {
+        "message": "Name this profile:"
     }
 }
