@@ -90,8 +90,8 @@ let profile_store;
 let last_load_profile = 0;
 let is_removed_default_style = false;
 let media_viewer_token: string[] = [];
-const opd_sidebar_width_expanded = "220px";
-const opd_sidebar_width_collapsed = "60px";
+const opd_sidebar_width_expanded = "208px";
+const opd_sidebar_width_collapsed = "64px";
 function request_page_reload() {
     try {
         sessionStorage.setItem(beforeunload_bypass_key, "1");
@@ -168,6 +168,7 @@ function ensure_opd_dialog_style() {
     style.setAttribute("opd_dialog_css", "");
     style.textContent = `
     .opd_dialog_overlay{
+        box-sizing: border-box;
         position: fixed;
         inset: 0;
         background: rgba(15, 23, 42, 0.45);
@@ -178,14 +179,17 @@ function ensure_opd_dialog_style() {
         padding: 16px;
     }
     .opd_dialog{
+        box-sizing: border-box;
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
         width: min(420px, 100%);
         background: #ffffff;
         color: #111827;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
         box-shadow: 0 18px 44px rgba(15, 23, 42, 0.28);
-        padding: 14px 16px;
-        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        padding: 24px;
+        font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
     .opd_dialog_message{
         margin: 0 0 12px;
@@ -223,7 +227,7 @@ function ensure_opd_dialog_style() {
         color: #111827;
         border-radius: 8px;
         min-width: 72px;
-        min-height: 32px;
+        min-height: 36px;
         padding: 6px 10px;
         cursor: pointer;
         font-size: 13px;

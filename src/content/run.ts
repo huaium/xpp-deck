@@ -878,6 +878,145 @@ function run(settings) {
         height: 30px;
         padding: 5px;
     }
+    /* Shared workspace chrome: keep embedded timelines untouched. */
+    #opd_main_element{
+        --opd-bg: #f4f5f7;
+        --opd-surface: #ffffff;
+        --opd-surface-alt: #f8f9fb;
+        --opd-border: #e3e6eb;
+        --opd-border-strong: #cbd1da;
+        --opd-text: #20242c;
+        --opd-muted: #687180;
+        --opd-hover: #edf0f5;
+        --opd-focus: #2563eb;
+        --opd-profile-selected-bg: #eaf1ff;
+        --opd-profile-selected-shadow: inset 3px 0 0 var(--opd-focus);
+    }
+    #opd_main_element[opd-dsp-theme="dark"]{
+        --opd-bg: #101216;
+        --opd-surface: #181b21;
+        --opd-surface-alt: #20242c;
+        --opd-border: #303641;
+        --opd-border-strong: #485160;
+        --opd-text: #eef0f4;
+        --opd-muted: #a4adbc;
+        --opd-hover: #282e38;
+        --opd-focus: #78a6ff;
+        --opd-profile-selected-bg: #24334b;
+        --opd-profile-selected-shadow: inset 3px 0 0 var(--opd-focus);
+    }
+    #opd_main_element *{
+        font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+    #opd_main_element .main_bar_functions{
+        gap: 4px;
+        padding: 8px;
+        font-weight: 500;
+    }
+    #opd_main_element .main_bar_functions hr{
+        border: 0;
+        margin: 6px 0;
+    }
+    #opd_main_element .dsp_btn_parent{
+        height: 40px;
+        border-radius: 8px;
+        gap: 12px;
+        transition: background-color 140ms ease;
+    }
+    #opd_main_element .dsp_btn_parent:hover{
+        border-color: transparent;
+    }
+    #opd_main_element .dsp_btn_label{
+        font-size: 13px;
+        font-weight: 500;
+    }
+    #opd_main_element .dsp_btn_profile_selected{
+        border-color: transparent;
+        box-shadow: var(--opd-profile-selected-shadow);
+    }
+    #opd_main_element .dsp_btn_profile_selected .dsp_btn_label{
+        font-weight: 600;
+    }
+    #opd_main_element .dsp_column_draggable_true{
+        margin: 0;
+        border-radius: 0;
+        border: 0;
+        border-right: 1px solid var(--opd-border);
+    }
+    #opd_main_element .column_bar{
+        min-height: 44px;
+        padding: 6px 12px;
+        gap: 4px;
+        border-top: 0 !important;
+        border-radius: 0;
+        background: var(--opd-surface);
+        flex-shrink: 0;
+    }
+    #opd_main_element .dsp_column_title{
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    #opd_main_element .dsp_column_btn{
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+        margin-right: 0;
+        border-radius: 8px;
+    }
+    #opd_main_element .dsp_column_settings_panel{
+        width: 100%;
+        max-height: min(480px, 60dvh);
+        overflow-y: auto;
+        flex-shrink: 0;
+        border: 0;
+        border-bottom: 1px solid var(--opd-border);
+        border-radius: 0;
+    }
+    #opd_main_element .dsp_column_settings_panel_content{
+        margin: 16px;
+    }
+    #opd_main_element .dsp_column_settings_panel_content h2{
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+    #opd_main_element .dsp_column_settings_list{
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+    #opd_main_element .dsp_column_settings_content_div{
+        min-height: 44px;
+        gap: 12px;
+        margin: 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--opd-border);
+    }
+    #opd_main_element .dsp_column_settings_content_div > span:last-child{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    #opd_main_element .dsp_column_settings_panel select,
+    #opd_main_element .dsp_column_settings_panel input[type="number"],
+    #opd_main_element .column_width_btn,
+    #opd_main_element .dsp_column_settings_panel_close_btn{
+        min-height: 32px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--opd-text);
+    }
+    #opd_main_element input[type="checkbox"]{
+        accent-color: var(--opd-focus);
+    }
+    @media (prefers-reduced-motion: reduce){
+        #opd_main_element *, #opd_main_element *::before, #opd_main_element *::after{
+            transition: none !important;
+            animation: none !important;
+            scroll-behavior: auto !important;
+        }
+    }
     </style>`,
     );
     // Create and insert column elements.
