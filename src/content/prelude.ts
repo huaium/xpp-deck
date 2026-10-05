@@ -715,12 +715,13 @@ export function open_opd_dialog({
                 const get_focusable_elements = (): HTMLElement[] =>
                     Array.from(
                         dialog.querySelectorAll(
-                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                            'button, wa-button, wa-select, wa-input, wa-checkbox, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                         ),
                     ).filter(
                         (elem): elem is HTMLElement =>
                             elem instanceof HTMLElement &&
-                            !elem.hasAttribute("disabled"),
+                            !elem.hasAttribute("disabled") &&
+                            !elem.hidden,
                     );
 
                 let closing = false;
@@ -782,6 +783,15 @@ export function open_opd_dialog({
                         event.stopPropagation();
                         finish(type == "confirm" ? false : null);
                     } else if (event.key == "Enter") {
+                        if (
+                            (event.composedPath?.() ?? []).some(
+                                (node) =>
+                                    node instanceof HTMLElement &&
+                                    (node.tagName === "WA-SELECT" ||
+                                        node.tagName === "WA-BUTTON"),
+                            )
+                        )
+                            return;
                         if (
                             type == "select" &&
                             document.activeElement == prompt_input

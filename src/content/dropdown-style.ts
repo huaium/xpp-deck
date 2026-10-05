@@ -3,6 +3,17 @@ export function ensure_dropdown_style() {
     const style = document.createElement("style");
     style.id = "opd_dropdown_style";
     style.textContent = `
+    #opd_main_element [hidden], .opd_dialog_overlay [hidden]{display:none!important;}
+    #opd_main_element, .opd_dialog_overlay{
+        --wa-font-family-body:"Segoe UI","Helvetica Neue",Arial,sans-serif;
+        --wa-border-radius-m:8px;--wa-form-control-height:40px;
+    }
+    .opd_wa_select{width:100%;min-width:0;}
+    .opd_wa_select::part(combobox){border-radius:8px;min-height:40px;}
+    .opd_wa_button img{width:24px;height:24px;}
+    .wa-dark .opd_ui_logo_parent .opd_wa_button img{filter:invert(1);}
+    .opd_ui_logo_parent > .opd_wa_button{margin-left:auto;}
+    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo_parent > .opd_wa_button{display:none;}
     #opd_main_element select, .opd_dialog_overlay select{
         appearance:none!important;
         box-sizing:border-box;
