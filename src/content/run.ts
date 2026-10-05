@@ -2,6 +2,7 @@ function run(settings) {
     opd_column_load_scheduler?.dispose();
     const load_scheduler = create_column_load_scheduler();
     opd_column_load_scheduler = load_scheduler;
+    const banner_observers = new WeakMap<HTMLIFrameElement, MutationObserver>();
 
     function column_load_priority(frame: HTMLIFrameElement) {
         const bounds = frame.getBoundingClientRect();
@@ -1658,6 +1659,47 @@ function run(settings) {
     }
     // Apply CSS (called on add/update).
     // Keep naming aligned with Desktop implementation for shared logic.
+    function observe_column_banner(frame: HTMLIFrameElement) {
+        banner_observers.get(frame)?.disconnect();
+        banner_observers.delete(frame);
+        const control = frame
+            .closest("div[opd_column_type]")
+            ?.querySelector(".opd_banner")
+            ?.closest<HTMLElement>(".dsp_column_btn");
+        if (!control) return;
+        control.style.display = "none";
+        let doc: Document;
+        try {
+            if (
+                !frame.contentWindow ||
+                frame.contentWindow.location.href === "about:blank"
+            )
+                return;
+            doc = frame.contentWindow.document;
+        } catch {
+            return;
+        }
+        const update = () => {
+            control.style.display = doc.querySelector('header[role="banner"]')
+                ? ""
+                : "none";
+        };
+        update();
+        const observer = new MutationObserver(() => {
+            if (!frame.isConnected) {
+                observer.disconnect();
+                return;
+            }
+            update();
+        });
+        observer.observe(doc, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["role"],
+        });
+        banner_observers.set(frame, observer);
+    }
     function apply_column_view_settings(frame: HTMLIFrameElement) {
         if (
             !frame.contentWindow ||
@@ -1720,12 +1762,23 @@ function run(settings) {
             if (pin_column) bind_column_pin(pin_column);
             if (column_object[index].hasAttribute("opd_load_bound")) continue;
             column_object[index].setAttribute("opd_load_bound", "");
+            const banner_control = column_object[index]
+                .closest("div[opd_column_type]")
+                ?.querySelector(".opd_banner")
+                ?.closest<HTMLElement>(".dsp_column_btn");
+            if (banner_control) banner_control.style.display = "none";
+            const banner_frame = column_object[index] as HTMLIFrameElement;
+            load_scheduler.onDispose(() =>
+                banner_observers.get(banner_frame)?.disconnect(),
+            );
             column_object[index].removeAttribute("opd_init_webview");
             // Document styles must be reapplied after every navigation.
             column_object[index].addEventListener("load", (event) => {
                 const frame = event.currentTarget;
-                if (frame instanceof HTMLIFrameElement)
+                if (frame instanceof HTMLIFrameElement) {
+                    observe_column_banner(frame);
                     apply_column_view_settings(frame);
+                }
             });
             // Post-load initialization for each column.
             column_object[index].addEventListener(

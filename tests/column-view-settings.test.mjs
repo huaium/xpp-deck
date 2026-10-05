@@ -92,9 +92,57 @@ test("reapplying column setup does not duplicate load listeners", () => {
         {
             document: { querySelectorAll: () => [frame] },
             queue_column_frames() {},
+            load_scheduler: { onDispose() {} },
+            banner_observers: new WeakMap(),
         },
     );
     append_object_css();
     append_object_css();
     assert.equal(listeners, 2);
+});
+
+test("banner availability follows DOM changes and replaces observers on reload", () => {
+    let present = false;
+    const control = { style: {} };
+    const observers = [];
+    class Observer {
+        constructor(callback) {
+            this.callback = callback;
+            observers.push(this);
+        }
+        observe() {}
+        disconnect() {
+            this.disconnected = true;
+        }
+    }
+    const frame = {
+        isConnected: true,
+        closest: () => ({ querySelector: () => ({ closest: () => control }) }),
+        contentWindow: {
+            location: { href: "https://x.com/compose/post" },
+            document: { querySelector: () => (present ? {} : null) },
+        },
+    };
+    const { observe_column_banner } = loadFunctions(
+        "../src/content/run.ts",
+        ["observe_column_banner"],
+        "",
+        {
+            MutationObserver: Observer,
+            banner_observers: new WeakMap(),
+        },
+    );
+    observe_column_banner(frame);
+    assert.equal(control.style.display, "none");
+    present = true;
+    observers[0].callback();
+    assert.equal(control.style.display, "");
+    present = false;
+    observers[0].callback();
+    assert.equal(control.style.display, "none");
+    observe_column_banner(frame);
+    assert.equal(observers[0].disconnected, true);
+    frame.isConnected = false;
+    observers[1].callback();
+    assert.equal(observers[1].disconnected, true);
 });
