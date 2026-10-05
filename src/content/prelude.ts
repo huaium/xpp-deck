@@ -833,6 +833,28 @@ document.addEventListener("keyup", (event) => {
 });
 // Watch storage updates (mainly for API rate-limit status).
 export let api_limit_obj: ApiAccessLimit | null = null;
+export function create_api_sidebar_html() {
+    const paths = [
+        "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+        "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z",
+        "M21 21l-5-5M17 10a7 7 0 1 0-14 0 7 7 0 0 0 14 0",
+    ];
+    return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<button type="button" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[index]}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></button>`).join("")}</div>`;
+}
+export function update_api_sidebar() {
+    for (const [key, label] of [["time_line", "ui_api_following"], ["recommend_timeline", "ui_api_for_you"], ["search", "ui_api_search"]] as const) {
+        const row = document.querySelector<HTMLElement>(`[data-api-key="${key}"]`);
+        if (!row) continue;
+        const name = i18n_message(label);
+        const quota = api_quota_state(api_limit_obj?.[key]);
+        const status = quota ? i18n_message("ui_api_percent_left", [String(Math.floor(quota.percentage))]) : i18n_message("ui_api_no_data");
+        row.querySelector(".opd_api_sidebar_label")!.textContent = name;
+        row.querySelector(".opd_api_sidebar_value")!.textContent = quota ? `${Math.floor(quota.percentage)}%` : "—";
+        row.dataset.level = quota?.level ?? "unknown";
+        row.title = `${name}: ${status}`;
+        row.setAttribute("aria-label", row.title);
+    }
+}
 export function api_quota_state(value: ApiAccessLimit["search"] | undefined) {
     if (value?.limit == null || value.remaining == null) return null;
     const limit = Number(value.limit);
@@ -936,6 +958,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         //console.log(changes)
         api_limit_obj = (changes.api_access_limit.newValue ??
             null) as ApiAccessLimit | null;
+        update_api_sidebar();
         const api_linit_status_btn =
             document.querySelector("#api_limit_status");
         if (api_limit_obj == null) {
