@@ -3080,46 +3080,34 @@ function run(settings) {
                         ? drag_event.currentTarget
                         : null;
                 if (!drop_target) return;
-                // Initialize display settings during move.
-                //bn_twview_mode(this.querySelector("iframe"));
-                // Set Explore URL.
-                //console.log(column_class[index])
-                // Apply move operation.
+                drop_target.style.borderLeft = "";
                 const dt_id = drag_event.dataTransfer?.getData("text/plain");
                 if (!dt_id) return;
                 const dr_elem = document.getElementById(dt_id);
-                if (dr_elem != null) {
-                    const dragged_column_root = dr_elem.querySelector("div");
-                    const dragged_column_frame =
-                        dragged_column_root?.querySelector("iframe");
-                    if (
-                        dragged_column_root?.getAttribute("opd_column_type") ===
-                        "explore"
-                    ) {
-                        // && dr_elem.querySelector("div").querySelector("iframe").src != `https://x.com${dr_elem.querySelector("div").getAttribute("opd_explore_path")}`
-                        //console.log(dr_elem.querySelector("div").getAttribute("opd_explore_path"))
-                        //console.log(dr_elem.querySelector("div").getAttribute("opd_pinned_path"))
-                        if (
-                            dragged_column_root.getAttribute(
-                                "opd_pinned_path",
-                            ) !== "" &&
-                            dragged_column_frame != null
-                        ) {
-                            //console.log("Pinned")
-                            dragged_column_frame.src = `https://x.com${dragged_column_root.getAttribute("opd_pinned_path")}`;
-                        } else if (dragged_column_frame != null) {
-                            //console.log("Exp_save")
-                            dragged_column_frame.src = `https://x.com${dragged_column_root.getAttribute("opd_explore_path")}`;
-                        }
-                    }
-                    drop_target.parentNode?.insertBefore(dr_elem, drop_target);
-                    drop_target.style.borderLeft = "";
-                    //append_object_css();
-                    //column_dd();
-                    column_settings_save("", last_load_profile);
-                } else {
-                    drop_target.style.borderLeft = "";
+                const parent = drop_target.parentElement;
+                if (
+                    !dr_elem ||
+                    !parent ||
+                    !dr_elem.matches('.dsp_column[draggable="true"]')
+                )
+                    return;
+                if (
+                    dr_elem == drop_target ||
+                    dr_elem.nextElementSibling == drop_target
+                )
+                    return;
+                // Re-inserting an iframe disconnects it and reloads its document.
+                if (typeof parent.moveBefore !== "function") {
+                    void opd_alert(
+                        i18n_message_or_fallback(
+                            "msg_column_move_browser_update",
+                            "Please update your browser to move columns without refreshing them.",
+                        ),
+                    );
+                    return;
                 }
+                parent.moveBefore(dr_elem, drop_target);
+                column_settings_save("", last_load_profile);
             });
         }
     }
