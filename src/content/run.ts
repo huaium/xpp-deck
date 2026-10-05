@@ -3,6 +3,7 @@ function run(settings) {
     const load_scheduler = create_column_load_scheduler();
     opd_column_load_scheduler = load_scheduler;
     const banner_observers = new WeakMap<HTMLIFrameElement, MutationObserver>();
+    const settings_animations = new WeakMap<HTMLElement, Animation>();
 
     function column_load_priority(frame: HTMLIFrameElement) {
         const bounds = frame.getBoundingClientRect();
@@ -1659,6 +1660,51 @@ function run(settings) {
     }
     // Apply CSS (called on add/update).
     // Keep naming aligned with Desktop implementation for shared logic.
+    function set_column_settings_open(panel: HTMLElement, open: boolean) {
+        const previous = settings_animations.get(panel);
+        const start_height = panel.getBoundingClientRect().height;
+        const start_opacity = previous
+            ? getComputedStyle(panel).opacity
+            : open
+              ? "0"
+              : "1";
+        previous?.cancel();
+        settings_animations.delete(panel);
+        panel.toggleAttribute("open", open);
+        panel.inert = !open;
+        panel
+            .closest("div[opd_column_type]")
+            ?.querySelector(".opd_settings_btn")
+            ?.setAttribute("aria-expanded", String(open));
+        const finish = () => {
+            panel.style.display = open ? "flex" : "none";
+            panel.style.height = "";
+            panel.style.overflow = "";
+            if (!open)
+                panel.closest(".dsp_column")?.setAttribute("draggable", "true");
+        };
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            finish();
+            return;
+        }
+        panel.style.display = "flex";
+        panel.style.height = "";
+        const end_height = open ? panel.getBoundingClientRect().height : 0;
+        panel.style.overflow = "hidden";
+        const animation = panel.animate(
+            [
+                { height: `${start_height}px`, opacity: start_opacity },
+                { height: `${end_height}px`, opacity: open ? "1" : "0" },
+            ],
+            { duration: 220, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+        );
+        settings_animations.set(panel, animation);
+        animation.onfinish = () => {
+            if (settings_animations.get(panel) !== animation) return;
+            settings_animations.delete(panel);
+            finish();
+        };
+    }
     function observe_column_banner(frame: HTMLIFrameElement) {
         banner_observers.get(frame)?.disconnect();
         banner_observers.delete(frame);
@@ -1875,15 +1921,10 @@ function run(settings) {
                                 if (!(settings_panel instanceof HTMLElement)) {
                                     return;
                                 }
-                                if (
-                                    settings_panel.getAttribute("open") == null
-                                ) {
-                                    settings_panel.setAttribute("open", "");
-                                    settings_panel.style.display = "flex";
-                                } else {
-                                    settings_panel.removeAttribute("open");
-                                    settings_panel.style.display = "none";
-                                }
+                                set_column_settings_open(
+                                    settings_panel,
+                                    !settings_panel.hasAttribute("open"),
+                                );
                             });
                     }
                     if (mode != "session_set") {
@@ -1905,8 +1946,7 @@ function run(settings) {
                                 if (!(settings_panel instanceof HTMLElement)) {
                                     return;
                                 }
-                                settings_panel.removeAttribute("open");
-                                settings_panel.style.display = "none";
+                                set_column_settings_open(settings_panel, false);
                             });
                         // Settings panel and hover interactions.
                         opd_column_div
