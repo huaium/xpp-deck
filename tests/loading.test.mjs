@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 
-function harness() {
+function harness(random) {
+    let random_calls = 0;
     let now = 0;
     let id = 0;
     const timers = new Map();
@@ -16,6 +17,17 @@ function harness() {
         "",
         {
             Date: { now: () => now },
+            Math: {
+                floor: Math.floor,
+                random: () => {
+                    const index = random_calls++;
+                    return random
+                        ? random(index)
+                        : index % 2 === 0
+                          ? 0.75
+                          : 0.5;
+                },
+            },
             setTimeout,
             clearTimeout: (key) => timers.delete(key),
             console: { error() {} },
@@ -76,6 +88,63 @@ test("scheduler limits concurrency, spaces starts, and prioritizes visible queue
     assert.equal(started.length, 3);
     h.advance(1);
     assert.equal(started[3], "last");
+});
+
+test("random gaps stay at their sampled bounds even when new jobs are enqueued", () => {
+    for (const [sample, gap] of [
+        [0, 800],
+        [0.999999, 1200],
+    ]) {
+        const h = harness((index) => (index % 2 === 0 ? 0.75 : sample));
+        let starts = 0;
+        const enqueue = () =>
+            h.scheduler.enqueue({
+                key: {},
+                valid: () => true,
+                priority: () => 0,
+                start() {
+                    starts++;
+                },
+            });
+        enqueue();
+        enqueue();
+        h.advance(400);
+        enqueue();
+        h.advance(gap - 401);
+        assert.equal(starts, 1);
+        h.advance(1);
+        assert.equal(starts, 2);
+        h.scheduler.dispose();
+    }
+});
+
+test("random concurrency switches between one and two without cancelling active loads", () => {
+    // Initial target two; after start 1 choose one, after start 2 choose two.
+    const samples = [0.75, 0.5, 0.25, 0.5, 0.75, 0.5, 0.25];
+    const h = harness((index) => samples[index] ?? 0.75);
+    const done = [];
+    for (let i = 0; i < 4; i++)
+        h.scheduler.enqueue({
+            key: {},
+            valid: () => true,
+            priority: () => 0,
+            start: (finish) => {
+                done.push(finish);
+            },
+        });
+    h.advance(1000);
+    assert.equal(done.length, 1);
+    done[0]();
+    assert.equal(done.length, 2);
+    h.advance(1000);
+    assert.equal(done.length, 3);
+    h.advance(5000);
+    assert.equal(done.length, 3);
+    done[1]();
+    assert.equal(done.length, 3);
+    done[2]();
+    assert.equal(done.length, 4);
+    h.scheduler.dispose();
 });
 
 test("scheduler deduplicates jobs, times out stalled loads, and skips removed columns", () => {

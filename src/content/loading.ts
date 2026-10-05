@@ -12,6 +12,8 @@ function create_column_load_scheduler() {
     const dispose_callbacks: (() => void)[] = [];
     let stopped = false;
     let last_start = -Infinity;
+    let start_gap = 0;
+    let concurrency_limit = Math.random() < 0.5 ? 1 : 2;
     let wake: ReturnType<typeof setTimeout> | undefined;
     const pump = () => {
         if (stopped) return;
@@ -20,12 +22,12 @@ function create_column_load_scheduler() {
         for (const [key, job] of jobs) {
             if (!active.has(key) && !job.valid()) jobs.delete(key);
         }
-        if (active.size >= 2) return;
+        if (active.size >= concurrency_limit) return;
         const pending = [...jobs.values()].filter(
             (job) => !active.has(job.key),
         );
         if (pending.length === 0) return;
-        const wait = 1000 - (Date.now() - last_start);
+        const wait = start_gap - (Date.now() - last_start);
         if (wait > 0) {
             wake = setTimeout(pump, wait);
             return;
@@ -46,6 +48,9 @@ function create_column_load_scheduler() {
         const timeout = setTimeout(done, 30000);
         active.set(job.key, done);
         last_start = Date.now();
+        // Sample once per start, not on every queue wake-up or enqueue.
+        start_gap = 800 + Math.floor(Math.random() * 401);
+        concurrency_limit = Math.random() < 0.5 ? 1 : 2;
         try {
             cleanup = job.start(done) || undefined;
             if (finished) cleanup?.();

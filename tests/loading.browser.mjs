@@ -80,7 +80,7 @@ try {
     assert.equal(starts.length, 4);
     assert.ok(maximum <= 2);
     for (let i = 1; i < starts.length; i++)
-        assert.ok(starts[i].time - starts[i - 1].time >= 900);
+        assert.ok(starts[i].time - starts[i - 1].time >= 700);
     await page.evaluate(() => {
         column_dd();
         const frame = document.getElementById("f0");
