@@ -1,5 +1,5 @@
 // Used by the auto-refresh feature.
-class OpdExtAutoReload {
+export class OpdExtAutoReload {
     opd_reload_token: string | null;
     Init: (column_window: Window) => void;
     Reload: (column_window: Window) => boolean;
@@ -39,4 +39,3 @@ class OpdExtAutoReload {
         };
     }
 }
-window.OpdExtAutoReload = OpdExtAutoReload;

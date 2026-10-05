@@ -13,7 +13,9 @@
         "*://*.x.com/*"
     ],
     "permissions": ["storage", "webRequest", "declarativeNetRequest"],
-    "background": { "service_worker": "src/background.js" },
+    "background": {
+        "service_worker": "src/background.js"
+    },
     "content_scripts": [
         {
             "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
@@ -22,15 +24,7 @@
         },
         {
             "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
-            "js": [
-                "src/content/prelude.js",
-                "src/content/loading.js",
-                "src/content/run.js",
-                "src/content/settings.js",
-                "src/extensions/auto_reload.js",
-                "src/extensions/media_viewer_block.js",
-                "src/extensions/media_viewer.js"
-            ]
+            "js": ["src/content/index.js"]
         }
     ],
     "web_accessible_resources": [
@@ -39,7 +33,6 @@
             "resources": [
                 "src/extensions/auto_reload_helper.js",
                 "src/extensions/media_viewer_block_helper.js",
-                "src/extensions/media_viewer.js",
                 "public/icons/logo_icon.svg",
                 "public/icons/settings.svg",
                 "public/icons/banner_hide.svg",

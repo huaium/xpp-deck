@@ -6,7 +6,7 @@ type MediaInfo = {
     id_str?: string;
     video_info?: { variants: MediaVariant[] };
 };
-class OpdExtMediaViewer {
+export class OpdExtMediaViewer {
     Preview: (media_info: MediaInfo[], pre_index: number) => void;
     SkipBtnDisabled: (
         dialog_elem: HTMLDialogElement,
@@ -358,4 +358,3 @@ class OpdExtMediaViewer {
         };
     }
 }
-window.OpdExtMediaViewer = OpdExtMediaViewer;

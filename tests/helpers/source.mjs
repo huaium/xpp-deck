@@ -47,7 +47,13 @@ export function productionDeclarations(source) {
 }
 
 export function transpile(source) {
-    return stripTypeScriptTypes(source, { mode: "strip" });
+    return stripTypeScriptTypes(
+        source.replace(
+            /\bexport (?=(?:async )?(?:function|class|const|let|type)\b)/g,
+            "",
+        ),
+        { mode: "strip" },
+    );
 }
 
 // Execute production declarations without moving extension code for testing.

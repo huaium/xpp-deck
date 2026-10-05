@@ -10,15 +10,19 @@
         "format": "prettier . --write",
         "format:check": "prettier . --check",
         "typecheck": "tsc -p tsconfig.json",
-        "build:ts": "tsc -p tsconfig.build.json",
+        "build:ts": "pnpm run build:bundle",
         "lint": "pnpm run typecheck && eslint .",
         "lint:fix": "eslint . --fix",
-        "build": "pnpm run build:ts && bash utils/package.sh",
-        "build:win": "pnpm run build:ts && pwsh -NoProfile -ExecutionPolicy Bypass -File utils/package.ps1",
-        "webext:prepare": "pnpm run build:ts && node utils/webext-prepare.mjs",
-        "webext:dev": "pnpm run webext:prepare && web-ext run --config=web-ext-config.mjs",
+        "build": "pnpm run typecheck && node utils/package.mjs",
+        "build:win": "pnpm run build",
+        "webext:prepare": "pnpm run build:bundle",
+        "webext:dev": "pnpm run typecheck && node utils/webext-dev.mjs",
         "webext:lint": "pnpm run webext:prepare && web-ext lint --source-dir build/web-ext-firefox-src",
-        "webext:clean": "rm -rf build/web-ext-firefox-src"
+        "webext:clean": "node utils/webext-clean.mjs",
+        "build:bundle": "pnpm run typecheck && node utils/build.mjs",
+        "webext:build": "pnpm run build",
+        "test:watch": "node tests/extension-watch.integration.mjs",
+        "test:browser:extension": "node tests/extension.browser.mjs"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
@@ -26,6 +30,7 @@
         "globals": "^17.13.0",
         "prettier": "^3.9.9",
         "typescript": "^7.0.2",
+        "vite": "^8.3.2",
         "web-ext": "latest"
     },
     "packageManager": "pnpm@12.9.1+sha512.06b055fff5cd20dc12781de173ced3310ce0951bf2ec620211a16045d5444d5c93a663210764ef29a653a610459ba0368f0e74f84d80c54723cf95aae7bc0d6d"

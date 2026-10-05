@@ -36,7 +36,12 @@ export default [
         },
     },
     {
-        files: ["utils/*.mjs", "eslint.config.mjs", "web-ext-config.mjs"],
+        files: [
+            "utils/*.mjs",
+            "vite.config.mjs",
+            "eslint.config.mjs",
+            "web-ext-config.mjs",
+        ],
         languageOptions: {
             sourceType: "module",
             globals: {

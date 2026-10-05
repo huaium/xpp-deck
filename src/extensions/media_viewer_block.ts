@@ -1,5 +1,5 @@
 // Disable native media viewer behavior.
-class OpdMediaViewerBlocker {
+export class OpdMediaViewerBlocker {
     opd_send_media_info_token: string | null;
     Init: (column_window: Window) => void;
 
@@ -60,4 +60,3 @@ class OpdMediaViewerBlocker {
         };
     }
 }
-window.OpdMediaViewerBlocker = OpdMediaViewerBlocker;

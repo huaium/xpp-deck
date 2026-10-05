@@ -7,7 +7,7 @@ function deletion(h) {
     return loadFunctions(
         "../src/content/run.ts",
         ["profile_delete_button_handler"],
-        "",
+        "function set_last_load_profile(value) { last_load_profile = value; }",
         h.globals,
     ).profile_delete_button_handler;
 }

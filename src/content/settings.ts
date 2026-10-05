@@ -1,4 +1,15 @@
-function apply_theme_for_main_element(main_element) {
+import {
+    i18n_message,
+    manifest,
+    opd_alert,
+    opd_bootstrap,
+    opd_root_theme_attribute,
+    request_page_reload,
+    system_dark_query,
+} from "./prelude";
+let is_added_system_color_mode = false;
+let apply_ui_color: (() => void) | null = null;
+export function apply_theme_for_main_element(main_element) {
     if (!main_element) {
         return;
     }
@@ -55,7 +66,7 @@ function apply_theme_for_main_element(main_element) {
     }
 }
 // Get color mode from cookie.
-function get_cookie_color_mode() {
+export function get_cookie_color_mode() {
     if (typeof opd_bootstrap.getCookieColorMode === "function") {
         try {
             return opd_bootstrap.getCookieColorMode();
@@ -75,7 +86,7 @@ function get_cookie_color_mode() {
     return "dark";
 }
 // Initialize settings.
-function settings_init() {
+export function settings_init() {
     const profile_store_default = [
         {
             type: "main_bar_empty_column",
@@ -156,4 +167,11 @@ function settings_init() {
             );
         },
     );
+}
+
+export function stop_system_theme_listener() {
+    if (is_added_system_color_mode && apply_ui_color) {
+        system_dark_query.removeEventListener("change", apply_ui_color);
+        is_added_system_color_mode = false;
+    }
 }

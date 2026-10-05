@@ -2,8 +2,9 @@
 
 Run `pnpm test` for the behavior suite. It uses Node's test runner and the
 TypeScript 7 native AST API to extract production functions and event handlers,
-and Node's built-in type stripping to execute them without changing the
-extension's script architecture. Type stripping requires Node 22.13 or newer
+and Node's built-in type stripping to execute them in isolated fixtures.
+Source modules are bundled by Vite into classic extension scripts. The fixture
+helper strips export modifiers from extracted declarations. Type stripping requires Node 22.13 or newer
 and currently emits an experimental API warning. The native API is exposed by
 TypeScript under `unstable` paths; its processes are closed after extraction.
 
@@ -11,6 +12,19 @@ Coverage includes dialogs, queue recovery, IME keyboard handling, profile
 creation/switching/deletion, column serialization and refresh defaults, sidebar
 state, language persistence and fallback, theme transitions, and reload guards.
 DOM adapters validate event behavior; they do not validate browser layout.
+
+The behavior suite also builds all six Vite entry points, checks classic-script
+syntax and manifest resource paths, and tests coordinated watch publication.
+Run `pnpm run test:watch` for native filesystem watcher integration in an isolated
+temporary project. It checks syntax-error recovery, asset additions/deletions,
+and shutdown; cleanup uses `trash`.
+
+Run `pnpm run test:browser:extension` after `pnpm run build:bundle` to exercise the
+actual bundled deck in Chromium with local X-page fixtures. It checks module
+initialization, iframe helper injection, banner detection, settings expansion,
+and display-mode persistence after a full iframe reload. Use the Playwright and
+browser-path overrides described below. This is not authenticated live-X testing
+or a test of installation in an actual Firefox extension environment.
 
 Column loading randomly targets one or two concurrent navigations, samples an
 800-1,200 ms gap after each start, and uses a 30-second slot timeout. Lowering the

@@ -6,7 +6,7 @@ type ColumnLoadJob = {
 };
 
 // A load event/timeout ends navigation work; internal X requests remain opaque.
-function create_column_load_scheduler() {
+export function create_column_load_scheduler() {
     const jobs = new Map<object, ColumnLoadJob>();
     const active = new Map<object, () => void>();
     const dispose_callbacks: (() => void)[] = [];
@@ -83,5 +83,3 @@ function create_column_load_scheduler() {
         },
     };
 }
-let opd_column_load_scheduler:
-    ReturnType<typeof create_column_load_scheduler> | undefined;

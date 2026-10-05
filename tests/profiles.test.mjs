@@ -9,7 +9,7 @@ test("profile saving persists a snapshot only after confirmation", async () => {
         const { profile_save_button_handler: save } = loadFunctions(
             "../src/content/run.ts",
             ["profile_save_button_handler"],
-            "",
+            "function set_last_load_profile(value) { last_load_profile = value; }",
             h.globals,
         );
         await save();
@@ -33,7 +33,7 @@ test("profile deletion cancels without writes and preserves the final profile", 
         const { profile_delete_button_handler: remove } = loadFunctions(
             "../src/content/run.ts",
             ["profile_delete_button_handler"],
-            "",
+            "function set_last_load_profile(value) { last_load_profile = value; }",
             h.globals,
         );
         await remove();
@@ -49,7 +49,7 @@ test("deleting the active profile selects the previous profile or first remainin
         const { profile_delete_button_handler: remove } = loadFunctions(
             "../src/content/run.ts",
             ["profile_delete_button_handler"],
-            "",
+            "function set_last_load_profile(value) { last_load_profile = value; }",
             h.globals,
         );
         await remove();
@@ -87,7 +87,7 @@ test("profile switching waits for confirmation, persists selection, and renders 
         const { create_profile_list_btn: bind } = loadFunctions(
             "../src/content/run.ts",
             ["create_profile_list_btn"],
-            "",
+            "function set_last_load_profile(value) { last_load_profile = value; }",
             h.globals,
         );
         bind();

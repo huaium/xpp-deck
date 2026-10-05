@@ -9,7 +9,7 @@
 - Explore (Universal Column\*1)
 - Add as many columns as your device and browser can handle
 - Two-row column layout
-- Auto-refresh columns with 1-second granularity (supports timeline and search)
+- Auto-refresh every content column, with a paced loading queue
 - Freely adjustable column width settings (in `1rem` units)
 - Unlimited profile save/switch support (column layout and settings)
 
@@ -47,34 +47,59 @@ then click the **Add to Firefox** button to install it easily.
 - Install it in developer mode
 - Open the extension runtime URL: https://twitter.com/run-opdeck
 
-## For Developers (web-ext)
+## Development
 
-To speed up Firefox development, validation, and builds, this repository includes `web-ext` scripts.  
-This repo uses `manifest.json` for Chromium and `manifest_firefox.json` for Firefox,  
-so `npm run webext:prepare` generates a temporary source where `manifest_firefox.json` is handled as `manifest.json`.
+Vite builds TypeScript modules into standalone classic-script bundles. The early
+reload guard, main content script, background script, popup, and two injected page
+helpers have separate entry points. Page helpers remain web-accessible resources
+and communicate with the content script through DOM events.
+
+Use Node.js 22.13+ (or a supported newer release) and pnpm. TypeScript checks types
+separately; Vite handles transpilation and bundling.
 
 ### 1) Install dependencies
 
 ```
-npm install
+pnpm install
 ```
 
-### 2) Hot-reload development in Firefox
+### 2) Watch development in Firefox
 
 ```
-npm run webext:dev
+pnpm run webext:dev
 ```
 
-### 3) Lint for Firefox
+Vite watches module dependencies, manifests, locale files, popup HTML, and public
+assets. Changes are debounced and synchronized only after successful builds;
+compilation errors leave the last working extension in place. `web-ext` reloads
+Firefox's extension after synchronization finishes. Refresh the X page manually
+to apply content-script changes; this is extension reload, not state-preserving
+HMR. Ctrl+C stops both the watcher and the browser runner.
+
+Watch mode transpiles without checking types on each save. Run `pnpm run typecheck`
+or `pnpm run lint` to check types. A changed Vite configuration requires restarting
+the development command.
+
+### 3) Validate
 
 ```
-npm run webext:lint
+pnpm test
+pnpm run lint
+pnpm run webext:lint
 ```
 
-### 4) Build for Firefox
+### 4) Build and package
 
 ```
-npm run webext:build
+pnpm run build
 ```
 
-Build artifacts are output to `build/web-ext-artifacts/`.
+Browser-specific ZIPs are written to `build/package/`. Prepared extensions are in
+`build/web-ext-firefox-src/` and `build/web-ext-chromium-src/`; each contains the
+correct `manifest.json` and only runtime assets. `pnpm run build:bundle` prepares
+these directories without creating ZIPs. `build:ts` remains a compatibility alias
+for that command, but no longer emits the old `build/ts-out` tree.
+
+Obsolete generated files and `pnpm run webext:clean` use the `trash` command so
+deletions are recoverable. If `trash` is unavailable, cleanup stops rather than
+permanently deleting files.

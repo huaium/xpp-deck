@@ -1,21 +1,21 @@
-const manifest = chrome.runtime.getManifest();
+export const manifest = chrome.runtime.getManifest();
 // Print welcome messages to console
 console.log("Welcome to XPP-Deck!");
 console.log(`Version: ${manifest.version}`);
 //
 const url_path = new URL(location.href);
-let is_added_system_color_mode = false;
-let apply_ui_color: (() => void) | null = null;
-const system_dark_query = window.matchMedia("(prefers-color-scheme: dark)");
-const opd_bootstrap: NonNullable<Window["__opdBootstrap"]> =
+export const system_dark_query = window.matchMedia(
+    "(prefers-color-scheme: dark)",
+);
+export const opd_bootstrap: NonNullable<Window["__opdBootstrap"]> =
     window.__opdBootstrap || {};
-const beforeunload_bypass_key =
+export const beforeunload_bypass_key =
     opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
-const opd_root_theme_attribute =
+export const opd_root_theme_attribute =
     opd_bootstrap.rootThemeAttribute || "data-opd-theme";
 type I18nOverrideMessages = Record<string, { message?: string }>;
 let opd_i18n_override_messages: I18nOverrideMessages | null = null;
-let opd_i18n_language = "browser";
+export let opd_i18n_language = "browser";
 function normalize_i18n_substitutions(
     substitutions?: string | string[] | null,
 ) {
@@ -41,7 +41,10 @@ function apply_i18n_substitutions(
         })
         .replace(/__OPD_DOLLAR__/g, "$");
 }
-function i18n_message(message_name: string, substitutions?: string | string[]) {
+export function i18n_message(
+    message_name: string,
+    substitutions?: string | string[],
+) {
     const override_message =
         opd_i18n_override_messages?.[message_name]?.message;
     if (typeof override_message === "string") {
@@ -85,14 +88,13 @@ async function initialize_i18n_override() {
         opd_i18n_override_messages = null;
     }
 }
-let is_shift_pressed = false;
-let profile_store;
-let last_load_profile = 0;
-let is_removed_default_style = false;
-let media_viewer_token: string[] = [];
-const opd_sidebar_width_expanded = "208px";
-const opd_sidebar_width_collapsed = "64px";
-function request_page_reload() {
+export let is_shift_pressed = false;
+export let profile_store;
+export let last_load_profile = 0;
+export let media_viewer_token: string[] = [];
+export const opd_sidebar_width_expanded = "208px";
+export const opd_sidebar_width_collapsed = "64px";
+export function request_page_reload() {
     try {
         sessionStorage.setItem(beforeunload_bypass_key, "1");
     } catch {
@@ -100,7 +102,7 @@ function request_page_reload() {
     }
     location.reload();
 }
-const ui_icon_define = {
+export const ui_icon_define = {
     banner_hide: "public/icons/banner_hide.svg",
     column_move: "public/icons/column_move.svg",
     column_close: "public/icons/column_close.svg",
@@ -126,7 +128,7 @@ const ui_icon_define = {
     download: "public/icons/download.svg",
     switch_theme: "public/icons/switch_theme.svg",
 };
-function create_sidebar_button_html(id, title, icon_class, label) {
+export function create_sidebar_button_html(id, title, icon_class, label) {
     return `<div class="dsp_btn_parent" id="${id}" title="${title}"><div class="dsp_btn_icon_wrap"><div class="${icon_class}"></div></div><span class="dsp_btn_label">${label}</span></div>`;
 }
 function create_profile_button_html(index, current_profile_index) {
@@ -135,7 +137,7 @@ function create_profile_button_html(index, current_profile_index) {
     const profile_display_number = index + 1;
     return `<div class="dsp_btn_parent${selected_profile_class}" title="${i18n_message("ui_profile_switch_title")}" id="userProfile-${index}"><div class="dsp_btn_icon_wrap"><div class="dsp_btn_change_profile_btn">P${profile_display_number}</div></div><span class="dsp_btn_label">${i18n_message("ui_profile_switch_label", [`${profile_display_number}`])}</span></div>`;
 }
-function create_profile_list_buttons_html(
+export function create_profile_list_buttons_html(
     profile_length,
     current_profile_index,
 ) {
@@ -148,13 +150,19 @@ function create_profile_list_buttons_html(
     }
     return profile_list_btn_html;
 }
-function create_profile_list_html(profile_length, current_profile_index) {
+export function create_profile_list_html(
+    profile_length,
+    current_profile_index,
+) {
     return `<div class="dsp_profile_section"><div class="dsp_profile_list"><div id="profile_btn_list">${create_profile_list_buttons_html(profile_length, current_profile_index)}</div></div></div>`;
 }
-function create_language_select_html() {
+export function create_language_select_html() {
     return `<div class="opd_language_select_wrap" title="${i18n_message_or_fallback("ui_language_selector_title", "Language")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message_or_fallback("ui_language_selector_label", "Language")}</div><select id="opd_language_select" class="opd_language_select"><option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_system", "System")}</option><option value="en" ${opd_i18n_language === "en" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_english", "English")}</option><option value="ja" ${opd_i18n_language === "ja" ? "selected" : ""}>${i18n_message_or_fallback("ui_language_option_japanese", "Japanese")}</option></select></div>`;
 }
-function i18n_message_or_fallback(message_id: string, fallback_text: string) {
+export function i18n_message_or_fallback(
+    message_id: string,
+    fallback_text: string,
+) {
     const translated = i18n_message(message_id);
     return translated == "" ? fallback_text : translated;
 }
@@ -430,7 +438,7 @@ function is_opd_dark_theme_enabled() {
     const main_element = document.getElementById("opd_main_element");
     return main_element?.getAttribute("opd-dsp-theme") === "dark";
 }
-function open_opd_dialog({
+export function open_opd_dialog({
     message,
     type,
     defaultValue,
@@ -613,14 +621,14 @@ function open_opd_dialog({
             }),
     );
 }
-async function opd_alert(message: string): Promise<void> {
+export async function opd_alert(message: string): Promise<void> {
     await open_opd_dialog({ message, type: "alert" });
 }
-async function opd_confirm(message: string): Promise<boolean> {
+export async function opd_confirm(message: string): Promise<boolean> {
     const result = await open_opd_dialog({ message, type: "confirm" });
     return result === true;
 }
-async function opd_prompt(
+export async function opd_prompt(
     message: string,
     defaultValue = "",
 ): Promise<string | null> {
@@ -631,7 +639,7 @@ async function opd_prompt(
     });
     return typeof result === "string" ? result : null;
 }
-async function open_about_page_modal() {
+export async function open_about_page_modal() {
     return enqueue_opd_dialog(
         () =>
             new Promise<void>((resolve) => {
@@ -785,8 +793,12 @@ document.addEventListener("keyup", (event) => {
     if (event.key === "Shift") is_shift_pressed = false;
 });
 // Watch storage updates (mainly for API rate-limit status).
-let api_limit_obj: ApiAccessLimit | null = null;
-let api_limit_dsc_obj = { time_line: "", recommend_timeline: "", search: "" };
+export let api_limit_obj: ApiAccessLimit | null = null;
+export let api_limit_dsc_obj = {
+    time_line: "",
+    recommend_timeline: "",
+    search: "",
+};
 type ApiAccessLimit = {
     search: {
         limit: number | string | null;
@@ -852,181 +864,192 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     }
 });
 //
-if (
-    location.href == "https://twitter.com/run-opdeck" ||
-    location.href == "https://x.com/run-opdeck"
+export function initialize_content(
+    run: typeof import("./run").run,
+    settings_init: typeof import("./settings").settings_init,
 ) {
-    //testmode
-    if (url_path.pathname == "/run-opdeck_test.html") {
-        //init();
-        console.log("testmode");
-        chrome.runtime
-            .sendMessage({ message: "dnr_upd_internal_dsp" })
-            .then(() => {
-                init();
-            });
-    } else {
-        if (navigator.brave != undefined) {
-            chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
-                init();
-            });
+    if (
+        location.href == "https://twitter.com/run-opdeck" ||
+        location.href == "https://x.com/run-opdeck"
+    ) {
+        //testmode
+        if (url_path.pathname == "/run-opdeck_test.html") {
             //init();
+            console.log("testmode");
+            chrome.runtime
+                .sendMessage({ message: "dnr_upd_internal_dsp" })
+                .then(() => {
+                    init();
+                });
         } else {
-            chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
-                init();
+            if (navigator.brave != undefined) {
+                chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
+                    init();
+                });
+                //init();
+            } else {
+                chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
+                    init();
+                });
+            }
+        }
+        //chrome.runtime.sendMessage({message: "dnr_upd"});
+        function init() {
+            //console.log("Welcome to XPP-Deck!");
+            chrome.storage.local.get("opd_settings", async function (value) {
+                await initialize_i18n_override();
+                if (value.opd_settings == undefined) {
+                    last_load_profile = 0;
+                    settings_init();
+                } else {
+                    const opd_settings_raw = String(value.opd_settings);
+                    if (
+                        JSON.parse(opd_settings_raw).last_load_profile ==
+                        undefined
+                    ) {
+                        if (
+                            await opd_confirm(
+                                i18n_message("msg_profile_data_broken_confirm"),
+                            )
+                        ) {
+                            chrome.storage.local.remove(
+                                "opd_settings",
+                                async function () {
+                                    await opd_alert(
+                                        i18n_message(
+                                            "msg_profile_init_completed",
+                                        ),
+                                    );
+                                },
+                            );
+                        } else {
+                            last_load_profile = 0;
+                        }
+                    } else {
+                        last_load_profile =
+                            JSON.parse(opd_settings_raw).last_load_profile;
+                    }
+                    //console.log(last_load_profile);
+                }
+
+                chrome.storage.local.get(
+                    "opd_profile_store",
+                    async function (store_value) {
+                        //console.log(store_value)
+                        //console.log(JSON.parse(store_value.opd_profile_store))
+                        profile_store = JSON.parse(
+                            String(store_value.opd_profile_store),
+                        );
+                        //RUN
+                        let ext_update_flag: boolean | null = null;
+                        let ext_settings;
+                        if (value.opd_settings != undefined) {
+                            if (
+                                JSON.parse(String(value.opd_settings))
+                                    .version != manifest.version
+                            ) {
+                                ext_update_flag = true;
+                            } else {
+                                ext_update_flag = false;
+                            }
+                        }
+                        if (
+                            value.opd_settings == undefined ||
+                            ext_update_flag == true
+                        ) {
+                            //settings_init();
+                            //ext_settings = JSON.parse(value.opd_settings);
+                            if (
+                                profile_store[last_load_profile]?.profile ==
+                                undefined
+                            ) {
+                                let recovery_setting = JSON.parse(
+                                    String(value.opd_settings),
+                                );
+                                recovery_setting.last_load_profile = 0;
+                                chrome.storage.local.set(
+                                    {
+                                        opd_settings:
+                                            JSON.stringify(recovery_setting),
+                                    },
+                                    async function () {
+                                        await opd_alert(
+                                            i18n_message(
+                                                "msg_settings_auto_repair",
+                                            ),
+                                        );
+                                        last_load_profile = 0;
+                                        request_page_reload();
+                                    },
+                                );
+                            }
+
+                            // Bump settings version when the extension is updated.
+                            if (ext_update_flag) {
+                                const setting = JSON.parse(
+                                    String(value.opd_settings),
+                                );
+                                setting.version = manifest.version;
+                                chrome.storage.local.set(
+                                    { opd_settings: JSON.stringify(setting) },
+                                    async function () {
+                                        if (
+                                            await opd_confirm(
+                                                i18n_message("app_update"),
+                                            )
+                                        ) {
+                                            open(
+                                                `https://github.com/kawa-nobu/Open-Deck/releases/tag/v${manifest.version}`,
+                                                "_blank",
+                                                "popup",
+                                            );
+                                        }
+                                    },
+                                );
+                            }
+                            ext_settings = {
+                                column_settings:
+                                    profile_store[last_load_profile].profile,
+                            };
+                        } else {
+                            //ext_settings = JSON.parse(value.opd_settings);
+                            if (
+                                profile_store[last_load_profile]?.profile ==
+                                undefined
+                            ) {
+                                let recovery_setting = JSON.parse(
+                                    String(value.opd_settings),
+                                );
+                                recovery_setting.last_load_profile = 0;
+                                chrome.storage.local.set(
+                                    {
+                                        opd_settings:
+                                            JSON.stringify(recovery_setting),
+                                    },
+                                    async function () {
+                                        await opd_alert(
+                                            i18n_message(
+                                                "msg_settings_auto_repair",
+                                            ),
+                                        );
+                                        last_load_profile = 0;
+                                        request_page_reload();
+                                    },
+                                );
+                            }
+                            ext_settings = {
+                                column_settings:
+                                    profile_store[last_load_profile].profile,
+                            };
+                        }
+                        //console.log(ext_settings);
+                        run(ext_settings);
+                    },
+                );
             });
         }
     }
-    //chrome.runtime.sendMessage({message: "dnr_upd"});
-    function init() {
-        //console.log("Welcome to XPP-Deck!");
-        chrome.storage.local.get("opd_settings", async function (value) {
-            await initialize_i18n_override();
-            if (value.opd_settings == undefined) {
-                last_load_profile = 0;
-                settings_init();
-            } else {
-                const opd_settings_raw = String(value.opd_settings);
-                if (
-                    JSON.parse(opd_settings_raw).last_load_profile == undefined
-                ) {
-                    if (
-                        await opd_confirm(
-                            i18n_message("msg_profile_data_broken_confirm"),
-                        )
-                    ) {
-                        chrome.storage.local.remove(
-                            "opd_settings",
-                            async function () {
-                                await opd_alert(
-                                    i18n_message("msg_profile_init_completed"),
-                                );
-                            },
-                        );
-                    } else {
-                        last_load_profile = 0;
-                    }
-                } else {
-                    last_load_profile =
-                        JSON.parse(opd_settings_raw).last_load_profile;
-                }
-                //console.log(last_load_profile);
-            }
-
-            chrome.storage.local.get(
-                "opd_profile_store",
-                async function (store_value) {
-                    //console.log(store_value)
-                    //console.log(JSON.parse(store_value.opd_profile_store))
-                    profile_store = JSON.parse(
-                        String(store_value.opd_profile_store),
-                    );
-                    //RUN
-                    let ext_update_flag: boolean | null = null;
-                    let ext_settings;
-                    if (value.opd_settings != undefined) {
-                        if (
-                            JSON.parse(String(value.opd_settings)).version !=
-                            manifest.version
-                        ) {
-                            ext_update_flag = true;
-                        } else {
-                            ext_update_flag = false;
-                        }
-                    }
-                    if (
-                        value.opd_settings == undefined ||
-                        ext_update_flag == true
-                    ) {
-                        //settings_init();
-                        //ext_settings = JSON.parse(value.opd_settings);
-                        if (
-                            profile_store[last_load_profile]?.profile ==
-                            undefined
-                        ) {
-                            let recovery_setting = JSON.parse(
-                                String(value.opd_settings),
-                            );
-                            recovery_setting.last_load_profile = 0;
-                            chrome.storage.local.set(
-                                {
-                                    opd_settings:
-                                        JSON.stringify(recovery_setting),
-                                },
-                                async function () {
-                                    await opd_alert(
-                                        i18n_message(
-                                            "msg_settings_auto_repair",
-                                        ),
-                                    );
-                                    last_load_profile = 0;
-                                    request_page_reload();
-                                },
-                            );
-                        }
-
-                        // Bump settings version when the extension is updated.
-                        if (ext_update_flag) {
-                            const setting = JSON.parse(
-                                String(value.opd_settings),
-                            );
-                            setting.version = manifest.version;
-                            chrome.storage.local.set(
-                                { opd_settings: JSON.stringify(setting) },
-                                async function () {
-                                    if (
-                                        await opd_confirm(
-                                            i18n_message("app_update"),
-                                        )
-                                    ) {
-                                        open(
-                                            `https://github.com/kawa-nobu/Open-Deck/releases/tag/v${manifest.version}`,
-                                            "_blank",
-                                            "popup",
-                                        );
-                                    }
-                                },
-                            );
-                        }
-                        ext_settings = {
-                            column_settings:
-                                profile_store[last_load_profile].profile,
-                        };
-                    } else {
-                        //ext_settings = JSON.parse(value.opd_settings);
-                        if (
-                            profile_store[last_load_profile]?.profile ==
-                            undefined
-                        ) {
-                            let recovery_setting = JSON.parse(
-                                String(value.opd_settings),
-                            );
-                            recovery_setting.last_load_profile = 0;
-                            chrome.storage.local.set(
-                                {
-                                    opd_settings:
-                                        JSON.stringify(recovery_setting),
-                                },
-                                async function () {
-                                    await opd_alert(
-                                        i18n_message(
-                                            "msg_settings_auto_repair",
-                                        ),
-                                    );
-                                    last_load_profile = 0;
-                                    request_page_reload();
-                                },
-                            );
-                        }
-                        ext_settings = {
-                            column_settings:
-                                profile_store[last_load_profile].profile,
-                        };
-                    }
-                    //console.log(ext_settings);
-                    run(ext_settings);
-                },
-            );
-        });
-    }
+}
+export function set_last_load_profile(value: number) {
+    last_load_profile = value;
 }

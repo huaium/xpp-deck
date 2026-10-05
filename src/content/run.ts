@@ -1,4 +1,43 @@
-function run(settings) {
+import {
+    api_limit_dsc_obj,
+    api_limit_obj,
+    beforeunload_bypass_key,
+    create_language_select_html,
+    create_profile_list_buttons_html,
+    create_profile_list_html,
+    create_sidebar_button_html,
+    i18n_message,
+    i18n_message_or_fallback,
+    is_shift_pressed,
+    last_load_profile,
+    manifest,
+    media_viewer_token,
+    opd_alert,
+    opd_confirm,
+    opd_i18n_language,
+    opd_prompt,
+    opd_root_theme_attribute,
+    opd_sidebar_width_collapsed,
+    opd_sidebar_width_expanded,
+    open_about_page_modal,
+    open_opd_dialog,
+    profile_store,
+    request_page_reload,
+    set_last_load_profile,
+    ui_icon_define,
+} from "./prelude";
+import { create_column_load_scheduler } from "./loading";
+import {
+    apply_theme_for_main_element,
+    stop_system_theme_listener,
+} from "./settings";
+import { OpdExtAutoReload } from "../extensions/auto_reload";
+import { OpdExtMediaViewer } from "../extensions/media_viewer";
+import { OpdMediaViewerBlocker } from "../extensions/media_viewer_block";
+let opd_column_load_scheduler:
+    ReturnType<typeof create_column_load_scheduler> | undefined;
+let is_removed_default_style = false;
+export function run(settings) {
     opd_column_load_scheduler?.dispose();
     const load_scheduler = create_column_load_scheduler();
     opd_column_load_scheduler = load_scheduler;
@@ -1396,10 +1435,7 @@ function run(settings) {
                     ? "light"
                     : "dark";
 
-            if (is_added_system_color_mode && apply_ui_color) {
-                system_dark_query.removeEventListener("change", apply_ui_color);
-                is_added_system_color_mode = false;
-            }
+            stop_system_theme_listener();
 
             document.cookie = `night_mode=${next_theme_mode === "dark" ? 1 : 0}; path=/; max-age=31536000`;
             opd_main_element.setAttribute("opd-dsp-theme", next_theme_mode);
@@ -1636,7 +1672,7 @@ function run(settings) {
                     if (current_main) {
                         current_main.remove();
                     }
-                    last_load_profile = index;
+                    set_last_load_profile(index);
                     chrome.storage.local.get("opd_settings", function (value) {
                         let load_setting = JSON.parse(
                             String(value.opd_settings),
@@ -2898,7 +2934,7 @@ function run(settings) {
                         chrome.storage.local.get(
                             "opd_settings",
                             function (load_value) {
-                                last_load_profile = after_profile_num;
+                                set_last_load_profile(after_profile_num);
                                 let load_setting = JSON.parse(
                                     String(load_value.opd_settings),
                                 );
