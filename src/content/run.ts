@@ -915,9 +915,12 @@ export function run(settings) {
             color: white;
         }
 
-        & .dsp_column_draggable_true,
-        & .dsp_column_title {
+        & .dsp_column_draggable_true {
             background-color: #2a2f36 !important;
+        }
+
+        & .dsp_column_title {
+            background-color: transparent !important;
         }
 
         & .dsp_btn_add_post_img,
