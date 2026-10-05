@@ -11,7 +11,7 @@ export function is_deck_location(href: string) {
     return (
         url.protocol === "https:" &&
         ["x.com", "twitter.com"].includes(url.hostname) &&
-        url.pathname === "/run-opdeck"
+        url.pathname === "/run-xppdeck"
     );
 }
 

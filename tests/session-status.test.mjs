@@ -6,7 +6,7 @@ const { AbortController } = globalThis;
 
 test("current X onboarding URLs identify login, not signup or external links", () => {
     let href =
-        "/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-opdeck";
+        "/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-xppdeck";
     let ownLink = false;
     const querySelectorAll = (selector) =>
         selector.includes("/i/jf/onboarding/web")

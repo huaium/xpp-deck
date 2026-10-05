@@ -53,7 +53,7 @@ export default defineConfig({
         firefoxProfile: path.resolve(".wxt-profiles/firefox"),
         chromiumProfile: path.resolve(".wxt-profiles/chrome"),
         keepProfileChanges: true,
-        startUrls: ["https://x.com/run-opdeck"],
+        startUrls: ["https://x.com/run-xppdeck"],
     },
     vite: () => ({
         build: { target: "es2022", minify: false, sourcemap: true },

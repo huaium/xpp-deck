@@ -56,7 +56,7 @@ html[data-opd-theme="light"] body {
     }
 
     if (
-        window.location?.pathname === "/run-opdeck" &&
+        window.location?.pathname === "/run-xppdeck" &&
         ["x.com", "twitter.com"].includes(window.location.hostname)
     ) {
         document.documentElement.setAttribute("data-opd-deck", "");

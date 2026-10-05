@@ -45,7 +45,7 @@ try {
             });
         }
     });
-    await page.goto("https://x.com/run-opdeck");
+    await page.goto("https://x.com/run-xppdeck");
     if (process.env.NULL_CUSTOM_ELEMENTS === "1") {
         await page.evaluate(() => {
             Object.defineProperty(window, "customElements", {
@@ -82,7 +82,7 @@ try {
             ]),
         };
         document.getElementById("react-root").innerHTML =
-            '<a href="/i/jf/onboarding/web?mode=signup">Continue with phone</a><a href="/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-opdeck">Log in with username or email</a>';
+            '<a href="/i/jf/onboarding/web?mode=signup">Continue with phone</a><a href="/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-xppdeck">Log in with username or email</a>';
         window.__opd_storage_writes = 0;
         window.chrome = {
             runtime: {

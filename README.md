@@ -52,7 +52,7 @@ then click the **Add to Firefox** button to install it easily.
 
 - Download the ZIP from the browser-specific branch you want
 - Install it in developer mode
-- Open the extension runtime URL: https://twitter.com/run-opdeck
+- Open the extension runtime URL: https://twitter.com/run-xppdeck
 
 ## Development
 

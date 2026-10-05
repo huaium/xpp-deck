@@ -166,14 +166,14 @@ test("returning to a visible tab checks the session, hidden tabs do not", async 
 test("only supported deck routes trigger the welcome flow", () => {
     const h = harness();
     for (const url of [
-        "https://x.com/run-opdeck",
-        "https://twitter.com/run-opdeck?test=1",
+        "https://x.com/run-xppdeck",
+        "https://twitter.com/run-xppdeck?test=1",
     ])
         assert.equal(h.route(url), true);
     for (const url of [
         "https://x.com/home",
-        "https://example.com/run-opdeck",
-        "http://x.com/run-opdeck",
+        "https://example.com/run-xppdeck",
+        "http://x.com/run-xppdeck",
     ])
         assert.equal(h.route(url), false);
     h.gate.dispose();
@@ -189,7 +189,7 @@ test("first-time profile setup does not read an unsaved profile", async () => {
         "let last_load_profile = 0;",
         {
             is_deck_location: () => true,
-            location: { href: "https://x.com/run-opdeck" },
+            location: { href: "https://x.com/run-xppdeck" },
             chrome: {
                 runtime: { sendMessage: async () => ({}) },
                 storage: {
