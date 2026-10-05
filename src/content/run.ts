@@ -1221,6 +1221,7 @@ export function run(settings) {
     }
     #opd_main_element .dsp_column_settings_content_div{
         min-height: 44px;
+        padding-block: 10px;
         gap: 12px;
         margin: 0;
         font-size: 13px;
@@ -1229,7 +1230,7 @@ export function run(settings) {
     #opd_main_element .dsp_column_settings_content_div > span:last-child{
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         flex-shrink: 0;
     }
     #opd_main_element .dsp_column_settings_panel select,
@@ -1243,6 +1244,37 @@ export function run(settings) {
     }
     #opd_main_element input[type="checkbox"]{
         accent-color: var(--opd-focus);
+    }
+    #opd_main_element .dsp_column_settings_panel wa-button{
+        border:0;
+        padding:0;
+        background:transparent;
+        border-radius:8px;
+    }
+    #opd_main_element .dsp_column_settings_panel wa-button::part(base){
+        min-height:40px;
+        border:1px solid var(--opd-border-strong);
+        border-radius:8px;
+        background:transparent;
+        color:var(--opd-text);
+        padding:0 14px;
+        font-size:12px;
+        box-shadow:none;
+    }
+    #opd_main_element .dsp_column_settings_panel wa-button:hover::part(base){
+        background:var(--opd-hover);
+    }
+    #opd_main_element .dsp_column_settings_panel wa-select::part(combobox),
+    #opd_main_element .dsp_column_settings_panel wa-input::part(base){
+        min-height:40px;
+        border:1px solid var(--opd-border-strong);
+        border-radius:8px;
+        background:var(--opd-surface);
+        color:var(--opd-text);
+    }
+    #opd_main_element .dsp_column_settings_panel_close_btn_wrap{
+        justify-content:flex-end;
+        margin:16px 0 0;
     }
     @media (prefers-reduced-motion: reduce){
         #opd_main_element *, #opd_main_element *::before, #opd_main_element *::after{
