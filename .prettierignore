@@ -1,6 +1,7 @@
 .git/
 node_modules/
 pnpm-lock.yaml
-.webext-profile/
-.serena/
 build/
+.wxt/
+.output/
+.wxt-profiles/

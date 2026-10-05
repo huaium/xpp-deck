@@ -3,7 +3,14 @@ import globals from "globals";
 
 export default [
     {
-        ignores: [".git/**", "build/**", "node_modules/**", ".wxt/**", ".output/**", ".webext-profile/**", ".webext-chromium-profile/**"],
+        ignores: [
+            ".git/**",
+            "build/**",
+            "node_modules/**",
+            ".wxt/**",
+            ".output/**",
+            ".wxt-profiles/**",
+        ],
     },
     js.configs.recommended,
     {
@@ -36,12 +43,7 @@ export default [
         },
     },
     {
-        files: [
-            "utils/*.mjs",
-            "wxt.config.mjs",
-            "eslint.config.mjs",
-            "web-ext-config.mjs",
-        ],
+        files: ["utils/*.mjs", "wxt.config.mjs", "eslint.config.mjs"],
         languageOptions: {
             sourceType: "module",
             globals: {

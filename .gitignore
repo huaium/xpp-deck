@@ -152,12 +152,6 @@ build/
 # Codex
 .codex/
 
-# web-ext
-.webext-profile/
-
-# Serena
-.serena/
-
 # WXT
 .wxt/
-.webext-chromium-profile/
+.wxt-profiles/

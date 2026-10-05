@@ -4,7 +4,7 @@
         "checkJs": true,
         "noEmit": true,
         "incremental": true,
-        "tsBuildInfoFile": "./build/.tsbuildinfo",
+        "tsBuildInfoFile": "./.wxt/tsconfig.tsbuildinfo",
         "skipLibCheck": true,
         "target": "ES2022",
         "lib": ["ES2022", "DOM"],
@@ -24,11 +24,6 @@
         "src/types/**/*.d.ts",
         "entrypoints/**/*.ts"
     ],
-    "exclude": [
-        "build/**",
-        "node_modules/**",
-        ".webext-profile/**",
-        "utils/**"
-    ],
+    "exclude": ["build/**", "node_modules/**", "utils/**"],
     "extends": "./.wxt/tsconfig.json"
 }

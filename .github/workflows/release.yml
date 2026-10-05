@@ -20,11 +20,30 @@ jobs:
               with:
                   fetch-depth: 0 # Retrieve full history.
 
-            - name: Create ZIP File
+            - name: Set Up Node.js
+              uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # setup-node v6
+              with:
+                  node-version: 24
+
+            - name: Set Up pnpm
+              uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # action-setup v4
+
+            - name: Install Dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Set Up Recoverable Build Cleanup
               run: |
-                  # Ensure executable permission.
-                  chmod +x ./package.sh
-                  ./package.sh
+                  sudo apt-get update
+                  sudo apt-get install --yes trash-cli
+                  mkdir -p "$RUNNER_TEMP/bin"
+                  ln -s "$(command -v trash-put)" "$RUNNER_TEMP/bin/trash"
+                  echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+            - name: Validate and Package With WXT
+              run: |
+                  pnpm run lint
+                  pnpm test
+                  pnpm run build
 
             - name: Fetch Latest Merged PR Infomation
               env:
@@ -40,7 +59,7 @@ jobs:
                   TAG_NAME: ${{ github.event.inputs.tag_name }}
               run: |
                   gh release create "$TAG_NAME" \
-                    ./package/*.zip \
+                    ./.output/*.zip \
                     --title "Release $TAG_NAME" \
                     --notes-file release_notes.md \
                     --draft

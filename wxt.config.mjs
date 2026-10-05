@@ -49,8 +49,8 @@ export default defineConfig({
     }),
     webExt: {
         binaries: { chrome: process.env.CHROMIUM_BINARY },
-        firefoxProfile: path.resolve(".webext-profile"),
-        chromiumProfile: path.resolve(".webext-chromium-profile"),
+        firefoxProfile: path.resolve(".wxt-profiles/firefox"),
+        chromiumProfile: path.resolve(".wxt-profiles/chrome"),
         keepProfileChanges: true,
         startUrls: ["https://x.com/run-opdeck"],
     },
@@ -62,8 +62,8 @@ export default defineConfig({
             if (wxt.config.webExt.config.disabled) return;
             const profile =
                 wxt.config.browser === "firefox"
-                    ? ".webext-profile"
-                    : ".webext-chromium-profile";
+                    ? ".wxt-profiles/firefox"
+                    : ".wxt-profiles/chrome";
             await fs.mkdir(path.resolve(profile), { recursive: true });
         },
         // WXT cleans its output after this hook; preserve previous output first.

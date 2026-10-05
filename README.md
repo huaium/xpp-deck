@@ -19,6 +19,7 @@
 This is because ESR does not support the CSS selectors used by this extension.**
 
 ## Languages
+
 The sidebar language selector supports English, Japanese, Simplified Chinese,
 Traditional Chinese, Korean, Spanish, French, German, and Brazilian Portuguese.
 It follows the browser language by default and falls back to English.
@@ -91,7 +92,8 @@ Ctrl+C stops development. Type checking remains separate from watch transpilatio
 
 Development output is in `.output/chrome-mv3-dev/` and
 `.output/firefox-mv2-dev/`. Separate browser profiles retain logins.
-The existing `webext:dev` and `webext:dev:chromium` commands are aliases.
+Browser profiles are stored in `.wxt-profiles/chrome/` and
+`.wxt-profiles/firefox/`, separately from generated output.
 
 ### Validate
 
@@ -99,7 +101,6 @@ The existing `webext:dev` and `webext:dev:chromium` commands are aliases.
 pnpm test
 pnpm run lint
 pnpm run test:watch
-pnpm run webext:lint
 ```
 
 ### Build
@@ -111,8 +112,12 @@ pnpm run build
 
 Production bundles are in `.output/chrome-mv3/` and `.output/firefox-mv2/`.
 WXT ZIP packages are written to `.output/`; the Firefox build also produces a
-source archive. `build:ts` and `webext:build` remain compatibility aliases.
+source archive.
 
 Previous build output is moved to Trash before WXT rebuilds it.
-`pnpm run webext:clean` moves generated output to Trash without deleting browser
+`pnpm run clean` moves generated output to Trash without deleting browser
 profiles. Cleanup stops if `trash` is unavailable or cannot access the files.
+
+WXT uses `web-ext` internally to launch development browsers. The dependency
+and WXT-native `webExt` runner options are retained for automatic browser startup;
+there are no standalone web-ext commands or configuration files.
