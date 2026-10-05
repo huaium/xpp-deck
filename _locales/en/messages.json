@@ -258,7 +258,7 @@
         "message": "Cannot delete profile because only one profile exists."
     },
     "msg_explore_pin_confirm": {
-        "message": "Pin this location?"
+        "message": "Pin this location?\n\nThis column will start at the current URL when you reload the deck or reopen this profile. You can still browse elsewhere; the column's position is not locked."
     },
     "msg_explore_unpin_confirm": {
         "message": "Unpin this location?"

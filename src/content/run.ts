@@ -68,7 +68,11 @@ function run(settings) {
                 queue_column_navigation(frame, () => {
                     const source = frame.getAttribute("data-opd-src");
                     frame.removeAttribute("data-opd-src");
-                    if (source) frame.src = source;
+                    const pinned = frame
+                        .closest("div[opd_column_type]")
+                        ?.getAttribute("opd_pinned_path");
+                    if (pinned) frame.src = `https://x.com${pinned}`;
+                    else if (source) frame.src = source;
                 });
             });
     }
@@ -1404,6 +1408,11 @@ function run(settings) {
         index < settings.column_settings.length && index < all_columns.length;
         index++
     ) {
+        const pinned_path = settings.column_settings[index].column_pinned_path;
+        all_columns[index].setAttribute(
+            "opd_pinned_path",
+            typeof pinned_path === "string" ? pinned_path : "",
+        );
         const custom_title = settings.column_settings[index].custom_title;
         if (typeof custom_title === "string" && custom_title.trim() !== "") {
             all_columns[index].setAttribute("opd_custom_title", custom_title);
@@ -1655,6 +1664,10 @@ function run(settings) {
             );
         }
         for (let index = 0; index < column_object.length; index++) {
+            const pin_column = column_object[index].closest<HTMLElement>(
+                "div[opd_column_type]",
+            );
+            if (pin_column) bind_column_pin(pin_column);
             column_object[index].removeAttribute("opd_init_webview");
             // Change banner/view mode.
             column_object[index].addEventListener("load", function (ev) {
@@ -1793,10 +1806,6 @@ function run(settings) {
                     const opd_column_banner_checkbox =
                         opd_column_div.querySelector<HTMLInputElement>(
                             ".opd_banner",
-                        );
-                    const opd_column_pinned_checkbox =
-                        opd_column_div.querySelector<HTMLInputElement>(
-                            ".opd_pinned_btn",
                         );
                     const opd_column_auto_reload_checkbox =
                         opd_column_div.querySelector<HTMLInputElement>(
@@ -2333,72 +2342,6 @@ function run(settings) {
                             );
                         }
 
-                        // Explore pin state.
-                        if (opd_column_pinned_checkbox != null) {
-                            if (mode != "session_set") {
-                                opd_column_pinned_checkbox.addEventListener(
-                                    "click",
-                                    async function (ev) {
-                                        const pinned_checkbox =
-                                            ev.currentTarget instanceof
-                                            HTMLInputElement
-                                                ? ev.currentTarget
-                                                : null;
-                                        if (!pinned_checkbox) return;
-                                        const pinned_column =
-                                            pinned_checkbox.closest(
-                                                "div[opd_column_type]",
-                                            );
-                                        if (!pinned_column) return;
-                                        if (pinned_checkbox.checked) {
-                                            if (
-                                                await opd_confirm(
-                                                    i18n_message(
-                                                        "msg_explore_pin_confirm",
-                                                    ),
-                                                )
-                                            ) {
-                                                const now_path =
-                                                    pinned_column.getAttribute(
-                                                        "opd_explore_path",
-                                                    ) ?? "";
-                                                pinned_column.setAttribute(
-                                                    "opd_pinned_path",
-                                                    now_path,
-                                                );
-                                                column_settings_save(
-                                                    "",
-                                                    last_load_profile,
-                                                );
-                                            } else {
-                                                pinned_checkbox.checked = false;
-                                            }
-                                        } else {
-                                            if (
-                                                await opd_confirm(
-                                                    i18n_message(
-                                                        "msg_explore_unpin_confirm",
-                                                    ),
-                                                )
-                                            ) {
-                                                pinned_column.setAttribute(
-                                                    "opd_pinned_path",
-                                                    "",
-                                                );
-                                                column_settings_save(
-                                                    "",
-                                                    last_load_profile,
-                                                );
-                                                pinned_checkbox.checked = false;
-                                            } else {
-                                                pinned_checkbox.checked = true;
-                                            }
-                                        }
-                                    },
-                                );
-                            }
-                        }
-                        // Auto-refresh mode events.
                         if (opd_column_auto_reload_checkbox != null) {
                             if (mode != "session_set") {
                                 opd_column_auto_reload_checkbox.addEventListener(
@@ -3204,6 +3147,76 @@ function run(settings) {
         });
     }
     // Column move handling.
+    function bind_column_pin(column: HTMLElement) {
+        let checkbox =
+            column.querySelector<HTMLInputElement>(".opd_pinned_btn");
+        if (!checkbox) {
+            const bar = column.querySelector(".column_bar");
+            if (!bar) return;
+            const wrapper = document.createElement("span");
+            wrapper.className = "dsp_column_btn";
+            checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "opd_pinned_btn";
+            checkbox.title = i18n_message("ui_column_pin_toggle_title");
+            const label = document.createElement("label");
+            label.className = "dsp_column_pin_btn opd_ui_icon_color";
+            wrapper.appendChild(checkbox);
+            wrapper.appendChild(label);
+            bar.insertBefore(
+                wrapper,
+                bar.querySelector(".dsp_column_close_btn_wrap"),
+            );
+        }
+        checkbox.checked = Boolean(column.getAttribute("opd_pinned_path"));
+        if (checkbox.hasAttribute("opd_pin_bound")) return;
+        checkbox.setAttribute("opd_pin_bound", "");
+        const control = checkbox;
+        control.addEventListener("click", async () => {
+            control.disabled = true;
+            try {
+                let path = "";
+                if (control.checked) {
+                    const frame =
+                        column.querySelector<HTMLIFrameElement>("iframe");
+                    const current_url =
+                        frame?.contentWindow?.location.href ?? "";
+                    path =
+                        (current_url.startsWith("https://")
+                            ? normalize_custom_x_path(current_url)
+                            : null) ??
+                        normalize_custom_x_path(
+                            frame?.getAttribute("data-opd-src") ?? "",
+                        ) ??
+                        "";
+                    if (!path) {
+                        await opd_alert(
+                            i18n_message("msg_invalid_value_alert"),
+                        );
+                        return;
+                    }
+                }
+                if (
+                    await opd_confirm(
+                        i18n_message(
+                            control.checked
+                                ? "msg_explore_pin_confirm"
+                                : "msg_explore_unpin_confirm",
+                        ),
+                    )
+                ) {
+                    if (!column.isConnected) return;
+                    column.setAttribute("opd_pinned_path", path);
+                    column_settings_save("", last_load_profile);
+                }
+            } finally {
+                control.checked = Boolean(
+                    column.getAttribute("opd_pinned_path"),
+                );
+                control.disabled = false;
+            }
+        });
+    }
     function column_rename() {
         const titles = document.querySelectorAll<HTMLElement>(
             '#opd_main_element .dsp_column[draggable="true"] .dsp_column_title .dsp_column_move_icon_parent span:last-child',
@@ -3464,9 +3477,8 @@ function run(settings) {
                 column_save_title: is_explore
                     ? column.getAttribute("opd_explore_title")
                     : null,
-                column_pinned_path: is_explore
-                    ? (column.getAttribute("opd_pinned_path") ?? "")
-                    : "",
+                column_pinned_path:
+                    column.getAttribute("opd_pinned_path") ?? "",
                 auto_reload: supports_reload
                     ? column.querySelector<HTMLInputElement>(
                           ".opd_a_reload_bar",
