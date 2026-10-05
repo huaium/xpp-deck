@@ -562,28 +562,6 @@ function run(settings) {
         height: 24px;
         cursor: pointer;
     }
-    .dsp_column_top_btn{
-        display: block;
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.top_bar_hide)});
-        transform: rotate(180deg);
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 22px;
-        height: 22px;
-        cursor: pointer;  
-    }
-    input:checked + .dsp_column_top_btn{
-        transform: rotate(0deg);
-    }
-    .dsp_column_top_btn input{
-        opacity: 0;
-        position: absolute;
-        z-index: 10;
-        margin: 0;
-        width: 24px;
-        height: 24px;    
-    }
     .dsp_column_close_btn_wrap{
         display: flex;
         justify-content: flex-end;
@@ -1020,7 +998,7 @@ function run(settings) {
     </style>`,
     );
     // Create and insert column elements.
-    let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span><span class="dsp_column_btn"><input class="opd_top_bar" type="checkbox" title="${i18n_message("ui_column_top_toggle_title")}" %column_top_bar_ch%><label class="dsp_column_top_btn opd_ui_icon_color"></label></span>`;
+    let default_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span><span class="dsp_column_btn"><input class="opd_banner" type="checkbox" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span>`;
     let post_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_settings_btn opd_ui_icon_color" title="${i18n_message("ui_column_settings_title")}"><input class="opd_settings_btn" type="button" value="S"></label></span>`;
     let refresh_element_bar = `<span class="dsp_column_btn"><label class="dsp_column_refresh_btn opd_ui_icon_color" title="${i18n_message("ui_column_refresh_title")}"><input class="column_refresh_btn" type="button" value="R"></label></span>`;
     let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><option value="0">${i18n_message("ui_settings_view_mode_all")}</option><option value="1">${i18n_message("ui_settings_view_mode_text_only")}</option><option value="2">${i18n_message("ui_settings_view_mode_media_only")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><select class="opd_column_size_preset"><option value="0">${i18n_message("ui_settings_column_width_small")}</option><option value="1">${i18n_message("ui_settings_column_width_medium")}</option><option value="2">${i18n_message("ui_settings_column_width_large")}</option><option value="3">${i18n_message("ui_settings_column_width_custom")}</option></select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><input type="button" class="column_width_btn" value="${i18n_message("ui_settings_column_width_custom_button")}"/></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><input class="opd_a_reload_bar" type="checkbox" %column_auto_reload_ch%></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%">${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><input type="button" class="dsp_column_settings_panel_close_btn" value="${i18n_message("ui_settings_close_button")}"/></div></div></div>`;
@@ -1077,7 +1055,6 @@ function run(settings) {
             ) {
                 //console.log(default_element[Object.keys(default_element)[default_index]]["html"])
                 let banner_checked = "";
-                let init_top_visible_checked = "";
                 let init_pinned_checked = "";
                 let init_pinned_path = "";
                 let init_auto_reload_checked = "";
@@ -1090,9 +1067,6 @@ function run(settings) {
                     banner_checked = "checked";
                 }
                 // Top search area and related UI.
-                if (settings.column_settings[index].top_visible == true) {
-                    init_top_visible_checked = "checked";
-                }
                 // Column width.
                 if (settings.column_settings[index].column_width != null) {
                     column_width_init =
@@ -1132,10 +1106,6 @@ function run(settings) {
                         .replaceAll("%column_save_path%", init_column_save_path)
                         .replaceAll("%column_num%", create_random_id())
                         .replace("%column_banner_ch%", banner_checked)
-                        .replace(
-                            "%column_top_bar_ch%",
-                            init_top_visible_checked,
-                        )
                         .replace("%column_tw_view_mode%", tw_view_type)
                         .replace("%column_pinned_ch%", init_pinned_checked)
                         .replaceAll(
@@ -1158,10 +1128,6 @@ function run(settings) {
                         .replaceAll("%column_save_path%", init_column_save_path)
                         .replaceAll("%column_num%", create_random_id())
                         .replace("%column_banner_ch%", banner_checked)
-                        .replace(
-                            "%column_top_bar_ch%",
-                            init_top_visible_checked,
-                        )
                         .replace("%column_tw_view_mode%", tw_view_type)
                         .replace("%column_pinned_ch%", init_pinned_checked)
                         .replaceAll(
@@ -1556,10 +1522,6 @@ function run(settings) {
                         opd_column_div.querySelector<HTMLInputElement>(
                             ".opd_banner",
                         );
-                    const opd_column_top_visible_checkbox =
-                        opd_column_div.querySelector<HTMLInputElement>(
-                            ".opd_top_bar",
-                        );
                     const opd_column_tw_view_mode_opt =
                         opd_column_div.querySelector<HTMLSelectElement>(
                             ".opd_tw_view_mode",
@@ -1599,53 +1561,6 @@ function run(settings) {
                         //console.log("else")
                         iframe_elem.contentWindow!.document.querySelector(
                             "head style[opd_banner_css]",
-                        )!.textContent = ``;
-                    }
-                    // Apply top-search-area hide setting.
-                    if (
-                        iframe_elem.contentWindow!.document.querySelector(
-                            "head style[opd_top_visible_css]",
-                        ) == null
-                    ) {
-                        iframe_elem
-                            .contentWindow!.document.querySelector("head")!
-                            .insertAdjacentHTML(
-                                "beforeend",
-                                `<style opd_top_visible_css></style>`,
-                            );
-                    }
-                    if (opd_column_top_visible_checkbox?.checked != true) {
-                        if (
-                            iframe_elem
-                                .closest("div[opd_column_type]")!
-                                .getAttribute("opd_column_type") == "explore"
-                        ) {
-                            //div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]){display:none;}
-                            iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_top_visible_css]",
-                            )!.textContent =
-                                `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1)`;
-                        } else {
-                            if (
-                                iframe_elem
-                                    .closest("div[opd_column_type]")!
-                                    .getAttribute("opd_column_type") == "home"
-                            ) {
-                                iframe_elem.contentWindow!.document.querySelector(
-                                    "head style[opd_top_visible_css]",
-                                )!.textContent =
-                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;} div[role="progressbar"] + div{display:none;}`;
-                            } else {
-                                iframe_elem.contentWindow!.document.querySelector(
-                                    "head style[opd_top_visible_css]",
-                                )!.textContent =
-                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){display:none;}`;
-                            }
-                        }
-                    } else {
-                        //console.log("else")
-                        iframe_elem.contentWindow!.document.querySelector(
-                            "head style[opd_top_visible_css]",
                         )!.textContent = ``;
                     }
 
@@ -1715,10 +1630,6 @@ function run(settings) {
                     const opd_column_banner_checkbox =
                         opd_column_div.querySelector<HTMLInputElement>(
                             ".opd_banner",
-                        );
-                    const opd_column_top_visible_checkbox =
-                        opd_column_div.querySelector<HTMLInputElement>(
-                            ".opd_top_bar",
                         );
                     const opd_column_pinned_checkbox =
                         opd_column_div.querySelector<HTMLInputElement>(
@@ -2017,56 +1928,6 @@ function run(settings) {
                             )!.textContent = ``;
                         }
 
-                        // Apply top-search-area hide setting.
-                        if (
-                            iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_top_visible_css]",
-                            ) == null
-                        ) {
-                            iframe_elem
-                                .contentWindow!.document.querySelector("head")!
-                                .insertAdjacentHTML(
-                                    "beforeend",
-                                    `<style opd_top_visible_css></style>`,
-                                );
-                        }
-                        if (opd_column_top_visible_checkbox?.checked != true) {
-                            //console.log("home_notcheck")
-                            if (
-                                iframe_elem
-                                    .closest("div[opd_column_type]")!
-                                    .getAttribute("opd_column_type") ==
-                                "explore"
-                            ) {
-                                iframe_elem.contentWindow!.document.querySelector(
-                                    "head style[opd_top_visible_css]",
-                                )!.textContent =
-                                    `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                            } else {
-                                if (
-                                    iframe_elem
-                                        .closest("div[opd_column_type]")!
-                                        .getAttribute("opd_column_type") ==
-                                    "home"
-                                ) {
-                                    iframe_elem.contentWindow!.document.querySelector(
-                                        "head style[opd_top_visible_css]",
-                                    )!.textContent =
-                                        `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                } else {
-                                    iframe_elem.contentWindow!.document.querySelector(
-                                        "head style[opd_top_visible_css]",
-                                    )!.textContent =
-                                        `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible; filter: none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                }
-                            }
-                        } else {
-                            //console.log("else")
-                            iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_top_visible_css]",
-                            )!.textContent = ``;
-                        }
-
                         // Load and apply tweet view mode settings.
                         if (
                             iframe_elem.contentWindow!.document.querySelector(
@@ -2307,85 +2168,6 @@ function run(settings) {
                                     } else {
                                         //console.log("else")
                                         banner_style.textContent = ``;
-                                    }
-                                },
-                            );
-
-                            // Top-search hide toggle event.
-                            opd_column_top_visible_checkbox?.addEventListener(
-                                "change",
-                                function (ev) {
-                                    const top_visible_checkbox =
-                                        ev.currentTarget instanceof
-                                        HTMLInputElement
-                                            ? ev.currentTarget
-                                            : null;
-                                    if (!top_visible_checkbox) return;
-                                    column_settings_save("", last_load_profile);
-                                    const topvisible_column =
-                                        top_visible_checkbox.closest(
-                                            "div[opd_column_type]",
-                                        );
-                                    if (!topvisible_column) return;
-                                    const topvisible_mode_target_object =
-                                        topvisible_column.querySelector(
-                                            "iframe",
-                                        );
-                                    if (
-                                        !(
-                                            topvisible_mode_target_object instanceof
-                                            HTMLIFrameElement
-                                        ) ||
-                                        !topvisible_mode_target_object.contentWindow
-                                    ) {
-                                        return;
-                                    }
-                                    const topvisible_doc =
-                                        topvisible_mode_target_object
-                                            .contentWindow.document;
-                                    const topvisible_head =
-                                        topvisible_doc.querySelector("head")!;
-                                    if (!topvisible_head) return;
-                                    //console.log(topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]'))
-                                    if (
-                                        topvisible_doc.querySelector(
-                                            "head style[opd_top_visible_css]",
-                                        ) == null
-                                    ) {
-                                        topvisible_head.insertAdjacentHTML(
-                                            "beforeend",
-                                            `<style opd_top_visible_css></style>`,
-                                        );
-                                    }
-                                    const topvisible_style =
-                                        topvisible_doc.querySelector(
-                                            "head style[opd_top_visible_css]",
-                                        );
-                                    if (!topvisible_style) return;
-                                    const topvisible_column_type =
-                                        topvisible_column.getAttribute(
-                                            "opd_column_type",
-                                        );
-                                    if (top_visible_checkbox.checked != true) {
-                                        //console.log(this)
-                                        //topvisible_mode_target_object.contentWindow.document.querySelector('head style[opd_top_visible_css]')!.textContent = `div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(form[role="search"]), div[data-testid="primaryColumn"] div[tabindex="0"][aria-label] div:has(h2[role="heading"]){display:none;};`;
-                                        if (
-                                            topvisible_column_type == "explore"
-                                        ) {
-                                            topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                        } else {
-                                            //console.log(this.closest("div[opd_column_type]")!.getAttribute("opd_column_type"))
-                                            if (
-                                                topvisible_column_type == "home"
-                                            ) {
-                                                topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;} [data-testid="app-bar-back"]{visibility: visible;} div[role="progressbar"] + div{display:none;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                            } else {
-                                                topvisible_style.textContent = `div[data-testid="primaryColumn"]>[tabindex="0"][aria-label]>div:nth-child(1){visibility: hidden; height: 0;top: calc(100vh - 60px);position: sticky;backdrop-filter: blur(0px) !important;}[data-testid="app-bar-back"]{visibility: visible;}div[data-testid="cellInnerDiv"]:has(button[aria-describedby], div[data-testid="UserAvatar-Container-unknown"]):not(:has(article[tabindex="-1"])){display:none;}`;
-                                            }
-                                        }
-                                    } else {
-                                        //console.log("else")
-                                        topvisible_style.textContent = ``;
                                     }
                                 },
                             );
@@ -2862,7 +2644,6 @@ function run(settings) {
             const new_column = default_element["post"]["html"]
                 .replaceAll("%column_num%", create_random_id())
                 .replace("%column_banner_ch%", "")
-                .replace("%column_top_bar_ch%", "checked")
                 .replace("%column_tw_view_mode%", "0")
                 .replaceAll("%column_width_num%", "30")
                 .replaceAll("%column_auto_reload_ch%", "")
@@ -2898,7 +2679,6 @@ function run(settings) {
             const new_column = default_element["home"]["html"]
                 .replaceAll("%column_num%", create_random_id())
                 .replace("%column_banner_ch%", "")
-                .replace("%column_top_bar_ch%", "checked")
                 .replace("%column_tw_view_mode%", "0")
                 .replaceAll("%column_width_num%", "30")
                 .replaceAll("%column_auto_reload_ch%", "")
@@ -2934,7 +2714,6 @@ function run(settings) {
             const new_column = default_element["notification"]["html"]
                 .replaceAll("%column_num%", create_random_id())
                 .replace("%column_banner_ch%", "")
-                .replace("%column_top_bar_ch%", "checked")
                 .replace("%column_tw_view_mode%", "0")
                 .replaceAll("%column_width_num%", "30");
             if (!add_target_column) return;
@@ -3050,7 +2829,6 @@ function run(settings) {
             .replaceAll("%column_save_path%", column_path)
             .replaceAll("%column_num%", column_id)
             .replace("%column_banner_ch%", "")
-            .replace("%column_top_bar_ch%", "checked")
             .replace("%column_tw_view_mode%", "0")
             .replaceAll("%column_pinned_save_path%", "")
             .replaceAll("%column_width_num%", "30")
@@ -3352,7 +3130,6 @@ function run(settings) {
     type SavedColumnSettings = {
         type: string;
         banner: boolean;
-        top_visible: boolean;
         tw_view_mode: string;
         column_save_path: string;
         column_save_title: string | null;
@@ -3375,10 +3152,7 @@ function run(settings) {
         for (let index = 0; index < columns.length; index++) {
             const banner_checkbox =
                 columns[index].querySelector<HTMLInputElement>(".opd_banner");
-            const top_bar_checkbox =
-                columns[index].querySelector<HTMLInputElement>(".opd_top_bar");
             const banner_checked = banner_checkbox?.checked == true;
-            const top_visible_checked = top_bar_checkbox?.checked == true;
             let tw_view_type = "0";
             let column_open_path = "";
             let column_pinned_save_path = "";
@@ -3442,7 +3216,6 @@ function run(settings) {
             settings_array["column_settings"].push({
                 type: columns[index].getAttribute("opd_column_type") ?? "",
                 banner: banner_checked,
-                top_visible: top_visible_checked,
                 tw_view_mode: tw_view_type,
                 column_save_path: column_open_path,
                 column_save_title: column_page_title,

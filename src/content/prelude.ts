@@ -102,7 +102,6 @@ function request_page_reload() {
 }
 const ui_icon_define = {
     banner_hide: "public/icons/banner_hide.svg",
-    top_bar_hide: "public/icons/top_hide.svg",
     column_move: "public/icons/column_move.svg",
     column_close: "public/icons/column_close.svg",
     column_settings: "public/icons/settings.svg",

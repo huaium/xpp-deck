@@ -80,7 +80,6 @@ function settings_init() {
         {
             type: "main_bar_empty_column",
             banner: false,
-            top_visible: true,
             tw_view_mode: "0",
             column_save_path: "",
             column_save_title: "",
@@ -92,7 +91,6 @@ function settings_init() {
         {
             type: "home",
             banner: true,
-            top_visible: true,
             tw_view_mode: "0",
             column_save_path: "",
             column_save_title: "",
@@ -104,7 +102,6 @@ function settings_init() {
         {
             type: "notification",
             banner: false,
-            top_visible: true,
             tw_view_mode: "0",
             column_save_path: "",
             auto_reload: false,
@@ -116,7 +113,6 @@ function settings_init() {
         {
             type: "explore",
             banner: false,
-            top_visible: true,
             tw_view_mode: "0",
             exp_type: "",
             column_save_path: "/explore",
@@ -129,7 +125,6 @@ function settings_init() {
         {
             type: "empty_column",
             banner: false,
-            top_visible: true,
             tw_view_mode: "0",
             column_save_path: "",
             column_save_title: "",
@@ -152,7 +147,9 @@ function settings_init() {
             chrome.storage.local.set(
                 { opd_settings: JSON.stringify(settings) },
                 async function () {
-                    await opd_alert(i18n_message("msg_initial_setup_completed"));
+                    await opd_alert(
+                        i18n_message("msg_initial_setup_completed"),
+                    );
 
                     request_page_reload();
                 },
