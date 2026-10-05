@@ -3,6 +3,32 @@ import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 import { profileHarness } from "./helpers/profile.mjs";
 
+test("clicking the current profile does not confirm, persist, or rebuild the deck", async () => {
+    const h = profileHarness(true);
+    h.globals.opd_confirm = async () => {
+        assert.fail("current profile must not ask for confirmation");
+    };
+    h.globals.run = () => assert.fail("current profile must not rebuild");
+    h.globals.document.querySelector = (selector) => {
+        assert.notEqual(selector, "#opd_main_element");
+        return {
+            addEventListener(_event, handler) {
+                h.buttons.set(selector, handler);
+            },
+        };
+    };
+    const { create_profile_list_btn: bind } = loadFunctions(
+        "../src/content/run.ts",
+        ["create_profile_list_btn"],
+        "",
+        h.globals,
+    );
+    bind();
+    await h.buttons.get("#userProfile-1")();
+    assert.equal(h.writes.length, 0);
+    assert.deepEqual(h.alerts, []);
+});
+
 test("profile saving persists a snapshot only after the name prompt is submitted", async () => {
     for (const confirmed of [false, true]) {
         const h = profileHarness(confirmed);

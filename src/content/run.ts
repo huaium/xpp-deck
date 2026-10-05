@@ -1858,6 +1858,7 @@ export function run(settings) {
                 continue;
             }
             profile_button.addEventListener("click", async function () {
+                if (index === last_load_profile) return;
                 //console.log(profile_store[index].profile)
                 const preload_array = profile_store[index].profile;
                 let preload_desc_array = new Array();
