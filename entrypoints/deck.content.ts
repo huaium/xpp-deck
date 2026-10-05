@@ -16,6 +16,8 @@ export default defineContentScript({
                 location.reload();
             });
         }
-        await import("../src/content/index");
+        const { start_content } = await import("../src/content/index");
+        if (ctx.signal.aborted) return;
+        ctx.onInvalidated(start_content());
     },
 });

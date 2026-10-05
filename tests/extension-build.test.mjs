@@ -29,6 +29,7 @@ test("WXT builds complete Chrome MV3 and Firefox MV2 distributions", async () =>
         );
         assert.equal(manifest.manifest_version, browser === "firefox" ? 2 : 3);
         assert.equal(manifest.version, "0.1.0");
+        assert.ok(!manifest.permissions.includes("cookies"));
         assert.equal(
             manifest.action?.default_popup ??
                 manifest.browser_action?.default_popup,

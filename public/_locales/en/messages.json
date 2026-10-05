@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "Please update your browser to move columns without refreshing them."
+    },
+    "ui_welcome_title": {
+        "message": "Sign in to get started"
+    },
+    "ui_welcome_description": {
+        "message": "Use your X account to load your columns."
+    },
+    "ui_welcome_sign_in": {
+        "message": "Sign in to X"
+    },
+    "ui_welcome_note": {
+        "message": "Sign-in happens directly on X."
+    },
+    "ui_welcome_retry": {
+        "message": "I've signed in"
+    },
+    "ui_welcome_try_again": {
+        "message": "Try again"
+    },
+    "ui_welcome_checking": {
+        "message": "Checking your X session..."
+    },
+    "ui_welcome_error_title": {
+        "message": "Unable to check your session"
+    },
+    "ui_welcome_error_description": {
+        "message": "The session check failed. Try again without changing your profiles."
     }
 }

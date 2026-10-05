@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "Atualize o navegador para mover colunas sem recarregá-las."
+    },
+    "ui_welcome_title": {
+        "message": "Entre para começar"
+    },
+    "ui_welcome_description": {
+        "message": "Use sua conta do X para carregar suas colunas."
+    },
+    "ui_welcome_sign_in": {
+        "message": "Entrar no X"
+    },
+    "ui_welcome_note": {
+        "message": "O login é feito diretamente no X."
+    },
+    "ui_welcome_retry": {
+        "message": "Já entrei"
+    },
+    "ui_welcome_try_again": {
+        "message": "Tentar novamente"
+    },
+    "ui_welcome_checking": {
+        "message": "Verificando sua sessão do X..."
+    },
+    "ui_welcome_error_title": {
+        "message": "Não foi possível verificar sua sessão"
+    },
+    "ui_welcome_error_description": {
+        "message": "A verificação falhou. Tente novamente sem alterar seus perfis."
     }
 }

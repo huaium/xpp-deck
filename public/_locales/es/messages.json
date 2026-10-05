@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "Actualiza el navegador para mover columnas sin recargarlas."
+    },
+    "ui_welcome_title": {
+        "message": "Inicia sesión para empezar"
+    },
+    "ui_welcome_description": {
+        "message": "Usa tu cuenta de X para cargar tus columnas."
+    },
+    "ui_welcome_sign_in": {
+        "message": "Iniciar sesión en X"
+    },
+    "ui_welcome_note": {
+        "message": "El inicio de sesión se realiza directamente en X."
+    },
+    "ui_welcome_retry": {
+        "message": "Ya inicié sesión"
+    },
+    "ui_welcome_try_again": {
+        "message": "Reintentar"
+    },
+    "ui_welcome_checking": {
+        "message": "Comprobando tu sesión de X..."
+    },
+    "ui_welcome_error_title": {
+        "message": "No se pudo comprobar tu sesión"
+    },
+    "ui_welcome_error_description": {
+        "message": "La comprobación falló. Reintenta sin modificar tus perfiles."
     }
 }

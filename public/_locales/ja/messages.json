@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "カラムを再読み込みせずに移動するには、ブラウザーを更新してください。"
+    },
+    "ui_welcome_title": {
+        "message": "ログインして始める"
+    },
+    "ui_welcome_description": {
+        "message": "Xアカウントでログインするとカラムを読み込めます。"
+    },
+    "ui_welcome_sign_in": {
+        "message": "Xにログイン"
+    },
+    "ui_welcome_note": {
+        "message": "ログインはXで直接行います。"
+    },
+    "ui_welcome_retry": {
+        "message": "ログインしました"
+    },
+    "ui_welcome_try_again": {
+        "message": "再試行"
+    },
+    "ui_welcome_checking": {
+        "message": "Xのログイン状態を確認しています..."
+    },
+    "ui_welcome_error_title": {
+        "message": "ログイン状態を確認できません"
+    },
+    "ui_welcome_error_description": {
+        "message": "確認に失敗しました。プロフィールを変更せずに再試行してください。"
     }
 }

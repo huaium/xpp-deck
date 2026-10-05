@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "请更新浏览器，以便在不刷新的情况下移动栏目。"
+    },
+    "ui_welcome_title": {
+        "message": "登录后开始使用"
+    },
+    "ui_welcome_description": {
+        "message": "使用你的 X 账号加载各个栏目。"
+    },
+    "ui_welcome_sign_in": {
+        "message": "登录 X"
+    },
+    "ui_welcome_note": {
+        "message": "登录将在 X 官方页面完成。"
+    },
+    "ui_welcome_retry": {
+        "message": "我已登录"
+    },
+    "ui_welcome_try_again": {
+        "message": "重试"
+    },
+    "ui_welcome_checking": {
+        "message": "正在检查 X 登录状态..."
+    },
+    "ui_welcome_error_title": {
+        "message": "无法检查登录状态"
+    },
+    "ui_welcome_error_description": {
+        "message": "检查失败，请重试。你的配置不会被更改。"
     }
 }

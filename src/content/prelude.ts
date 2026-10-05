@@ -1,9 +1,10 @@
+import { is_deck_location } from "./session";
+
 export const manifest = chrome.runtime.getManifest();
 // Print welcome messages to console
 console.log("Welcome to XPP-Deck!");
 console.log(`Version: ${manifest.version}`);
 //
-const url_path = new URL(location.href);
 export const system_dark_query = window.matchMedia(
     "(prefers-color-scheme: dark)",
 );
@@ -72,7 +73,7 @@ function get_storage_local_async(
         chrome.storage.local.get(key, (value) => resolve(value));
     });
 }
-async function initialize_i18n_override() {
+export async function initialize_i18n_override() {
     const language_setting = await get_storage_local_async(
         "opd_language_override",
     );
@@ -1117,43 +1118,20 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     }
 });
 //
-export function initialize_content(
+export async function initialize_content(
     run: typeof import("./run").run,
     settings_init: typeof import("./settings").settings_init,
 ) {
-    if (
-        location.href == "https://twitter.com/run-opdeck" ||
-        location.href == "https://x.com/run-opdeck"
-    ) {
-        //testmode
-        if (url_path.pathname == "/run-opdeck_test.html") {
-            //init();
-            console.log("testmode");
-            chrome.runtime
-                .sendMessage({ message: "dnr_upd_internal_dsp" })
-                .then(() => {
-                    init();
-                });
-        } else {
-            if (navigator.brave != undefined) {
-                chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
-                    init();
-                });
-                //init();
-            } else {
-                chrome.runtime.sendMessage({ message: "dnr_upd" }).then(() => {
-                    init();
-                });
-            }
-        }
-        //chrome.runtime.sendMessage({message: "dnr_upd"});
+    if (is_deck_location(location.href)) {
+        await chrome.runtime.sendMessage({ message: "dnr_upd" });
+        init();
         function init() {
             //console.log("Welcome to XPP-Deck!");
             chrome.storage.local.get("opd_settings", async function (value) {
-                await initialize_i18n_override();
                 if (value.opd_settings == undefined) {
                     last_load_profile = 0;
                     settings_init();
+                    return;
                 } else {
                     const opd_settings_raw = String(value.opd_settings);
                     if (

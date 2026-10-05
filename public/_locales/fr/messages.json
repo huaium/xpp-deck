@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "Mettez votre navigateur à jour pour déplacer les colonnes sans les recharger."
+    },
+    "ui_welcome_title": {
+        "message": "Connectez-vous pour commencer"
+    },
+    "ui_welcome_description": {
+        "message": "Utilisez votre compte X pour charger vos colonnes."
+    },
+    "ui_welcome_sign_in": {
+        "message": "Se connecter à X"
+    },
+    "ui_welcome_note": {
+        "message": "La connexion se fait directement sur X."
+    },
+    "ui_welcome_retry": {
+        "message": "Je suis connecté"
+    },
+    "ui_welcome_try_again": {
+        "message": "Réessayer"
+    },
+    "ui_welcome_checking": {
+        "message": "Vérification de votre session X..."
+    },
+    "ui_welcome_error_title": {
+        "message": "Impossible de vérifier votre session"
+    },
+    "ui_welcome_error_description": {
+        "message": "La vérification a échoué. Réessayez sans modifier vos profils."
     }
 }

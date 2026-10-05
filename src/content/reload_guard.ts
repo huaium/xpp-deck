@@ -49,6 +49,7 @@ export function start_reload_guard() {
         const style = document.createElement("style");
         style.id = preloadStyleId;
         style.textContent = `
+html[data-opd-deck] #react-root { visibility: hidden !important; }
 html[data-opd-theme="dark"],
 html[data-opd-theme="dark"] body {
     background: #101215 !important;
@@ -63,6 +64,12 @@ html[data-opd-theme="light"] body {
         document.documentElement.appendChild(style);
     }
 
+    if (
+        window.location?.pathname === "/run-opdeck" &&
+        ["x.com", "twitter.com"].includes(window.location.hostname)
+    ) {
+        document.documentElement.setAttribute("data-opd-deck", "");
+    }
     ensurePreloadThemeStyle();
     applyRootThemeMarker();
     bootstrap.beforeunloadBypassKey = bypassKey;

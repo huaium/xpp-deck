@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "請更新瀏覽器，以便在不重新整理的情況下移動欄位。"
+    },
+    "ui_welcome_title": {
+        "message": "登入後開始使用"
+    },
+    "ui_welcome_description": {
+        "message": "使用你的 X 帳號載入各個欄位。"
+    },
+    "ui_welcome_sign_in": {
+        "message": "登入 X"
+    },
+    "ui_welcome_note": {
+        "message": "登入將在 X 官方頁面完成。"
+    },
+    "ui_welcome_retry": {
+        "message": "我已登入"
+    },
+    "ui_welcome_try_again": {
+        "message": "重試"
+    },
+    "ui_welcome_checking": {
+        "message": "正在檢查 X 登入狀態..."
+    },
+    "ui_welcome_error_title": {
+        "message": "無法檢查登入狀態"
+    },
+    "ui_welcome_error_description": {
+        "message": "檢查失敗，請重試。你的設定不會被更改。"
     }
 }

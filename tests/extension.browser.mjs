@@ -16,15 +16,16 @@ const browser = await playwright.chromium.launch({
         : {}),
 });
 try {
-    const page = await browser.newPage({
+    const context = await browser.newContext({
         viewport: { width: 1800, height: 900 },
     });
+    const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => {
         errors.push(error.message);
         console.error(error.message);
     });
-    await page.route("https://x.com/**", async (route) => {
+    await context.route("https://x.com/**", async (route) => {
         const url = new URL(route.request().url());
         if (url.pathname.startsWith("/__extension__/")) {
             const file = url.pathname.slice("/__extension__/".length);
@@ -69,6 +70,9 @@ try {
                 { name: "smoke", profile: columns },
             ]),
         };
+        document.getElementById("react-root").innerHTML =
+            '<a href="/i/jf/onboarding/web?mode=signup">Continue with phone</a><a href="/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-opdeck">Log in with username or email</a>';
+        window.__opd_storage_writes = 0;
         window.chrome = {
             runtime: {
                 getManifest: () => ({ version: "0.1.0" }),
@@ -80,6 +84,7 @@ try {
                 local: {
                     get: (key, callback) => callback({ [key]: store[key] }),
                     set: (value, callback) => {
+                        window.__opd_storage_writes++;
                         Object.assign(store, value);
                         callback?.();
                     },
@@ -94,6 +99,67 @@ try {
     await page.addScriptTag({
         content: await readFile(directory + "content-scripts/deck.js", "utf8"),
     });
+    await page.locator("#opd_welcome a").waitFor({ state: "visible" });
+    assert.equal(await page.locator("iframe").count(), 0);
+    assert.equal(await page.evaluate(() => window.__opd_storage_writes), 0);
+    assert.equal(
+        await page
+            .locator("#react-root")
+            .evaluate((root) => window.getComputedStyle(root).visibility),
+        "hidden",
+    );
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.evaluate(() =>
+        document.documentElement.setAttribute("data-opd-theme", "dark"),
+    );
+    assert.equal(
+        await page
+            .locator("#opd_welcome")
+            .evaluate(
+                (element) => window.getComputedStyle(element).backgroundColor,
+            ),
+        "rgb(16, 18, 21)",
+    );
+    assert.ok(
+        await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+    );
+    const buttonBounds = await page.locator("#opd_welcome a").boundingBox();
+    assert.ok(
+        buttonBounds.x >= 0 && buttonBounds.x + buttonBounds.width <= 375,
+    );
+    if (process.env.WELCOME_SCREENSHOT_PATH)
+        await page.screenshot({ path: process.env.WELCOME_SCREENSHOT_PATH });
+    await page.setViewportSize({ width: 1800, height: 900 });
+    await page.evaluate(() =>
+        document.documentElement.setAttribute("data-opd-theme", "light"),
+    );
+    const [login] = await Promise.all([
+        page.waitForEvent("popup"),
+        page.locator("#opd_welcome a").click(),
+    ]);
+    await login.waitForLoadState();
+    assert.equal(login.url(), "https://x.com/i/flow/login");
+    await login.close();
+    await page.locator("#opd_welcome button").waitFor({ state: "visible" });
+    await page.evaluate(() => {
+        document.getElementById("react-root").replaceChildren();
+    });
+    await page.locator("#opd_welcome button").click();
+    await page.waitForFunction(
+        () =>
+            document.querySelector("#opd_welcome h1")?.textContent ===
+            "Unable to check your session",
+    );
+    assert.equal(await page.locator("iframe").count(), 0);
+    assert.equal(await page.locator("#opd_welcome a").isVisible(), false);
+    await page.evaluate(() => {
+        document.getElementById("react-root").innerHTML =
+            '<a data-testid="AppTabBar_Profile_Link" href="/account">Profile</a>';
+        window.dispatchEvent(new window.Event("focus"));
+    });
+    await page.locator("#opd_welcome").waitFor({ state: "detached" });
     await page.waitForFunction(
         () =>
             [...document.querySelectorAll("#opd_main_element iframe")]
@@ -190,7 +256,7 @@ try {
         .click();
     assert.deepEqual(errors, []);
     console.log(
-        "Built extension Chromium smoke test passed: initialization, iframe helpers, dynamic banner controls, settings animation and refresh persistence.",
+        "Built extension Chromium smoke test passed: signed-out welcome, official sign-in tab, session retry, initialization, iframe helpers, dynamic banner controls, settings animation and refresh persistence.",
     );
 } finally {
     await browser.close();

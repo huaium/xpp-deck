@@ -358,5 +358,32 @@
     },
     "msg_column_move_browser_update": {
         "message": "Aktualisiere deinen Browser, um Spalten ohne Neuladen zu verschieben."
+    },
+    "ui_welcome_title": {
+        "message": "Zum Start anmelden"
+    },
+    "ui_welcome_description": {
+        "message": "Lade deine Spalten mit deinem X-Konto."
+    },
+    "ui_welcome_sign_in": {
+        "message": "Bei X anmelden"
+    },
+    "ui_welcome_note": {
+        "message": "Die Anmeldung erfolgt direkt bei X."
+    },
+    "ui_welcome_retry": {
+        "message": "Ich bin angemeldet"
+    },
+    "ui_welcome_try_again": {
+        "message": "Erneut versuchen"
+    },
+    "ui_welcome_checking": {
+        "message": "X-Sitzung wird geprüft..."
+    },
+    "ui_welcome_error_title": {
+        "message": "Sitzung konnte nicht geprüft werden"
+    },
+    "ui_welcome_error_description": {
+        "message": "Die Prüfung ist fehlgeschlagen. Versuche es erneut, ohne deine Profile zu ändern."
     }
 }

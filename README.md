@@ -121,3 +121,15 @@ profiles. Cleanup stops if `trash` is unavailable or cannot access the files.
 WXT uses `web-ext` internally to launch development browsers. The dependency
 and WXT-native `webExt` runner options are retained for automatic browser startup;
 there are no standalone web-ext commands or configuration files.
+
+### Signed-out startup
+
+The deck checks X's rendered navigation for account/profile or login controls.
+No cookies are read, no additional permission is required, and no X API requests
+are made by the session check. A short-lived observer waits up to five seconds for
+X to render; inconclusive pages show a retry state rather than assuming logout.
+
+Sign-in opens X's official page in a separate tab. Returning to the deck checks
+again. If the original page is still stale, “I've signed in” reloads it for a fresh
+check. Existing profiles are preserved. Detection uses structural markers, not
+translated text, but may require maintenance if X changes its markup.
