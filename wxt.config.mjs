@@ -39,6 +39,7 @@ export default defineConfig({
             {
                 matches,
                 resources: [
+                    "icon.png",
                     "auto_reload_helper.js",
                     "media_viewer_block_helper.js",
                     "public/icons/*.svg",
