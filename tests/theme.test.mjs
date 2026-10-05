@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { loadFunctions } from "./helpers/source.mjs";
+import { loadFunctions, transpile } from "./helpers/source.mjs";
 import { readFileSync } from "node:fs";
 import { URL } from "node:url";
 import vm from "node:vm";
-import ts from "typescript";
 
 function bootstrap(cookie, dark = false, storageThrows = false) {
     const listeners = {};
@@ -46,7 +45,7 @@ function bootstrap(cookie, dark = false, storageThrows = false) {
         new URL("../src/content/reload_guard.ts", import.meta.url),
         "utf8",
     );
-    vm.runInNewContext(ts.transpileModule(source, {}).outputText, context);
+    vm.runInNewContext(transpile(source), context);
     return { listeners, attributes, storage, themeListener };
 }
 

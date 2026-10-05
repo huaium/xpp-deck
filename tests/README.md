@@ -1,8 +1,11 @@
 # Tests
 
 Run `pnpm test` for the behavior suite. It uses Node's test runner and the
-existing TypeScript parser to execute production functions and event handlers
-without changing the extension's script architecture.
+TypeScript 7 native AST API to extract production functions and event handlers,
+and Node's built-in type stripping to execute them without changing the
+extension's script architecture. Type stripping requires Node 22.13 or newer
+and currently emits an experimental API warning. The native API is exposed by
+TypeScript under `unstable` paths; its processes are closed after extraction.
 
 Coverage includes dialogs, queue recovery, IME keyboard handling, profile
 creation/switching/deletion, column serialization and refresh defaults, sidebar

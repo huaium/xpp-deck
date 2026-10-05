@@ -5,7 +5,7 @@ import process from "node:process";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { URL } from "node:url";
-import ts from "typescript";
+import { productionDeclarations, transpile } from "./helpers/source.mjs";
 
 // Use an existing Playwright installation; never install packages implicitly.
 const require = createRequire(import.meta.url);
@@ -24,12 +24,6 @@ const source = readFileSync(
     new URL("../src/content/prelude.ts", import.meta.url),
     "utf8",
 );
-const tree = ts.createSourceFile(
-    "prelude.ts",
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-);
 const names = new Set([
     "ensure_opd_dialog_style",
     "enqueue_opd_dialog",
@@ -37,11 +31,12 @@ const names = new Set([
     "open_about_page_modal",
     "i18n_message_or_fallback",
 ]);
-const declarations = tree.statements.filter(
-    (node) => ts.isFunctionDeclaration(node) && names.has(node.name?.text),
-);
-assert.equal(declarations.length, names.size);
-const script = ts.transpileModule(
+const available = productionDeclarations(source);
+const declarations = [...names].map((name) => {
+    assert.ok(available.has(name), `Missing production function ${name}`);
+    return available.get(name);
+});
+const script = transpile(
     `
 const manifest = {version: '1.0.0'};
 const chrome = {runtime: {getManifest: () => manifest, getURL: (path) => 'https://fixture.invalid/' + path}};
@@ -49,12 +44,11 @@ const ui_icon_define = {column_close: 'close.svg'};
 let opd_dialog_queue = Promise.resolve();
 function i18n_message(key) {return key === 'ui_dialog_cancel_button' ? 'Cancel' : 'OK';}
 function is_opd_dark_theme_enabled() {return false;}
-${declarations.map((node) => node.getText(tree)).join("\n")}
+${declarations.join("\n")}
 window.openTestDialog = (options) => {window.result = 'pending'; open_opd_dialog(options).then(value => window.result = value);};
 window.openTestAbout = open_about_page_modal;
 `,
-    { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
-).outputText;
+);
 
 for (const engine of ["chromium", "firefox"]) {
     const executablePath =
