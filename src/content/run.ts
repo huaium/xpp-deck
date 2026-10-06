@@ -3529,7 +3529,15 @@ export function run(settings) {
                     const url = frame?.contentWindow?.location.href;
                     if (!url || url === "about:blank")
                         throw new Error("Column has no active page");
-                    await navigator.clipboard.writeText(url);
+                    const copied_url = new URL(url);
+                    copied_url.search = copied_url.search
+                        .slice(1)
+                        .split("&")
+                        .filter(
+                            (part) => !new URLSearchParams(part).has("lang"),
+                        )
+                        .join("&");
+                    await navigator.clipboard.writeText(copied_url.href);
                     await opd_alert(i18n_message("ui_column_link_copied"));
                 } catch {
                     await opd_alert(
