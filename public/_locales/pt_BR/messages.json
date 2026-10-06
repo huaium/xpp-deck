@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "Não foi possível carregar seu deck"
+    },
+    "ui_startup_error_description": {
+        "message": "Tente novamente ou redefina todos os perfis para o layout padrão."
+    },
+    "ui_reset_profiles": {
+        "message": "Redefinir perfis"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "Redefinir todos os perfis? Os perfis e layouts salvos serão substituídos permanentemente pelo perfil padrão."
+    },
     "ui_column_homepage": {
         "message": "Página inicial"
     },

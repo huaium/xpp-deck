@@ -3,6 +3,7 @@ import {
     initialize_i18n_override,
     i18n_message_or_fallback,
     request_page_reload,
+    opd_confirm,
 } from "./prelude";
 import { run } from "./run";
 import { settings_init } from "./settings";
@@ -20,6 +21,14 @@ export function start_content() {
         message: i18n_message_or_fallback,
         start: () => initialize_content(run, settings_init),
         reload: request_page_reload,
+        confirmReset: () =>
+            opd_confirm(
+                i18n_message_or_fallback(
+                    "msg_reset_profiles_confirm",
+                    "Reset all profiles? This permanently replaces your saved profiles and column layouts with the default profile.",
+                ),
+            ),
+        reset: () => settings_init(),
     });
     void initialize_i18n_override().then(() => gate.check());
     return () => {

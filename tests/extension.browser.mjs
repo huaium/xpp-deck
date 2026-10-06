@@ -160,11 +160,11 @@ try {
     await login.waitForLoadState();
     assert.equal(login.url(), "https://x.com/i/flow/login");
     await login.close();
-    await page.locator("#opd_welcome wa-button").waitFor({ state: "visible" });
+    await page.locator("#opd_welcome_retry").waitFor({ state: "visible" });
     await page.evaluate(() => {
         document.getElementById("react-root").replaceChildren();
     });
-    await page.locator("#opd_welcome wa-button").click();
+    await page.locator("#opd_welcome_retry").click();
     await page.waitForFunction(
         () =>
             document.querySelector("#opd_welcome h1")?.textContent ===

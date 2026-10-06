@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "Unable to load your deck"
+    },
+    "ui_startup_error_description": {
+        "message": "Try again, or reset all profiles to the default layout."
+    },
+    "ui_reset_profiles": {
+        "message": "Reset profiles"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "Reset all profiles? This permanently replaces your saved profiles and column layouts with the default profile."
+    },
     "ui_column_homepage": {
         "message": "Homepage"
     },

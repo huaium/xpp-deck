@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { setImmediate } from "node:timers/promises";
 const { AbortController } = globalThis;
 import { loadFunctions } from "./helpers/source.mjs";
 
-function harness(status = "signed-out", startImpl = async () => {}) {
+function harness(
+    status = "signed-out",
+    startImpl = async () => {},
+    resetOptions = {},
+) {
     class Element {
         children = [];
         listeners = new Map();
@@ -59,6 +64,7 @@ function harness(status = "signed-out", startImpl = async () => {}) {
             { document, window, AbortController },
         );
     const gate = mount({
+        ...resetOptions,
         message: (_key, fallback) => fallback,
         start: async () => {
             starts++;
@@ -74,7 +80,7 @@ function harness(status = "signed-out", startImpl = async () => {}) {
     });
     const view = document.body.children[0];
     const content = view.children[0];
-    const [signIn, retry] = content.children[3].children;
+    const [signIn, retry, reset] = content.children[3].children;
     return {
         gate,
         route,
@@ -84,6 +90,7 @@ function harness(status = "signed-out", startImpl = async () => {}) {
         view,
         signIn,
         retry,
+        reset,
         status: (value) => {
             status = value;
         },
@@ -107,6 +114,51 @@ test("initialization errors keep a visible retry screen and allow recovery", asy
     await h.gate.check();
     assert.equal(h.document.body.children.includes(h.view), false);
     assert.equal(h.counts().starts, 2);
+    h.gate.dispose();
+});
+
+test("startup reset requires confirmation and leaves Retry available", async () => {
+    let confirmed = false;
+    let confirmations = 0;
+    let resets = 0;
+    const h = harness(
+        "signed-in",
+        async () => {
+            throw new Error("Corrupt profiles");
+        },
+        {
+            confirmReset: async () => {
+                confirmations++;
+                return confirmed;
+            },
+            reset: async () => {
+                resets++;
+            },
+        },
+    );
+    assert.equal(h.reset.hidden, true);
+    await h.gate.check();
+    assert.equal(h.reset.hidden, false);
+    h.reset.click();
+    await setImmediate();
+    assert.equal(confirmations, 1);
+    assert.equal(resets, 0);
+    assert.equal(h.retry.disabled, false);
+    confirmed = true;
+    h.reset.click();
+    await setImmediate();
+    assert.equal(resets, 1);
+    h.gate.dispose();
+});
+
+test("session detection errors never offer profile reset", async () => {
+    const h = harness("unknown", async () => {}, {
+        confirmReset: async () => true,
+        reset: async () =>
+            assert.fail("session errors must not reset profiles"),
+    });
+    await h.gate.check();
+    assert.equal(h.reset.hidden, true);
     h.gate.dispose();
 });
 

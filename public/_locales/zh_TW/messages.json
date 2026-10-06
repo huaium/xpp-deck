@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "無法載入面板"
+    },
+    "ui_startup_error_description": {
+        "message": "請重試，或將所有設定檔重設為預設配置。"
+    },
+    "ui_reset_profiles": {
+        "message": "重設設定檔"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "重設所有設定檔？已儲存的設定檔與欄位配置將被預設設定檔永久取代。"
+    },
     "ui_column_homepage": {
         "message": "首頁"
     },

@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "No se pudo cargar tu deck"
+    },
+    "ui_startup_error_description": {
+        "message": "Inténtalo de nuevo o restablece todos los perfiles al diseño predeterminado."
+    },
+    "ui_reset_profiles": {
+        "message": "Restablecer perfiles"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "¿Restablecer todos los perfiles? Los perfiles y diseños guardados se sustituirán permanentemente por el perfil predeterminado."
+    },
     "ui_column_homepage": {
         "message": "Página de inicio"
     },

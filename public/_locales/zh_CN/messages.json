@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "无法加载面板"
+    },
+    "ui_startup_error_description": {
+        "message": "请重试，或将所有配置重置为默认布局。"
+    },
+    "ui_reset_profiles": {
+        "message": "重置配置"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "重置所有配置？已保存的配置和栏目布局将被默认配置永久替换。"
+    },
     "ui_column_homepage": {
         "message": "主页"
     },

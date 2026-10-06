@@ -4,6 +4,8 @@ type WelcomeOptions = {
     start: () => void | Promise<void>;
     reload: () => void;
     check?: () => Promise<SessionStatus>;
+    confirmReset?: () => Promise<boolean>;
+    reset?: () => Promise<void>;
 };
 
 export function is_deck_location(href: string) {
@@ -144,10 +146,16 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
     signIn.target = "_blank";
     signIn.rel = "noopener noreferrer";
     const retry = document.createElement("wa-button");
+    retry.id = "opd_welcome_retry";
     retry.setAttribute("type", "button");
+    const reset = document.createElement("wa-button");
+    reset.id = "opd_welcome_reset";
+    reset.setAttribute("type", "button");
+    reset.setAttribute("variant", "danger");
+    reset.setAttribute("appearance", "outlined");
     const note = document.createElement("p");
     note.className = "welcome-note";
-    actions.append(signIn, retry);
+    actions.append(signIn, retry, reset);
     content.append(brand, title, description, actions, note);
     view.appendChild(content);
     document.body.appendChild(view);
@@ -158,32 +166,51 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
     let ready = false;
     let disposed = false;
     let attemptedSignIn = false;
+    let startupFailed = false;
     const text = options.message;
     function render(state: "checking" | "signed-out" | "unknown") {
         title.textContent = text(
-            state === "unknown" ? "ui_welcome_error_title" : "ui_welcome_title",
-            state === "unknown"
-                ? "Unable to check your session"
-                : "Sign in to get started",
+            startupFailed
+                ? "ui_startup_error_title"
+                : state === "unknown"
+                  ? "ui_welcome_error_title"
+                  : "ui_welcome_title",
+            startupFailed
+                ? "Unable to load your deck"
+                : state === "unknown"
+                  ? "Unable to check your session"
+                  : "Sign in to get started",
         );
         description.textContent =
             state === "checking"
                 ? text("ui_welcome_checking", "Checking your X session...")
-                : state === "unknown"
+                : startupFailed
                   ? text(
-                        "ui_welcome_error_description",
-                        "The session check failed. Try again without changing your profiles.",
+                        "ui_startup_error_description",
+                        "Try again, or reset all profiles to the default layout.",
                     )
-                  : text(
-                        "ui_welcome_description",
-                        "Use your X account to load your columns.",
-                    );
+                  : state === "unknown"
+                    ? text(
+                          "ui_welcome_error_description",
+                          "The session check failed. Try again without changing your profiles.",
+                      )
+                    : text(
+                          "ui_welcome_description",
+                          "Use your X account to load your columns.",
+                      );
         signIn.textContent = text("ui_welcome_sign_in", "Sign in to X");
         signIn.hidden = state !== "signed-out";
         retry.hidden =
             state === "checking" ||
             (state === "signed-out" && !attemptedSignIn);
         retry.disabled = busy;
+        reset.hidden =
+            state !== "unknown" ||
+            !startupFailed ||
+            !options.reset ||
+            !options.confirmReset;
+        reset.disabled = busy;
+        reset.textContent = text("ui_reset_profiles", "Reset profiles");
         retry.textContent =
             state === "signed-out"
                 ? text("ui_welcome_retry", "I've signed in")
@@ -222,6 +249,7 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
                 ready = true;
                 view.remove();
             } catch {
+                startupFailed = true;
                 busy = false;
                 render("unknown");
             }
@@ -237,6 +265,30 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
     const onRetry = () => {
         void check(true);
     };
+    const onReset = async () => {
+        if (
+            busy ||
+            disposed ||
+            !startupFailed ||
+            !options.reset ||
+            !options.confirmReset
+        )
+            return;
+        busy = true;
+        render("unknown");
+        try {
+            if (await options.confirmReset()) {
+                if (disposed) return;
+                await options.reset();
+            }
+        } finally {
+            busy = false;
+            if (!disposed) render("unknown");
+        }
+    };
+    const resetListener = () => {
+        void onReset().catch(() => {});
+    };
     const onVisibility = () => {
         if (!document.hidden) void check();
     };
@@ -246,6 +298,7 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
     };
     signIn.addEventListener("click", onSignIn);
     retry.addEventListener("click", onRetry);
+    reset.addEventListener("click", resetListener);
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
     render("checking");
@@ -258,6 +311,7 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
             document.removeEventListener("visibilitychange", onVisibility);
             signIn.removeEventListener("click", onSignIn);
             retry.removeEventListener("click", onRetry);
+            reset.removeEventListener("click", resetListener);
             view.remove();
             style.remove();
         },

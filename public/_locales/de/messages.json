@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "Deck konnte nicht geladen werden"
+    },
+    "ui_startup_error_description": {
+        "message": "Erneut versuchen oder alle Profile auf das Standardlayout zurücksetzen."
+    },
+    "ui_reset_profiles": {
+        "message": "Profile zurücksetzen"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "Alle Profile zurücksetzen? Gespeicherte Profile und Spaltenlayouts werden dauerhaft durch das Standardprofil ersetzt."
+    },
     "ui_column_homepage": {
         "message": "Startseite"
     },

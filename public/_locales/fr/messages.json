@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "Impossible de charger votre deck"
+    },
+    "ui_startup_error_description": {
+        "message": "Réessayez ou réinitialisez tous les profils avec la disposition par défaut."
+    },
+    "ui_reset_profiles": {
+        "message": "Réinitialiser les profils"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "Réinitialiser tous les profils ? Les profils et dispositions enregistrés seront définitivement remplacés par le profil par défaut."
+    },
     "ui_column_homepage": {
         "message": "Page d’accueil"
     },

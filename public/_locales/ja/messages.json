@@ -1,4 +1,16 @@
 {
+    "ui_startup_error_title": {
+        "message": "デッキを読み込めません"
+    },
+    "ui_startup_error_description": {
+        "message": "再試行するか、すべてのプロファイルを既定のレイアウトにリセットしてください。"
+    },
+    "ui_reset_profiles": {
+        "message": "プロファイルをリセット"
+    },
+    "msg_reset_profiles_confirm": {
+        "message": "すべてのプロファイルをリセットしますか？保存したプロファイルとカラム配置は既定のプロファイルに置き換えられ、元に戻せません。"
+    },
     "ui_column_homepage": {
         "message": "ホームページ"
     },
