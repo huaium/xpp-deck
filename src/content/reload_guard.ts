@@ -72,7 +72,13 @@ html[data-opd-theme="light"] body {
         systemDarkQuery.addEventListener("change", applyRootThemeMarker);
     }
 
+    const isTopLevelDeck = () =>
+        window === window.top &&
+        window.location.protocol === "https:" &&
+        ["x.com", "twitter.com"].includes(window.location.hostname) &&
+        window.location.pathname === "/run-xppdeck";
     const beforeUnload = (event: BeforeUnloadEvent) => {
+        if (!isTopLevelDeck()) return;
         try {
             if (sessionStorage.getItem(bypassKey) === "1") {
                 sessionStorage.removeItem(bypassKey);
@@ -85,7 +91,8 @@ html[data-opd-theme="light"] body {
         event.preventDefault();
         event.returnValue = "";
     };
-    if (!development) window.addEventListener("beforeunload", beforeUnload);
+    if (!development && isTopLevelDeck())
+        window.addEventListener("beforeunload", beforeUnload);
     return () => {
         systemDarkQuery.removeEventListener("change", applyRootThemeMarker);
         window.removeEventListener("beforeunload", beforeUnload);

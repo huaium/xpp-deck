@@ -10,6 +10,7 @@ function bootstrap(
     dark = false,
     storageThrows = false,
     development = false,
+    { href = "https://x.com/run-xppdeck", embedded = false } = {},
 ) {
     const listeners = {};
     const attributes = {};
@@ -29,6 +30,7 @@ function bootstrap(
             },
         },
         window: {
+            location: new URL(href),
             matchMedia: () => ({
                 matches: dark,
                 addEventListener: (_name, fn) => {
@@ -53,6 +55,7 @@ function bootstrap(
             removeItem: (key) => storage.delete(key),
         },
     };
+    context.window.top = embedded ? {} : context.window;
     const source = readFileSync(
         new URL("../src/content/reload_guard.ts", import.meta.url),
         "utf8",
@@ -61,8 +64,54 @@ function bootstrap(
         transpile(source) + `\nstart_reload_guard(${development});`,
         context,
     );
-    return { listeners, attributes, storage, themeListener, cleanup };
+    return {
+        listeners,
+        attributes,
+        storage,
+        themeListener,
+        cleanup,
+        window: context.window,
+    };
 }
+
+test("leave-page warnings are limited to top-level HTTPS deck routes", () => {
+    for (const href of [
+        "https://x.com/home",
+        "https://x.com/notifications",
+        "https://twitter.com/home",
+        "https://x.com/run-xppdeck/other",
+        "http://x.com/run-xppdeck",
+        "https://example.com/run-xppdeck",
+    ]) {
+        assert.equal(
+            bootstrap("", false, false, false, { href }).listeners.beforeunload,
+            undefined,
+        );
+    }
+    for (const href of [
+        "https://x.com/run-xppdeck",
+        "https://twitter.com/run-xppdeck?test=1",
+    ]) {
+        assert.equal(
+            typeof bootstrap("", false, false, false, { href }).listeners
+                .beforeunload,
+            "function",
+        );
+        assert.equal(
+            bootstrap("", false, false, false, { href, embedded: true })
+                .listeners.beforeunload,
+            undefined,
+        );
+    }
+});
+
+test("the deck warning does not follow SPA navigation to an ordinary X page", () => {
+    const h = bootstrap("");
+    h.window.location.pathname = "/home";
+    h.listeners.beforeunload({
+        preventDefault: () => assert.fail("ordinary pages must not warn"),
+    });
+});
 
 test("development skips leave-page confirmation but retains theme initialization", () => {
     const h = bootstrap("", true, false, true);
