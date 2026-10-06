@@ -55,6 +55,8 @@ export function run(settings) {
     dispose_deck();
     const load_scheduler = create_column_load_scheduler();
     opd_column_load_scheduler = load_scheduler;
+    const deck_lifetime = new AbortController();
+    load_scheduler.onDispose(() => deck_lifetime.abort());
     load_scheduler.onDispose(stop_system_theme_listener);
     const banner_observers = new WeakMap<HTMLIFrameElement, MutationObserver>();
     const settings_animations = new WeakMap<HTMLElement, Animation>();
@@ -1812,6 +1814,7 @@ export function run(settings) {
             }
             const target_profile = profile_store[index];
             profile_button.addEventListener("click", async function () {
+                if (deck_lifetime.signal.aborted) return;
                 if (target_profile.id === profile_store[last_load_profile]?.id)
                     return;
                 //console.log(profile_store[index].profile)
@@ -1899,11 +1902,13 @@ export function run(settings) {
                         `${i18n_message("msg_profile_load_confirm", [String(index + 1), preload_desc_array.join("\r\n")])}`,
                     )
                 ) {
+                    if (deck_lifetime.signal.aborted) return;
                     try {
                         const result = await profile_storage_request({
                             op: "select",
                             id: target_profile.id,
                         });
+                        if (deck_lifetime.signal.aborted) return;
                         profile_store.splice(
                             0,
                             profile_store.length,
@@ -1920,6 +1925,7 @@ export function run(settings) {
                                 profile_store[last_load_profile].profile,
                         });
                     } catch (error) {
+                        if (deck_lifetime.signal.aborted) return;
                         await opd_alert(
                             error instanceof Error
                                 ? error.message
@@ -3113,6 +3119,7 @@ export function run(settings) {
     const profile_save_button = document.getElementById("profile_save");
     if (profile_save_button) {
         profile_save_button.addEventListener("click", async function () {
+            if (deck_lifetime.signal.aborted) return;
             const default_name = next_profile_name(profile_store);
             const requested_name = await opd_prompt(
                 i18n_message_or_fallback(
@@ -3121,6 +3128,7 @@ export function run(settings) {
                 ),
                 default_name,
             );
+            if (deck_lifetime.signal.aborted) return;
             if (requested_name !== null) {
                 const profile = column_settings_save("profile_out");
                 if (profile == null) {
@@ -3133,6 +3141,7 @@ export function run(settings) {
                         name: requested_name.trim() || default_name,
                         columns: profile.column_settings,
                     });
+                    if (deck_lifetime.signal.aborted) return;
                     profile_store.splice(
                         0,
                         profile_store.length,
@@ -3157,6 +3166,7 @@ export function run(settings) {
                     }
                     create_profile_list_btn();
                 } catch (error) {
+                    if (deck_lifetime.signal.aborted) return;
                     await opd_alert(
                         error instanceof Error ? error.message : String(error),
                     );
@@ -3168,6 +3178,7 @@ export function run(settings) {
     const profile_delete_button = document.getElementById("profile_delete");
     if (profile_delete_button) {
         profile_delete_button.addEventListener("click", async function () {
+            if (deck_lifetime.signal.aborted) return;
             if (profile_store.length <= 1) {
                 await opd_alert(
                     i18n_message("msg_profile_delete_current_alert"),
@@ -3185,6 +3196,7 @@ export function run(settings) {
                     label: profile_display_name(profile, index),
                 })),
             });
+            if (deck_lifetime.signal.aborted) return;
             if (typeof selected_profile !== "string") {
                 return;
             }
@@ -3212,6 +3224,7 @@ export function run(settings) {
                     ]),
                 )
             ) {
+                if (deck_lifetime.signal.aborted) return;
                 delete_num = profile_store.indexOf(selected_entry);
                 if (profile_store.length <= 1 || delete_num < 0) {
                     return;
@@ -3226,16 +3239,25 @@ export function run(settings) {
                         op: "delete",
                         id: selected_entry.id,
                     });
-                    profile_store.splice(
-                        0,
-                        profile_store.length,
-                        ...result.profiles,
-                    );
-                    let after_profile_num = profile_store.findIndex(
+                    if (deck_lifetime.signal.aborted) return;
+                    let after_profile_num = result.profiles.findIndex(
                         (profile) => profile.id === preferred_id,
                     );
                     if (after_profile_num < 0) after_profile_num = 0;
-                    const next_id = profile_store[after_profile_num].id;
+                    const next_id = result.profiles[after_profile_num].id;
+                    const selected = await profile_storage_request({
+                        op: "select",
+                        id: next_id,
+                    });
+                    if (deck_lifetime.signal.aborted) return;
+                    profile_store.splice(
+                        0,
+                        profile_store.length,
+                        ...selected.profiles,
+                    );
+                    after_profile_num = profile_store.findIndex(
+                        (profile) => profile.id === next_id,
+                    );
                     set_last_load_profile(after_profile_num);
                     if (next_id !== active_id) {
                         document.querySelector("#opd_main_element")?.remove();
@@ -3254,11 +3276,8 @@ export function run(settings) {
                                 );
                         create_profile_list_btn();
                     }
-                    await profile_storage_request({
-                        op: "select",
-                        id: next_id,
-                    });
                 } catch (error) {
+                    if (deck_lifetime.signal.aborted) return;
                     await opd_alert(
                         error instanceof Error ? error.message : String(error),
                     );
@@ -3721,6 +3740,7 @@ export function run(settings) {
         if (mode == "profile_out") {
             return settings_array;
         }
+        if (deck_lifetime.signal.aborted) return null;
         Object.assign(profile_store[profile_num], {
             profile: settings_array.column_settings,
         });
@@ -3730,7 +3750,11 @@ export function run(settings) {
             id: profile_id,
             columns: settings_array.column_settings,
         }).catch((error) =>
-            opd_alert(error instanceof Error ? error.message : String(error)),
+            deck_lifetime.signal.aborted
+                ? undefined
+                : opd_alert(
+                      error instanceof Error ? error.message : String(error),
+                  ),
         );
         return null;
     }

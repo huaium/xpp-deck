@@ -144,6 +144,7 @@ test("column snapshots preserve display, width, homepage URL, title, and refresh
             profile_storage_request: async () => {
                 writes.push({ opd_profile_store: JSON.stringify(profiles) });
             },
+            deck_lifetime: new AbortController(),
             profile_store: profiles,
             document: { querySelectorAll: () => columns },
             chrome: {

@@ -1,4 +1,5 @@
 export function profileHarness(confirmed, active = 1, count = 3) {
+    const deck_lifetime = new globalThis.AbortController();
     const store = Array.from({ length: count }, (_, i) => ({
         id: `profile-id-${i}`,
         name: `profile-${i}`,
@@ -8,6 +9,7 @@ export function profileHarness(confirmed, active = 1, count = 3) {
     const alerts = [];
     const buttons = new Map();
     const globals = {
+        deck_lifetime,
         profile_storage_request: async (operation) => {
             if (operation.op === "create") {
                 store.push({
