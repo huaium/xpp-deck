@@ -43,6 +43,7 @@ export function profileHarness(confirmed, active = 1, count = 3) {
             ],
         }),
         create_profile_list_btn: () => {},
+        run: () => {},
     };
     return { store, writes, alerts, buttons, globals };
 }

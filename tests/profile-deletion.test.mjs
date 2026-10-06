@@ -12,6 +12,48 @@ function deletion(h) {
     ).profile_delete_button_handler;
 }
 
+test("deleting the active profile replaces its columns before storage callbacks", async () => {
+    for (const active of [0, 1, 2]) {
+        const h = profileHarness(true, active);
+        h.store.forEach((profile, index) => {
+            profile.profile = [
+                { type: ["home", "notification", "explore"][index] },
+            ];
+        });
+        const expected = h.store[active === 0 ? 1 : active - 1].profile;
+        let visible = h.store[active].profile;
+        let removed = false;
+        const pending = [];
+        h.globals.document.querySelector = (selector) =>
+            selector === "#opd_main_element"
+                ? {
+                      remove() {
+                          removed = true;
+                      },
+                  }
+                : null;
+        h.globals.run = (settings) => {
+            assert.equal(removed, true);
+            visible = settings.column_settings;
+        };
+        h.globals.chrome.storage.local.set = (value, done) => {
+            h.writes.push(value);
+            pending.push(done);
+        };
+        await deletion(h)();
+        assert.equal(visible, expected);
+        assert.equal(h.store[Math.max(0, active - 1)].profile, expected);
+        // A subsequent column save must use the replacement layout, not the deleted one.
+        h.store[Math.max(0, active - 1)].profile = visible;
+        assert.equal(h.store[Math.max(0, active - 1)].profile, expected);
+        while (pending.length) pending.shift()();
+        assert.equal(
+            JSON.parse(h.writes[1].opd_settings).last_load_profile,
+            Math.max(0, active - 1),
+        );
+    }
+});
+
 test("deletion offers every profile and preserves the active profile when another is removed", async () => {
     for (const [active, selected, remainingActive] of [
         [1, 0, 0],
@@ -21,6 +63,10 @@ test("deletion offers every profile and preserves the active profile when anothe
         const h = profileHarness(true, active);
         let options;
         let confirmationName;
+        h.globals.run = () =>
+            assert.fail(
+                "unselected profile deletion must not rebuild the deck",
+            );
         h.globals.i18n_message = (key, substitutions) => {
             if (key === "msg_profile_delete_confirm")
                 confirmationName = substitutions[0];

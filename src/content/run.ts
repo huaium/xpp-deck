@@ -3236,18 +3236,27 @@ export function run(settings) {
                 if (profile_store.length <= 1 || delete_num < 0) {
                     return;
                 }
+                const deleting_active_profile =
+                    delete_num === last_load_profile;
                 const after_profile_num =
                     delete_num <= last_load_profile
                         ? Math.max(0, last_load_profile - 1)
                         : last_load_profile;
                 profile_store.splice(delete_num, 1);
+                set_last_load_profile(after_profile_num);
+                if (deleting_active_profile) {
+                    document.querySelector("#opd_main_element")?.remove();
+                    run({
+                        column_settings:
+                            profile_store[after_profile_num].profile,
+                    });
+                }
                 chrome.storage.local.set(
                     { opd_profile_store: JSON.stringify(profile_store) },
                     function () {
                         chrome.storage.local.get(
                             "opd_settings",
                             function (load_value) {
-                                set_last_load_profile(after_profile_num);
                                 let load_setting = JSON.parse(
                                     String(load_value.opd_settings),
                                 );
