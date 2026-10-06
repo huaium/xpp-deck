@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 
-function harness(pinned = false) {
+function harness() {
     let resolve;
     const prompts = [];
     let saves = 0;
     let updates = 0;
     class Input {
         tagName = "WA-CHECKBOX";
-        checked = pinned;
+        checked = false;
     }
     const column = {
         isConnected: true,
@@ -76,16 +76,12 @@ function harness(pinned = false) {
     };
 }
 
-for (const pinned of [false, true]) {
-    test(`closing ${pinned ? "pinned" : "unpinned"} column requires OK`, async () => {
-        const h = harness(pinned);
+{
+    test("closing a column requires OK", async () => {
+        const h = harness();
         const pending = h.button.click();
         assert.equal(h.column.isConnected, true);
-        assert.deepEqual(h.prompts, [
-            pinned
-                ? "msg_pinned_column_close_confirm"
-                : "msg_column_close_confirm",
-        ]);
+        assert.deepEqual(h.prompts, ["msg_column_close_confirm"]);
         h.answer(true);
         await pending;
         assert.equal(h.column.isConnected, false);

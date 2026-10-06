@@ -1,4 +1,10 @@
 {
+    "ui_column_homepage": {
+        "message": "首頁"
+    },
+    "ui_homepage_set_current": {
+        "message": "設為目前頁面"
+    },
     "ui_column_copy_link_title": {
         "message": "複製連結"
     },
@@ -31,9 +37,6 @@
     },
     "ui_column_refresh_title": {
         "message": "重新整理欄位"
-    },
-    "ui_column_pin_toggle_title": {
-        "message": "切換釘選位置"
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
@@ -242,20 +245,11 @@
     "msg_profile_delete_current_alert": {
         "message": "僅剩一個設定檔，無法刪除。"
     },
-    "msg_explore_pin_confirm": {
-        "message": "釘選此位置？\n\n重新載入或開啟此設定檔時，欄位將從目前 URL 開始。仍可瀏覽其他頁面，欄位位置不會鎖定。"
-    },
-    "msg_explore_unpin_confirm": {
-        "message": "取消釘選此位置？"
-    },
     "msg_column_add_confirm": {
         "message": "確認$1？"
     },
     "msg_column_close_confirm": {
         "message": "關閉此欄位？"
-    },
-    "msg_pinned_column_close_confirm": {
-        "message": "此欄位已釘選。\n關閉欄位？"
     },
     "msg_initial_setup_completed_prototype": {
         "message": "初始設定完成。\n歡迎使用 XPP-Deck 原型版！"

@@ -252,8 +252,6 @@ export const ui_icon_define = {
     column_move: "public/icons/column_move.svg",
     column_close: "public/icons/column_close.svg",
     column_settings: "public/icons/settings.svg",
-    column_pin: "public/icons/pin.svg",
-    column_pinned: "public/icons/pinned.svg",
     column_widesize: "public/icons/column_w_size.svg",
     column_add_1: "public/icons/column_add_1st.svg",
     column_add_2: "public/icons/column_add_2nd.svg",

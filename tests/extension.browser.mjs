@@ -255,7 +255,9 @@ try {
     assert.ok(Math.abs(themeBounds.width - languageBounds.width) < 1);
     assert.ok(
         Math.abs(
-            (layoutBounds.y - themeBounds.y - themeBounds.height) -
+            layoutBounds.y -
+                themeBounds.y -
+                themeBounds.height -
                 (languageBounds.y - layoutBounds.y - layoutBounds.height),
         ) < 1,
     );
@@ -323,21 +325,10 @@ try {
         ),
         0,
     );
-    for (const control of [".opd_banner", ".opd_pinned_btn"]) {
-        assert.equal(
-            await home.locator(control).evaluate((input) => input.hidden),
-            false,
-        );
-    }
-    assert.equal(await home.locator(".dsp_column_pin_btn").isVisible(), true);
-    await home.locator("wa-checkbox.opd_pinned_btn").click();
-    await page.locator(".opd_dialog wa-button.opd_dialog_primary").click();
-    await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
-    assert.equal(await home.getAttribute("opd_pinned_path"), "/home");
-    await home.locator("wa-checkbox.opd_pinned_btn").click();
-    await page.locator(".opd_dialog wa-button.opd_dialog_primary").click();
-    await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
-    assert.equal(await home.getAttribute("opd_pinned_path"), "");
+    assert.equal(await home.locator(".opd_homepage_btn").isVisible(), true);
+    assert.equal(await home.locator(".opd_pinned_btn").count(), 0);
+    assert.equal(await home.getAttribute("opd_homepage_path"), "/home");
+
     assert.equal(
         await home.locator(".dsp_column_banner_btn").isVisible(),
         true,

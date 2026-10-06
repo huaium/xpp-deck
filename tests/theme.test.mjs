@@ -5,7 +5,12 @@ import { readFileSync } from "node:fs";
 import { URL } from "node:url";
 import vm from "node:vm";
 
-function bootstrap(cookie, dark = false, storageThrows = false, development = false) {
+function bootstrap(
+    cookie,
+    dark = false,
+    storageThrows = false,
+    development = false,
+) {
     const listeners = {};
     const attributes = {};
     const storage = new Map();

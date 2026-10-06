@@ -1,4 +1,10 @@
 {
+    "ui_column_homepage": {
+        "message": "Page d’accueil"
+    },
+    "ui_homepage_set_current": {
+        "message": "Utiliser la page actuelle"
+    },
     "ui_column_copy_link_title": {
         "message": "Copier le lien"
     },
@@ -31,9 +37,6 @@
     },
     "ui_column_refresh_title": {
         "message": "Actualiser la colonne"
-    },
-    "ui_column_pin_toggle_title": {
-        "message": "Épingler ou désépingler cet emplacement"
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
@@ -242,20 +245,11 @@
     "msg_profile_delete_current_alert": {
         "message": "Impossible de supprimer le seul profil existant."
     },
-    "msg_explore_pin_confirm": {
-        "message": "Épingler cet emplacement ?\n\nAu rechargement ou à l’ouverture de ce profil, la colonne démarrera à l’URL actuelle. Vous pouvez toujours naviguer ailleurs ; la position de la colonne n’est pas verrouillée."
-    },
-    "msg_explore_unpin_confirm": {
-        "message": "Désépingler cet emplacement ?"
-    },
     "msg_column_add_confirm": {
         "message": "$1 ?"
     },
     "msg_column_close_confirm": {
         "message": "Fermer cette colonne ?"
-    },
-    "msg_pinned_column_close_confirm": {
-        "message": "Cette colonne est épinglée.\nFermer la colonne ?"
     },
     "msg_initial_setup_completed_prototype": {
         "message": "Configuration initiale terminée.\nBienvenue sur le prototype de XPP-Deck !"

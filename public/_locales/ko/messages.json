@@ -1,4 +1,10 @@
 {
+    "ui_column_homepage": {
+        "message": "홈페이지"
+    },
+    "ui_homepage_set_current": {
+        "message": "현재 페이지로 설정"
+    },
     "ui_column_copy_link_title": {
         "message": "링크 복사"
     },
@@ -31,9 +37,6 @@
     },
     "ui_column_refresh_title": {
         "message": "열 새로 고침"
-    },
-    "ui_column_pin_toggle_title": {
-        "message": "위치 고정 전환"
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
@@ -242,20 +245,11 @@
     "msg_profile_delete_current_alert": {
         "message": "프로필이 하나뿐이므로 삭제할 수 없습니다."
     },
-    "msg_explore_pin_confirm": {
-        "message": "이 위치를 고정할까요?\n\n다시 로드하거나 이 프로필을 열면 열이 현재 URL에서 시작합니다. 다른 페이지를 탐색할 수 있으며 열의 위치는 잠기지 않습니다."
-    },
-    "msg_explore_unpin_confirm": {
-        "message": "이 위치의 고정을 해제할까요?"
-    },
     "msg_column_add_confirm": {
         "message": "$1 작업을 진행할까요?"
     },
     "msg_column_close_confirm": {
         "message": "이 열을 닫을까요?"
-    },
-    "msg_pinned_column_close_confirm": {
-        "message": "이 열은 고정되어 있습니다.\n열을 닫을까요?"
     },
     "msg_initial_setup_completed_prototype": {
         "message": "초기 설정이 완료되었습니다.\nXPP-Deck 프로토타입에 오신 것을 환영합니다!"

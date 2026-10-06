@@ -1,4 +1,10 @@
 {
+    "ui_column_homepage": {
+        "message": "Startseite"
+    },
+    "ui_homepage_set_current": {
+        "message": "Aktuelle Seite verwenden"
+    },
     "ui_column_copy_link_title": {
         "message": "Link kopieren"
     },
@@ -31,9 +37,6 @@
     },
     "ui_column_refresh_title": {
         "message": "Spalte aktualisieren"
-    },
-    "ui_column_pin_toggle_title": {
-        "message": "Position anheften oder lösen"
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
@@ -242,20 +245,11 @@
     "msg_profile_delete_current_alert": {
         "message": "Das einzige vorhandene Profil kann nicht gelöscht werden."
     },
-    "msg_explore_pin_confirm": {
-        "message": "Diese Position anheften?\n\nBeim Neuladen oder Öffnen dieses Profils startet die Spalte an der aktuellen URL. Du kannst weiterhin andere Seiten öffnen; die Spaltenposition wird nicht gesperrt."
-    },
-    "msg_explore_unpin_confirm": {
-        "message": "Diese Position lösen?"
-    },
     "msg_column_add_confirm": {
         "message": "$1?"
     },
     "msg_column_close_confirm": {
         "message": "Diese Spalte schließen?"
-    },
-    "msg_pinned_column_close_confirm": {
-        "message": "Diese Spalte ist angeheftet.\nSpalte schließen?"
     },
     "msg_initial_setup_completed_prototype": {
         "message": "Ersteinrichtung abgeschlossen.\nWillkommen beim XPP-Deck-Prototyp!"

@@ -1,4 +1,10 @@
 {
+    "ui_column_homepage": {
+        "message": "ホームページ"
+    },
+    "ui_homepage_set_current": {
+        "message": "現在のページに設定"
+    },
     "ui_column_copy_link_title": {
         "message": "リンクをコピー"
     },
@@ -31,9 +37,6 @@
     },
     "ui_column_refresh_title": {
         "message": "カラムを再読み込み"
-    },
-    "ui_column_pin_toggle_title": {
-        "message": "ピン止め切り替え"
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
@@ -242,20 +245,11 @@
     "msg_profile_delete_current_alert": {
         "message": "プロファイルが1つしかないため削除できません"
     },
-    "msg_explore_pin_confirm": {
-        "message": "この場所でピン止めしますか?\n\nデッキの再読み込みやプロファイルの再表示時に、このカラムは現在のURLから開きます。別のページへの移動は可能で、カラムの位置は固定されません。"
-    },
-    "msg_explore_unpin_confirm": {
-        "message": "ピン止めを解除します"
-    },
     "msg_column_add_confirm": {
         "message": "「$1」を実行しますか?"
     },
     "msg_column_close_confirm": {
         "message": "このカラムを閉じますか？"
-    },
-    "msg_pinned_column_close_confirm": {
-        "message": "ピン止めされているカラムです\nカラムを閉じますか？"
     },
     "msg_initial_setup_completed_prototype": {
         "message": "初期設定構築が完了しました。\nようこそ！XPP-Deck試作版へ！"

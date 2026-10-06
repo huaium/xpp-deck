@@ -59,7 +59,7 @@ test("initial setup persists a default profile before acknowledgement and reload
     assert.equal(reloaded, true);
 });
 
-test("column snapshots preserve display, width, pinned URL, title, and refresh settings", () => {
+test("column snapshots preserve display, width, homepage URL, title, and refresh settings", () => {
     const writes = [];
     const profiles = [
         { name: "old", profile: [] },
@@ -71,7 +71,7 @@ test("column snapshots preserve display, width, pinned URL, title, and refresh s
                 opd_column_type: "explore",
                 opd_column_width: "30",
                 opd_explore_path: "/search?q=test",
-                opd_pinned_path: "/i/bookmarks",
+                opd_homepage_path: "/i/bookmarks",
                 opd_explore_title: "Saved",
             },
             {
@@ -112,7 +112,7 @@ test("column snapshots preserve display, width, pinned URL, title, and refresh s
         tw_view_mode: "2",
         column_save_path: "/search?q=test",
         column_save_title: "Saved",
-        column_pinned_path: "/i/bookmarks",
+        column_homepage_path: "/i/bookmarks",
         auto_reload: true,
         auto_reload_time: 5000,
         column_width: "30",

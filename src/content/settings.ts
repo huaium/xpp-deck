@@ -92,7 +92,7 @@ export function settings_init() {
             tw_view_mode: "0",
             column_save_path: "",
             column_save_title: "",
-            column_pinned_path: "",
+            column_homepage_path: "",
             auto_reload: false,
             auto_reload_time: 10000,
             column_width: null,
@@ -103,7 +103,7 @@ export function settings_init() {
             tw_view_mode: "0",
             column_save_path: "",
             column_save_title: "",
-            column_pinned_path: "",
+            column_homepage_path: "",
             auto_reload: false,
             auto_reload_time: 10000,
             column_width: null,
@@ -115,7 +115,7 @@ export function settings_init() {
             column_save_path: "",
             auto_reload: false,
             auto_reload_time: 10000,
-            column_pinned_path: "",
+            column_homepage_path: "",
             column_save_title: "",
             column_width: null,
         },
@@ -126,7 +126,7 @@ export function settings_init() {
             exp_type: "",
             column_save_path: "/explore",
             column_save_title: "",
-            column_pinned_path: "",
+            column_homepage_path: "",
             auto_reload: false,
             auto_reload_time: 10000,
             column_width: null,
@@ -137,7 +137,7 @@ export function settings_init() {
             tw_view_mode: "0",
             column_save_path: "",
             column_save_title: "",
-            column_pinned_path: "",
+            column_homepage_path: "",
             auto_reload: false,
             auto_reload_time: 10000,
             column_width: null,
@@ -145,7 +145,7 @@ export function settings_init() {
     ];
     const settings = {
         last_load_profile: 0,
-        //column_settings:[{type:"main_bar_empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"home", banner:true, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"notification", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}, {type:"explore", banner:false, top_visible:true, tw_view_mode:"0", exp_type:"", column_save_path:"/explore", column_pinned_path:"", column_width:null}, {type:"empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_pinned_path:"", column_width:null}],
+        //column_settings:[{type:"main_bar_empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_homepage_path:"", column_width:null}, {type:"home", banner:true, top_visible:true, tw_view_mode:"0", column_save_path:"", column_homepage_path:"", column_width:null}, {type:"notification", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_homepage_path:"", column_width:null}, {type:"explore", banner:false, top_visible:true, tw_view_mode:"0", exp_type:"", column_save_path:"/explore", column_homepage_path:"", column_width:null}, {type:"empty_column", banner:false, top_visible:true, tw_view_mode:"0", column_save_path:"", column_homepage_path:"", column_width:null}],
         version: manifest.version,
     };
     let profile = [

@@ -1,4 +1,10 @@
 {
+    "ui_column_homepage": {
+        "message": "主页"
+    },
+    "ui_homepage_set_current": {
+        "message": "设为当前页面"
+    },
     "ui_column_copy_link_title": {
         "message": "复制链接"
     },
@@ -31,9 +37,6 @@
     },
     "ui_column_refresh_title": {
         "message": "刷新栏目"
-    },
-    "ui_column_pin_toggle_title": {
-        "message": "切换固定位置"
     },
     "ui_sidebar_logo_title": {
         "message": "XPP-Deck\nv$1"
@@ -242,20 +245,11 @@
     "msg_profile_delete_current_alert": {
         "message": "仅剩一个配置，无法删除。"
     },
-    "msg_explore_pin_confirm": {
-        "message": "固定此位置？\n\n重新加载或打开此配置时，栏目将从当前 URL 开始。仍可浏览其他页面，栏目位置不会锁定。"
-    },
-    "msg_explore_unpin_confirm": {
-        "message": "取消固定此位置？"
-    },
     "msg_column_add_confirm": {
         "message": "确认$1？"
     },
     "msg_column_close_confirm": {
         "message": "关闭此栏目？"
-    },
-    "msg_pinned_column_close_confirm": {
-        "message": "此栏目已固定。\n关闭栏目？"
     },
     "msg_initial_setup_completed_prototype": {
         "message": "初始设置完成。\n欢迎使用 XPP-Deck 原型版！"

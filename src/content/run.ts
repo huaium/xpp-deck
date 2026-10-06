@@ -120,10 +120,10 @@ export function run(settings) {
                 queue_column_navigation(frame, () => {
                     const source = frame.getAttribute("data-opd-src");
                     frame.removeAttribute("data-opd-src");
-                    const pinned = frame
+                    const homepage = frame
                         .closest("div[opd_column_type]")
-                        ?.getAttribute("opd_pinned_path");
-                    if (pinned) frame.src = `https://x.com${pinned}`;
+                        ?.getAttribute("opd_homepage_path");
+                    if (homepage) frame.src = `https://x.com${homepage}`;
                     else if (source) frame.src = source;
                 });
             });
@@ -749,6 +749,11 @@ export function run(settings) {
         background:url(${chrome.runtime.getURL("public/icons/copy_link.svg")}) center / contain no-repeat;
         cursor:pointer;
     }
+    .opd_homepage_btn{display:block;width:22px;height:22px;background:url(${chrome.runtime.getURL("public/icons/homepage.svg")}) center / contain no-repeat;cursor:pointer;}
+    #opd_main_element .opd_homepage_setting{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0 16px;border-bottom:1px solid var(--opd-border);font-size:13px;}
+    #opd_main_element .opd_homepage_setting > label{grid-column:1 / -1;}
+    #opd_main_element .opd_homepage_setting wa-input{width:100%;min-width:0;}
+    #opd_main_element .opd_homepage_current{align-self:center;}
     .dsp_column_refresh_btn input{
         display: none;
     }
@@ -799,27 +804,6 @@ export function run(settings) {
     }
     .dsp_column_close_btn input{
         display: none;
-    }
-
-    .dsp_column_pin_btn{
-        display: block;
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.column_pin)});
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 18px;
-        height: 18px;    
-    }
-    wa-checkbox[checked] + .dsp_column_pin_btn{
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.column_pinned)});
-    }
-    .dsp_column_pin_btn input{
-        opacity: 0;
-        position: absolute;
-        z-index: 10;
-        margin: 0;
-        width: 24px;
-        height: 24px;
     }
 
     .dsp_column_settings_panel{
@@ -1222,8 +1206,9 @@ export function run(settings) {
     #opd_main_element .dsp_column_settings_panel{
         background: var(--opd-surface);
         width: 100%;
-        max-height: min(480px, 60dvh);
-        overflow-y: auto;
+        height: auto;
+        max-height: none;
+        overflow: visible;
         flex-shrink: 0;
         border: 0;
         border-bottom: 1px solid var(--opd-border);
@@ -1359,7 +1344,7 @@ export function run(settings) {
             html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_notifications_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe allow="fullscreen" data-opd-src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
         explore: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" opd_pinned_path="%column_pinned_save_path%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_explore_title")}</span></div></span>${default_element_bar}<span class="dsp_column_btn"><wa-checkbox class="opd_pinned_btn" title="${i18n_message("ui_column_pin_toggle_title")}" %column_pinned_ch%></wa-checkbox><label class="dsp_column_pin_btn opd_ui_icon_color"></label></span>${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_explore_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
         },
     };
     let ins_html = document.createElement("div");
@@ -1392,8 +1377,6 @@ export function run(settings) {
             ) {
                 //console.log(default_element[Object.keys(default_element)[default_index]]["html"])
                 let banner_checked = "";
-                let init_pinned_checked = "";
-                let init_pinned_path = "";
                 let init_auto_reload_checked = "";
                 let init_column_save_path =
                     settings.column_settings[index].column_save_path;
@@ -1409,22 +1392,6 @@ export function run(settings) {
                     column_width_init =
                         settings.column_settings[index].column_width;
                 }
-                // Explore pin state.
-                if (settings.column_settings[index].type == "explore") {
-                    if (
-                        settings.column_settings[index].column_pinned_path != ""
-                    ) {
-                        init_pinned_checked = "checked";
-                        init_pinned_path =
-                            settings.column_settings[index].column_pinned_path;
-                        init_column_save_path =
-                            settings.column_settings[index].column_pinned_path;
-                        //%column_pinned_ch%
-                    } else {
-                        init_column_save_path =
-                            settings.column_settings[index].column_save_path;
-                    }
-                }
                 // Auto refresh.
                 if (settings.column_settings[index].auto_reload) {
                     init_auto_reload_checked = "checked";
@@ -1438,11 +1405,6 @@ export function run(settings) {
                         .replaceAll("%column_num%", create_random_id())
                         .replace("%column_banner_ch%", banner_checked)
                         .replace("%column_tw_view_mode%", tw_view_type)
-                        .replace("%column_pinned_ch%", init_pinned_checked)
-                        .replaceAll(
-                            "%column_pinned_save_path%",
-                            init_pinned_path,
-                        )
                         .replaceAll("%column_width_num%", column_width_init)
                         .replaceAll(
                             "%column_auto_reload_ch%",
@@ -1460,11 +1422,6 @@ export function run(settings) {
                         .replaceAll("%column_num%", create_random_id())
                         .replace("%column_banner_ch%", banner_checked)
                         .replace("%column_tw_view_mode%", tw_view_type)
-                        .replace("%column_pinned_ch%", init_pinned_checked)
-                        .replaceAll(
-                            "%column_pinned_save_path%",
-                            init_pinned_path,
-                        )
                         .replaceAll("%column_width_num%", column_width_init)
                         .replaceAll(
                             "%column_auto_reload_ch%",
@@ -1789,11 +1746,14 @@ export function run(settings) {
         index < settings.column_settings.length && index < all_columns.length;
         index++
     ) {
-        const pinned_path = settings.column_settings[index].column_pinned_path;
-        all_columns[index].setAttribute(
-            "opd_pinned_path",
-            typeof pinned_path === "string" ? pinned_path : "",
+        const saved = settings.column_settings[index];
+        const frame = all_columns[index].querySelector("iframe");
+        const homepage = resolve_column_homepage(
+            saved,
+            frame?.getAttribute("data-opd-src") ?? "",
         );
+        if (homepage)
+            all_columns[index].setAttribute("opd_homepage_path", homepage);
         const custom_title = settings.column_settings[index].custom_title;
         if (typeof custom_title === "string" && custom_title.trim() !== "") {
             all_columns[index].setAttribute("opd_custom_title", custom_title);
@@ -2152,10 +2112,10 @@ export function run(settings) {
             );
         }
         for (let index = 0; index < column_object.length; index++) {
-            const pin_column = column_object[index].closest<HTMLElement>(
+            const homepage_column = column_object[index].closest<HTMLElement>(
                 "div[opd_column_type]",
             );
-            if (pin_column) bind_column_pin(pin_column);
+            if (homepage_column) bind_column_homepage(homepage_column);
             if (column_object[index].hasAttribute("opd_load_bound")) continue;
             column_object[index].setAttribute("opd_load_bound", "");
             const banner_control = column_object[index]
@@ -3078,7 +3038,6 @@ export function run(settings) {
             .replaceAll("%column_num%", column_id)
             .replace("%column_banner_ch%", "")
             .replace("%column_tw_view_mode%", "0")
-            .replaceAll("%column_pinned_save_path%", "")
             .replaceAll("%column_width_num%", "30")
             .replaceAll("%column_auto_reload_ch%", "")
             .replaceAll("%column_auto_reload_time%", "10");
@@ -3386,74 +3345,90 @@ export function run(settings) {
         });
         update();
     }
-    function bind_column_pin(column: HTMLElement) {
-        let checkbox = column.querySelector<WaCheckbox>(".opd_pinned_btn");
-        if (!checkbox) {
-            const bar = column.querySelector(".column_bar");
-            if (!bar) return;
-            const wrapper = document.createElement("span");
-            wrapper.className = "dsp_column_btn";
-            checkbox = document.createElement("wa-checkbox");
-            checkbox.className = "opd_pinned_btn";
-            checkbox.title = i18n_message("ui_column_pin_toggle_title");
-            const label = document.createElement("label");
-            label.className = "dsp_column_pin_btn opd_ui_icon_color";
-            wrapper.appendChild(checkbox);
-            wrapper.appendChild(label);
-            bar.insertBefore(
-                wrapper,
-                bar
-                    .querySelector(".column_refresh_btn")
-                    ?.closest(".dsp_column_btn") ??
-                    bar.querySelector(".dsp_column_close_btn_wrap"),
+    function resolve_column_homepage(saved, original_url: string) {
+        return (
+            normalize_custom_x_path(saved.column_homepage_path ?? "") ??
+            normalize_custom_x_path(saved.column_pinned_path ?? "") ??
+            normalize_custom_x_path(original_url)
+        );
+    }
+    function bind_column_homepage(column: HTMLElement) {
+        if (column.hasAttribute("opd_homepage_bound")) return;
+        const bar = column.querySelector(".column_bar");
+        const panel = column.querySelector(".dsp_column_settings_list");
+        const frame = column.querySelector<HTMLIFrameElement>("iframe");
+        if (!bar || !panel || !frame) return;
+        column.setAttribute("opd_homepage_bound", "");
+        if (!column.getAttribute("opd_homepage_path")) {
+            const path = normalize_custom_x_path(
+                frame.getAttribute("data-opd-src") ?? frame.src,
             );
+            if (path) column.setAttribute("opd_homepage_path", path);
         }
-        checkbox.checked = Boolean(column.getAttribute("opd_pinned_path"));
-        if (checkbox.hasAttribute("opd_pin_bound")) return;
-        checkbox.setAttribute("opd_pin_bound", "");
-        const control = checkbox;
-        control.addEventListener("change", async () => {
-            control.disabled = true;
+        const wrapper = document.createElement("span");
+        wrapper.className = "dsp_column_btn";
+        const home = document.createElement("wa-button");
+        home.className = "opd_homepage_btn opd_ui_icon_color";
+        home.setAttribute("appearance", "plain");
+        home.title = i18n_message("ui_column_homepage");
+        home.setAttribute("aria-label", home.title);
+        wrapper.appendChild(home);
+        bar.insertBefore(
+            wrapper,
+            bar
+                .querySelector(".column_refresh_btn")
+                ?.closest(".dsp_column_btn") ?? null,
+        );
+        home.addEventListener("click", () => {
+            const path = column.getAttribute("opd_homepage_path");
+            if (path)
+                queue_column_navigation(frame, () => {
+                    frame.src = `https://x.com${path}`;
+                });
+        });
+        const row = document.createElement("div");
+        row.className = "opd_homepage_setting";
+        const label = document.createElement("label");
+        label.textContent = i18n_message("ui_column_homepage");
+        const input = document.createElement("wa-input");
+        input.className = "opd_homepage_input";
+        input.setAttribute("aria-label", label.textContent);
+        input.value = `https://x.com${column.getAttribute("opd_homepage_path") ?? "/home"}`;
+        const current = document.createElement("wa-button");
+        current.className = "opd_homepage_current";
+        current.textContent = i18n_message("ui_homepage_set_current");
+        row.append(label, input, current);
+        panel.prepend(row);
+        const save = async (value: string) => {
+            const path = normalize_custom_x_path(value);
+            if (!path) {
+                input.value = `https://x.com${column.getAttribute("opd_homepage_path") ?? "/home"}`;
+                await opd_alert(i18n_message("msg_invalid_value_alert"));
+                return;
+            }
+            input.value = `https://x.com${path}`;
+            if (path !== column.getAttribute("opd_homepage_path")) {
+                column.setAttribute("opd_homepage_path", path);
+                column_settings_save("", last_load_profile);
+            }
+        };
+        input.addEventListener("blur", () => {
+            void save(String(input.value));
+        });
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                void save(String(input.value));
+            }
+        });
+        current.addEventListener("click", async () => {
             try {
-                let path = "";
-                if (control.checked) {
-                    const frame =
-                        column.querySelector<HTMLIFrameElement>("iframe");
-                    const current_url =
-                        frame?.contentWindow?.location.href ?? "";
-                    path =
-                        (current_url.startsWith("https://")
-                            ? normalize_custom_x_path(current_url)
-                            : null) ??
-                        normalize_custom_x_path(
-                            frame?.getAttribute("data-opd-src") ?? "",
-                        ) ??
-                        "";
-                    if (!path) {
-                        await opd_alert(
-                            i18n_message("msg_invalid_value_alert"),
-                        );
-                        return;
-                    }
-                }
-                if (
-                    await opd_confirm(
-                        i18n_message(
-                            control.checked
-                                ? "msg_explore_pin_confirm"
-                                : "msg_explore_unpin_confirm",
-                        ),
-                    )
-                ) {
-                    if (!column.isConnected) return;
-                    column.setAttribute("opd_pinned_path", path);
-                    column_settings_save("", last_load_profile);
-                }
-            } finally {
-                control.checked = Boolean(
-                    column.getAttribute("opd_pinned_path"),
-                );
-                control.disabled = false;
+                const url = frame.contentWindow?.location.href;
+                if (!url || url === "about:blank")
+                    throw new Error("No current page");
+                await save(url);
+            } catch {
+                await opd_alert(i18n_message("msg_invalid_value_alert"));
             }
         });
     }
@@ -3660,21 +3635,11 @@ export function run(settings) {
                 if (!close_button || confirmation_pending) return;
                 const column_element = close_button.closest(".dsp_column")!;
                 if (!column_element) return;
-                const pin_checkbox_element =
-                    column_element.querySelector(".opd_pinned_btn");
-                const pin_checkbox =
-                    pin_checkbox_element?.tagName === "WA-CHECKBOX"
-                        ? (pin_checkbox_element as WaCheckbox).checked
-                        : undefined;
                 confirmation_pending = true;
                 try {
                     if (
                         (await opd_confirm(
-                            i18n_message(
-                                pin_checkbox
-                                    ? "msg_pinned_column_close_confirm"
-                                    : "msg_column_close_confirm",
-                            ),
+                            i18n_message("msg_column_close_confirm"),
                         )) &&
                         column_element.isConnected
                     ) {
@@ -3695,7 +3660,7 @@ export function run(settings) {
         tw_view_mode: string;
         column_save_path: string;
         column_save_title: string | null;
-        column_pinned_path: string;
+        column_homepage_path: string;
         auto_reload: boolean | null;
         auto_reload_time: number;
         column_width: string | null;
@@ -3749,8 +3714,8 @@ export function run(settings) {
                 column_save_title: is_explore
                     ? column.getAttribute("opd_explore_title")
                     : null,
-                column_pinned_path:
-                    column.getAttribute("opd_pinned_path") ?? "",
+                column_homepage_path:
+                    column.getAttribute("opd_homepage_path") ?? "",
                 auto_reload: supports_reload
                     ? column.querySelector<WaCheckbox>(".opd_a_reload_bar")
                           ?.checked == true
