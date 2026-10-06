@@ -1,3 +1,4 @@
+import { profile_storage_request } from "./profile-storage";
 import {
     i18n_message,
     manifest,
@@ -88,7 +89,7 @@ export function get_cookie_color_mode() {
     return mode === "light" || mode === "dark" ? mode : "system";
 }
 // Initialize settings.
-export function settings_init() {
+export function settings_init(only_if_missing = false) {
     const profile_store_default = [
         {
             type: "main_bar_empty_column",
@@ -159,31 +160,14 @@ export function settings_init() {
         },
     ];
     //console.log(profile);
-    return new Promise<void>((resolve, reject) => {
-        chrome.storage.local.set(
-            { opd_profile_store: JSON.stringify(profile) },
-            () => {
-                if (chrome.runtime.lastError) {
-                    reject(new Error(chrome.runtime.lastError.message));
-                    return;
-                }
-                chrome.storage.local.set(
-                    { opd_settings: JSON.stringify(settings) },
-                    () => {
-                        if (chrome.runtime.lastError) {
-                            reject(new Error(chrome.runtime.lastError.message));
-                            return;
-                        }
-                        void opd_alert(
-                            i18n_message("msg_initial_setup_completed"),
-                        ).then(() => {
-                            request_page_reload();
-                            resolve();
-                        }, reject);
-                    },
-                );
-            },
-        );
+    return profile_storage_request({
+        op: "reset",
+        only_if_missing,
+        profiles: profile,
+        settings,
+    }).then(async () => {
+        await opd_alert(i18n_message("msg_initial_setup_completed"));
+        request_page_reload();
     });
 }
 

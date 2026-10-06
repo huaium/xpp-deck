@@ -17,6 +17,7 @@ function harness() {
         ["start_background"],
         "",
         {
+            create_profile_storage: () => ({ request: async () => ({}) }),
             chrome: {
                 runtime,
                 declarativeNetRequest: {
@@ -143,4 +144,34 @@ test("rule installation reports API errors", () => {
         },
     );
     assert.equal(response, false);
+});
+
+test("profile mutations reject ordinary-page and embedded senders", () => {
+    const h = harness();
+    for (const sender of [
+        {
+            frameId: 0,
+            url: "https://x.com/home",
+            tab: { id: 7, url: "https://x.com/home" },
+        },
+        {
+            frameId: 1,
+            url: "https://x.com/run-xppdeck",
+            tab: { id: 7, url: "https://x.com/run-xppdeck" },
+        },
+        {},
+    ]) {
+        let response;
+        assert.equal(
+            h.message(
+                { message: "profiles", operation: { op: "read" } },
+                sender,
+                (value) => {
+                    response = value;
+                },
+            ),
+            false,
+        );
+        assert.equal(response.ok, false);
+    }
 });

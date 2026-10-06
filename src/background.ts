@@ -1,4 +1,7 @@
+import { create_profile_storage } from "./profile-storage";
+
 export function start_background() {
+    const profile_storage = create_profile_storage();
     const is_deck_url = (href?: string) => {
         if (!href) return false;
         try {
@@ -28,6 +31,39 @@ export function start_background() {
         });
     });
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.message === "profiles") {
+            const source = sender as {
+                frameId?: number;
+                tab?: { id?: number; url?: string };
+                url?: string;
+            };
+            if (
+                source.frameId !== 0 ||
+                !Number.isInteger(source.tab?.id) ||
+                !is_deck_url(source.url) ||
+                !is_deck_url(source.tab?.url)
+            ) {
+                sendResponse({ ok: false, error: "Invalid profile sender" });
+                return false;
+            }
+            void profile_storage
+                .request(
+                    (
+                        request as unknown as {
+                            operation: Record<string, unknown>;
+                        }
+                    ).operation,
+                )
+                .then(
+                    (value) => sendResponse({ ok: true, value }),
+                    (error) =>
+                        sendResponse({
+                            ok: false,
+                            error: String(error.message),
+                        }),
+                );
+            return true;
+        }
         if (request.message !== "dnr_upd") return false;
         const source = sender as {
             frameId?: number;

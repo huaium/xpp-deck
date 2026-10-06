@@ -1,3 +1,4 @@
+import { profile_storage_request } from "./profile-storage";
 import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
 import { column_navigation_url } from "./column-navigation";
 import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js";
@@ -1809,8 +1810,10 @@ export function run(settings) {
             if (!profile_button) {
                 continue;
             }
+            const target_profile = profile_store[index];
             profile_button.addEventListener("click", async function () {
-                if (index === last_load_profile) return;
+                if (target_profile.id === profile_store[last_load_profile]?.id)
+                    return;
                 //console.log(profile_store[index].profile)
                 const preload_array = profile_store[index].profile;
                 let preload_desc_array = new Array();
@@ -1896,29 +1899,33 @@ export function run(settings) {
                         `${i18n_message("msg_profile_load_confirm", [String(index + 1), preload_desc_array.join("\r\n")])}`,
                     )
                 ) {
-                    const current_main =
-                        document.querySelector("#opd_main_element");
-                    if (current_main) {
-                        current_main.remove();
+                    try {
+                        const result = await profile_storage_request({
+                            op: "select",
+                            id: target_profile.id,
+                        });
+                        profile_store.splice(
+                            0,
+                            profile_store.length,
+                            ...result.profiles,
+                        );
+                        set_last_load_profile(
+                            profile_store.findIndex(
+                                (profile) => profile.id === target_profile.id,
+                            ),
+                        );
+                        document.querySelector("#opd_main_element")?.remove();
+                        run({
+                            column_settings:
+                                profile_store[last_load_profile].profile,
+                        });
+                    } catch (error) {
+                        await opd_alert(
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                        );
                     }
-                    set_last_load_profile(index);
-                    chrome.storage.local.get("opd_settings", function (value) {
-                        let load_setting = JSON.parse(
-                            String(value.opd_settings),
-                        );
-                        load_setting.last_load_profile = index;
-                        chrome.storage.local.set(
-                            {
-                                opd_settings: JSON.stringify(load_setting),
-                            },
-                            function () {},
-                        );
-                    });
-                    const column_settings = {
-                        column_settings: profile_store[index].profile,
-                    };
-                    //console.log(column_settings)
-                    run(column_settings);
                 }
             });
         }
@@ -3119,28 +3126,41 @@ export function run(settings) {
                 if (profile == null) {
                     return;
                 }
-                const save_object = {
-                    name: requested_name.trim() || default_name,
-                    profile: profile.column_settings,
-                };
-                //console.log(profile)
-                profile_store.push(save_object);
-                //console.log(profile_store)
-                chrome.storage.local.set(
-                    { opd_profile_store: JSON.stringify(profile_store) },
-                    function () {
-                        const profile_button_list =
-                            document.querySelector("#profile_btn_list");
-                        if (profile_button_list instanceof HTMLElement) {
-                            profile_button_list.innerHTML =
-                                create_profile_list_buttons_html(
-                                    profile_store.length,
-                                    last_load_profile,
-                                );
-                        }
-                        create_profile_list_btn();
-                    },
-                );
+                const active_id = profile_store[last_load_profile].id;
+                try {
+                    const result = await profile_storage_request({
+                        op: "create",
+                        name: requested_name.trim() || default_name,
+                        columns: profile.column_settings,
+                    });
+                    profile_store.splice(
+                        0,
+                        profile_store.length,
+                        ...result.profiles,
+                    );
+                    const active_index = profile_store.findIndex(
+                        (entry) => entry.id === active_id,
+                    );
+                    if (active_index < 0) {
+                        request_page_reload();
+                        return;
+                    }
+                    set_last_load_profile(active_index);
+                    const profile_button_list =
+                        document.querySelector("#profile_btn_list");
+                    if (profile_button_list instanceof HTMLElement) {
+                        profile_button_list.innerHTML =
+                            create_profile_list_buttons_html(
+                                profile_store.length,
+                                last_load_profile,
+                            );
+                    }
+                    create_profile_list_btn();
+                } catch (error) {
+                    await opd_alert(
+                        error instanceof Error ? error.message : String(error),
+                    );
+                }
             }
         });
     }
@@ -3196,59 +3216,53 @@ export function run(settings) {
                 if (profile_store.length <= 1 || delete_num < 0) {
                     return;
                 }
-                const deleting_active_profile =
-                    delete_num === last_load_profile;
-                const after_profile_num =
-                    delete_num <= last_load_profile
-                        ? Math.max(0, last_load_profile - 1)
-                        : last_load_profile;
-                profile_store.splice(delete_num, 1);
-                set_last_load_profile(after_profile_num);
-                if (deleting_active_profile) {
-                    document.querySelector("#opd_main_element")?.remove();
-                    run({
-                        column_settings:
-                            profile_store[after_profile_num].profile,
+                const active_id = profile_store[last_load_profile].id;
+                const preferred_id =
+                    delete_num === last_load_profile
+                        ? profile_store[Math.max(0, last_load_profile - 1)].id
+                        : active_id;
+                try {
+                    const result = await profile_storage_request({
+                        op: "delete",
+                        id: selected_entry.id,
                     });
+                    profile_store.splice(
+                        0,
+                        profile_store.length,
+                        ...result.profiles,
+                    );
+                    let after_profile_num = profile_store.findIndex(
+                        (profile) => profile.id === preferred_id,
+                    );
+                    if (after_profile_num < 0) after_profile_num = 0;
+                    const next_id = profile_store[after_profile_num].id;
+                    set_last_load_profile(after_profile_num);
+                    if (next_id !== active_id) {
+                        document.querySelector("#opd_main_element")?.remove();
+                        run({
+                            column_settings:
+                                profile_store[after_profile_num].profile,
+                        });
+                    } else {
+                        const profile_button_list =
+                            document.querySelector("#profile_btn_list");
+                        if (profile_button_list instanceof HTMLElement)
+                            profile_button_list.innerHTML =
+                                create_profile_list_buttons_html(
+                                    profile_store.length,
+                                    after_profile_num,
+                                );
+                        create_profile_list_btn();
+                    }
+                    await profile_storage_request({
+                        op: "select",
+                        id: next_id,
+                    });
+                } catch (error) {
+                    await opd_alert(
+                        error instanceof Error ? error.message : String(error),
+                    );
                 }
-                chrome.storage.local.set(
-                    { opd_profile_store: JSON.stringify(profile_store) },
-                    function () {
-                        chrome.storage.local.get(
-                            "opd_settings",
-                            function (load_value) {
-                                let load_setting = JSON.parse(
-                                    String(load_value.opd_settings),
-                                );
-                                load_setting.last_load_profile =
-                                    after_profile_num;
-                                chrome.storage.local.set(
-                                    {
-                                        opd_settings:
-                                            JSON.stringify(load_setting),
-                                    },
-                                    function () {
-                                        const profile_button_list =
-                                            document.querySelector(
-                                                "#profile_btn_list",
-                                            );
-                                        if (
-                                            profile_button_list instanceof
-                                            HTMLElement
-                                        ) {
-                                            profile_button_list.innerHTML =
-                                                create_profile_list_buttons_html(
-                                                    profile_store.length,
-                                                    after_profile_num,
-                                                );
-                                        }
-                                        create_profile_list_btn();
-                                    },
-                                );
-                            },
-                        );
-                    },
-                );
             }
         });
     }
@@ -3710,9 +3724,13 @@ export function run(settings) {
         Object.assign(profile_store[profile_num], {
             profile: settings_array.column_settings,
         });
-        chrome.storage.local.set(
-            { opd_profile_store: JSON.stringify(profile_store) },
-            function () {},
+        const profile_id = profile_store[profile_num].id;
+        void profile_storage_request({
+            op: "save",
+            id: profile_id,
+            columns: settings_array.column_settings,
+        }).catch((error) =>
+            opd_alert(error instanceof Error ? error.message : String(error)),
         );
         return null;
     }

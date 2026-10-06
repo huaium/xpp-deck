@@ -11,6 +11,7 @@ function harness(saved) {
         ["start_background"],
         "",
         {
+            create_profile_storage: () => ({ request: async () => ({}) }),
             chrome: {
                 runtime: { onMessage: { addListener() {} } },
                 tabs: {

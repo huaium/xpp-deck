@@ -1,5 +1,6 @@
 export function profileHarness(confirmed, active = 1, count = 3) {
     const store = Array.from({ length: count }, (_, i) => ({
+        id: `profile-id-${i}`,
         name: `profile-${i}`,
         profile: [{ type: "home" }],
     }));
@@ -7,6 +8,36 @@ export function profileHarness(confirmed, active = 1, count = 3) {
     const alerts = [];
     const buttons = new Map();
     const globals = {
+        profile_storage_request: async (operation) => {
+            if (operation.op === "create") {
+                store.push({
+                    id: "new-id",
+                    name: operation.name,
+                    profile: operation.columns,
+                });
+                writes.push({ opd_profile_store: JSON.stringify(store) });
+            } else if (operation.op === "delete") {
+                store.splice(
+                    store.findIndex((p) => p.id === operation.id),
+                    1,
+                );
+                writes.push({ opd_profile_store: JSON.stringify(store) });
+            } else if (operation.op === "select") {
+                writes.push({
+                    opd_settings: JSON.stringify({
+                        last_load_profile: store.findIndex(
+                            (p) => p.id === operation.id,
+                        ),
+                        version: "1",
+                    }),
+                });
+            } else if (operation.op === "save") {
+                store.find((p) => p.id === operation.id).profile =
+                    operation.columns;
+                writes.push({ opd_profile_store: JSON.stringify(store) });
+            }
+            return { profiles: store.slice() };
+        },
         profile_store: store,
         last_load_profile: active,
         document: { querySelector: () => null },

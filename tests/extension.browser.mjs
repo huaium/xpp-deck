@@ -101,13 +101,44 @@ try {
         document.getElementById("react-root").innerHTML =
             '<a href="/i/jf/onboarding/web?mode=signup">Continue with phone</a><a href="/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-xppdeck">Log in with username or email</a>';
         window.__opd_storage_writes = 0;
+        const messageListeners = [];
         window.chrome = {
             runtime: {
                 getManifest: () => ({ version: "0.1.0" }),
                 getURL: (file) => `https://x.com/__extension__/${file}`,
-                sendMessage: async () => ({}),
+                onMessage: {
+                    addListener: (listener) => messageListeners.push(listener),
+                },
+                sendMessage: (request) =>
+                    new Promise((resolve) => {
+                        for (const listener of messageListeners) {
+                            if (
+                                listener(
+                                    request,
+                                    {
+                                        frameId: 0,
+                                        url: "https://x.com/run-xppdeck",
+                                        tab: {
+                                            id: 1,
+                                            url: "https://x.com/run-xppdeck",
+                                        },
+                                    },
+                                    resolve,
+                                )
+                            )
+                                return;
+                        }
+                    }),
             },
             i18n: { getMessage: (key) => key },
+            tabs: {
+                onUpdated: { addListener() {} },
+                onRemoved: { addListener() {} },
+            },
+            declarativeNetRequest: {
+                updateSessionRules: (_rules, done) => done?.(),
+            },
+            webRequest: { onHeadersReceived: { addListener() {} } },
             storage: {
                 local: {
                     get: (key, callback) =>
@@ -127,6 +158,9 @@ try {
                 onChanged: { addListener() {} },
             },
         };
+    });
+    await page.addScriptTag({
+        content: await readFile(directory + "background.js", "utf8"),
     });
     await page.addScriptTag({
         content: await readFile(directory + "content-scripts/guard.js", "utf8"),

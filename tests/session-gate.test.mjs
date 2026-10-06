@@ -257,6 +257,10 @@ test("first-time profile setup does not read an unsaved profile", async () => {
         ["initialize_content"],
         "let last_load_profile = 0;",
         {
+            profile_storage_request: async (operation) => {
+                reads.push(operation.op);
+                return {};
+            },
             is_deck_location: () => true,
             location: { href: "https://x.com/run-xppdeck" },
             chrome: {
@@ -282,10 +286,7 @@ test("first-time profile setup does not read an unsaved profile", async () => {
     );
     assert.equal(initialized, 1);
     assert.equal(runs, 0);
-    assert.deepEqual(Array.from(reads[0]), [
-        "opd_settings",
-        "opd_profile_store",
-    ]);
+    assert.deepEqual(reads, ["read"]);
 });
 
 test("explicit sign-in retry refreshes stale X markup, while focus checks do not", async () => {

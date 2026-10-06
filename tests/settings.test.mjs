@@ -19,6 +19,14 @@ test("initial setup persists a default profile before acknowledgement and reload
         ["settings_init"],
         "",
         {
+            profile_storage_request: async (operation) => {
+                writes.push({
+                    opd_profile_store: JSON.stringify(operation.profiles),
+                });
+                writes.push({
+                    opd_settings: JSON.stringify(operation.settings),
+                });
+            },
             manifest: { version: "1.2.3" },
             chrome: {
                 runtime: {},
@@ -41,7 +49,8 @@ test("initial setup persists a default profile before acknowledgement and reload
             },
         },
     );
-    settings_init();
+    const setup = settings_init();
+    await Promise.resolve();
     assert.equal(writes.length, 2);
     const profiles = JSON.parse(writes[0].opd_profile_store);
     assert.equal(profiles.length, 1);
@@ -56,6 +65,7 @@ test("initial setup persists a default profile before acknowledgement and reload
     });
     assert.equal(reloaded, false);
     acknowledge();
+    await setup;
     await new Promise((resolve) => setImmediate(resolve));
     assert.equal(reloaded, true);
 });
@@ -91,6 +101,9 @@ test("column snapshots preserve display, width, homepage URL, title, and refresh
         {
             manifest: { version: "1" },
             last_load_profile: 0,
+            profile_storage_request: async () => {
+                writes.push({ opd_profile_store: JSON.stringify(profiles) });
+            },
             profile_store: profiles,
             document: { querySelectorAll: () => columns },
             chrome: {

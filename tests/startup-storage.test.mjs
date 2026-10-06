@@ -12,6 +12,23 @@ function harness(stored) {
         ["initialize_content"],
         "let last_load_profile = 0; let profile_store;",
         {
+            profile_storage_request: (operation) => {
+                if (operation.op === "read")
+                    return new Promise((resolve, reject) =>
+                        callbacks.push(() => {
+                            if (runtime.lastError)
+                                reject(new Error(runtime.lastError.message));
+                            else resolve(stored);
+                        }),
+                    );
+                writes.push({
+                    opd_settings: JSON.stringify({
+                        ...JSON.parse(stored.opd_settings),
+                        version: operation.version,
+                    }),
+                });
+                return Promise.resolve({});
+            },
             is_deck_location: () => true,
             location: { href: "https://x.com/run-xppdeck" },
             manifest: { version: "1" },

@@ -2,6 +2,7 @@ import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.
 import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js";
 import type WaButton from "@awesome.me/webawesome/dist/components/button/button.js";
 import { is_deck_location } from "./session";
+import { profile_storage_request } from "./profile-storage";
 
 export const manifest = chrome.runtime.getManifest();
 // Print welcome messages to console
@@ -1317,24 +1318,13 @@ export async function initialize_content(
     });
     if (rules_ready === false)
         throw new Error("Unable to initialize deck rules");
-    const stored = await new Promise<Record<string, unknown>>(
-        (resolve, reject) => {
-            chrome.storage.local.get(
-                ["opd_settings", "opd_profile_store"],
-                (value) => {
-                    if (chrome.runtime.lastError)
-                        reject(new Error(chrome.runtime.lastError.message));
-                    else resolve(value);
-                },
-            );
-        },
-    );
+    const stored = await profile_storage_request({ op: "read" });
     if (
         stored.opd_settings === undefined &&
         stored.opd_profile_store === undefined
     ) {
         last_load_profile = 0;
-        await settings_init();
+        await settings_init(true);
         return;
     }
     const settings = JSON.parse(String(stored.opd_settings));
@@ -1367,16 +1357,9 @@ export async function initialize_content(
     }
     const updated = settings.version !== manifest.version;
     if (updated) {
-        const next_settings = { ...settings, version: manifest.version };
-        await new Promise<void>((resolve, reject) => {
-            chrome.storage.local.set(
-                { opd_settings: JSON.stringify(next_settings) },
-                () => {
-                    if (chrome.runtime.lastError)
-                        reject(new Error(chrome.runtime.lastError.message));
-                    else resolve();
-                },
-            );
+        await profile_storage_request({
+            op: "version",
+            version: manifest.version,
         });
     }
     last_load_profile = settings.last_load_profile;
