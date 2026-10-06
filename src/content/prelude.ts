@@ -1311,20 +1311,23 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 export async function initialize_content(
     run: typeof import("./run").run,
     settings_init: typeof import("./settings").settings_init,
+    signal?: AbortSignal,
 ) {
-    if (!is_deck_location(location.href)) return;
+    if (signal?.aborted || !is_deck_location(location.href)) return;
     const rules_ready = await chrome.runtime.sendMessage({
         message: "dnr_upd",
     });
+    if (signal?.aborted) return;
     if (rules_ready === false)
         throw new Error("Unable to initialize deck rules");
     const stored = await profile_storage_request({ op: "read" });
+    if (signal?.aborted) return;
     if (
         stored.opd_settings === undefined &&
         stored.opd_profile_store === undefined
     ) {
         last_load_profile = 0;
-        await settings_init(true);
+        await settings_init(true, signal);
         return;
     }
     const settings = JSON.parse(String(stored.opd_settings));
@@ -1361,11 +1364,14 @@ export async function initialize_content(
             op: "version",
             version: manifest.version,
         });
+        if (signal?.aborted) return;
     }
     last_load_profile = settings.last_load_profile;
     profile_store = profiles;
     await run({ column_settings: profiles[last_load_profile].profile });
+    if (signal?.aborted) return;
     if (updated && (await opd_confirm(i18n_message("app_update")))) {
+        if (signal?.aborted) return;
         open(
             "https://github.com/kawa-nobu/Open-Deck/releases/tag/v" +
                 manifest.version,

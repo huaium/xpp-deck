@@ -14,12 +14,13 @@ import { mount_webawesome_controls } from "./webawesome";
 
 export function start_content() {
     if (!is_deck_location(location.href)) return () => {};
+    const startup = new AbortController();
     ensure_dropdown_style();
     const stop_controls = mount_webawesome_controls();
     const stop_title = keep_deck_tab_title(chrome.runtime.getURL("icon.png"));
     const gate = mount_session_gate({
         message: i18n_message_or_fallback,
-        start: () => initialize_content(run, settings_init),
+        start: () => initialize_content(run, settings_init, startup.signal),
         reload: request_page_reload,
         confirmReset: () =>
             opd_confirm(
@@ -28,10 +29,14 @@ export function start_content() {
                     "Reset all profiles? This permanently replaces your saved profiles and column layouts with the default profile.",
                 ),
             ),
-        reset: () => settings_init(),
+        reset: () => settings_init(false, startup.signal),
     });
-    void initialize_i18n_override().then(() => gate.check());
+    void initialize_i18n_override().then(async () => {
+        if (!startup.signal.aborted) await gate.check();
+    });
     return () => {
+        if (startup.signal.aborted) return;
+        startup.abort();
         gate.dispose();
         dispose_deck();
         stop_title();

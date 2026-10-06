@@ -3,6 +3,46 @@ import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 import { setImmediate } from "node:timers";
 
+const { AbortController } = globalThis;
+
+for (const stage of ["storage", "acknowledgement"]) {
+    test(`cancelled setup stops late UI and reload after ${stage}`, async () => {
+        const controller = new AbortController();
+        let finish;
+        let alerts = 0;
+        let reloads = 0;
+        const { settings_init } = loadFunctions(
+            "../src/content/settings.ts",
+            ["settings_init"],
+            "",
+            {
+                manifest: { version: "1" },
+                i18n_message: (key) => key,
+                profile_storage_request: () =>
+                    stage === "storage"
+                        ? new Promise((resolve) => {
+                              finish = resolve;
+                          })
+                        : Promise.resolve(),
+                opd_alert: () => {
+                    alerts++;
+                    return new Promise((resolve) => {
+                        finish = resolve;
+                    });
+                },
+                request_page_reload: () => reloads++,
+            },
+        );
+        const pending = settings_init(true, controller.signal);
+        await Promise.resolve();
+        controller.abort();
+        finish();
+        await pending;
+        assert.equal(alerts, stage === "storage" ? 0 : 1);
+        assert.equal(reloads, 0);
+    });
+}
+
 function column(attributes, controls = {}) {
     return {
         getAttribute: (name) => attributes[name] ?? null,

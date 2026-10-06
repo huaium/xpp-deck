@@ -3,7 +3,9 @@ import test from "node:test";
 import { setImmediate } from "node:timers/promises";
 import { loadFunctions } from "./helpers/source.mjs";
 
-function harness(stored) {
+const { AbortController } = globalThis;
+
+function harness(stored, deferVersion = false) {
     const callbacks = [];
     const writes = [];
     const runtime = { sendMessage: async () => true };
@@ -27,6 +29,10 @@ function harness(stored) {
                         version: operation.version,
                     }),
                 });
+                if (deferVersion)
+                    return new Promise((resolve) =>
+                        callbacks.push(() => resolve({})),
+                    );
                 return Promise.resolve({});
             },
             is_deck_location: () => true,
@@ -57,6 +63,107 @@ const valid = {
         { name: "Saved", profile: [{ type: "home" }] },
     ]),
 };
+
+test("pre-aborted startup makes no background requests", async () => {
+    const h = harness(valid);
+    h.runtime.sendMessage = () => assert.fail("must not initialize rules");
+    const controller = new AbortController();
+    controller.abort();
+    await h.initialize(
+        () => assert.fail("must not mount"),
+        () => assert.fail("must not reset"),
+        controller.signal,
+    );
+});
+
+test("cancellation during rule initialization prevents the subsequent profile read", async () => {
+    const h = harness(valid);
+    let finishRules;
+    h.runtime.sendMessage = () =>
+        new Promise((resolve) => {
+            finishRules = resolve;
+        });
+    const controller = new AbortController();
+    const pending = h.initialize(
+        () => assert.fail("must not mount"),
+        () => assert.fail("must not reset"),
+        controller.signal,
+    );
+    controller.abort();
+    finishRules(true);
+    await pending;
+    assert.equal(h.callbacks.length, 0);
+});
+
+test("cancellation during version persistence prevents mounting", async () => {
+    const h = harness(
+        {
+            ...valid,
+            opd_settings: JSON.stringify({
+                version: "old",
+                last_load_profile: 0,
+            }),
+        },
+        true,
+    );
+    const controller = new AbortController();
+    const pending = h.initialize(
+        () => assert.fail("must not mount"),
+        () => assert.fail("must not reset"),
+        controller.signal,
+    );
+    await setImmediate();
+    h.callbacks.shift()();
+    await setImmediate();
+    assert.equal(h.writes.length, 1);
+    controller.abort();
+    h.callbacks.shift()();
+    await pending;
+});
+
+test("content teardown cancels startup while the profile read is pending", async () => {
+    for (const stored of [valid, {}]) {
+        const h = harness(stored);
+        let pending;
+        let mounts = 0;
+        let resets = 0;
+        const { start_content } = loadFunctions(
+            "../src/content/index.ts",
+            ["start_content"],
+            "",
+            {
+                AbortController,
+                location: { href: "https://x.com/run-xppdeck" },
+                is_deck_location: () => true,
+                ensure_dropdown_style() {},
+                mount_webawesome_controls: () => () => {},
+                keep_deck_tab_title: () => () => {},
+                chrome: { runtime: { getURL: (url) => url } },
+                mount_session_gate: (options) => ({
+                    check: () => {
+                        pending = options.start();
+                    },
+                    dispose() {},
+                }),
+                i18n_message_or_fallback() {},
+                request_page_reload() {},
+                initialize_i18n_override: async () => {},
+                initialize_content: h.initialize,
+                run: () => mounts++,
+                settings_init: () => resets++,
+                dispose_deck() {},
+            },
+        );
+        const stop = start_content();
+        await setImmediate();
+        assert.equal(h.callbacks.length, 1);
+        stop();
+        h.callbacks.shift()();
+        await pending;
+        assert.equal(mounts, 0);
+        assert.equal(resets, 0);
+    }
+});
 
 test("startup waits for storage and deck initialization", async () => {
     const h = harness(valid);

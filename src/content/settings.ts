@@ -89,7 +89,8 @@ export function get_cookie_color_mode() {
     return mode === "light" || mode === "dark" ? mode : "system";
 }
 // Initialize settings.
-export function settings_init(only_if_missing = false) {
+export function settings_init(only_if_missing = false, signal?: AbortSignal) {
+    if (signal?.aborted) return Promise.resolve();
     const profile_store_default = [
         {
             type: "main_bar_empty_column",
@@ -166,7 +167,9 @@ export function settings_init(only_if_missing = false) {
         profiles: profile,
         settings,
     }).then(async () => {
+        if (signal?.aborted) return;
         await opd_alert(i18n_message("msg_initial_setup_completed"));
+        if (signal?.aborted) return;
         request_page_reload();
     });
 }

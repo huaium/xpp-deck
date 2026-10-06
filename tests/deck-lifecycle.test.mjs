@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 
+const { AbortController } = globalThis;
+
 test("deck disposal releases its active lifecycle exactly once", () => {
     let disposed = 0;
     const { dispose_deck } = loadFunctions(
@@ -24,6 +26,7 @@ test("content-script teardown disposes deck resources as well as the session gat
         ["start_content"],
         "",
         {
+            AbortController,
             location: { href: "https://x.com/run-xppdeck" },
             is_deck_location: () => true,
             ensure_dropdown_style() {},
@@ -42,6 +45,7 @@ test("content-script teardown disposes deck resources as well as the session gat
     );
     const stop = start_content();
     await Promise.resolve();
+    stop();
     stop();
     assert.deepEqual(cleaned, ["gate", "deck", "title", "controls"]);
 });
