@@ -1,12 +1,57 @@
 export function start_background() {
-    chrome.runtime.onMessage.addListener(
-        function (request, sender, sendResponse) {
-            if (request.message == "dnr_upd") {
-                /*chrome.declarativeNetRequest.updateEnabledRulesets(({disableRulesetIds: ["ruleset_1"]}));
-            chrome.declarativeNetRequest.updateEnabledRulesets(({enableRulesetIds: ["ruleset_1"]}));*/
-                const dnr_rules = [
+    const is_deck_url = (href?: string) => {
+        if (!href) return false;
+        try {
+            const url = new URL(href);
+            return (
+                url.protocol === "https:" &&
+                ["x.com", "twitter.com"].includes(url.hostname) &&
+                url.pathname === "/run-xppdeck"
+            );
+        } catch {
+            return false;
+        }
+    };
+    const rule_id = (tab_id: number) => tab_id + 2;
+    // Remove the old browser-wide rule when upgrading an existing session.
+    chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [1] });
+    chrome.tabs.onUpdated.addListener((tab_id, change) => {
+        if (change.url && !is_deck_url(change.url)) {
+            chrome.declarativeNetRequest.updateSessionRules({
+                removeRuleIds: [rule_id(tab_id)],
+            });
+        }
+    });
+    chrome.tabs.onRemoved.addListener((tab_id) => {
+        chrome.declarativeNetRequest.updateSessionRules({
+            removeRuleIds: [rule_id(tab_id)],
+        });
+    });
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.message !== "dnr_upd") return false;
+        const source = sender as {
+            frameId?: number;
+            url?: string;
+            tab?: { id?: number; url?: string };
+        };
+        const tab_id = source.tab?.id;
+        if (
+            source.frameId !== 0 ||
+            !Number.isInteger(tab_id) ||
+            tab_id! < 0 ||
+            !is_deck_url(source.url) ||
+            !is_deck_url(source.tab?.url)
+        ) {
+            sendResponse(false);
+            return false;
+        }
+        const id = rule_id(tab_id!);
+        chrome.declarativeNetRequest.updateSessionRules(
+            {
+                removeRuleIds: [id],
+                addRules: [
                     {
-                        id: 1,
+                        id,
                         priority: 1,
                         action: {
                             type: "modifyHeaders",
@@ -22,40 +67,22 @@ export function start_background() {
                             ],
                         },
                         condition: {
-                            urlFilter: "x.com",
-                            resourceTypes: [
-                                "main_frame",
-                                "sub_frame",
-                                "stylesheet",
-                                "script",
-                                "image",
-                                "font",
-                                "object",
-                                "xmlhttprequest",
-                                "ping",
-                                "csp_report",
-                                "media",
-                                "websocket",
-                                "other",
-                            ],
+                            regexFilter:
+                                "^https://(www\\.)?(x\\.com|twitter\\.com)/",
+                            requestDomains: ["x.com", "twitter.com"],
+                            initiatorDomains: ["x.com", "twitter.com"],
+                            tabIds: [tab_id],
+                            resourceTypes: ["sub_frame"],
                         },
                     },
-                ];
-                chrome.declarativeNetRequest.updateSessionRules(
-                    {
-                        //updateDynamicRules
-                        removeRuleIds: [1],
-                        addRules: dnr_rules,
-                    },
-                    function () {
-                        console.log("dnr_update_ok");
-                        sendResponse(true);
-                    },
-                );
-            }
-            return true;
-        },
-    );
+                ],
+            },
+            () => {
+                sendResponse(!chrome.runtime.lastError);
+            },
+        );
+        return true;
+    });
     //
     type ApiRateLimit = {
         limit: string | null;

@@ -13,6 +13,7 @@ interface ChromeStorageArea {
 }
 
 interface ChromeRuntime {
+    lastError?: { message?: string };
     getManifest(): { version: string };
     getURL(path: string): string;
     reload(): void;
@@ -37,6 +38,14 @@ interface ChromeDeclarativeNetRequest {
 
 interface ChromeTabs {
     create(createProperties: { url?: string }): void;
+    onUpdated: {
+        addListener(
+            callback: (tabId: number, changeInfo: { url?: string }) => void,
+        ): void;
+    };
+    onRemoved: {
+        addListener(callback: (tabId: number) => void): void;
+    };
 }
 
 interface ChromeWebRequest {
