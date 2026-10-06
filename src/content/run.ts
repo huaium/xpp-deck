@@ -45,10 +45,16 @@ import { OpdExtAutoReload } from "../extensions/auto_reload";
 let opd_column_load_scheduler:
     ReturnType<typeof create_column_load_scheduler> | undefined;
 let is_removed_default_style = false;
+export function dispose_deck() {
+    const scheduler = opd_column_load_scheduler;
+    opd_column_load_scheduler = undefined;
+    scheduler?.dispose();
+}
 export function run(settings) {
-    opd_column_load_scheduler?.dispose();
+    dispose_deck();
     const load_scheduler = create_column_load_scheduler();
     opd_column_load_scheduler = load_scheduler;
+    load_scheduler.onDispose(stop_system_theme_listener);
     const banner_observers = new WeakMap<HTMLIFrameElement, MutationObserver>();
     const settings_animations = new WeakMap<HTMLElement, Animation>();
 
@@ -1245,6 +1251,14 @@ export function run(settings) {
     .opd_column_drag_active .dsp_column_move_icon { cursor: grabbing; }
     </style>`,
     );
+    const deck_styles = Array.from(
+        document_head.querySelectorAll(
+            "style[second_column_css], style[opd_default_css]",
+        ),
+    );
+    load_scheduler.onDispose(() =>
+        deck_styles.forEach((style) => style.remove()),
+    );
     // Create and insert column elements.
     let default_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_settings_btn opd_ui_icon_color opd_settings_btn" title="${i18n_message("ui_column_settings_title")}"></wa-button></span><span class="dsp_column_btn"><wa-checkbox class="opd_banner" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%></wa-checkbox><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span>`;
     let refresh_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_refresh_btn opd_ui_icon_color column_refresh_btn" title="${i18n_message("ui_column_refresh_title")}"></wa-button></span><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_copy_link_btn opd_ui_icon_color" title="${i18n_message("ui_column_copy_link_title")}"></wa-button></span>`;
@@ -1272,6 +1286,12 @@ export function run(settings) {
     };
     let ins_html = document.createElement("div");
     ins_html.id = "opd_main_element";
+    load_scheduler.onDispose(() => {
+        ins_html
+            .getAnimations({ subtree: true })
+            .forEach((animation) => animation.cancel());
+        ins_html.remove();
+    });
     ins_html.setAttribute(
         "style",
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;",
@@ -1552,7 +1572,12 @@ export function run(settings) {
                 layout?.addEventListener("click", close_before_layout, {
                     capture: true,
                 });
-                return () => {
+                let cleaned = false;
+                let unregister_cleanup = () => {};
+                const cleanup = () => {
+                    if (cleaned) return;
+                    cleaned = true;
+                    unregister_cleanup();
                     theme_observer.disconnect();
                     document.removeEventListener(
                         "keydown",
@@ -1566,6 +1591,11 @@ export function run(settings) {
                         parents[index]?.appendChild(control),
                     );
                 };
+                unregister_cleanup = load_scheduler.onDispose(() => {
+                    close_before_layout();
+                    cleanup();
+                });
+                return cleanup;
             },
         });
     });
@@ -2609,11 +2639,14 @@ export function run(settings) {
     // Track navigation without changing the user-facing column title.
     function mutate_url(element) {
         let exp_object = element.querySelector("iframe");
-        exp_object.addEventListener("load", function () {
+        let exp_observer: MutationObserver | undefined;
+        const on_load = () => {
+            exp_observer?.disconnect();
+            exp_observer = undefined;
             if (exp_object.contentWindow.location.href === "about:blank")
                 return;
             let exp_old_url = exp_object.contentWindow.location.href;
-            let exp_observer = new MutationObserver(function () {
+            exp_observer = new MutationObserver(function () {
                 if (exp_old_url != exp_object.contentWindow.location.href) {
                     let exp_url = new URL(
                         exp_object.contentWindow.location.href,
@@ -2631,6 +2664,11 @@ export function run(settings) {
                 childList: true,
                 subtree: true,
             });
+        };
+        exp_object.addEventListener("load", on_load);
+        load_scheduler.onDispose(() => {
+            exp_object.removeEventListener("load", on_load);
+            exp_observer?.disconnect();
         });
     }
     // Prevent auto-scroll when opening media posts.
@@ -3692,6 +3730,13 @@ export function run(settings) {
     const target_elem = document.getElementById("react-root");
     if (!target_elem) return;
     const observer = new MutationObserver(main_dsp);
+    const original_visibility = target_elem.style.visibility;
+    const original_overflow = target_elem.style.overflow;
+    load_scheduler.onDispose(() => {
+        observer.disconnect();
+        target_elem.style.visibility = original_visibility;
+        target_elem.style.overflow = original_overflow;
+    });
     observer.observe(target_elem, {
         childList: true,
         characterData: true,
@@ -3724,6 +3769,7 @@ export function run(settings) {
 
         apply_theme_for_main_element(main_element);
     });
+    load_scheduler.onDispose(() => observe_head_observer.disconnect());
     const observe_head = document.querySelector("head")!;
     if (observe_head) {
         observe_head_observer.observe(observe_head, {

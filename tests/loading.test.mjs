@@ -2,6 +2,20 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
 
+test("completed resource cleanup can unregister and scheduler disposal is idempotent", () => {
+    const h = harness();
+    let cleaned = 0;
+    const unregister = h.scheduler.onDispose(() => cleaned++);
+    unregister();
+    unregister();
+    h.scheduler.onDispose(() => cleaned++);
+    h.scheduler.dispose();
+    h.scheduler.dispose();
+    assert.equal(cleaned, 1);
+    h.scheduler.onDispose(() => cleaned++);
+    assert.equal(cleaned, 2);
+});
+
 function harness(random) {
     let random_calls = 0;
     let now = 0;

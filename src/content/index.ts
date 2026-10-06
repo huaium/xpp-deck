@@ -5,7 +5,7 @@ import {
     request_page_reload,
     opd_confirm,
 } from "./prelude";
-import { run } from "./run";
+import { run, dispose_deck } from "./run";
 import { settings_init } from "./settings";
 import { is_deck_location, mount_session_gate } from "./session";
 import { keep_deck_tab_title } from "./tab-title";
@@ -33,6 +33,7 @@ export function start_content() {
     void initialize_i18n_override().then(() => gate.check());
     return () => {
         gate.dispose();
+        dispose_deck();
         stop_title();
         stop_controls();
     };

@@ -73,8 +73,13 @@ export function create_column_load_scheduler() {
         onDispose(callback: () => void) {
             if (stopped) callback();
             else dispose_callbacks.push(callback);
+            return () => {
+                const index = dispose_callbacks.indexOf(callback);
+                if (index !== -1) dispose_callbacks.splice(index, 1);
+            };
         },
         dispose() {
+            if (stopped) return;
             stopped = true;
             if (wake !== undefined) clearTimeout(wake);
             for (const finish of [...active.values()]) finish();

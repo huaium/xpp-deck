@@ -192,4 +192,5 @@ export function stop_system_theme_listener() {
         system_dark_query.removeEventListener("change", apply_ui_color);
         is_added_system_color_mode = false;
     }
+    apply_ui_color = null;
 }

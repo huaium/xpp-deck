@@ -6,6 +6,9 @@ test("navigation saves the URL without reading or replacing page titles", () => 
     let onload;
     let onmutation;
     let saves = 0;
+    let cleanup;
+    let disconnected = 0;
+    let removed = 0;
     const attributes = new Map([
         ["opd_explore_title", "Search"],
         ["opd_custom_title", "Search"],
@@ -22,6 +25,7 @@ test("navigation saves the URL without reading or replacing page titles", () => 
         addEventListener: (event, handler) => {
             onload = handler;
         },
+        removeEventListener: () => removed++,
     };
     const { mutate_url } = loadFunctions(
         "../src/content/run.ts",
@@ -33,6 +37,14 @@ test("navigation saves the URL without reading or replacing page titles", () => 
                     onmutation = handler;
                 }
                 observe() {}
+                disconnect() {
+                    disconnected++;
+                }
+            },
+            load_scheduler: {
+                onDispose: (callback) => {
+                    cleanup = callback;
+                },
             },
             column_settings_save: () => {
                 saves++;
@@ -51,6 +63,11 @@ test("navigation saves the URL without reading or replacing page titles", () => 
     assert.equal(attributes.get("opd_explore_title"), "Search");
     assert.equal(attributes.get("opd_custom_title"), "Search");
     assert.equal(saves, 1);
+    onload();
+    assert.equal(disconnected, 1);
+    cleanup();
+    assert.equal(disconnected, 2);
+    assert.equal(removed, 1);
 });
 
 for (const title of [null, "   ", "  My Search  "]) {
