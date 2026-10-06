@@ -104,15 +104,38 @@ export function start_background() {
             reset_unix_time: null,
         },
     };
-    function send_content_script(value) {
-        // session.setAccessLevel is unsupported in Firefox, so session storage is deferred for now.
-        //chrome.storage.session.set
-        chrome.storage.local.set({ api_access_limit: value }, function () {
-            console.log("set ok");
+    let counters_ready = false;
+    const pending_updates: Array<() => void> = [];
+    chrome.storage.local.get("api_access_limit", (value) => {
+        const saved = value.api_access_limit;
+        if (saved && typeof saved === "object") {
+            for (const key of Object.keys(access_limit) as Array<
+                keyof AccessLimit
+            >) {
+                const counter = saved[key];
+                if (!counter || typeof counter !== "object") continue;
+                for (const field of Object.keys(access_limit[key]) as Array<
+                    keyof ApiRateLimit
+                >) {
+                    const entry = counter[field];
+                    if (typeof entry === "string" || entry === null) {
+                        access_limit[key][field] = entry;
+                    }
+                }
+            }
+        }
+        counters_ready = true;
+        for (const update of pending_updates.splice(0)) update();
+    });
+    function send_content_script(value: AccessLimit) {
+        // Snapshot each response so subsequent updates cannot mutate an in-flight write.
+        chrome.storage.local.set({
+            api_access_limit: {
+                search: { ...value.search },
+                time_line: { ...value.time_line },
+                recommend_timeline: { ...value.recommend_timeline },
+            },
         });
-        /*chrome.storage.local.set({api_access_limit: value}).then(() => {
-        console.log("set ok");
-      });*/
     }
     let rate_limit_until = 0;
     chrome.storage.local.get("opd_rate_limit_until", (value) => {
@@ -151,75 +174,93 @@ export function start_background() {
                     opd_rate_limit_until: rate_limit_until,
                 });
             }
-            if (resp.url.search(/SearchTimeline/g) != -1) {
-                //console.log(resp);
-                for (let index = 0; index < response_headers.length; index++) {
-                    switch (response_headers[index].name) {
-                        case "x-rate-limit-remaining":
-                            access_limit.search.remaining =
-                                response_headers[index].value ?? null;
-                            break;
-                        case "x-rate-limit-limit":
-                            access_limit.search.limit =
-                                response_headers[index].value ?? null;
-                            break;
-                        case "x-rate-limit-reset":
-                            access_limit.search.reset_unix_time =
-                                response_headers[index].value ?? null;
-                            break;
-                        default:
-                            break;
+            const update_counters = () => {
+                if (resp.url.search(/SearchTimeline/g) != -1) {
+                    //console.log(resp);
+                    for (
+                        let index = 0;
+                        index < response_headers.length;
+                        index++
+                    ) {
+                        switch (response_headers[index].name) {
+                            case "x-rate-limit-remaining":
+                                access_limit.search.remaining =
+                                    response_headers[index].value ?? null;
+                                break;
+                            case "x-rate-limit-limit":
+                                access_limit.search.limit =
+                                    response_headers[index].value ?? null;
+                                break;
+                            case "x-rate-limit-reset":
+                                access_limit.search.reset_unix_time =
+                                    response_headers[index].value ?? null;
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    //(access_limit);
+                    send_content_script(access_limit);
                 }
-                //(access_limit);
-                send_content_script(access_limit);
-            }
-            if (resp.url.search(/HomeLatestTimeline/g) != -1) {
-                //console.log(resp);
-                for (let index = 0; index < response_headers.length; index++) {
-                    switch (response_headers[index].name) {
-                        case "x-rate-limit-remaining":
-                            access_limit.time_line.remaining =
-                                response_headers[index].value ?? null;
-                            break;
-                        case "x-rate-limit-limit":
-                            access_limit.time_line.limit =
-                                response_headers[index].value ?? null;
-                            break;
-                        case "x-rate-limit-reset":
-                            access_limit.time_line.reset_unix_time =
-                                response_headers[index].value ?? null;
-                            break;
-                        default:
-                            break;
+                if (resp.url.search(/HomeLatestTimeline/g) != -1) {
+                    //console.log(resp);
+                    for (
+                        let index = 0;
+                        index < response_headers.length;
+                        index++
+                    ) {
+                        switch (response_headers[index].name) {
+                            case "x-rate-limit-remaining":
+                                access_limit.time_line.remaining =
+                                    response_headers[index].value ?? null;
+                                break;
+                            case "x-rate-limit-limit":
+                                access_limit.time_line.limit =
+                                    response_headers[index].value ?? null;
+                                break;
+                            case "x-rate-limit-reset":
+                                access_limit.time_line.reset_unix_time =
+                                    response_headers[index].value ?? null;
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    //console.log(access_limit)
+                    send_content_script(access_limit);
                 }
-                //console.log(access_limit)
-                send_content_script(access_limit);
-            }
-            if (resp.url.search(/HomeTimeline/g) != -1) {
-                //console.log(resp);
-                for (let index = 0; index < response_headers.length; index++) {
-                    switch (response_headers[index].name) {
-                        case "x-rate-limit-remaining":
-                            access_limit.recommend_timeline.remaining =
-                                response_headers[index].value ?? null;
-                            break;
-                        case "x-rate-limit-limit":
-                            access_limit.recommend_timeline.limit =
-                                response_headers[index].value ?? null;
-                            break;
-                        case "x-rate-limit-reset":
-                            access_limit.recommend_timeline.reset_unix_time =
-                                response_headers[index].value ?? null;
-                            break;
-                        default:
-                            break;
+                if (resp.url.search(/HomeTimeline/g) != -1) {
+                    //console.log(resp);
+                    for (
+                        let index = 0;
+                        index < response_headers.length;
+                        index++
+                    ) {
+                        switch (response_headers[index].name) {
+                            case "x-rate-limit-remaining":
+                                access_limit.recommend_timeline.remaining =
+                                    response_headers[index].value ?? null;
+                                break;
+                            case "x-rate-limit-limit":
+                                access_limit.recommend_timeline.limit =
+                                    response_headers[index].value ?? null;
+                                break;
+                            case "x-rate-limit-reset":
+                                access_limit.recommend_timeline.reset_unix_time =
+                                    response_headers[index].value ?? null;
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                    //console.log(access_limit)
+                    send_content_script(access_limit);
                 }
-                //console.log(access_limit)
-                send_content_script(access_limit);
-            }
+            };
+            // Keep the listener registered synchronously, but do not overwrite
+            // persisted counters before the startup read has completed.
+            if (counters_ready) update_counters();
+            else pending_updates.push(update_counters);
         },
         { urls: ["*://x.com/i/api/*"] },
         ["responseHeaders"],
