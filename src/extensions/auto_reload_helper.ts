@@ -1,9 +1,7 @@
 export function start_auto_reload_helper() {
     // Auto-refresh helper.
     (() => {
-        let path_old: string | null = null;
         let opd_reload_token: string | null = null;
-        let reload_func = () => {};
         function read_path(
             source: unknown,
             path: (string | number)[],
@@ -27,15 +25,10 @@ export function start_auto_reload_helper() {
             }
             return current;
         }
-        // Watch route changes by URL.
-        new MutationObserver(function () {
-            const path_search = `${location.pathname}${location.search}`;
-            if (path_old === path_search) {
-                return;
-            }
+        function refresh_current_page(): boolean {
             // Get section element.
             const section = document.querySelector('section[role="region"]');
-            if (!section) return;
+            if (!section) return false;
             // Get React props.
             const props = get_props(section, "Props");
             const refresh = read_path(props, [
@@ -49,13 +42,11 @@ export function start_auto_reload_helper() {
                 "onRefresh",
             ]);
             if (typeof refresh !== "function") {
-                // Fallback to a no-op when function is unavailable.
-                reload_func = () => {};
-                return;
+                return false;
             }
-            reload_func = refresh as () => void;
-            path_old = path_search;
-        }).observe(document, { childList: true, subtree: true });
+            refresh();
+            return true;
+        }
         // Helper to get React props.
         function get_props(elem: Element, type: "Props" | "Fiber") {
             const prop_type = type === "Props" ? type : "Fiber";
@@ -79,9 +70,22 @@ export function start_auto_reload_helper() {
             "opd_column_reload",
             (e) => {
                 const detail = JSON.parse(String(e.detail));
-                if (opd_reload_token && opd_reload_token !== detail.token)
+                if (!opd_reload_token || opd_reload_token !== detail.token)
                     return;
-                reload_func();
+                let refreshed = false;
+                try {
+                    refreshed = refresh_current_page();
+                } catch {
+                    // A changed X component tree can make its hook unusable.
+                }
+                document.dispatchEvent(
+                    new CustomEvent("opd_column_reload_result", {
+                        detail: JSON.stringify({
+                            token: opd_reload_token,
+                            refreshed,
+                        }),
+                    }),
+                );
             },
             true,
         );

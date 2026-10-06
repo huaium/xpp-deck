@@ -308,7 +308,12 @@ test("auto-refresh rechecks enabled and hover state before a paced dispatch", ()
                 clearTimeout: h.clearTimeout,
             },
         );
-        const reload = { Reload: () => refreshes++ };
+        const reload = {
+            Reload: () => {
+                refreshes++;
+                return true;
+            },
+        };
         queue_column_auto_refresh(frame, reload);
         queue_column_auto_refresh(frame, reload);
         hovered = pause;

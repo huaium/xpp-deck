@@ -184,7 +184,19 @@ export function run(settings) {
                     done();
                     return;
                 }
-                reload.Reload(frame.contentWindow!);
+                if (!reload.Reload(frame.contentWindow!)) {
+                    const loaded = () => done();
+                    frame.addEventListener("load", loaded);
+                    try {
+                        frame.src = column_navigation_url(
+                            frame.contentWindow!.location.href,
+                        );
+                    } catch (error) {
+                        frame.removeEventListener("load", loaded);
+                        throw error;
+                    }
+                    return () => frame.removeEventListener("load", loaded);
+                }
                 frame.contentWindow!.scrollTo({ top: 0, behavior: "auto" });
                 // X's refresh hook exposes no request-completion event.
                 const timer = setTimeout(done, 1000);

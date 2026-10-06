@@ -18,6 +18,10 @@ export function apply_theme_for_main_element(main_element) {
 
     switch (color_mode) {
         case "system": {
+            if (is_added_system_color_mode && apply_ui_color) {
+                system_dark_query.removeEventListener("change", apply_ui_color);
+                is_added_system_color_mode = false;
+            }
             apply_ui_color = () => {
                 const currentScheme = system_dark_query.matches
                     ? "dark"

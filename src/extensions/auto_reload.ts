@@ -11,29 +11,53 @@ export class OpdExtAutoReload {
             const helper_script =
                 column_window.document.createElement("script");
             helper_script.src = chrome.runtime.getURL("auto_reload_helper.js");
+            const token = crypto.randomUUID();
+            this.opd_reload_token = token;
+            helper_script.addEventListener(
+                "load",
+                () => {
+                    column_window.document.dispatchEvent(
+                        new CustomEvent("opd_column_reload_init", {
+                            detail: JSON.stringify({
+                                token,
+                            }),
+                        }),
+                    );
+                },
+                { once: true },
+            );
             column_window.document.head.appendChild(helper_script);
-
-            this.opd_reload_token = crypto.randomUUID();
-            setTimeout(() => {
-                column_window.document.dispatchEvent(
-                    new CustomEvent("opd_column_reload_init", {
+        };
+        this.Reload = (column_window) => {
+            if (!this.opd_reload_token) return false;
+            const doc = column_window.document;
+            let refreshed = false;
+            const on_result = (event: Event) => {
+                try {
+                    const detail = JSON.parse(
+                        String((event as CustomEvent).detail),
+                    );
+                    if (detail.token === this.opd_reload_token)
+                        refreshed = detail.refreshed === true;
+                } catch {
+                    // Ignore malformed page events.
+                }
+            };
+            doc.addEventListener("opd_column_reload_result", on_result);
+            try {
+                doc.dispatchEvent(
+                    new CustomEvent("opd_column_reload", {
+                        bubbles: true,
+                        composed: true,
                         detail: JSON.stringify({
                             token: this.opd_reload_token,
                         }),
                     }),
                 );
-            }, 10);
-        };
-        this.Reload = (column_window) => {
-            if (!this.opd_reload_token) return false;
-            column_window.document.dispatchEvent(
-                new CustomEvent("opd_column_reload", {
-                    bubbles: true,
-                    composed: true,
-                    detail: JSON.stringify({ token: this.opd_reload_token }),
-                }),
-            );
-            return true;
+            } finally {
+                doc.removeEventListener("opd_column_reload_result", on_result);
+            }
+            return refreshed;
         };
     }
 }
