@@ -41,6 +41,7 @@ export default defineConfig({
                     "icon.png",
                     "auto_reload_helper.js",
                     "media_viewer_block_helper.js",
+                    "column-navigation-main.js",
                     "public/icons/*.svg",
                     "_locales/*/messages.json",
                 ],

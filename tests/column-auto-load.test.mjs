@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
+import { column_navigation_url } from "./helpers/column-navigation.mjs";
 
 test("every content column saves its auto-load toggle and interval", () => {
     for (const type of ["home", "notification", "post", "explore"]) {
@@ -46,8 +47,16 @@ test("pages without an in-place refresh hook use queued reloads and pause while 
         let reloaded = 0;
         const frame = {
             isConnected: true,
+            set src(value) {
+                assert.ok(value.includes("lang="));
+                reloaded++;
+            },
             contentWindow: {
-                location: { pathname: path, reload: () => reloaded++ },
+                location: {
+                    href: "https://x.com" + path,
+                    pathname: path,
+                    reload: () => reloaded++,
+                },
             },
             closest: () => ({ querySelector: () => ({ checked: enabled }) }),
             getAttribute: () => (hovered ? "true" : "false"),
@@ -60,6 +69,7 @@ test("pages without an in-place refresh hook use queued reloads and pause while 
                 document: { hidden: false },
                 api_refresh_paused: () => false,
                 column_load_priority: () => 0,
+                column_navigation_url,
                 queue_column_navigation: (_frame, start, valid) => {
                     assert.equal(valid(), true);
                     queued++;

@@ -17,14 +17,21 @@ const schedulerSource = readFileSync(
 const declarations = productionDeclarations(
     readFileSync(new URL("../src/content/run.ts", import.meta.url), "utf8"),
 );
-const helpers = [
-    "column_load_priority",
-    "queue_column_navigation",
-    "queue_column_frames",
-    "column_dd",
-]
-    .map((name) => declarations.get(name))
-    .join("\n");
+const navigationSource = readFileSync(
+    new URL("../src/content/column-navigation.ts", import.meta.url),
+    "utf8",
+);
+const helpers =
+    navigationSource +
+    "\n" +
+    [
+        "column_load_priority",
+        "queue_column_navigation",
+        "queue_column_frames",
+        "column_dd",
+    ]
+        .map((name) => declarations.get(name))
+        .join("\n");
 const browser = await playwright.chromium.launch({
     headless: true,
     timeout: 15000,
@@ -131,6 +138,12 @@ try {
     assert.equal(starts.length, before + 1);
     await page.evaluate(() => {
         const root = document.getElementById("opd_main_element");
+        // Hold the next column in the pacing gap so disposal tests queued work,
+        // rather than racing an already-started navigation.
+        const frame = document.getElementById("f0");
+        queue_column_navigation(frame, () =>
+            frame.contentWindow.location.reload(),
+        );
         root.insertAdjacentHTML(
             "beforeend",
             '<div opd_column_type=home><iframe data-opd-src="https://fixture.invalid/cancelled"></iframe></div>',

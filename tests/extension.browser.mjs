@@ -370,7 +370,7 @@ try {
     await Promise.all([
         page.waitForEvent(
             "framenavigated",
-            (frame) => frame.url() === "https://x.com/home",
+            (frame) => new URL(frame.url()).pathname === "/home",
         ),
         home.locator(".dsp_column_refresh_btn").click(),
     ]);

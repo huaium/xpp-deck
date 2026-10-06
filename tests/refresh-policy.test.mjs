@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
+import { column_navigation_url } from "./helpers/column-navigation.mjs";
 
 test("automatic refresh checks visibility and cooldown again before starting", () => {
     const document = { hidden: false };
@@ -10,8 +11,16 @@ test("automatic refresh checks visibility and cooldown again before starting", (
     let reloaded = 0;
     const frame = {
         isConnected: true,
+        set src(value) {
+            assert.ok(value.includes("lang="));
+            reloaded++;
+        },
         contentWindow: {
-            location: { pathname: "/notifications", reload: () => reloaded++ },
+            location: {
+                href: "https://x.com/notifications",
+                pathname: "/notifications",
+                reload: () => reloaded++,
+            },
         },
         closest: () => ({ querySelector: () => ({ checked: true }) }),
         getAttribute: () => "false",
@@ -24,6 +33,7 @@ test("automatic refresh checks visibility and cooldown again before starting", (
             document,
             api_refresh_paused: () => paused,
             column_load_priority: () => (offscreen ? 1 : 0),
+            column_navigation_url,
             queue_column_navigation: (frame, start, valid) => {
                 job = { start, valid };
             },

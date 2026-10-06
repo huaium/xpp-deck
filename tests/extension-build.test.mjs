@@ -35,20 +35,30 @@ test("WXT builds complete Chrome MV3 and Firefox MV2 distributions", async () =>
                 manifest.browser_action?.default_popup,
             "popup.html",
         );
-        const early = manifest.content_scripts.find(
-            (entry) => entry.run_at === "document_start",
+        const early = manifest.content_scripts.find((entry) =>
+            entry.js.includes("content-scripts/guard.js"),
         );
         const deck = manifest.content_scripts.find(
             (entry) => entry.run_at === "document_idle",
         );
         assert.deepEqual(early.js, ["content-scripts/guard.js"]);
         assert.deepEqual(deck.js, ["content-scripts/deck.js"]);
+        const navigation = manifest.content_scripts.find((entry) =>
+            entry.js.includes("content-scripts/column-navigation.js"),
+        );
+        if (browser === "chrome") {
+            assert.equal(navigation.world, "MAIN");
+            assert.equal(navigation.all_frames, true);
+            assert.equal(navigation.run_at, "document_start");
+        } else assert.equal(navigation, undefined);
         const background =
             manifest.background.service_worker ??
             manifest.background.scripts[0];
         for (const file of [
             ...early.js,
             ...deck.js,
+            ...(navigation?.js ?? []),
+            "column-navigation-main.js",
             background,
             "auto_reload_helper.js",
             "media_viewer_block_helper.js",

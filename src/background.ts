@@ -70,7 +70,6 @@ export function start_background() {
                             regexFilter:
                                 "^https://(www\\.)?(x\\.com|twitter\\.com)/",
                             requestDomains: ["x.com", "twitter.com"],
-                            initiatorDomains: ["x.com", "twitter.com"],
                             tabIds: [tab_id],
                             resourceTypes: ["sub_frame"],
                         },

@@ -76,6 +76,7 @@ test("header removal is limited to explicit embedded X documents in each deck ta
             "x.com",
             "twitter.com",
         ]);
+        assert.equal(rule.condition.initiatorDomains, undefined);
         const pattern = new RegExp(rule.condition.regexFilter);
         assert.equal(pattern.test("https://x.com/home"), true);
         assert.equal(pattern.test("https://twitter.com/notifications"), true);

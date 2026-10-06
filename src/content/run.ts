@@ -1,4 +1,5 @@
 import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
+import { column_navigation_url } from "./column-navigation";
 import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js";
 import type WaCheckbox from "@awesome.me/webawesome/dist/components/checkbox/checkbox.js";
 import type WaButton from "@awesome.me/webawesome/dist/components/button/button.js";
@@ -123,8 +124,11 @@ export function run(settings) {
                     const homepage = frame
                         .closest("div[opd_column_type]")
                         ?.getAttribute("opd_homepage_path");
-                    if (homepage) frame.src = `https://x.com${homepage}`;
-                    else if (source) frame.src = source;
+                    if (homepage)
+                        frame.src = column_navigation_url(
+                            `https://x.com${homepage}`,
+                        );
+                    else if (source) frame.src = column_navigation_url(source);
                 });
             });
     }
@@ -165,7 +169,10 @@ export function run(settings) {
             queue_column_navigation(
                 frame,
                 () => {
-                    if (eligible()) frame.contentWindow!.location.reload();
+                    if (eligible())
+                        frame.src = column_navigation_url(
+                            frame.contentWindow!.location.href,
+                        );
                 },
                 eligible,
             );
@@ -2660,9 +2667,17 @@ export function run(settings) {
                                 return;
                             }
                             queue_column_navigation(target_iframe, () => {
-                                if (target_iframe.contentWindow)
-                                    target_iframe.contentWindow.location.reload();
-                                else target_iframe.src = target_iframe.src;
+                                let url = target_iframe.src;
+                                try {
+                                    const current =
+                                        target_iframe.contentWindow?.location
+                                            .href;
+                                    if (current && current !== "about:blank")
+                                        url = current;
+                                } catch {
+                                    // A blocked document is opaque; retry its requested URL.
+                                }
+                                target_iframe.src = column_navigation_url(url);
                             });
                         });
                     }
@@ -3392,7 +3407,7 @@ export function run(settings) {
             const path = column.getAttribute("opd_homepage_path");
             if (path)
                 queue_column_navigation(frame, () => {
-                    frame.src = `https://x.com${path}`;
+                    frame.src = column_navigation_url(`https://x.com${path}`);
                 });
         });
         const row = document.createElement("div");

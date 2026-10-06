@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
+import { column_navigation_url } from "./helpers/column-navigation.mjs";
 
 test("homepage editing, current-page capture, and navigation stay independent", async () => {
     class Element {
@@ -54,6 +55,7 @@ test("homepage editing, current-page capture, and navigation stay independent", 
         {
             document: { createElement: () => new Element() },
             i18n_message: (key) => key,
+            column_navigation_url,
             queue_column_navigation: (_frame, navigate) => navigate(),
             column_settings_save: () => saves++,
             last_load_profile: 0,
@@ -76,7 +78,7 @@ test("homepage editing, current-page capture, and navigation stay independent", 
     assert.equal(attributes.get("opd_homepage_path"), "/search?q=test");
     assert.equal(saves, 2);
     bar.children[0].children[0].handlers.get("click")();
-    assert.equal(frame.src, "https://x.com/search?q=test");
+    assert.equal(frame.src, "https://x.com/search?q=test&lang=");
 });
 
 test("homepage migration prefers explicit homepage, then legacy pin, then original URL", () => {
@@ -153,10 +155,11 @@ test("queued navigation starts at the homepage URL rather than the column defaul
             "",
             {
                 document: { querySelectorAll: () => [frame] },
+                column_navigation_url,
                 queue_column_navigation: (_frame, navigate) => navigate(),
             },
         );
         queue_column_frames();
-        assert.equal(frame.src, "https://x.com/i/bookmarks", type);
+        assert.equal(frame.src, "https://x.com/i/bookmarks?lang=", type);
     }
 });
