@@ -46,6 +46,23 @@ try {
         }
     });
     await page.goto("https://x.com/run-xppdeck");
+    await page.evaluate(() => {
+        const NativeObserver = window.MutationObserver;
+        const tracked = new Map();
+        window.__opd_observers = tracked;
+        window.MutationObserver = class extends NativeObserver {
+            observe(target, options) {
+                super.observe(target, options);
+                if (target === document.head || target.id === "react-root") {
+                    tracked.set(this, target);
+                }
+            }
+            disconnect() {
+                tracked.delete(this);
+                super.disconnect();
+            }
+        };
+    });
     if (process.env.NULL_CUSTOM_ELEMENTS === "1") {
         await page.evaluate(() => {
             Object.defineProperty(window, "customElements", {
@@ -438,6 +455,19 @@ try {
     await page
         .locator(".opd_dialog_actions wa-button:not(.opd_dialog_primary)")
         .click();
+    await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
+    const resourceCounts = () => page.evaluate(() => ({
+        styles: document.querySelectorAll("style[opd_default_css], style[second_column_css]").length,
+        observers: window.__opd_observers.size,
+    }));
+    const initialResources = await resourceCounts();
+    for (const profile of [1, 0, 1]) {
+        await page.locator(`#userProfile-${profile}`).click();
+        await page.locator("wa-button.opd_dialog_primary").click();
+        await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
+        assert.deepEqual(await resourceCounts(), initialResources);
+        assert.equal(await page.locator("#opd_main_element").count(), 1);
+    }
     assert.deepEqual(errors, []);
     console.log(
         "Built extension Chromium smoke test passed: signed-out welcome, official sign-in tab, session retry, initialization, iframe helpers, dynamic banner controls, settings animation and refresh persistence.",
