@@ -129,7 +129,6 @@ export async function initialize_i18n_override() {
 export let is_shift_pressed = false;
 export let profile_store;
 export let last_load_profile = 0;
-export let media_viewer_token: string[] = [];
 export const opd_sidebar_width_expanded = "208px";
 export const opd_sidebar_width_collapsed = "64px";
 const ui_animations = new WeakMap<HTMLElement, Animation>();
@@ -266,9 +265,6 @@ export const ui_icon_define = {
     profile_save: "public/icons/profile_save.svg",
     profile_delete: "public/icons/profile_delete.svg",
     refresh: "public/icons/refresh.svg",
-    forward: "public/icons/forward.svg",
-    next: "public/icons/next.svg",
-    download: "public/icons/download.svg",
     switch_theme: "public/icons/switch_theme.svg",
 };
 export function create_sidebar_button_html(id, title, icon_class, label) {

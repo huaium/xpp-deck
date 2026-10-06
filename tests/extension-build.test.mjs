@@ -61,7 +61,6 @@ test("WXT builds complete Chrome MV3 and Firefox MV2 distributions", async () =>
             "column-navigation-main.js",
             background,
             "auto_reload_helper.js",
-            "media_viewer_block_helper.js",
         ]) {
             const source = await fs.readFile(path.join(root, file), "utf8");
             assert.doesNotThrow(() => new vm.Script(source), file);
@@ -99,7 +98,6 @@ test("WXT builds complete Chrome MV3 and Firefox MV2 distributions", async () =>
                   );
         for (const resource of [
             "auto_reload_helper.js",
-            "media_viewer_block_helper.js",
             "public/icons/*.svg",
             "_locales/*/messages.json",
         ])

@@ -4,6 +4,56 @@ import { readFileSync } from "node:fs";
 import { URL } from "node:url";
 import { loadFunctions } from "./helpers/source.mjs";
 
+test("all view modes remain independent of native media viewing", () => {
+    for (const [value, expected] of [
+        ["0", ""],
+        ["1", ":has"],
+        ["2", ":not"],
+    ]) {
+        const styles = new Map();
+        const frame = {
+            hasAttribute: () => false,
+            closest: () => ({
+                querySelector: (selector) =>
+                    selector === ".opd_tw_view_mode"
+                        ? { value, hasAttribute: () => true }
+                        : { checked: false },
+            }),
+            contentWindow: {
+                location: { href: "https://x.com/home" },
+                document: {
+                    querySelector: () => ({
+                        querySelector: (selector) => styles.get(selector),
+                        appendChild: (style) =>
+                            styles.set(`style[${style.attribute}]`, style),
+                    }),
+                    createElement: () => ({
+                        setAttribute(name) {
+                            this.attribute = name;
+                        },
+                    }),
+                },
+            },
+        };
+        const { apply_column_view_settings } = loadFunctions(
+            "../src/content/run.ts",
+            ["apply_column_view_settings"],
+        );
+        apply_column_view_settings(frame);
+        const css = styles.get("style[opd_tw_view_mode_css]").textContent;
+        if (expected) assert.ok(css.includes(expected));
+        else assert.equal(css, "");
+    }
+    const source = readFileSync(
+        new URL("../src/content/run.ts", import.meta.url),
+        "utf8",
+    );
+    assert.doesNotMatch(
+        source,
+        /media_viewer|opd_send_media_info|OpdMediaViewer/,
+    );
+});
+
 test("view settings survive replacement iframe documents", () => {
     const attrs = new Set();
     const view = {

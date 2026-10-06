@@ -20,7 +20,6 @@ import {
     last_load_profile,
     manifest,
     next_profile_name,
-    media_viewer_token,
     opd_alert,
     opd_confirm,
     opd_i18n_language,
@@ -43,8 +42,6 @@ import {
     get_cookie_color_mode,
 } from "./settings";
 import { OpdExtAutoReload } from "../extensions/auto_reload";
-import { OpdExtMediaViewer } from "../extensions/media_viewer";
-import { OpdMediaViewerBlocker } from "../extensions/media_viewer_block";
 let opd_column_load_scheduler:
     ReturnType<typeof create_column_load_scheduler> | undefined;
 let is_removed_default_style = false;
@@ -203,18 +200,6 @@ export function run(settings) {
         last_load_profile,
     );
     //console.log(profile_list_btn_html)
-    // Media preview panel.
-    const media_viewer = new OpdExtMediaViewer();
-    document.addEventListener("opd_send_media_info", (e) => {
-        const detail = JSON.parse(String(e.detail));
-        for (let index = 0; index < media_viewer_token.length; index++) {
-            const token = media_viewer_token[index];
-            if (detail.token === token) {
-                media_viewer.Preview(detail.media_info, detail.selected_index);
-                break;
-            }
-        }
-    });
     // Insert CSS tags.
     const document_head = document.head;
     if (!document_head) return;
@@ -998,87 +983,6 @@ export function run(settings) {
         }
     }
 
-    /* Media viewer. */
-    ::backdrop {
-        background: rgba(0, 0, 0, 0.9);
-    }
-    #opd_media_viewer:focus {
-        outline: none;
-    }
-    .opd_media_viewer_func_btn{
-        border: 0;
-        background: #00000000;
-        cursor: pointer;
-        outline: none;
-    }
-    .opd_media_viewer_func_btn.media_switch_btn{
-        width: 80px;
-        height: 80px;
-        margin: 10px;
-        border-radius: 10px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .opd_media_viewer_func_btn_circle button{
-        border: 0;
-        background: #00000000;
-        cursor: pointer;
-        outline: none;
-        border-radius: 10px;
-    }
-    button[disabled].opd_media_viewer_func_btn{
-        visibility: hidden;
-    }
-    .opd_media_viewer_func_btn_icon_color{
-        filter: brightness(0) saturate(100%) invert(96%) sepia(6%) saturate(0%) hue-rotate(285deg) brightness(115%) contrast(100%);
-    }
-    .opd_media_viewer_func_btn:hover{
-        background: #2f2f2fa3;
-    }
-    .opd_media_viewer_func_btn_circle button:hover{
-        background: #2f2f2fa3;
-    }
-    .media_viewer_icon_close{
-        display: block;
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.column_close)});
-        background-size: 20px;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 40px;
-        height: 40px;
-        padding: 5px;
-    }
-    .media_viewer_icon_forward{
-        display: block;
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.forward)});
-        background-size: 20px;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-    }
-    .media_viewer_icon_next{
-        display: block;
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.next)});
-        background-size: 20px;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-    }
-    .media_viewer_icon_download{
-        display: block;
-        background-image: url(${chrome.runtime.getURL(ui_icon_define.download)});
-        background-size: 20px;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-    }
     /* Shared workspace chrome: keep embedded timelines untouched. */
     #opd_main_element{
         --opd-bg: #f4f5f7;
@@ -2206,15 +2110,6 @@ export function run(settings) {
                             // Set up auto-refresh hooks.
                             column_content_reload = new OpdExtAutoReload();
                             column_content_reload.Init(target_column);
-                            // Set up media-viewer hooks.
-                            const column_media_viewer_blocker =
-                                new OpdMediaViewerBlocker();
-                            column_media_viewer_blocker.Init(target_column);
-                            const media_info_token =
-                                column_media_viewer_blocker.opd_send_media_info_token;
-                            if (media_info_token != null) {
-                                media_viewer_token.push(media_info_token);
-                            }
                         }
                     }
                     bind_column_auto_reload(iframe_elem, column_content_reload);
