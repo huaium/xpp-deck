@@ -1315,163 +1315,84 @@ export async function initialize_content(
     run: typeof import("./run").run,
     settings_init: typeof import("./settings").settings_init,
 ) {
-    if (is_deck_location(location.href)) {
-        await chrome.runtime.sendMessage({ message: "dnr_upd" });
-        init();
-        function init() {
-            //console.log("Welcome to XPP-Deck!");
-            chrome.storage.local.get("opd_settings", async function (value) {
-                if (value.opd_settings == undefined) {
-                    last_load_profile = 0;
-                    settings_init();
-                    return;
-                } else {
-                    const opd_settings_raw = String(value.opd_settings);
-                    if (
-                        JSON.parse(opd_settings_raw).last_load_profile ==
-                        undefined
-                    ) {
-                        if (
-                            await opd_confirm(
-                                i18n_message("msg_profile_data_broken_confirm"),
-                            )
-                        ) {
-                            chrome.storage.local.remove(
-                                "opd_settings",
-                                async function () {
-                                    await opd_alert(
-                                        i18n_message(
-                                            "msg_profile_init_completed",
-                                        ),
-                                    );
-                                },
-                            );
-                        } else {
-                            last_load_profile = 0;
-                        }
-                    } else {
-                        last_load_profile =
-                            JSON.parse(opd_settings_raw).last_load_profile;
-                    }
-                    //console.log(last_load_profile);
-                }
-
-                chrome.storage.local.get(
-                    "opd_profile_store",
-                    async function (store_value) {
-                        //console.log(store_value)
-                        //console.log(JSON.parse(store_value.opd_profile_store))
-                        profile_store = JSON.parse(
-                            String(store_value.opd_profile_store),
-                        );
-                        //RUN
-                        let ext_update_flag: boolean | null = null;
-                        let ext_settings;
-                        if (value.opd_settings != undefined) {
-                            if (
-                                JSON.parse(String(value.opd_settings))
-                                    .version != manifest.version
-                            ) {
-                                ext_update_flag = true;
-                            } else {
-                                ext_update_flag = false;
-                            }
-                        }
-                        if (
-                            value.opd_settings == undefined ||
-                            ext_update_flag == true
-                        ) {
-                            //settings_init();
-                            //ext_settings = JSON.parse(value.opd_settings);
-                            if (
-                                profile_store[last_load_profile]?.profile ==
-                                undefined
-                            ) {
-                                let recovery_setting = JSON.parse(
-                                    String(value.opd_settings),
-                                );
-                                recovery_setting.last_load_profile = 0;
-                                chrome.storage.local.set(
-                                    {
-                                        opd_settings:
-                                            JSON.stringify(recovery_setting),
-                                    },
-                                    async function () {
-                                        await opd_alert(
-                                            i18n_message(
-                                                "msg_settings_auto_repair",
-                                            ),
-                                        );
-                                        last_load_profile = 0;
-                                        request_page_reload();
-                                    },
-                                );
-                            }
-
-                            // Bump settings version when the extension is updated.
-                            if (ext_update_flag) {
-                                const setting = JSON.parse(
-                                    String(value.opd_settings),
-                                );
-                                setting.version = manifest.version;
-                                chrome.storage.local.set(
-                                    { opd_settings: JSON.stringify(setting) },
-                                    async function () {
-                                        if (
-                                            await opd_confirm(
-                                                i18n_message("app_update"),
-                                            )
-                                        ) {
-                                            open(
-                                                `https://github.com/kawa-nobu/Open-Deck/releases/tag/v${manifest.version}`,
-                                                "_blank",
-                                                "popup",
-                                            );
-                                        }
-                                    },
-                                );
-                            }
-                            ext_settings = {
-                                column_settings:
-                                    profile_store[last_load_profile].profile,
-                            };
-                        } else {
-                            //ext_settings = JSON.parse(value.opd_settings);
-                            if (
-                                profile_store[last_load_profile]?.profile ==
-                                undefined
-                            ) {
-                                let recovery_setting = JSON.parse(
-                                    String(value.opd_settings),
-                                );
-                                recovery_setting.last_load_profile = 0;
-                                chrome.storage.local.set(
-                                    {
-                                        opd_settings:
-                                            JSON.stringify(recovery_setting),
-                                    },
-                                    async function () {
-                                        await opd_alert(
-                                            i18n_message(
-                                                "msg_settings_auto_repair",
-                                            ),
-                                        );
-                                        last_load_profile = 0;
-                                        request_page_reload();
-                                    },
-                                );
-                            }
-                            ext_settings = {
-                                column_settings:
-                                    profile_store[last_load_profile].profile,
-                            };
-                        }
-                        //console.log(ext_settings);
-                        run(ext_settings);
-                    },
-                );
-            });
-        }
+    if (!is_deck_location(location.href)) return;
+    const rules_ready = await chrome.runtime.sendMessage({
+        message: "dnr_upd",
+    });
+    if (rules_ready === false)
+        throw new Error("Unable to initialize deck rules");
+    const stored = await new Promise<Record<string, unknown>>(
+        (resolve, reject) => {
+            chrome.storage.local.get(
+                ["opd_settings", "opd_profile_store"],
+                (value) => {
+                    if (chrome.runtime.lastError)
+                        reject(new Error(chrome.runtime.lastError.message));
+                    else resolve(value);
+                },
+            );
+        },
+    );
+    if (
+        stored.opd_settings === undefined &&
+        stored.opd_profile_store === undefined
+    ) {
+        last_load_profile = 0;
+        await settings_init();
+        return;
+    }
+    const settings = JSON.parse(String(stored.opd_settings));
+    const profiles = JSON.parse(String(stored.opd_profile_store));
+    if (
+        !settings ||
+        typeof settings !== "object" ||
+        Array.isArray(settings) ||
+        !Number.isInteger(settings.last_load_profile) ||
+        settings.last_load_profile < 0 ||
+        !Array.isArray(profiles) ||
+        profiles.length === 0 ||
+        settings.last_load_profile >= profiles.length ||
+        profiles.some(
+            (profile) =>
+                !profile ||
+                typeof profile !== "object" ||
+                !Array.isArray(profile.profile) ||
+                profile.profile.length === 0 ||
+                profile.profile.some(
+                    (column) =>
+                        !column ||
+                        typeof column !== "object" ||
+                        typeof column.type !== "string" ||
+                        column.type.length === 0,
+                ),
+        )
+    ) {
+        throw new Error("Invalid saved deck profiles");
+    }
+    const updated = settings.version !== manifest.version;
+    if (updated) {
+        const next_settings = { ...settings, version: manifest.version };
+        await new Promise<void>((resolve, reject) => {
+            chrome.storage.local.set(
+                { opd_settings: JSON.stringify(next_settings) },
+                () => {
+                    if (chrome.runtime.lastError)
+                        reject(new Error(chrome.runtime.lastError.message));
+                    else resolve();
+                },
+            );
+        });
+    }
+    last_load_profile = settings.last_load_profile;
+    profile_store = profiles;
+    await run({ column_settings: profiles[last_load_profile].profile });
+    if (updated && (await opd_confirm(i18n_message("app_update")))) {
+        open(
+            "https://github.com/kawa-nobu/Open-Deck/releases/tag/v" +
+                manifest.version,
+            "_blank",
+            "popup",
+        );
     }
 }
 export function set_last_load_profile(value: number) {

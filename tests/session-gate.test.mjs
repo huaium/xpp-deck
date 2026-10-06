@@ -3,7 +3,7 @@ import test from "node:test";
 const { AbortController } = globalThis;
 import { loadFunctions } from "./helpers/source.mjs";
 
-function harness(status = "signed-out") {
+function harness(status = "signed-out", startImpl = async () => {}) {
     class Element {
         children = [];
         listeners = new Map();
@@ -62,6 +62,7 @@ function harness(status = "signed-out") {
         message: (_key, fallback) => fallback,
         start: async () => {
             starts++;
+            await startImpl();
         },
         reload: () => {
             reloads++;
@@ -92,6 +93,22 @@ function harness(status = "signed-out") {
         counts: () => ({ starts, reloads, checks }),
     };
 }
+
+test("initialization errors keep a visible retry screen and allow recovery", async () => {
+    let corrupt = true;
+    const h = harness("signed-in", async () => {
+        if (corrupt) throw new Error("Invalid saved deck profiles");
+    });
+    await h.gate.check();
+    assert.equal(h.document.body.children.includes(h.view), true);
+    assert.equal(h.retry.hidden, false);
+    assert.equal(h.retry.disabled, false);
+    corrupt = false;
+    await h.gate.check();
+    assert.equal(h.document.body.children.includes(h.view), false);
+    assert.equal(h.counts().starts, 2);
+    h.gate.dispose();
+});
 
 test("signed-out welcome blocks initialization and opens only X's official login", async () => {
     const h = harness();
@@ -213,7 +230,10 @@ test("first-time profile setup does not read an unsaved profile", async () => {
     );
     assert.equal(initialized, 1);
     assert.equal(runs, 0);
-    assert.deepEqual(reads, ["opd_settings"]);
+    assert.deepEqual(Array.from(reads[0]), [
+        "opd_settings",
+        "opd_profile_store",
+    ]);
 });
 
 test("explicit sign-in retry refreshes stale X markup, while focus checks do not", async () => {

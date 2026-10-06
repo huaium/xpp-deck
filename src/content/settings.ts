@@ -155,21 +155,32 @@ export function settings_init() {
         },
     ];
     //console.log(profile);
-    chrome.storage.local.set(
-        { opd_profile_store: JSON.stringify(profile) },
-        function () {
-            chrome.storage.local.set(
-                { opd_settings: JSON.stringify(settings) },
-                async function () {
-                    await opd_alert(
-                        i18n_message("msg_initial_setup_completed"),
-                    );
-
-                    request_page_reload();
-                },
-            );
-        },
-    );
+    return new Promise<void>((resolve, reject) => {
+        chrome.storage.local.set(
+            { opd_profile_store: JSON.stringify(profile) },
+            () => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                    return;
+                }
+                chrome.storage.local.set(
+                    { opd_settings: JSON.stringify(settings) },
+                    () => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                            return;
+                        }
+                        void opd_alert(
+                            i18n_message("msg_initial_setup_completed"),
+                        ).then(() => {
+                            request_page_reload();
+                            resolve();
+                        }, reject);
+                    },
+                );
+            },
+        );
+    });
 }
 
 export function stop_system_theme_listener() {

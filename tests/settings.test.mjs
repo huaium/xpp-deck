@@ -21,6 +21,7 @@ test("initial setup persists a default profile before acknowledgement and reload
         {
             manifest: { version: "1.2.3" },
             chrome: {
+                runtime: {},
                 storage: {
                     local: {
                         set(value, callback) {

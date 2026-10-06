@@ -93,7 +93,14 @@ try {
             i18n: { getMessage: (key) => key },
             storage: {
                 local: {
-                    get: (key, callback) => callback({ [key]: store[key] }),
+                    get: (key, callback) =>
+                        callback(
+                            Object.fromEntries(
+                                (Array.isArray(key) ? key : [key]).map(
+                                    (name) => [name, store[name]],
+                                ),
+                            ),
+                        ),
                     set: (value, callback) => {
                         window.__opd_storage_writes++;
                         Object.assign(store, value);
