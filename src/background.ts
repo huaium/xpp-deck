@@ -131,6 +131,17 @@ export function start_background() {
         recommend_timeline: ApiRateLimit;
     };
 
+    const api_endpoints = [
+        ["SearchTimeline", "search"],
+        ["HomeLatestTimeline", "time_line"],
+        ["HomeTimeline", "recommend_timeline"],
+    ] as const;
+    const rate_limit_fields = new Map<string | undefined, keyof ApiRateLimit>([
+        ["x-rate-limit-remaining", "remaining"],
+        ["x-rate-limit-limit", "limit"],
+        ["x-rate-limit-reset", "reset_unix_time"],
+    ]);
+
     let access_limit: AccessLimit = {
         search: { limit: null, remaining: null, reset_unix_time: null },
         time_line: { limit: null, remaining: null, reset_unix_time: null },
@@ -211,85 +222,13 @@ export function start_background() {
                 });
             }
             const update_counters = () => {
-                if (resp.url.search(/SearchTimeline/g) != -1) {
-                    //console.log(resp);
-                    for (
-                        let index = 0;
-                        index < response_headers.length;
-                        index++
-                    ) {
-                        switch (response_headers[index].name) {
-                            case "x-rate-limit-remaining":
-                                access_limit.search.remaining =
-                                    response_headers[index].value ?? null;
-                                break;
-                            case "x-rate-limit-limit":
-                                access_limit.search.limit =
-                                    response_headers[index].value ?? null;
-                                break;
-                            case "x-rate-limit-reset":
-                                access_limit.search.reset_unix_time =
-                                    response_headers[index].value ?? null;
-                                break;
-                            default:
-                                break;
-                        }
+                for (const [endpoint, key] of api_endpoints) {
+                    if (!resp.url.includes(endpoint)) continue;
+                    const counter = access_limit[key];
+                    for (const item of response_headers) {
+                        const field = rate_limit_fields.get(item.name);
+                        if (field) counter[field] = item.value ?? null;
                     }
-                    //(access_limit);
-                    send_content_script(access_limit);
-                }
-                if (resp.url.search(/HomeLatestTimeline/g) != -1) {
-                    //console.log(resp);
-                    for (
-                        let index = 0;
-                        index < response_headers.length;
-                        index++
-                    ) {
-                        switch (response_headers[index].name) {
-                            case "x-rate-limit-remaining":
-                                access_limit.time_line.remaining =
-                                    response_headers[index].value ?? null;
-                                break;
-                            case "x-rate-limit-limit":
-                                access_limit.time_line.limit =
-                                    response_headers[index].value ?? null;
-                                break;
-                            case "x-rate-limit-reset":
-                                access_limit.time_line.reset_unix_time =
-                                    response_headers[index].value ?? null;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    //console.log(access_limit)
-                    send_content_script(access_limit);
-                }
-                if (resp.url.search(/HomeTimeline/g) != -1) {
-                    //console.log(resp);
-                    for (
-                        let index = 0;
-                        index < response_headers.length;
-                        index++
-                    ) {
-                        switch (response_headers[index].name) {
-                            case "x-rate-limit-remaining":
-                                access_limit.recommend_timeline.remaining =
-                                    response_headers[index].value ?? null;
-                                break;
-                            case "x-rate-limit-limit":
-                                access_limit.recommend_timeline.limit =
-                                    response_headers[index].value ?? null;
-                                break;
-                            case "x-rate-limit-reset":
-                                access_limit.recommend_timeline.reset_unix_time =
-                                    response_headers[index].value ?? null;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    //console.log(access_limit)
                     send_content_script(access_limit);
                 }
             };
