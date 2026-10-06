@@ -1,4 +1,12 @@
 export function start_reload_guard(development = false) {
+    const isTopLevelDeck = () =>
+        window === window.top &&
+        window.location.protocol === "https:" &&
+        ["x.com", "twitter.com"].includes(window.location.hostname) &&
+        window.location.pathname === "/run-xppdeck";
+    if (!isTopLevelDeck()) return () => {};
+    let stopped = false;
+    let preloadStyle: HTMLStyleElement | undefined;
     const bypassKey = "opd_beforeunload_bypass_once";
     const rootThemeAttribute = "data-opd-theme";
     const preloadStyleId = "opd_preload_theme_style";
@@ -20,6 +28,7 @@ export function start_reload_guard(development = false) {
     }
 
     function applyRootThemeMarker() {
+        if (stopped || !isTopLevelDeck()) return;
         const colorMode = getCookieColorMode();
         const resolvedTheme =
             colorMode === "system"
@@ -41,26 +50,22 @@ export function start_reload_guard(development = false) {
         style.id = preloadStyleId;
         style.textContent = `
 html[data-opd-deck] #react-root { visibility: hidden !important; }
-html[data-opd-theme="dark"],
-html[data-opd-theme="dark"] body {
+html[data-opd-deck][data-opd-theme="dark"],
+html[data-opd-deck][data-opd-theme="dark"] body {
     background: #101215 !important;
     color: #e5ebf3 !important;
 }
-html[data-opd-theme="light"],
-html[data-opd-theme="light"] body {
+html[data-opd-deck][data-opd-theme="light"],
+html[data-opd-deck][data-opd-theme="light"] body {
     background: #ffffff !important;
     color: #111827 !important;
 }
 `;
         document.documentElement.appendChild(style);
+        preloadStyle = style;
     }
 
-    if (
-        window.location?.pathname === "/run-xppdeck" &&
-        ["x.com", "twitter.com"].includes(window.location.hostname)
-    ) {
-        document.documentElement.setAttribute("data-opd-deck", "");
-    }
+    document.documentElement.setAttribute("data-opd-deck", "");
     ensurePreloadThemeStyle();
     applyRootThemeMarker();
     bootstrap.beforeunloadBypassKey = bypassKey;
@@ -72,11 +77,6 @@ html[data-opd-theme="light"] body {
         systemDarkQuery.addEventListener("change", applyRootThemeMarker);
     }
 
-    const isTopLevelDeck = () =>
-        window === window.top &&
-        window.location.protocol === "https:" &&
-        ["x.com", "twitter.com"].includes(window.location.hostname) &&
-        window.location.pathname === "/run-xppdeck";
     const beforeUnload = (event: BeforeUnloadEvent) => {
         if (!isTopLevelDeck()) return;
         try {
@@ -93,8 +93,26 @@ html[data-opd-theme="light"] body {
     };
     if (!development && isTopLevelDeck())
         window.addEventListener("beforeunload", beforeUnload);
-    return () => {
+    const checkLocation = () => {
+        if (!isTopLevelDeck()) cleanup();
+    };
+    const routeObserver = new MutationObserver(checkLocation);
+    routeObserver.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+    });
+    window.addEventListener("popstate", checkLocation);
+    const cleanup = () => {
+        if (stopped) return;
+        stopped = true;
+        routeObserver.disconnect();
         systemDarkQuery.removeEventListener("change", applyRootThemeMarker);
         window.removeEventListener("beforeunload", beforeUnload);
+        window.removeEventListener("popstate", checkLocation);
+        document.documentElement.removeAttribute("data-opd-deck");
+        document.documentElement.removeAttribute(rootThemeAttribute);
+        preloadStyle?.remove();
+        if (window.__opdBootstrap === bootstrap) delete window.__opdBootstrap;
     };
+    return cleanup;
 }

@@ -15,18 +15,27 @@ function bootstrap(
     const listeners = {};
     const attributes = {};
     const storage = new Map();
+    const styles = [];
+    let routeMutation;
     let themeListener;
     let cleanup;
     const context = {
         document: {
             cookie,
             getElementById: () => null,
-            createElement: () => ({}),
+            createElement: () => ({
+                remove() {
+                    styles.splice(styles.indexOf(this), 1);
+                },
+            }),
             documentElement: {
                 setAttribute: (key, value) => {
                     attributes[key] = value;
                 },
-                appendChild: () => {},
+                removeAttribute: (key) => {
+                    delete attributes[key];
+                },
+                appendChild: (style) => styles.push(style),
             },
         },
         window: {
@@ -54,6 +63,13 @@ function bootstrap(
             },
             removeItem: (key) => storage.delete(key),
         },
+        MutationObserver: class {
+            constructor(callback) {
+                routeMutation = callback;
+            }
+            observe() {}
+            disconnect() {}
+        },
     };
     context.window.top = embedded ? {} : context.window;
     const source = readFileSync(
@@ -71,8 +87,40 @@ function bootstrap(
         themeListener,
         cleanup,
         window: context.window,
+        styles,
+        routeMutation: () => routeMutation?.(),
     };
 }
+
+test("theme bootstrap leaves ordinary pages and all embedded documents untouched", () => {
+    for (const options of [
+        { href: "https://x.com/home" },
+        { href: "https://twitter.com/search?q=test" },
+        { href: "https://x.com/home", embedded: true },
+        { href: "https://x.com/run-xppdeck", embedded: true },
+    ]) {
+        const h = bootstrap("opd_theme=dark", true, false, false, options);
+        assert.deepEqual(h.attributes, {});
+        assert.equal(h.styles.length, 0);
+        assert.equal(h.window.__opdBootstrap, undefined);
+        assert.equal(h.themeListener, undefined);
+    }
+});
+
+test("leaving the deck removes theme markers and styles before further system updates", () => {
+    const h = bootstrap("", true);
+    assert.equal(h.styles.length, 1);
+    assert.match(
+        h.styles[0].textContent,
+        /html\[data-opd-deck\]\[data-opd-theme=/,
+    );
+    h.window.location.pathname = "/home";
+    h.routeMutation();
+    assert.deepEqual(h.attributes, {});
+    assert.equal(h.styles.length, 0);
+    h.themeListener();
+    assert.deepEqual(h.attributes, {});
+});
 
 test("leave-page warnings are limited to top-level HTTPS deck routes", () => {
     for (const href of [
