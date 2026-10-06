@@ -42,6 +42,7 @@ function harness(saved) {
     start_background();
     return {
         writes,
+        respond: (details) => listener(details),
         response(endpoint, remaining) {
             listener({
                 url: `https://x.com/i/api/graphql/id/${endpoint}`,
@@ -106,4 +107,23 @@ test("missing or malformed saved counters do not prevent API updates", () => {
         h.response("SearchTimeline", "20");
         assert.equal(h.writes.at(-1).api_access_limit.search.remaining, "20");
     }
+});
+
+test("badge 429 captures only safe attribution and honors response cooldown headers", () => {
+    const h = harness();
+    h.restore();
+    const before = Date.now();
+    h.respond({
+        url: "https://x.com/i/api/graphql/id/ViewerBadgeCounts?variables=private",
+        statusCode: 429,
+        tabId: 7,
+        frameId: 4,
+        responseHeaders: [{ name: "Retry-After", value: "600" }],
+    });
+    const value = h.writes.at(-1);
+    assert.ok(value.opd_rate_limit_until >= before + 600000);
+    assert.equal(value.opd_rate_limit_event.endpoint, "ViewerBadgeCounts");
+    assert.equal(value.opd_rate_limit_event.tabId, 7);
+    assert.equal(value.opd_rate_limit_event.frameId, 4);
+    assert.doesNotMatch(JSON.stringify(value), /variables|private|graphql/);
 });

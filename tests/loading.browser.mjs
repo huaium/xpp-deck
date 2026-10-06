@@ -65,6 +65,12 @@ try {
     await page.addScriptTag({
         content: transpile(`${schedulerSource}
         const load_scheduler = create_column_load_scheduler();
+        const observed_frames = new WeakSet();
+        const visible_initial_frames = new WeakMap();
+        const pending_frame_observer = new IntersectionObserver(entries => {
+            for (const entry of entries) visible_initial_frames.set(entry.target, entry.isIntersecting);
+            queue_column_frames();
+        });
         function i18n_message_or_fallback(key, fallback) {return fallback;}
         function column_rename() {}
         function column_settings_save() {}

@@ -54,6 +54,8 @@ interface ChromeWebRequest {
             callback: (details: {
                 url: string;
                 statusCode?: number;
+                tabId?: number;
+                frameId?: number;
                 responseHeaders?: Array<{
                     name?: string;
                     value?: string;

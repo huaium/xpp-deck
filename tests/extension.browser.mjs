@@ -47,6 +47,24 @@ try {
     });
     await page.goto("https://x.com/run-xppdeck");
     await page.evaluate(() => {
+        window.__opd_column_starts = [];
+        const source = Object.getOwnPropertyDescriptor(
+            window.HTMLIFrameElement.prototype,
+            "src",
+        );
+        Object.defineProperty(window.HTMLIFrameElement.prototype, "src", {
+            ...source,
+            set(value) {
+                if (this.closest("#opd_main_element"))
+                    window.__opd_column_starts.push({
+                        time: window.performance.now(),
+                        frame: this,
+                    });
+                source.set.call(this, value);
+            },
+        });
+    });
+    await page.evaluate(() => {
         const NativeObserver = window.MutationObserver;
         const tracked = new Map();
         window.__opd_observers = tracked;
@@ -102,6 +120,7 @@ try {
             '<a href="/i/jf/onboarding/web?mode=signup">Continue with phone</a><a href="/i/jf/onboarding/web?mode=login&redirect_after_login=%2Frun-xppdeck">Log in with username or email</a>';
         window.__opd_storage_writes = 0;
         const messageListeners = [];
+        const storageListeners = new Set();
         window.chrome = {
             runtime: {
                 getManifest: () => ({ version: "0.1.0" }),
@@ -138,7 +157,13 @@ try {
             declarativeNetRequest: {
                 updateSessionRules: (_rules, done) => done?.(),
             },
-            webRequest: { onHeadersReceived: { addListener() {} } },
+            webRequest: {
+                onHeadersReceived: {
+                    addListener: (listener) => {
+                        window.__opd_headers_received = listener;
+                    },
+                },
+            },
             storage: {
                 local: {
                     get: (key, callback) =>
@@ -151,11 +176,23 @@ try {
                         ),
                     set: (value, callback) => {
                         window.__opd_storage_writes++;
+                        const changes = Object.fromEntries(
+                            Object.entries(value).map(([key, newValue]) => [
+                                key,
+                                { oldValue: store[key], newValue },
+                            ]),
+                        );
                         Object.assign(store, value);
+                        for (const listener of Array.from(storageListeners))
+                            listener(changes, "local");
                         callback?.();
                     },
                 },
-                onChanged: { addListener() {} },
+                onChanged: {
+                    addListener: (listener) => storageListeners.add(listener),
+                    removeListener: (listener) =>
+                        storageListeners.delete(listener),
+                },
             },
         };
     });
@@ -238,6 +275,13 @@ try {
             ),
     );
     const home = page.locator('[opd_column_type="home"]');
+    const initialStartTimes = await page.evaluate(() =>
+        window.__opd_column_starts.slice(0, 4).map((entry) => entry.time),
+    );
+    for (let index = 1; index < initialStartTimes.length; index++)
+        assert.ok(
+            initialStartTimes[index] - initialStartTimes[index - 1] >= 1990,
+        );
     assert.equal(await page.locator("#switch_theme").isVisible(), false);
     assert.equal(await page.locator("#second_rack").isVisible(), false);
     assert.equal(await page.locator("#opd_language_select").isVisible(), false);
@@ -516,6 +560,42 @@ try {
     await page.locator(".opd_dialog_overlay").waitFor({ state: "detached" });
     assert.deepEqual(await resourceCounts(), initialResources);
     assert.equal(await page.locator("#opd_main_element").count(), 1);
+    await page.waitForFunction(() =>
+        Array.from(document.querySelectorAll("#opd_main_element iframe")).every(
+            (frame) => frame.hasAttribute("opd_controls_initialized"),
+        ),
+    );
+    await page.evaluate(() =>
+        window.__opd_headers_received({
+            url: "https://x.com/i/api/graphql/fixture/ViewerBadgeCounts?variables=private",
+            statusCode: 429,
+            tabId: 1,
+            frameId: 1,
+            responseHeaders: [{ name: "Retry-After", value: "60" }],
+        }),
+    );
+    const startsBeforeCooldownClick = await page.evaluate(
+        () => window.__opd_column_starts.length,
+    );
+    await page.locator('[opd_column_type="home"] .column_refresh_btn').click();
+    assert.equal(
+        await page.evaluate(() => window.__opd_column_starts.length),
+        startsBeforeCooldownClick,
+    );
+    await page.locator('[data-api-key="recommend_timeline"]').click();
+    await page
+        .getByText(/Column loading and refreshes are paused until/)
+        .waitFor({ state: "visible" });
+    await page.locator("wa-button.opd_dialog_primary").click();
+    await page.evaluate(() => {
+        const now = Date.now() + 61000;
+        Date.now = () => now;
+        document.dispatchEvent(new window.Event("visibilitychange"));
+    });
+    await page.waitForFunction(
+        (previous) => window.__opd_column_starts.length > previous,
+        startsBeforeCooldownClick,
+    );
     assert.deepEqual(errors, []);
     console.log(
         "Built extension Chromium smoke test passed: signed-out welcome, official sign-in tab, session retry, initialization, iframe helpers, dynamic banner controls, settings animation and refresh persistence.",

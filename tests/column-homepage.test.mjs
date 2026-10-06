@@ -155,6 +155,10 @@ test("queued navigation starts at the homepage URL rather than the column defaul
             "",
             {
                 document: { querySelectorAll: () => [frame] },
+                visible_initial_frames: new WeakMap([[frame, true]]),
+                observed_frames: new WeakSet(),
+                pending_frame_observer: { observe() {}, unobserve() {} },
+                column_load_priority: () => 0,
                 column_navigation_url,
                 queue_column_navigation: (_frame, navigate) => navigate(),
             },

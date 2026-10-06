@@ -406,5 +406,8 @@
     },
     "ui_layout_double": {
         "message": "双行"
+    },
+    "ui_api_loading_paused": {
+        "message": "已达到 X 的请求限制。列加载和刷新将暂停至 $1。"
     }
 }

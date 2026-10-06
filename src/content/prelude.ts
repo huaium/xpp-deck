@@ -1041,14 +1041,28 @@ document.addEventListener("keyup", (event) => {
 // Watch storage updates (mainly for API rate-limit status).
 export let api_limit_obj: ApiAccessLimit | null = null;
 let rate_limit_until = 0;
-chrome.storage.local.get("opd_rate_limit_until", (value) => {
-    rate_limit_until = Math.max(
-        rate_limit_until,
-        Number(value.opd_rate_limit_until) || 0,
-    );
-});
+let rate_limit_endpoint: string | null = null;
+function read_rate_limit_endpoint(value: unknown): string | null {
+    const endpoint = (value as { endpoint?: unknown } | null)?.endpoint;
+    return typeof endpoint === "string" ? endpoint : null;
+}
+chrome.storage.local.get(
+    ["opd_rate_limit_until", "opd_rate_limit_event"],
+    (value) => {
+        rate_limit_until = Math.max(
+            rate_limit_until,
+            Number(value.opd_rate_limit_until) || 0,
+        );
+        rate_limit_endpoint = read_rate_limit_endpoint(
+            value.opd_rate_limit_event,
+        );
+    },
+);
 export function api_refresh_paused() {
     return Date.now() < rate_limit_until;
+}
+export function api_loading_paused_until() {
+    return rate_limit_until;
 }
 function api_icon_path(index: number) {
     const paths = [
@@ -1119,7 +1133,33 @@ export async function open_api_limits_dialog() {
             const cards = document.createElement("div");
             cards.className = "opd_api_cards";
             dialog.appendChild(cards);
+            const cooldown_notice = document.createElement("p");
+            cooldown_notice.className = "opd_api_detail";
+            cooldown_notice.setAttribute("role", "status");
+            dialog.appendChild(cooldown_notice);
+            let notice_timer: ReturnType<typeof setTimeout> | undefined;
             const render = () => {
+                if (notice_timer !== undefined) clearTimeout(notice_timer);
+                cooldown_notice.hidden = !api_refresh_paused();
+                if (!cooldown_notice.hidden) {
+                    cooldown_notice.textContent = i18n_message(
+                        "ui_api_loading_paused",
+                        [
+                            new Date(
+                                api_loading_paused_until(),
+                            ).toLocaleTimeString(),
+                        ],
+                    );
+                    if (rate_limit_endpoint)
+                        cooldown_notice.textContent += ` (${rate_limit_endpoint})`;
+                    notice_timer = setTimeout(
+                        render,
+                        Math.min(
+                            api_loading_paused_until() - Date.now() + 1,
+                            2147483647,
+                        ),
+                    );
+                }
                 cards.replaceChildren();
                 for (const [key, label] of [
                     ["time_line", "ui_api_following"],
@@ -1219,6 +1259,7 @@ export async function open_api_limits_dialog() {
                 }
             };
             const listener = (changes: ChromeStorageChanges) => {
+                if (changes.opd_rate_limit_until) render();
                 if (changes.api_access_limit) {
                     api_limit_obj = (changes.api_access_limit.newValue ??
                         null) as ApiAccessLimit | null;
@@ -1227,7 +1268,10 @@ export async function open_api_limits_dialog() {
             };
             render();
             chrome.storage.onChanged.addListener(listener);
-            return () => chrome.storage.onChanged.removeListener(listener);
+            return () => {
+                if (notice_timer !== undefined) clearTimeout(notice_timer);
+                chrome.storage.onChanged.removeListener(listener);
+            };
         },
     });
 }
@@ -1254,6 +1298,10 @@ type ApiAccessLimit = {
     };
 };
 chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (changes.opd_rate_limit_event)
+        rate_limit_endpoint = read_rate_limit_endpoint(
+            changes.opd_rate_limit_event.newValue,
+        );
     if (changes.opd_rate_limit_until) {
         rate_limit_until = Math.max(
             rate_limit_until,

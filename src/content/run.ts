@@ -7,6 +7,7 @@ import type WaButton from "@awesome.me/webawesome/dist/components/button/button.
 import {
     open_api_limits_dialog,
     api_refresh_paused,
+    api_loading_paused_until,
     animate_ui_entrance,
     animate_sidebar_change,
     create_api_sidebar_html,
@@ -53,17 +54,37 @@ export function dispose_deck() {
 }
 export function run(settings) {
     dispose_deck();
-    const load_scheduler = create_column_load_scheduler();
+    const load_scheduler = create_column_load_scheduler({
+        concurrency: 1,
+        minGapMs: 2000,
+        maxGapMs: 3000,
+        blockedUntil: api_loading_paused_until,
+        paused: () => document.hidden,
+    });
     opd_column_load_scheduler = load_scheduler;
     const deck_lifetime = new AbortController();
     load_scheduler.onDispose(() => deck_lifetime.abort());
     load_scheduler.onDispose(stop_system_theme_listener);
     const banner_observers = new WeakMap<HTMLIFrameElement, MutationObserver>();
     const settings_animations = new WeakMap<HTMLElement, Animation>();
+    const observed_frames = new WeakSet<HTMLIFrameElement>();
+    const visible_initial_frames = new WeakMap<HTMLIFrameElement, boolean>();
+    const pending_frame_observer = new IntersectionObserver((entries) => {
+        if (deck_lifetime.signal.aborted) return;
+        for (const entry of entries)
+            visible_initial_frames.set(
+                entry.target as HTMLIFrameElement,
+                entry.isIntersecting,
+            );
+        queue_column_frames();
+    });
+    load_scheduler.onDispose(() => pending_frame_observer.disconnect());
 
     function column_load_priority(frame: HTMLIFrameElement) {
         const bounds = frame.getBoundingClientRect();
         return bounds.right > 0 &&
+            bounds.right > bounds.left &&
+            bounds.bottom > bounds.top &&
             bounds.left < window.innerWidth &&
             bounds.bottom > 0 &&
             bounds.top < window.innerHeight
@@ -124,18 +145,36 @@ export function run(settings) {
                 "#opd_main_element iframe[data-opd-src]",
             )
             .forEach((frame) => {
-                queue_column_navigation(frame, () => {
-                    const source = frame.getAttribute("data-opd-src");
-                    frame.removeAttribute("data-opd-src");
-                    const homepage = frame
-                        .closest("div[opd_column_type]")
-                        ?.getAttribute("opd_homepage_path");
-                    if (homepage)
-                        frame.src = column_navigation_url(
-                            `https://x.com${homepage}`,
-                        );
-                    else if (source) frame.src = column_navigation_url(source);
-                });
+                if (!observed_frames.has(frame)) {
+                    observed_frames.add(frame);
+                    pending_frame_observer.observe(frame);
+                }
+                if (
+                    document.hidden ||
+                    visible_initial_frames.get(frame) !== true
+                )
+                    return;
+                queue_column_navigation(
+                    frame,
+                    () => {
+                        const source = frame.getAttribute("data-opd-src");
+                        frame.removeAttribute("data-opd-src");
+                        pending_frame_observer.unobserve(frame);
+                        const homepage = frame
+                            .closest("div[opd_column_type]")
+                            ?.getAttribute("opd_homepage_path");
+                        if (homepage)
+                            frame.src = column_navigation_url(
+                                `https://x.com${homepage}`,
+                            );
+                        else if (source)
+                            frame.src = column_navigation_url(source);
+                    },
+                    () =>
+                        frame.isConnected &&
+                        !document.hidden &&
+                        visible_initial_frames.get(frame) === true,
+                );
             });
     }
     function column_set_interval(callback: () => void, interval: number) {
@@ -2687,6 +2726,27 @@ export function run(settings) {
     // Prevent auto-scroll when opening media posts.
     const main_rack_element =
         document.querySelector<HTMLElement>("#main_rack_element");
+    const resume_loading = () => {
+        if (deck_lifetime.signal.aborted) return;
+        load_scheduler.resume();
+        queue_column_frames();
+    };
+    const on_rate_limit_change = (changes: ChromeStorageChanges) => {
+        if (changes.opd_rate_limit_until) resume_loading();
+    };
+    document.addEventListener("visibilitychange", resume_loading);
+    window.addEventListener("resize", resume_loading);
+    main_rack_element?.addEventListener("scroll", resume_loading, {
+        capture: true,
+        passive: true,
+    });
+    chrome.storage.onChanged.addListener(on_rate_limit_change);
+    load_scheduler.onDispose(() => {
+        document.removeEventListener("visibilitychange", resume_loading);
+        window.removeEventListener("resize", resume_loading);
+        main_rack_element?.removeEventListener("scroll", resume_loading, true);
+        chrome.storage.onChanged.removeListener(on_rate_limit_change);
+    });
     if (main_rack_element) {
         main_rack_element.addEventListener("scrollend", function () {
             main_rack_element.scrollTop = 0;

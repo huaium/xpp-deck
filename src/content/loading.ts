@@ -6,19 +6,34 @@ type ColumnLoadJob = {
 };
 
 // A load event/timeout ends navigation work; internal X requests remain opaque.
-export function create_column_load_scheduler() {
+export function create_column_load_scheduler(
+    options: {
+        concurrency?: number;
+        minGapMs?: number;
+        maxGapMs?: number;
+        blockedUntil?: () => number;
+        paused?: () => boolean;
+    } = {},
+) {
     const jobs = new Map<object, ColumnLoadJob>();
     const active = new Map<object, () => void>();
     const dispose_callbacks: (() => void)[] = [];
     let stopped = false;
     let last_start = -Infinity;
     let start_gap = 0;
-    let concurrency_limit = Math.random() < 0.5 ? 1 : 2;
+    let concurrency_limit =
+        options.concurrency ?? (Math.random() < 0.5 ? 1 : 2);
     let wake: ReturnType<typeof setTimeout> | undefined;
     const pump = () => {
         if (stopped) return;
         if (wake !== undefined) clearTimeout(wake);
         wake = undefined;
+        if (options.paused?.()) return;
+        const cooldown = (options.blockedUntil?.() ?? 0) - Date.now();
+        if (cooldown > 0) {
+            wake = setTimeout(pump, Math.min(cooldown, 2147483647));
+            return;
+        }
         for (const [key, job] of jobs) {
             if (!active.has(key) && !job.valid()) jobs.delete(key);
         }
@@ -49,8 +64,13 @@ export function create_column_load_scheduler() {
         active.set(job.key, done);
         last_start = Date.now();
         // Sample once per start, not on every queue wake-up or enqueue.
-        start_gap = 800 + Math.floor(Math.random() * 401);
-        concurrency_limit = Math.random() < 0.5 ? 1 : 2;
+        const minimum_gap = options.minGapMs ?? 800;
+        const maximum_gap = options.maxGapMs ?? 1200;
+        start_gap =
+            minimum_gap +
+            Math.floor(Math.random() * (maximum_gap - minimum_gap + 1));
+        concurrency_limit =
+            options.concurrency ?? (Math.random() < 0.5 ? 1 : 2);
         try {
             cleanup = job.start(done) || undefined;
             if (finished) cleanup?.();
@@ -61,6 +81,7 @@ export function create_column_load_scheduler() {
         pump();
     };
     return {
+        resume: pump,
         has(key: object) {
             return jobs.has(key);
         },

@@ -95,6 +95,16 @@ Development output is in `.output/chrome-mv3-dev/` and
 Browser profiles are stored in `.wxt-profiles/chrome/` and
 `.wxt-profiles/firefox/`, separately from generated output.
 
+### Loading Limits
+
+Column loads and extension-triggered refreshes run one at a time per deck, with
+a random 2–3-second gap between starts. Initial loads wait until their columns
+are onscreen; hidden tabs do not start new loads. HTTP 429 responses pause queued
+work until the response reset/retry deadline (at least 60 seconds when missing).
+The API Usage dialog shows the pause. Last rate-limit attribution is stored
+locally in `opd_rate_limit_event`, without query parameters or credentials.
+This does not throttle X's own requests inside already-loaded pages.
+
 ### Validate
 
 ```sh

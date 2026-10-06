@@ -406,5 +406,8 @@
     },
     "ui_layout_double": {
         "message": "두 행"
+    },
+    "ui_api_loading_paused": {
+        "message": "X 요청 한도에 도달했습니다. 열 로딩과 새로고침이 $1까지 일시 중지됩니다."
     }
 }

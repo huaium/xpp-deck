@@ -160,6 +160,10 @@ test("actual rebuild and disposal abort each deck's lifetime independently", () 
         "let opd_column_load_scheduler;",
         {
             AbortController: Controller,
+            api_loading_paused_until: () => 0,
+            IntersectionObserver: class {
+                disconnect() {}
+            },
             create_column_load_scheduler: () => {
                 const callbacks = [];
                 return {

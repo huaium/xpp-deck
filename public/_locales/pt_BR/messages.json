@@ -406,5 +406,8 @@
     },
     "ui_layout_double": {
         "message": "Duas linhas"
+    },
+    "ui_api_loading_paused": {
+        "message": "Limite do X atingido. O carregamento e a atualização das colunas estão pausados até $1."
     }
 }

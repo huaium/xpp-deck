@@ -406,5 +406,8 @@
     },
     "ui_layout_double": {
         "message": "2段"
+    },
+    "ui_api_loading_paused": {
+        "message": "Xのレート制限に達しました。カラムの読み込みと更新は$1まで一時停止します。"
     }
 }

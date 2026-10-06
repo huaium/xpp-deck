@@ -219,6 +219,20 @@ export function start_background() {
                 rate_limit_until = Math.max(rate_limit_until, deadline);
                 chrome.storage.local.set({
                     opd_rate_limit_until: rate_limit_until,
+                    opd_rate_limit_event: {
+                        endpoint: new URL(resp.url).pathname.split("/").at(-1),
+                        status: resp.statusCode ?? null,
+                        tabId: resp.tabId ?? null,
+                        frameId: resp.frameId ?? null,
+                        limit: header("x-rate-limit-limit") ?? null,
+                        remaining: header("x-rate-limit-remaining") ?? null,
+                        observedAt: now,
+                        resetAt: Number.isFinite(reset) ? reset : null,
+                        retryAfterAt: Number.isFinite(retry_time)
+                            ? retry_time
+                            : null,
+                        until: rate_limit_until,
+                    },
                 });
             }
             const update_counters = () => {

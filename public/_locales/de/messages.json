@@ -406,5 +406,8 @@
     },
     "ui_layout_double": {
         "message": "Zwei Zeilen"
+    },
+    "ui_api_loading_paused": {
+        "message": "X-Anfragelimit erreicht. Laden und Aktualisieren der Spalten pausieren bis $1."
     }
 }

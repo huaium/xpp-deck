@@ -63,11 +63,22 @@ test("API cards show unknown data, update live, and release their listener", asy
     const dialog = new Element();
     let listener;
     let cleanup;
+    let paused = false;
+    let timer;
+    const deadline = Date.now() + 60000;
     const { open_api_limits_dialog } = loadFunctions(
         "../src/content/prelude.ts",
         ["api_quota_state", "open_api_limits_dialog", "api_icon_path"],
         "let api_limit_obj = null;",
         {
+            api_refresh_paused: () => paused,
+            api_loading_paused_until: () => deadline,
+            rate_limit_endpoint: "ViewerBadgeCounts",
+            setTimeout: (callback) => {
+                timer = callback;
+                return 1;
+            },
+            clearTimeout() {},
             document: {
                 createElement: () => new Element(),
                 createElementNS: () => new Element(),
@@ -128,6 +139,15 @@ test("API cards show unknown data, update live, and release their listener", asy
     assert.equal(card.children[1].children[0].style.width, "98.4%");
     assert.equal(card.children[2].textContent, "ui_api_remaining:492/500");
     assert.ok(card.children[3].textContent.startsWith("ui_api_reset:"));
+    paused = true;
+    listener({ opd_rate_limit_until: { newValue: deadline } });
+    assert.equal(dialog.children[2].hidden, false);
+    assert.ok(
+        dialog.children[2].textContent.startsWith("ui_api_loading_paused:"),
+    );
+    paused = false;
+    timer();
+    assert.equal(dialog.children[2].hidden, true);
     cleanup();
     assert.equal(listener, null);
 });
