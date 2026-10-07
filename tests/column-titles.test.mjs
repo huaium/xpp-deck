@@ -111,3 +111,30 @@ test("custom titles serialize independently of Explore navigation titles", () =>
         );
     }
 });
+
+test("profile serialization does not include the sidebar as a column", () => {
+    const column = (type) => ({
+        getAttribute: (key) => (key === "xpd_column_type" ? type : null),
+        querySelector: () => null,
+    });
+    const sidebar = column("dsp_column");
+    const notification = column("notification");
+    const { column_settings_save } = loadFunctions(
+        "../src/content/run.ts",
+        ["column_settings_save"],
+        "",
+        {
+            document: {
+                querySelectorAll: (selector) =>
+                    selector.includes(':not([xpd_column_type="dsp_column"])')
+                        ? [notification]
+                        : [sidebar, notification],
+            },
+            last_load_profile: 0,
+            manifest: { version: "1" },
+        },
+    );
+    const result = column_settings_save("profile_out").column_settings;
+    assert.equal(result.length, 1);
+    assert.equal(result[0].type, "notification");
+});

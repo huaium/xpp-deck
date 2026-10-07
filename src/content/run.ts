@@ -1483,7 +1483,11 @@ export function run(settings) {
         return;
     }
     load_scheduler.onDispose(
-        mount_cooldown_notice(xpd_main_element, api_loading_paused_until, i18n_message),
+        mount_cooldown_notice(
+            xpd_main_element,
+            api_loading_paused_until,
+            i18n_message,
+        ),
     );
     const switch_theme_button =
         document.querySelector<HTMLElement>("#switch_theme");
@@ -1779,12 +1783,15 @@ export function run(settings) {
     const all_columns = document.querySelectorAll(
         '#xpd_main_element div[xpd_column_type]:not([xpd_column_type="dsp_column"])',
     );
+    const saved_columns = settings.column_settings.filter(
+        (column) => column.type !== "dsp_column",
+    );
     for (
         let index = 0;
-        index < settings.column_settings.length && index < all_columns.length;
+        index < saved_columns.length && index < all_columns.length;
         index++
     ) {
-        const saved = settings.column_settings[index];
+        const saved = saved_columns[index];
         const frame = all_columns[index].querySelector("iframe");
         const homepage = resolve_column_homepage(
             saved,
@@ -1792,22 +1799,21 @@ export function run(settings) {
         );
         if (homepage)
             all_columns[index].setAttribute("xpd_homepage_path", homepage);
-        const custom_title = settings.column_settings[index].custom_title;
+        const custom_title = saved.custom_title;
         if (typeof custom_title === "string" && custom_title.trim() !== "") {
             all_columns[index].setAttribute("xpd_custom_title", custom_title);
-        } else if (settings.column_settings[index].type !== "explore") {
+        } else if (saved.type !== "explore") {
             continue;
         }
         const safe_title =
             custom_title ||
-            (settings.column_settings[index].column_save_title &&
-            settings.column_settings[index].column_save_title !== ""
-                ? settings.column_settings[index].column_save_title
+            (saved.column_save_title && saved.column_save_title !== ""
+                ? saved.column_save_title
                 : i18n_message("ui_column_explore_title"));
-        if (settings.column_settings[index].type === "explore") {
+        if (saved.type === "explore") {
             all_columns[index].setAttribute(
                 "xpd_explore_title",
-                settings.column_settings[index].column_save_title ||
+                saved.column_save_title ||
                     i18n_message("ui_column_explore_title"),
             );
         }
@@ -3801,7 +3807,7 @@ export function run(settings) {
             version: manifest.version,
         };
         const columns = document.querySelectorAll(
-            "#xpd_main_element div[xpd_column_type]",
+            '#xpd_main_element div[xpd_column_type]:not([xpd_column_type="dsp_column"])',
         );
         for (let index = 0; index < columns.length; index++) {
             const column = columns[index];
