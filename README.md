@@ -1,5 +1,9 @@
 # XPP-Deck
 
+[![Chrome: Manifest V3](https://img.shields.io/badge/Chrome-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)](#get-started)
+[![Firefox: Manifest V2](https://img.shields.io/badge/Firefox-Manifest_V2-FF7139?logo=firefoxbrowser&logoColor=white)](#get-started)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
+
 <p align="center">
   <img src="docs/screenshot.png" alt="XPP-Deck screenshot" width="500">
 </p>

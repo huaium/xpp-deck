@@ -22,8 +22,10 @@ test("project links and installation documentation use the XPP-Deck repository",
         source.includes('"https://github.com/huaium/xpp-deck/releases/tag/v"'),
     );
     assert.ok(readme.includes("https://github.com/huaium/xpp-deck/releases"));
-    assert.ok(readme.includes('src="public/icons/logo_icon.svg"'));
-    assert.ok(readme.includes('media="(prefers-color-scheme: dark)"'));
+    assert.ok(readme.includes('src="docs/screenshot.png"'));
+    assert.ok(existsSync(new URL("docs/screenshot.png", root)));
+    for (const badge of ["Chrome-Manifest_V3", "Firefox-Manifest_V2", "License-MIT"])
+        assert.ok(readme.includes(`https://img.shields.io/badge/${badge}-`));
     assert.ok(existsSync(new URL("public/icon.png", root)));
     assert.ok(existsSync(new URL("LICENSE.original", root)));
 });
