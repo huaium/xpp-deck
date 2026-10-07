@@ -11,11 +11,13 @@ on:
                 required: true
 
 jobs:
-    build-and-release:
+    build:
         runs-on: ubuntu-latest
         permissions:
-            contents: write
+            contents: read
             pull-requests: read
+        outputs:
+            tag_name: ${{ steps.preview.outputs.tag_name }}
 
         steps:
             - name: Checkout Code
@@ -47,13 +49,58 @@ jobs:
                   gh pr list --state merged --base Release --limit 1 --json title,body --template \
                   '{{ range . }}# {{ .title }}{{ "\n\n" }}{{ .body }}{{ end }}' > release_notes.md
 
-            - name: Create Release
+            - name: Preview Release for Approval
+              id: preview
               env:
-                  GH_TOKEN: ${{ github.token }}
                   TAG_NAME: ${{ github.event.inputs.tag_name || github.ref_name }}
               run: |
+                  echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+                  if [ ! -s release_notes.md ]; then
+                    printf 'Release %s\n' "$TAG_NAME" > release_notes.md
+                  fi
+                  {
+                    printf '## Proposed release: %s\n\n' "$TAG_NAME"
+                    echo 'Review the description and packaged extensions below before approving the release job.'
+                    echo
+                    cat release_notes.md
+                    printf '\n\n### Downloads\n\n'
+                    find .output -maxdepth 1 \( -name '*-chrome.zip' -o -name '*-firefox.zip' \) -printf '- `%f`\n'
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+            - name: Save Release Packages and Description
+              uses: actions/upload-artifact@v7
+              with:
+                  name: release-candidate
+                  path: |
+                      .output/*-chrome.zip
+                      .output/*-firefox.zip
+                      release_notes.md
+                  include-hidden-files: true
+                  if-no-files-found: error
+
+    publish:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: release
+            url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        permissions:
+            contents: write
+        steps:
+            - name: Download Approved Release Candidate
+              uses: actions/download-artifact@v8
+              with:
+                  name: release-candidate
+
+            - name: Publish Release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+                  TAG_NAME: ${{ needs.build.outputs.tag_name }}
+              run: |
                   gh release create "$TAG_NAME" \
-                    ./.output/*.zip \
+                    ./.output/*-chrome.zip \
+                    ./.output/*-firefox.zip \
                     --title "Release $TAG_NAME" \
                     --notes-file release_notes.md \
-                    --draft
+                    --target "$GITHUB_SHA"

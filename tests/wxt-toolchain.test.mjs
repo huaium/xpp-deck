@@ -51,7 +51,11 @@ test("release workflow packages and uploads WXT artifacts", async () => {
     );
     assert.doesNotMatch(workflow, /run: pnpm install/);
     assert.match(workflow, /pnpm run build/);
-    assert.match(workflow, /\.\/\.output\/\*\.zip/);
+    for (const browser of ["chrome", "firefox"]) {
+        assert.ok(workflow.includes(`.output/*-${browser}.zip`));
+        assert.ok(workflow.includes(`./.output/*-${browser}.zip`));
+    }
+    assert.doesNotMatch(workflow, /\.output\/\*\.zip/);
     assert.doesNotMatch(workflow, /package\.sh|\.\/package\//);
     assert.deepEqual(
         [...workflow.matchAll(/uses: (\S+)/g)].map((match) => match[1]),
@@ -59,6 +63,8 @@ test("release workflow packages and uploads WXT artifacts", async () => {
             "actions/checkout@v7",
             "actions/setup-node@v7",
             "pnpm/setup@v3",
+            "actions/upload-artifact@v7",
+            "actions/download-artifact@v8",
         ],
     );
     const pkg = JSON.parse(
@@ -66,6 +72,12 @@ test("release workflow packages and uploads WXT artifacts", async () => {
     );
     assert.match(pkg.scripts.build, /wxt zip -b chrome/);
     assert.match(pkg.scripts.build, /wxt zip -b firefox --mv2/);
+    assert.match(workflow, /publish:\s+needs: build/);
+    assert.match(workflow, /environment:\s+name: release/);
+    assert.ok(workflow.includes('$GITHUB_STEP_SUMMARY'));
+    assert.match(workflow, /cat release_notes\.md/);
+    assert.match(workflow, /include-hidden-files: true/);
+    assert.doesNotMatch(workflow, /--draft/);
 });
 
 test("formatter and linter ignore generated WXT output and browser data", async () => {
