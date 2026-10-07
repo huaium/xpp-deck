@@ -1,7 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { setImmediate } from "node:timers";
+import { readFileSync } from "node:fs";
+import { URL } from "node:url";
 import { loadFunctions } from "./helpers/source.mjs";
+
+test("saved column titles exclude the sidebar from their positional mapping", () => {
+    const source = readFileSync(
+        new URL("../src/content/run.ts", import.meta.url),
+        "utf8",
+    );
+    const selector = source.match(
+        /const all_columns = document\.querySelectorAll\(\s*'([^']+)'/,
+    )?.[1];
+    assert.equal(
+        selector,
+        '#xpd_main_element div[xpd_column_type]:not([xpd_column_type="dsp_column"])',
+    );
+});
 
 test("column titles rename through click and keyboard without touching frames", async () => {
     for (const [input, connected, expected] of [

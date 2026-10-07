@@ -1746,7 +1746,7 @@ export function run(settings) {
     }
     // Restore custom titles and Explore titles safely after DOM insertion.
     const all_columns = document.querySelectorAll(
-        "#xpd_main_element div[xpd_column_type]",
+        '#xpd_main_element div[xpd_column_type]:not([xpd_column_type="dsp_column"])',
     );
     for (
         let index = 0;
