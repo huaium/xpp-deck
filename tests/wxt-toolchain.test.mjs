@@ -41,10 +41,24 @@ test("release workflow packages and uploads WXT artifacts", async () => {
         new URL(".github/workflows/release.yml", root),
         "utf8",
     );
-    assert.match(workflow, /pnpm install --frozen-lockfile/);
+    assert.match(workflow, /require-lockfile: true/);
+    assert.doesNotMatch(workflow, /run: pnpm install/);
     assert.match(workflow, /pnpm run build/);
     assert.match(workflow, /\.\/\.output\/\*\.zip/);
     assert.doesNotMatch(workflow, /package\.sh|\.\/package\//);
+    assert.deepEqual(
+        [...workflow.matchAll(/uses: (\S+)/g)].map((match) => match[1]),
+        [
+            "actions/checkout@v7",
+            "actions/setup-node@v7",
+            "pnpm/setup@v3",
+        ],
+    );
+    const pkg = JSON.parse(
+        await fs.readFile(new URL("package.json", root), "utf8"),
+    );
+    assert.match(pkg.scripts.build, /wxt zip -b chrome/);
+    assert.match(pkg.scripts.build, /wxt zip -b firefox --mv2/);
 });
 
 test("formatter and linter ignore generated WXT output and browser data", async () => {
