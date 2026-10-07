@@ -410,6 +410,9 @@
     "ui_layout_double": {
         "message": "2段"
     },
+    "ui_rate_limit_notice": {
+        "message": "Xが一時的にリクエストを制限しています。再読み込みする前にお待ちください。"
+    },
     "ui_api_loading_paused": {
         "message": "Xのレート制限に達しました。カラムの読み込みと更新は$1まで一時停止します。"
     },

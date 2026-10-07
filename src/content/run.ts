@@ -1,5 +1,6 @@
 import { profile_storage_request } from "./profile-storage";
 import { mount_advanced_settings } from "./advanced-settings";
+import { mount_cooldown_notice } from "./cooldown-notice";
 import {
     loading_preferences,
     apply_loading_preferences,
@@ -1269,6 +1270,33 @@ export function run(settings) {
             scroll-behavior: auto !important;
         }
     }
+    .xpd_cooldown_notice {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        max-width: calc(100vw - 32px);
+        box-sizing: border-box;
+        padding: 12px 18px;
+        border: 1px solid #b7791f;
+        border-radius: 10px;
+        background: #fff7df;
+        color: #65430b;
+        font-size: 14px;
+        line-height: 1.5;
+        box-shadow: 0 4px 16px #0002;
+    }
+    .xpd_cooldown_notice[hidden] { display: none; }
+    .xpd_cooldown_notice, .xpd_cooldown_notice * {
+        user-select: text;
+        -webkit-user-select: text;
+        cursor: text;
+    }
+    [xpd-dsp-theme="dark"] .xpd_cooldown_notice {
+        background: #302719;
+        color: #ffe0a3;
+    }
     div[xpd_load_status] { position: relative; }
     div[xpd_load_status]::after {
         content: attr(xpd_load_status);
@@ -1454,6 +1482,9 @@ export function run(settings) {
     if (!xpd_main_element || !sidebar_toggle_button) {
         return;
     }
+    load_scheduler.onDispose(
+        mount_cooldown_notice(xpd_main_element, api_loading_paused_until, i18n_message),
+    );
     const switch_theme_button =
         document.querySelector<HTMLElement>("#switch_theme");
     const settings_button = document.createElement("wa-button");

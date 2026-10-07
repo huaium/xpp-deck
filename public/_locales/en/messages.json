@@ -410,6 +410,9 @@
     "ui_layout_double": {
         "message": "Two rows"
     },
+    "ui_rate_limit_notice": {
+        "message": "X is temporarily limiting requests. Please wait before reloading."
+    },
     "ui_api_loading_paused": {
         "message": "X rate limit reached. Column loading and refreshes are paused until $1."
     },

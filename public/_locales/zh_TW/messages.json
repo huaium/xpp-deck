@@ -410,6 +410,9 @@
     "ui_layout_double": {
         "message": "雙列"
     },
+    "ui_rate_limit_notice": {
+        "message": "X 暫時限制了請求。請等待冷卻結束後再重新整理。"
+    },
     "ui_api_loading_paused": {
         "message": "已達到 X 的請求限制。欄位載入和重新整理將暫停至 $1。"
     },

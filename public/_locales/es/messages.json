@@ -410,6 +410,9 @@
     "ui_layout_double": {
         "message": "Dos filas"
     },
+    "ui_rate_limit_notice": {
+        "message": "X está limitando las solicitudes temporalmente. Espera antes de recargar."
+    },
     "ui_api_loading_paused": {
         "message": "Se alcanzó el límite de X. La carga y actualización de columnas se pausa hasta las $1."
     },

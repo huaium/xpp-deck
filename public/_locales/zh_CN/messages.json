@@ -410,6 +410,9 @@
     "ui_layout_double": {
         "message": "双行"
     },
+    "ui_rate_limit_notice": {
+        "message": "X 暂时限制了请求。请等待冷却结束后再刷新。"
+    },
     "ui_api_loading_paused": {
         "message": "已达到 X 的请求限制。列加载和刷新将暂停至 $1。"
     },

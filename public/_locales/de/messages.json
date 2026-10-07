@@ -410,6 +410,9 @@
     "ui_layout_double": {
         "message": "Zwei Zeilen"
     },
+    "ui_rate_limit_notice": {
+        "message": "X begrenzt Anfragen vorübergehend. Bitte vor dem Neuladen warten."
+    },
     "ui_api_loading_paused": {
         "message": "X-Anfragelimit erreicht. Laden und Aktualisieren der Spalten pausieren bis $1."
     },
