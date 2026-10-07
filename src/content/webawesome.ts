@@ -1,5 +1,4 @@
 // Compatibility setup must run before any component registration.
-import "./webawesome-polyfills";
 import "@awesome.me/webawesome/dist/styles/themes/default.css";
 import "@awesome.me/webawesome/dist/components/select/select.js";
 import "@awesome.me/webawesome/dist/components/button/button.js";

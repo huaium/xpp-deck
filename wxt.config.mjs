@@ -55,7 +55,33 @@ export default defineConfig({
         keepProfileChanges: true,
         startUrls: ["https://x.com/run-xppdeck"],
     },
-    vite: () => ({
+    vite: (env) => ({
+        plugins:
+            env.browser === "firefox"
+                ? [
+                      {
+                          name: "xpd-firefox-component-realm",
+                          enforce: "pre",
+                          transform(code, id) {
+                              if (id.includes("custom-elements.min.js")) {
+                                  return code.replace(
+                                      "c instanceof Object",
+                                      '(c !== null && (typeof c === "object" || typeof c === "function"))',
+                                  );
+                              }
+                              if (
+                                  !id.includes("node_modules/") ||
+                                  !/(@lit[+/]|lit[+/]|webawesome|element-internals-polyfill)/.test(
+                                      id,
+                                  ) ||
+                                  !id.endsWith(".js")
+                              )
+                                  return;
+                              return `import { xpdHTMLElement as HTMLElement, xpdCustomElements as customElements, xpdCustomElementRegistry as CustomElementRegistry } from ${JSON.stringify(path.resolve("src/content/custom-element-platform.ts"))};\n${code}`;
+                          },
+                      },
+                  ]
+                : [],
         build: { target: "es2022", minify: false, sourcemap: true },
     }),
     hooks: {

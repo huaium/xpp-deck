@@ -649,6 +649,20 @@ try {
         (previous) => window.__xpd_column_starts.length > previous,
         startsBeforeCooldownClick,
     );
+    await page.goto("https://x.com/home");
+    await page.evaluate(() => {
+        window.__xpd_original_registry = window.customElements;
+    });
+    await page.addScriptTag({
+        content: await readFile(directory + "content-scripts/deck.js", "utf8"),
+    });
+    assert.equal(await page.locator("#xpd_main_element").count(), 0);
+    assert.equal(
+        await page.evaluate(
+            () => window.customElements === window.__xpd_original_registry,
+        ),
+        true,
+    );
     assert.deepEqual(errors, []);
     console.log(
         "Built extension Chromium smoke test passed: signed-out welcome, official sign-in tab, session retry, initialization, iframe helpers, dynamic banner controls, settings animation and refresh persistence.",
