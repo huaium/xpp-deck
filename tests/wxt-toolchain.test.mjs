@@ -42,6 +42,13 @@ test("release workflow packages and uploads WXT artifacts", async () => {
         "utf8",
     );
     assert.match(workflow, /require-lockfile: true/);
+    assert.match(workflow, /push:\s+tags:\s+- "v\*"/);
+    assert.match(workflow, /workflow_dispatch:\s+inputs:\s+tag_name:/);
+    assert.ok(
+        workflow.includes(
+            "TAG_NAME: ${{ github.event.inputs.tag_name || github.ref_name }}",
+        ),
+    );
     assert.doesNotMatch(workflow, /run: pnpm install/);
     assert.match(workflow, /pnpm run build/);
     assert.match(workflow, /\.\/\.output\/\*\.zip/);
