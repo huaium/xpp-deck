@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { defineConfig } from "wxt";
+import MagicString from "magic-string";
 
 const matches = ["https://*.twitter.com/*", "https://*.x.com/*"];
 export default defineConfig({
@@ -64,10 +65,21 @@ export default defineConfig({
                           enforce: "pre",
                           transform(code, id) {
                               if (id.includes("custom-elements.min.js")) {
-                                  return code.replace(
+                                  if (!code.includes("c instanceof Object"))
+                                      return;
+                                  const source = new MagicString(code);
+                                  source.replace(
                                       "c instanceof Object",
                                       '(c !== null && (typeof c === "object" || typeof c === "function"))',
                                   );
+                                  return {
+                                      code: source.toString(),
+                                      map: source.generateMap({
+                                          source: id,
+                                          includeContent: true,
+                                          hires: true,
+                                      }),
+                                  };
                               }
                               if (
                                   !id.includes("node_modules/") ||
@@ -77,7 +89,18 @@ export default defineConfig({
                                   !id.endsWith(".js")
                               )
                                   return;
-                              return `import { xpdHTMLElement as HTMLElement, xpdCustomElements as customElements, xpdCustomElementRegistry as CustomElementRegistry } from ${JSON.stringify(path.resolve("src/content/custom-element-platform.ts"))};\n${code}`;
+                              const source = new MagicString(code);
+                              source.prepend(
+                                  `import { xpdHTMLElement as HTMLElement, xpdCustomElements as customElements, xpdCustomElementRegistry as CustomElementRegistry } from ${JSON.stringify(path.resolve("src/content/custom-element-platform.ts"))};\n`,
+                              );
+                              return {
+                                  code: source.toString(),
+                                  map: source.generateMap({
+                                      source: id,
+                                      includeContent: true,
+                                      hires: true,
+                                  }),
+                              };
                           },
                       },
                   ]

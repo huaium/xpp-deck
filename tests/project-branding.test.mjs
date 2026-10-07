@@ -22,7 +22,9 @@ test("project links and installation documentation use the XPP-Deck repository",
         source.includes('"https://github.com/huaium/xpp-deck/releases/tag/v"'),
     );
     assert.ok(readme.includes("https://github.com/huaium/xpp-deck/releases"));
-    assert.ok(readme.includes("![XPP-Deck icon](public/icon.png)"));
+    assert.ok(readme.includes('src="public/icons/logo_icon.svg"'));
+    assert.ok(readme.includes('srcset="docs/logo-dark.svg"'));
+    assert.ok(readme.includes('media="(prefers-color-scheme: dark)"'));
     assert.ok(existsSync(new URL("public/icon.png", root)));
     assert.ok(existsSync(new URL("LICENSE.original", root)));
 });
