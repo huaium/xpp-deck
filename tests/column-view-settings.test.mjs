@@ -15,7 +15,7 @@ test("all view modes remain independent of native media viewing", () => {
             hasAttribute: () => false,
             closest: () => ({
                 querySelector: (selector) =>
-                    selector === ".opd_tw_view_mode"
+                    selector === ".xpd_tw_view_mode"
                         ? { value, hasAttribute: () => true }
                         : { checked: false },
             }),
@@ -40,7 +40,7 @@ test("all view modes remain independent of native media viewing", () => {
             ["apply_column_view_settings"],
         );
         apply_column_view_settings(frame);
-        const css = styles.get("style[opd_tw_view_mode_css]").textContent;
+        const css = styles.get("style[xpd_tw_view_mode_css]").textContent;
         if (expected) assert.ok(css.includes(expected));
         else assert.equal(css, "");
     }
@@ -50,7 +50,7 @@ test("all view modes remain independent of native media viewing", () => {
     );
     assert.doesNotMatch(
         source,
-        /media_viewer|opd_send_media_info|OpdMediaViewer/,
+        /media_viewer|xpd_send_media_info|XpdMediaViewer/,
     );
 });
 
@@ -87,7 +87,7 @@ test("view settings survive replacement iframe documents", () => {
         },
         closest: () => ({
             querySelector: (selector) =>
-                selector === ".opd_banner" ? banner : view,
+                selector === ".xpd_banner" ? banner : view,
         }),
     };
     const { apply_column_view_settings } = loadFunctions(
@@ -101,10 +101,10 @@ test("view settings survive replacement iframe documents", () => {
     frame.contentWindow.document = newDocument();
     apply_column_view_settings(frame);
     assert.equal(view.value, "1");
-    assert.equal(styles.get("style[opd_banner_css]").textContent, "");
-    assert.match(styles.get("style[opd_tw_view_mode_css]").textContent, /:has/);
+    assert.equal(styles.get("style[xpd_banner_css]").textContent, "");
+    assert.match(styles.get("style[xpd_tw_view_mode_css]").textContent, /:has/);
     assert.doesNotMatch(
-        styles.get("style[opd_tw_view_mode_css]").textContent,
+        styles.get("style[xpd_tw_view_mode_css]").textContent,
         /:not/,
     );
     apply_column_view_settings(frame);

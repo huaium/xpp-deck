@@ -105,7 +105,7 @@ test("WXT builds complete Chrome MV3 and Firefox MV2 distributions", async () =>
         if (browser === "firefox") {
             assert.equal(
                 manifest.browser_specific_settings.gecko.id,
-                "opd_release@kwdev",
+                "xpp-deck@huaium",
             );
             assert.ok(manifest.permissions.includes("*://*.x.com/*"));
         }

@@ -12,16 +12,16 @@ console.log(`Version: ${manifest.version}`);
 export const system_dark_query = window.matchMedia(
     "(prefers-color-scheme: dark)",
 );
-export const opd_bootstrap: NonNullable<Window["__opdBootstrap"]> =
-    window.__opdBootstrap || {};
+export const xpd_bootstrap: NonNullable<Window["__xpdBootstrap"]> =
+    window.__xpdBootstrap || {};
 export const beforeunload_bypass_key =
-    opd_bootstrap.beforeunloadBypassKey || "opd_beforeunload_bypass_once";
-export const opd_root_theme_attribute =
-    opd_bootstrap.rootThemeAttribute || "data-opd-theme";
+    xpd_bootstrap.beforeunloadBypassKey || "xpd_beforeunload_bypass_once";
+export const xpd_root_theme_attribute =
+    xpd_bootstrap.rootThemeAttribute || "data-xpd-theme";
 type I18nOverrideMessages = Record<string, { message?: string }>;
-let opd_i18n_override_messages: I18nOverrideMessages | null = null;
-let opd_english_messages: I18nOverrideMessages = {};
-export let opd_i18n_language = "browser";
+let xpd_i18n_override_messages: I18nOverrideMessages | null = null;
+let xpd_english_messages: I18nOverrideMessages = {};
+export let xpd_i18n_language = "browser";
 export const supported_languages = {
     en: "English",
     ja: "日本語",
@@ -42,9 +42,9 @@ export function resolve_language(language: string) {
     return Object.hasOwn(supported_languages, base) ? base : "en";
 }
 export function formatting_locale() {
-    return opd_i18n_language === "browser"
+    return xpd_i18n_language === "browser"
         ? navigator.language
-        : opd_i18n_language.replaceAll("_", "-");
+        : xpd_i18n_language.replaceAll("_", "-");
 }
 function normalize_i18n_substitutions(
     substitutions?: string | string[] | null,
@@ -64,44 +64,53 @@ function apply_i18n_substitutions(
     const normalized_substitutions =
         normalize_i18n_substitutions(substitutions);
     return message
-        .replace(/\$\$/g, "__OPD_DOLLAR__")
+        .replace(/\$\$/g, "__XPD_DOLLAR__")
         .replace(/\$(\d+)/g, (match, index_text) => {
             const index = Number(index_text) - 1;
             return normalized_substitutions[index] ?? "";
         })
-        .replace(/__OPD_DOLLAR__/g, "$");
+        .replace(/__XPD_DOLLAR__/g, "$");
 }
 export function i18n_message(
     message_name: string,
     substitutions?: string | string[],
 ) {
     const override_message =
-        opd_i18n_override_messages?.[message_name]?.message;
+        xpd_i18n_override_messages?.[message_name]?.message;
     if (typeof override_message === "string") {
         return apply_i18n_substitutions(override_message, substitutions);
     }
-    const fallback = opd_english_messages[message_name]?.message;
+    const fallback = xpd_english_messages[message_name]?.message;
     return typeof fallback === "string"
         ? apply_i18n_substitutions(fallback, substitutions)
         : chrome.i18n.getMessage(message_name, substitutions);
 }
 function get_storage_local_async(
-    key: string,
+    key: string | string[],
 ): Promise<Record<string, unknown>> {
     return new Promise((resolve) => {
         chrome.storage.local.get(key, (value) => resolve(value));
     });
 }
 export async function initialize_i18n_override() {
-    const language_setting = await get_storage_local_async(
-        "opd_language_override",
+    const language_setting = await get_storage_local_async([
+        "xpd_language_override",
+        "xpd_rate_limit_until",
+        "xpd_rate_limit_event",
+    ]);
+    rate_limit_until = Math.max(
+        rate_limit_until,
+        Number(language_setting.xpd_rate_limit_until) || 0,
+    );
+    rate_limit_endpoint = read_rate_limit_endpoint(
+        language_setting.xpd_rate_limit_event,
     );
     const language_setting_record = language_setting as Record<string, unknown>;
     const selected_language =
-        typeof language_setting_record.opd_language_override === "string"
-            ? language_setting_record.opd_language_override
+        typeof language_setting_record.xpd_language_override === "string"
+            ? language_setting_record.xpd_language_override
             : "browser";
-    opd_i18n_language =
+    xpd_i18n_language =
         selected_language === "browser"
             ? "browser"
             : resolve_language(selected_language);
@@ -114,24 +123,24 @@ export async function initialize_i18n_override() {
         const english = await fetch(
             chrome.runtime.getURL("_locales/en/messages.json"),
         );
-        if (english.ok) opd_english_messages = await english.json();
+        if (english.ok) xpd_english_messages = await english.json();
         const response = await fetch(
             chrome.runtime.getURL(`_locales/${locale}/messages.json`),
         );
         if (!response.ok) {
-            opd_i18n_override_messages = null;
+            xpd_i18n_override_messages = null;
             return;
         }
-        opd_i18n_override_messages = await response.json();
+        xpd_i18n_override_messages = await response.json();
     } catch {
-        opd_i18n_override_messages = null;
+        xpd_i18n_override_messages = null;
     }
 }
 export let is_shift_pressed = false;
 export let profile_store;
 export let last_load_profile = 0;
-export const opd_sidebar_width_expanded = "208px";
-export const opd_sidebar_width_collapsed = "64px";
+export const xpd_sidebar_width_expanded = "208px";
+export const xpd_sidebar_width_collapsed = "64px";
 const ui_animations = new WeakMap<HTMLElement, Animation>();
 export async function animate_sidebar_change(
     element: HTMLElement,
@@ -331,10 +340,10 @@ export function create_language_select_html() {
     const options = Object.entries(supported_languages)
         .map(
             ([code, name]) =>
-                `<wa-option value="${code}" ${opd_i18n_language === code ? "selected" : ""}>${name}</wa-option>`,
+                `<wa-option value="${code}" ${xpd_i18n_language === code ? "selected" : ""}>${name}</wa-option>`,
         )
         .join("");
-    return `<div class="opd_language_select_wrap" title="${i18n_message("ui_language_selector_title")}"><hr class="opd_language_separator"><div class="opd_language_select_label">${i18n_message("ui_language_selector_label")}</div><wa-select id="opd_language_select" class="opd_language_select"><wa-option value="browser" ${opd_i18n_language === "browser" ? "selected" : ""}>${i18n_message("ui_language_option_system")}</wa-option>${options}</wa-select></div>`;
+    return `<div class="xpd_language_select_wrap" title="${i18n_message("ui_language_selector_title")}"><hr class="xpd_language_separator"><div class="xpd_language_select_label">${i18n_message("ui_language_selector_label")}</div><wa-select id="xpd_language_select" class="xpd_language_select"><wa-option value="browser" ${xpd_i18n_language === "browser" ? "selected" : ""}>${i18n_message("ui_language_option_system")}</wa-option>${options}</wa-select></div>`;
 }
 export function i18n_message_or_fallback(
     message_id: string,
@@ -343,16 +352,16 @@ export function i18n_message_or_fallback(
     const translated = i18n_message(message_id);
     return translated == "" ? fallback_text : translated;
 }
-let opd_dialog_queue: Promise<unknown> = Promise.resolve();
-function ensure_opd_dialog_style() {
-    if (document.querySelector("style[opd_dialog_css]") != null) {
+let xpd_dialog_queue: Promise<unknown> = Promise.resolve();
+function ensure_xpd_dialog_style() {
+    if (document.querySelector("style[xpd_dialog_css]") != null) {
         return;
     }
     const style = document.createElement("style");
-    style.setAttribute("opd_dialog_css", "");
+    style.setAttribute("xpd_dialog_css", "");
     style.textContent = `
-    .opd_dialog_overlay{
-        animation: opd_overlay_enter 160ms ease-out;
+    .xpd_dialog_overlay{
+        animation: xpd_overlay_enter 160ms ease-out;
         box-sizing: border-box;
         position: fixed;
         inset: 0;
@@ -363,8 +372,8 @@ function ensure_opd_dialog_style() {
         justify-content: center;
         padding: 16px;
     }
-    .opd_dialog{
-        animation: opd_dialog_enter 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    .xpd_dialog{
+        animation: xpd_dialog_enter 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
         box-sizing: border-box;
         max-height: calc(100dvh - 32px);
         overflow-y: auto;
@@ -377,29 +386,29 @@ function ensure_opd_dialog_style() {
         padding: 24px;
         font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
-    @keyframes opd_overlay_enter{from{opacity:0;}to{opacity:1;}}
-    @keyframes opd_dialog_enter{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-    @media(prefers-reduced-motion:reduce){.opd_dialog_overlay,.opd_dialog{animation:none;}}
-    .opd_dialog_message{
+    @keyframes xpd_overlay_enter{from{opacity:0;}to{opacity:1;}}
+    @keyframes xpd_dialog_enter{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+    @media(prefers-reduced-motion:reduce){.xpd_dialog_overlay,.xpd_dialog{animation:none;}}
+    .xpd_dialog_message{
         margin: 0 0 12px;
         white-space: pre-wrap;
         word-break: break-word;
         font-size: 14px;
         line-height: 1.5;
     }
-    .opd_api_cards{display:grid;gap:12px;margin:16px 0;}
-    .opd_api_card{border:1px solid #cbd5e1;border-radius:10px;padding:14px;background:linear-gradient(135deg,#f8fafc,#fff);}
-    .opd_api_heading{display:flex;justify-content:space-between;gap:12px;font-weight:700;}
-    .opd_api_name{display:flex;align-items:center;gap:8px;}
-    .opd_api_icon{width:18px;height:18px;flex-shrink:0;}
-    .opd_api_detail{margin:8px 0 0;font-size:13px;opacity:.8;}
-    .opd_api_track{height:8px;margin-top:12px;border-radius:8px;background:#e2e8f0;overflow:hidden;}
-    .opd_api_fill{height:100%;background:#16834a;}
-    .opd_api_fill[data-level="amber"]{background:#b77909;}
-    .opd_api_fill[data-level="red"]{background:#d33b36;}
-    .opd_dialog_theme_dark .opd_api_card{border-color:#475569;background:linear-gradient(135deg,#243044,#1e293b);}
-    .opd_dialog_theme_dark .opd_api_track{background:#475569;}
-    .opd_dialog_input{
+    .xpd_api_cards{display:grid;gap:12px;margin:16px 0;}
+    .xpd_api_card{border:1px solid #cbd5e1;border-radius:10px;padding:14px;background:linear-gradient(135deg,#f8fafc,#fff);}
+    .xpd_api_heading{display:flex;justify-content:space-between;gap:12px;font-weight:700;}
+    .xpd_api_name{display:flex;align-items:center;gap:8px;}
+    .xpd_api_icon{width:18px;height:18px;flex-shrink:0;}
+    .xpd_api_detail{margin:8px 0 0;font-size:13px;opacity:.8;}
+    .xpd_api_track{height:8px;margin-top:12px;border-radius:8px;background:#e2e8f0;overflow:hidden;}
+    .xpd_api_fill{height:100%;background:#16834a;}
+    .xpd_api_fill[data-level="amber"]{background:#b77909;}
+    .xpd_api_fill[data-level="red"]{background:#d33b36;}
+    .xpd_dialog_theme_dark .xpd_api_card{border-color:#475569;background:linear-gradient(135deg,#243044,#1e293b);}
+    .xpd_dialog_theme_dark .xpd_api_track{background:#475569;}
+    .xpd_dialog_input{
         width: 100%;
         box-sizing: border-box;
         padding: 8px 10px;
@@ -409,17 +418,17 @@ function ensure_opd_dialog_style() {
         color: #111827;
         margin-bottom: 12px;
     }
-    .opd_dialog_input:focus{
+    .xpd_dialog_input:focus{
         outline: 2px solid #60a5fa;
         outline-offset: 1px;
         border-color: #60a5fa;
     }
-    .opd_dialog_actions{
+    .xpd_dialog_actions{
         display: flex;
         justify-content: flex-end;
         gap: 8px;
     }
-    .opd_dialog_actions button{
+    .xpd_dialog_actions button{
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -437,36 +446,36 @@ function ensure_opd_dialog_style() {
         white-space: nowrap;
         font-weight: 600;
     }
-    .opd_dialog_actions button:hover{
+    .xpd_dialog_actions button:hover{
         background: #eef2f7;
     }
-    .opd_dialog_actions .opd_dialog_primary{
+    .xpd_dialog_actions .xpd_dialog_primary{
         background: #2563eb;
         border-color: #2563eb;
         color: #ffffff;
     }
-    .opd_dialog_actions .opd_dialog_primary:hover{
+    .xpd_dialog_actions .xpd_dialog_primary:hover{
         background: #1d4ed8;
     }
-    .opd_about_dialog{
+    .xpd_about_dialog{
         width: min(760px, 100%);
         max-height: min(92vh, 700px);
         overflow: auto;
     }
-    .opd_about_header{
+    .xpd_about_header{
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 0.5rem;
         margin-bottom: 0.6rem;
     }
-    .opd_about_title{
+    .xpd_about_title{
         margin: 0;
         font-size: 1.25rem;
         font-weight: 800;
         color: #111827;
     }
-    .opd_about_close{
+    .xpd_about_close{
         border: 1px solid #cbd5e1;
         border-radius: 8px;
         background: #f8fafc;
@@ -479,10 +488,10 @@ function ensure_opd_dialog_style() {
         justify-content: center;
         padding: 0;
     }
-    .opd_about_close:hover{
+    .xpd_about_close:hover{
         background: #eef2f7;
     }
-    .opd_about_close_icon{
+    .xpd_about_close_icon{
         width: 14px;
         height: 14px;
         display: block;
@@ -490,13 +499,13 @@ function ensure_opd_dialog_style() {
         background-size: contain;
         background-position: center;
     }
-    .opd_about_area1{
+    .xpd_about_area1{
         display: flex;
         flex-direction: row;
         align-items: center;
         gap: 0.75rem;
     }
-    .opd_about_logo{
+    .xpd_about_logo{
         background-repeat: no-repeat;
         background-size: contain;
         background-position: center;
@@ -506,7 +515,7 @@ function ensure_opd_dialog_style() {
         height: 200px;
         cursor: default;
     }
-    .opd_about_wordmark{
+    .xpd_about_wordmark{
         width: 100%;
         max-width: 460px;
         margin-bottom: 0.5rem;
@@ -516,16 +525,16 @@ function ensure_opd_dialog_style() {
         font-weight: 900;
         color: #111827;
     }
-    .opd_about_value{
+    .xpd_about_value{
         font-size: 1rem;
         color: #111827;
         margin-bottom: 0.25rem;
     }
-    .opd_about_value span{
+    .xpd_about_value span{
         margin-left: 0.5rem;
         font-weight: 700;
     }
-    .opd_about_area2{
+    .xpd_about_area2{
         margin-top: 0.9rem;
         display: flex;
         flex-wrap: wrap;
@@ -533,7 +542,7 @@ function ensure_opd_dialog_style() {
         column-gap: 1rem;
         justify-content: space-between;
     }
-    .opd_about_area2 div{
+    .xpd_about_area2 div{
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -541,98 +550,98 @@ function ensure_opd_dialog_style() {
         font-size: 1rem;
         color: #111827;
     }
-    .opd_about_area2 a{
+    .xpd_about_area2 a{
         color: #2563eb;
         text-decoration: underline;
     }
-    .opd_about_area2 a:hover{
+    .xpd_about_area2 a:hover{
         color: #1d4ed8;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark{
         background: rgba(2, 6, 23, 0.68);
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_dialog{
         background: #1b2330;
         color: #e5ebf3;
         border-color: #4a576b;
         box-shadow: 0 18px 44px rgba(2, 6, 23, 0.55);
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_input{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_dialog_input{
         background: #111827;
         color: #e5ebf3;
         border-color: #4a576b;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions button{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_dialog_actions button{
         background: #283140;
         color: #e5ebf3;
         border-color: #4a576b;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions button:hover{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_dialog_actions button:hover{
         background: #313c4d;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions .opd_dialog_primary{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_dialog_actions .xpd_dialog_primary{
         background: #3b82f6;
         border-color: #3b82f6;
         color: #ffffff;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_dialog_actions .opd_dialog_primary:hover{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_dialog_actions .xpd_dialog_primary:hover{
         background: #2563eb;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_title,
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_wordmark,
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_value,
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_area2 div{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_title,
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_wordmark,
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_value,
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_area2 div{
         color: #e5ebf3;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_close{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_close{
         background: #283140;
         color: #e5ebf3;
         border-color: #4a576b;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_close:hover{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_close:hover{
         background: #313c4d;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_close_icon{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_close_icon{
         filter: brightness(0) saturate(100%) invert(98%);
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_logo{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_logo{
         filter: brightness(0) saturate(100%) invert(98%);
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_area2 a{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_area2 a{
         color: #7cb1ff;
     }
-    .opd_dialog_overlay.opd_dialog_theme_dark .opd_about_area2 a:hover{
+    .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_area2 a:hover{
         color: #9dc2ff;
     }
     @media (max-width: 680px){
-        .opd_about_area1{
+        .xpd_about_area1{
             flex-direction: column;
             align-items: flex-start;
         }
-        .opd_about_logo{
+        .xpd_about_logo{
             width: 150px;
             height: 150px;
         }
-        .opd_about_wordmark{
+        .xpd_about_wordmark{
             max-width: 320px;
             font-size: clamp(1.8rem, 10vw, 3rem);
         }
-        .opd_about_area2{
+        .xpd_about_area2{
             justify-content: flex-start;
         }
     }`;
     document.head.appendChild(style);
 }
-function enqueue_opd_dialog<T>(task: () => Promise<T>): Promise<T> {
-    const dialog_task = opd_dialog_queue.then(task, task);
-    opd_dialog_queue = dialog_task.catch(() => {});
+function enqueue_xpd_dialog<T>(task: () => Promise<T>): Promise<T> {
+    const dialog_task = xpd_dialog_queue.then(task, task);
+    xpd_dialog_queue = dialog_task.catch(() => {});
     return dialog_task;
 }
-function is_opd_dark_theme_enabled() {
-    const main_element = document.getElementById("opd_main_element");
-    return main_element?.getAttribute("opd-dsp-theme") === "dark";
+function is_xpd_dark_theme_enabled() {
+    const main_element = document.getElementById("xpd_main_element");
+    return main_element?.getAttribute("xpd-dsp-theme") === "dark";
 }
-export function open_opd_dialog({
+export function open_xpd_dialog({
     message,
     type,
     defaultValue,
@@ -645,28 +654,28 @@ export function open_opd_dialog({
     choices?: { value: string; label: string }[];
     mount?: (dialog: HTMLDivElement) => () => void;
 }) {
-    return enqueue_opd_dialog(
+    return enqueue_xpd_dialog(
         () =>
             new Promise((resolve) => {
-                ensure_opd_dialog_style();
+                ensure_xpd_dialog_style();
                 const overlay = document.createElement("div");
-                overlay.className = "opd_dialog_overlay";
-                if (is_opd_dark_theme_enabled()) {
-                    overlay.classList.add("opd_dialog_theme_dark");
+                overlay.className = "xpd_dialog_overlay";
+                if (is_xpd_dark_theme_enabled()) {
+                    overlay.classList.add("xpd_dialog_theme_dark");
                 }
                 const dialog = document.createElement("div");
-                dialog.className = "opd_dialog";
+                dialog.className = "xpd_dialog";
                 dialog.setAttribute("role", "dialog");
                 dialog.setAttribute("aria-modal", "true");
                 const message_elem = document.createElement("p");
-                message_elem.className = "opd_dialog_message";
+                message_elem.className = "xpd_dialog_message";
                 message_elem.textContent = `${message}`;
                 dialog.appendChild(message_elem);
                 const cleanup_content = mount?.(dialog);
                 let prompt_input: WaInput | WaSelect | null = null;
                 if (type == "prompt") {
                     prompt_input = document.createElement("wa-input");
-                    prompt_input.className = "opd_dialog_input";
+                    prompt_input.className = "xpd_dialog_input";
                     prompt_input.setAttribute("aria-label", message);
                     prompt_input.type = "text";
                     prompt_input.value = defaultValue ?? "";
@@ -674,7 +683,7 @@ export function open_opd_dialog({
                 }
                 if (type == "select") {
                     const select = document.createElement("wa-select");
-                    select.className = "opd_dialog_input";
+                    select.className = "xpd_dialog_input";
                     select.setAttribute("aria-label", message);
                     for (const choice of choices ?? []) {
                         const option = document.createElement("wa-option");
@@ -687,14 +696,14 @@ export function open_opd_dialog({
                     dialog.appendChild(select);
                 }
                 const action_row = document.createElement("div");
-                action_row.className = "opd_dialog_actions";
+                action_row.className = "xpd_dialog_actions";
                 const ok_button = document.createElement("wa-button");
                 ok_button.type = "button";
                 ok_button.textContent = i18n_message_or_fallback(
                     "ui_dialog_ok_button",
                     "OK",
                 );
-                ok_button.className = "opd_dialog_primary";
+                ok_button.className = "xpd_dialog_primary";
                 ok_button.variant = "brand";
                 let cancel_button: WaButton | null = null;
                 if (type != "alert") {
@@ -852,18 +861,18 @@ export function open_opd_dialog({
             }),
     );
 }
-export async function opd_alert(message: string): Promise<void> {
-    await open_opd_dialog({ message, type: "alert" });
+export async function xpd_alert(message: string): Promise<void> {
+    await open_xpd_dialog({ message, type: "alert" });
 }
-export async function opd_confirm(message: string): Promise<boolean> {
-    const result = await open_opd_dialog({ message, type: "confirm" });
+export async function xpd_confirm(message: string): Promise<boolean> {
+    const result = await open_xpd_dialog({ message, type: "confirm" });
     return result === true;
 }
-export async function opd_prompt(
+export async function xpd_prompt(
     message: string,
     defaultValue = "",
 ): Promise<string | null> {
-    const result = await open_opd_dialog({
+    const result = await open_xpd_dialog({
         message,
         type: "prompt",
         defaultValue,
@@ -871,30 +880,30 @@ export async function opd_prompt(
     return typeof result === "string" ? result : null;
 }
 export async function open_about_page_modal() {
-    return enqueue_opd_dialog(
+    return enqueue_xpd_dialog(
         () =>
             new Promise<void>((resolve) => {
-                ensure_opd_dialog_style();
+                ensure_xpd_dialog_style();
                 const overlay = document.createElement("div");
-                overlay.className = "opd_dialog_overlay";
-                if (is_opd_dark_theme_enabled()) {
-                    overlay.classList.add("opd_dialog_theme_dark");
+                overlay.className = "xpd_dialog_overlay";
+                if (is_xpd_dark_theme_enabled()) {
+                    overlay.classList.add("xpd_dialog_theme_dark");
                 }
                 const dialog = document.createElement("div");
-                dialog.className = "opd_dialog opd_about_dialog";
+                dialog.className = "xpd_dialog xpd_about_dialog";
                 dialog.setAttribute("role", "dialog");
                 dialog.setAttribute("aria-modal", "true");
                 const header = document.createElement("div");
-                header.className = "opd_about_header";
+                header.className = "xpd_about_header";
                 const title = document.createElement("h2");
-                title.className = "opd_about_title";
+                title.className = "xpd_about_title";
                 title.textContent = i18n_message_or_fallback(
                     "ui_about_title",
                     "About",
                 );
                 const close_button = document.createElement("wa-button");
                 close_button.type = "button";
-                close_button.className = "opd_about_close";
+                close_button.className = "xpd_about_close";
                 close_button.appearance = "plain";
                 close_button.setAttribute(
                     "aria-label",
@@ -904,23 +913,23 @@ export async function open_about_page_modal() {
                     ),
                 );
                 const close_icon = document.createElement("span");
-                close_icon.className = "opd_about_close_icon";
+                close_icon.className = "xpd_about_close_icon";
                 close_icon.style.backgroundImage = `url(${chrome.runtime.getURL(ui_icon_define.column_close)})`;
                 close_button.appendChild(close_icon);
                 header.appendChild(title);
                 header.appendChild(close_button);
 
                 const body_top = document.createElement("section");
-                body_top.className = "opd_about_area1";
+                body_top.className = "xpd_about_area1";
                 const logo = document.createElement("div");
-                logo.className = "opd_about_logo";
+                logo.className = "xpd_about_logo";
                 logo.style.backgroundImage = `url(${chrome.runtime.getURL("public/icons/logo_icon.svg")})`;
                 const body_top_right = document.createElement("div");
                 const wordmark = document.createElement("div");
-                wordmark.className = "opd_about_wordmark";
+                wordmark.className = "xpd_about_wordmark";
                 wordmark.textContent = "XPP-Deck";
                 const version = document.createElement("div");
-                version.className = "opd_about_value";
+                version.className = "xpd_about_value";
                 version.innerHTML = `${i18n_message_or_fallback("ui_about_version_label", "Version")}:<span>${chrome.runtime.getManifest().version}</span>`;
                 body_top_right.appendChild(wordmark);
                 body_top_right.appendChild(version);
@@ -928,11 +937,11 @@ export async function open_about_page_modal() {
                 body_top.appendChild(body_top_right);
 
                 const body_links = document.createElement("section");
-                body_links.className = "opd_about_area2";
+                body_links.className = "xpd_about_area2";
                 body_links.innerHTML = `
                     <div>${i18n_message_or_fallback("ui_about_original_dev_label", "Original Dev")}<br /><a href="https://twitter.com/kw_nobu2" target="_blank" rel="noopener noreferrer">kawa-nobu</a></div>
-                    <div>${i18n_message_or_fallback("ui_about_github_label", "GitHub")}<br /><a href="https://github.com/kawa-nobu/Open-Deck" target="_blank" rel="noopener noreferrer">XPP-Deck</a></div>
-                    <div>${i18n_message_or_fallback("ui_about_changelog_label", "Change Log")}<br /><a href="https://github.com/kawa-nobu/Open-Deck/releases" target="_blank" rel="noopener noreferrer">${i18n_message_or_fallback("ui_about_releases_label", "Releases")}</a></div>
+                    <div>${i18n_message_or_fallback("ui_about_github_label", "GitHub")}<br /><a href="https://github.com/huaium/xpp-deck" target="_blank" rel="noopener noreferrer">XPP-Deck</a></div>
+                    <div>${i18n_message_or_fallback("ui_about_changelog_label", "Change Log")}<br /><a href="https://github.com/huaium/xpp-deck/releases" target="_blank" rel="noopener noreferrer">${i18n_message_or_fallback("ui_about_releases_label", "Releases")}</a></div>
                 `;
 
                 dialog.appendChild(header);
@@ -1047,14 +1056,14 @@ function read_rate_limit_endpoint(value: unknown): string | null {
     return typeof endpoint === "string" ? endpoint : null;
 }
 chrome.storage.local.get(
-    ["opd_rate_limit_until", "opd_rate_limit_event"],
+    ["xpd_rate_limit_until", "xpd_rate_limit_event"],
     (value) => {
         rate_limit_until = Math.max(
             rate_limit_until,
-            Number(value.opd_rate_limit_until) || 0,
+            Number(value.xpd_rate_limit_until) || 0,
         );
         rate_limit_endpoint = read_rate_limit_endpoint(
-            value.opd_rate_limit_event,
+            value.xpd_rate_limit_event,
         );
     },
 );
@@ -1073,7 +1082,7 @@ function api_icon_path(index: number) {
     return paths[index];
 }
 export function create_api_sidebar_html() {
-    return `<div id="api_limit_status_button" class="opd_api_sidebar"><span class="opd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<wa-button appearance="plain" class="opd_api_sidebar_row" data-api-key="${key}"><svg class="opd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${api_icon_path(index)}"/></svg><span class="opd_api_sidebar_label"></span><span class="opd_api_sidebar_value"></span></wa-button>`).join("")}</div>`;
+    return `<div id="api_limit_status_button" class="xpd_api_sidebar"><span class="xpd_api_sidebar_heading">${escape_profile_name(i18n_message_or_fallback("ui_button_api_usage_label", "API Usage"))}</span>${(["time_line", "recommend_timeline", "search"] as const).map((key, index) => `<wa-button appearance="plain" class="xpd_api_sidebar_row" data-api-key="${key}"><svg class="xpd_api_sidebar_icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${api_icon_path(index)}"/></svg><span class="xpd_api_sidebar_label"></span><span class="xpd_api_sidebar_value"></span></wa-button>`).join("")}</div>`;
 }
 export function update_api_sidebar() {
     for (const [key, label] of [
@@ -1092,8 +1101,8 @@ export function update_api_sidebar() {
                   String(Math.floor(quota.percentage)),
               ])
             : i18n_message("ui_api_no_data");
-        row.querySelector(".opd_api_sidebar_label")!.textContent = name;
-        row.querySelector(".opd_api_sidebar_value")!.textContent = quota
+        row.querySelector(".xpd_api_sidebar_label")!.textContent = name;
+        row.querySelector(".xpd_api_sidebar_value")!.textContent = quota
             ? `${Math.floor(quota.percentage)}%`
             : "—";
         row.dataset.level = quota?.level ?? "unknown";
@@ -1121,20 +1130,20 @@ export function api_quota_state(value: ApiAccessLimit["search"] | undefined) {
     };
 }
 export async function open_api_limits_dialog() {
-    await open_opd_dialog({
+    await open_xpd_dialog({
         type: "alert",
         message: i18n_message("ui_api_limits_title"),
         mount: (dialog) => {
             const description = document.createElement("p");
-            description.className = "opd_api_detail";
+            description.className = "xpd_api_detail";
             description.style.whiteSpace = "pre-line";
             description.textContent = i18n_message("ui_api_limits_description");
             dialog.appendChild(description);
             const cards = document.createElement("div");
-            cards.className = "opd_api_cards";
+            cards.className = "xpd_api_cards";
             dialog.appendChild(cards);
             const cooldown_notice = document.createElement("p");
-            cooldown_notice.className = "opd_api_detail";
+            cooldown_notice.className = "xpd_api_detail";
             cooldown_notice.setAttribute("role", "status");
             dialog.appendChild(cooldown_notice);
             let notice_timer: ReturnType<typeof setTimeout> | undefined;
@@ -1167,17 +1176,17 @@ export async function open_api_limits_dialog() {
                     ["search", "ui_api_search"],
                 ] as const) {
                     const card = document.createElement("section");
-                    card.className = "opd_api_card";
+                    card.className = "xpd_api_card";
                     const heading = document.createElement("div");
-                    heading.className = "opd_api_heading";
+                    heading.className = "xpd_api_heading";
                     const name = document.createElement("span");
-                    name.className = "opd_api_name";
+                    name.className = "xpd_api_name";
                     const icon = document.createElementNS(
                         "http://www.w3.org/2000/svg",
                         "svg",
                     );
                     for (const [attribute, value] of Object.entries({
-                        class: "opd_api_icon",
+                        class: "xpd_api_icon",
                         viewBox: "0 0 24 24",
                         "aria-hidden": "true",
                         fill: "none",
@@ -1217,7 +1226,7 @@ export async function open_api_limits_dialog() {
                     card.appendChild(heading);
                     if (quota) {
                         const track = document.createElement("div");
-                        track.className = "opd_api_track";
+                        track.className = "xpd_api_track";
                         track.setAttribute("role", "progressbar");
                         track.setAttribute("aria-label", i18n_message(label));
                         track.setAttribute("aria-valuemin", "0");
@@ -1230,12 +1239,12 @@ export async function open_api_limits_dialog() {
                             String(Math.min(quota.remaining, quota.limit)),
                         );
                         const fill = document.createElement("div");
-                        fill.className = "opd_api_fill";
+                        fill.className = "xpd_api_fill";
                         fill.dataset.level = quota.level;
                         fill.style.width = `${quota.percentage}%`;
                         track.appendChild(fill);
                         const detail = document.createElement("p");
-                        detail.className = "opd_api_detail";
+                        detail.className = "xpd_api_detail";
                         detail.textContent = i18n_message("ui_api_remaining", [
                             quota.remaining.toLocaleString(formatting_locale()),
                             quota.limit.toLocaleString(formatting_locale()),
@@ -1245,7 +1254,7 @@ export async function open_api_limits_dialog() {
                         const date = new Date(Number(reset) * 1000);
                         if (reset != null && Number.isFinite(date.getTime())) {
                             const time = document.createElement("p");
-                            time.className = "opd_api_detail";
+                            time.className = "xpd_api_detail";
                             time.textContent = i18n_message("ui_api_reset", [
                                 date.toLocaleTimeString(formatting_locale(), {
                                     hour: "numeric",
@@ -1259,7 +1268,7 @@ export async function open_api_limits_dialog() {
                 }
             };
             const listener = (changes: ChromeStorageChanges) => {
-                if (changes.opd_rate_limit_until) render();
+                if (changes.xpd_rate_limit_until) render();
                 if (changes.api_access_limit) {
                     api_limit_obj = (changes.api_access_limit.newValue ??
                         null) as ApiAccessLimit | null;
@@ -1298,14 +1307,14 @@ type ApiAccessLimit = {
     };
 };
 chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (changes.opd_rate_limit_event)
+    if (changes.xpd_rate_limit_event)
         rate_limit_endpoint = read_rate_limit_endpoint(
-            changes.opd_rate_limit_event.newValue,
+            changes.xpd_rate_limit_event.newValue,
         );
-    if (changes.opd_rate_limit_until) {
+    if (changes.xpd_rate_limit_until) {
         rate_limit_until = Math.max(
             rate_limit_until,
-            Number(changes.opd_rate_limit_until.newValue) || 0,
+            Number(changes.xpd_rate_limit_until.newValue) || 0,
         );
     }
     if (changes.api_access_limit != undefined) {
@@ -1371,15 +1380,15 @@ export async function initialize_content(
     const stored = await profile_storage_request({ op: "read" });
     if (signal?.aborted) return;
     if (
-        stored.opd_settings === undefined &&
-        stored.opd_profile_store === undefined
+        stored.xpd_settings === undefined &&
+        stored.xpd_profile_store === undefined
     ) {
         last_load_profile = 0;
         await settings_init(true, signal);
         return;
     }
-    const settings = JSON.parse(String(stored.opd_settings));
-    const profiles = JSON.parse(String(stored.opd_profile_store));
+    const settings = JSON.parse(String(stored.xpd_settings));
+    const profiles = JSON.parse(String(stored.xpd_profile_store));
     if (
         !settings ||
         typeof settings !== "object" ||
@@ -1418,10 +1427,10 @@ export async function initialize_content(
     profile_store = profiles;
     await run({ column_settings: profiles[last_load_profile].profile });
     if (signal?.aborted) return;
-    if (updated && (await opd_confirm(i18n_message("app_update")))) {
+    if (updated && (await xpd_confirm(i18n_message("app_update")))) {
         if (signal?.aborted) return;
         open(
-            "https://github.com/kawa-nobu/Open-Deck/releases/tag/v" +
+            "https://github.com/huaium/xpp-deck/releases/tag/v" +
                 manifest.version,
             "_blank",
             "popup",

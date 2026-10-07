@@ -36,7 +36,7 @@ test("column titles rename through click and keyboard without touching frames", 
                 last_load_profile: 0,
                 column_settings_save: () => saves++,
                 i18n_message_or_fallback: (_key, fallback) => fallback,
-                opd_prompt: async (_message, value) => {
+                xpd_prompt: async (_message, value) => {
                     prompts++;
                     assert.equal(value, "Home");
                     return input;
@@ -58,7 +58,7 @@ test("column titles rename through click and keyboard without touching frames", 
         assert.equal(saves, expected === "Home" ? 0 : 1);
         assert.equal(prompts, 1);
         if (expected !== "Home")
-            assert.equal(attributes.get("opd_custom_title"), expected);
+            assert.equal(attributes.get("xpd_custom_title"), expected);
         assert.ok(handlers.has("click"));
     }
 });
@@ -66,9 +66,9 @@ test("column titles rename through click and keyboard without touching frames", 
 test("custom titles serialize independently of Explore navigation titles", () => {
     for (const type of ["home", "explore", "post", "notification"]) {
         const attributes = {
-            opd_column_type: type,
-            opd_custom_title: "<My Column>",
-            opd_explore_title: "Detected title",
+            xpd_column_type: type,
+            xpd_custom_title: "<My Column>",
+            xpd_explore_title: "Detected title",
         };
         const { column_settings_save } = loadFunctions(
             "../src/content/run.ts",

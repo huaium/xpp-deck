@@ -18,11 +18,11 @@ for (const button of [
             "",
             {
                 i18n_message: (key) => key,
-                opd_confirm: async () => {
+                xpd_confirm: async () => {
                     confirmations++;
                     return false;
                 },
-                opd_prompt: () =>
+                xpd_prompt: () =>
                     assert.fail("must not prompt after cancellation"),
                 add_explore_column_with_path: () =>
                     assert.fail("must not add after cancellation"),

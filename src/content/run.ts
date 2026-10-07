@@ -22,15 +22,15 @@ import {
     last_load_profile,
     manifest,
     next_profile_name,
-    opd_alert,
-    opd_confirm,
-    opd_i18n_language,
-    opd_prompt,
-    opd_root_theme_attribute,
-    opd_sidebar_width_collapsed,
-    opd_sidebar_width_expanded,
+    xpd_alert,
+    xpd_confirm,
+    xpd_i18n_language,
+    xpd_prompt,
+    xpd_root_theme_attribute,
+    xpd_sidebar_width_collapsed,
+    xpd_sidebar_width_expanded,
     open_about_page_modal,
-    open_opd_dialog,
+    open_xpd_dialog,
     profile_store,
     profile_display_name,
     request_page_reload,
@@ -43,13 +43,13 @@ import {
     stop_system_theme_listener,
     get_cookie_color_mode,
 } from "./settings";
-import { OpdExtAutoReload } from "../extensions/auto_reload";
-let opd_column_load_scheduler:
+import { XpdExtAutoReload } from "../extensions/auto_reload";
+let xpd_column_load_scheduler:
     ReturnType<typeof create_column_load_scheduler> | undefined;
 let is_removed_default_style = false;
 export function dispose_deck() {
-    const scheduler = opd_column_load_scheduler;
-    opd_column_load_scheduler = undefined;
+    const scheduler = xpd_column_load_scheduler;
+    xpd_column_load_scheduler = undefined;
     scheduler?.dispose();
 }
 export function run(settings) {
@@ -61,7 +61,7 @@ export function run(settings) {
         blockedUntil: api_loading_paused_until,
         paused: () => document.hidden,
     });
-    opd_column_load_scheduler = load_scheduler;
+    xpd_column_load_scheduler = load_scheduler;
     const deck_lifetime = new AbortController();
     load_scheduler.onDispose(() => deck_lifetime.abort());
     load_scheduler.onDispose(stop_system_theme_listener);
@@ -97,9 +97,9 @@ export function run(settings) {
         eligible: () => boolean = () => frame.isConnected,
     ) {
         if (!frame.isConnected || load_scheduler.has(frame)) return;
-        const root = frame.closest<HTMLElement>("div[opd_column_type]");
+        const root = frame.closest<HTMLElement>("div[xpd_column_type]");
         root?.setAttribute(
-            "opd_load_status",
+            "xpd_load_status",
             i18n_message_or_fallback("ui_column_waiting", "Waiting to load"),
         );
         frame.setAttribute("aria-busy", "true");
@@ -109,7 +109,7 @@ export function run(settings) {
             priority: () => column_load_priority(frame),
             start: (done) => {
                 root?.setAttribute(
-                    "opd_load_status",
+                    "xpd_load_status",
                     i18n_message_or_fallback("ui_column_loading", "Loading..."),
                 );
                 const loaded = () => {
@@ -126,7 +126,7 @@ export function run(settings) {
                 frame.addEventListener("load", loaded);
                 const cleanup = () => {
                     frame.removeEventListener("load", loaded);
-                    root?.removeAttribute("opd_load_status");
+                    root?.removeAttribute("xpd_load_status");
                     frame.removeAttribute("aria-busy");
                 };
                 try {
@@ -142,7 +142,7 @@ export function run(settings) {
     function queue_column_frames() {
         document
             .querySelectorAll<HTMLIFrameElement>(
-                "#opd_main_element iframe[data-opd-src]",
+                "#xpd_main_element iframe[data-xpd-src]",
             )
             .forEach((frame) => {
                 if (!observed_frames.has(frame)) {
@@ -157,12 +157,12 @@ export function run(settings) {
                 queue_column_navigation(
                     frame,
                     () => {
-                        const source = frame.getAttribute("data-opd-src");
-                        frame.removeAttribute("data-opd-src");
+                        const source = frame.getAttribute("data-xpd-src");
+                        frame.removeAttribute("data-xpd-src");
                         pending_frame_observer.unobserve(frame);
                         const homepage = frame
-                            .closest("div[opd_column_type]")
-                            ?.getAttribute("opd_homepage_path");
+                            .closest("div[xpd_column_type]")
+                            ?.getAttribute("xpd_homepage_path");
                         if (homepage)
                             frame.src = column_navigation_url(
                                 `https://x.com${homepage}`,
@@ -184,7 +184,7 @@ export function run(settings) {
     }
     function queue_column_auto_refresh(
         frame: HTMLIFrameElement,
-        reload: OpdExtAutoReload | null,
+        reload: XpdExtAutoReload | null,
     ) {
         const eligible = () => {
             if (!frame.isConnected || !frame.contentWindow) return false;
@@ -195,8 +195,8 @@ export function run(settings) {
             )
                 return false;
             const enabled = frame
-                .closest("div[opd_column_type]")
-                ?.querySelector<WaCheckbox>(".opd_a_reload_bar")?.checked;
+                .closest("div[xpd_column_type]")
+                ?.querySelector<WaCheckbox>(".xpd_a_reload_bar")?.checked;
             return (
                 enabled === true &&
                 frame.getAttribute("auto_reload_mouse_hover") !== "true"
@@ -266,32 +266,32 @@ export function run(settings) {
     document_head.insertAdjacentHTML(
         "afterbegin",
         `<style second_column_css></style>
-    <style opd_default_css>
+    <style xpd_default_css>
     html{
         overflow-y:hidden !important;
     }
-    #opd_main_element{
-        --opd-bg: #e6e9ee;
-        --opd-surface: #ffffff;
-        --opd-surface-alt: #f5f7fa;
-        --opd-border: #c6ced8;
-        --opd-border-strong: #a8b2bf;
-        --opd-text: #1f2937;
-        --opd-muted: #5f6b7a;
-        --opd-hover: #e7edf4;
-        --opd-focus: #3b82f6;
-        --opd-profile-selected-bg: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
-        --opd-profile-selected-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-        --opd-sidebar-width: ${opd_sidebar_width_expanded};
-        --opd-sidebar-label-opacity: 1;
-        --opd-sidebar-label-width: auto;
+    #xpd_main_element{
+        --xpd-bg: #e6e9ee;
+        --xpd-surface: #ffffff;
+        --xpd-surface-alt: #f5f7fa;
+        --xpd-border: #c6ced8;
+        --xpd-border-strong: #a8b2bf;
+        --xpd-text: #1f2937;
+        --xpd-muted: #5f6b7a;
+        --xpd-hover: #e7edf4;
+        --xpd-focus: #3b82f6;
+        --xpd-profile-selected-bg: linear-gradient(180deg, #eef5ff 0%, #e4eefc 100%);
+        --xpd-profile-selected-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+        --xpd-sidebar-width: ${xpd_sidebar_width_expanded};
+        --xpd-sidebar-label-opacity: 1;
+        --xpd-sidebar-label-width: auto;
     }
-    #opd_main_element.opd_sidebar_collapsed{
-        --opd-sidebar-width: ${opd_sidebar_width_collapsed};
-        --opd-sidebar-label-opacity: 0;
-        --opd-sidebar-label-width: 0;
+    #xpd_main_element.xpd_sidebar_collapsed{
+        --xpd-sidebar-width: ${xpd_sidebar_width_collapsed};
+        --xpd-sidebar-label-opacity: 0;
+        --xpd-sidebar-label-width: 0;
     }
-    #opd_main_element *{
+    #xpd_main_element *{
         box-sizing: border-box;
         font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
@@ -301,9 +301,9 @@ export function run(settings) {
         align-items: stretch;
         gap: 0.4rem;
         margin-top: 0.4rem;
-        color: var(--opd-text);
+        color: var(--xpd-text);
         font-weight: 700;
-        width: var(--opd-sidebar-width);
+        width: var(--xpd-sidebar-width);
         padding: 0 0.5rem 0.5rem;
         overflow: hidden;
         transition: width 0.18s ease;
@@ -312,26 +312,26 @@ export function run(settings) {
         width: 100%;
         margin: 0.15rem 0;
         border: 0;
-        border-top: 1px solid var(--opd-border);
+        border-top: 1px solid var(--xpd-border);
     }
-    .opd_version_span{
+    .xpd_version_span{
         cursor: pointer;
-        color: var(--opd-muted);
+        color: var(--xpd-muted);
         font-size: 0.72rem;
         white-space: nowrap;
     }
-    #opd_main_element{
-        background: var(--opd-bg) !important;
+    #xpd_main_element{
+        background: var(--xpd-bg) !important;
     }
-    div[opd_column_type="dsp_column"]{
+    div[xpd_column_type="dsp_column"]{
         overflow-x: scroll;
         scrollbar-width: none;
     }
     #main_bar_empty_column{
-        background-color: var(--opd-surface);
-        border-right: 1px solid var(--opd-border);
-        min-width: var(--opd-sidebar-width) !important;
-        max-width: var(--opd-sidebar-width) !important;
+        background-color: var(--xpd-surface);
+        border-right: 1px solid var(--xpd-border);
+        min-width: var(--xpd-sidebar-width) !important;
+        max-width: var(--xpd-sidebar-width) !important;
         transition: min-width 0.18s ease, max-width 0.18s ease;
     }
     #api_limit_status{
@@ -341,16 +341,16 @@ export function run(settings) {
         min-height: 24px;
         line-height: 24px;
         text-align: center;
-        border: 1px solid var(--opd-border);
-        background: var(--opd-surface-alt);
-        color: var(--opd-muted);
+        border: 1px solid var(--xpd-border);
+        background: var(--xpd-surface-alt);
+        color: var(--xpd-muted);
         font-size: 0.72rem;
     }
     #api_limit_status:hover{
-        background-color: var(--opd-hover);
+        background-color: var(--xpd-hover);
         cursor: help;
     }
-    .opd_ui_logo_parent{
+    .xpd_ui_logo_parent{
         overflow: hidden;
         display: flex;
         width: 100%;
@@ -363,44 +363,44 @@ export function run(settings) {
         box-sizing: border-box;
         padding: 0.1rem 16px;
     }
-    .opd_global_settings_button{
+    .xpd_global_settings_button{
         margin-left:auto; flex-shrink:0; width:36px; height:36px;
         border:0; border-radius:8px; background:transparent; cursor:pointer;
         display:grid; place-items:center;
     }
-    .opd_global_settings_button:hover{background:var(--opd-hover);}
-    .opd_global_settings_button img{width:24px;height:24px;}
-    .opd_global_settings_controls{--opd-text:inherit;--opd-muted:inherit;--opd-border:#87919c;--opd-hover:rgba(128,128,128,.12);}
-    .opd_dialog_theme_dark .opd_global_settings_controls .dsp_btn_icon_wrap{filter:invert(1);}
-    .opd_global_settings_controls .opd_language_separator{display:none;}
-    .opd_global_settings_controls .opd_language_select{color:inherit;background:transparent;}
-    .opd_global_settings_dialog{width: min(420px, calc(100vw - 32px));}
-    .opd_global_settings_dialog .opd_dialog_message{font-size:1.15rem;font-weight:700;margin-bottom:20px;}
-    .opd_global_settings_controls .opd_global_setting_row,
-    .opd_global_settings_controls .opd_language_select_wrap{
+    .xpd_global_settings_button:hover{background:var(--xpd-hover);}
+    .xpd_global_settings_button img{width:24px;height:24px;}
+    .xpd_global_settings_controls{--xpd-text:inherit;--xpd-muted:inherit;--xpd-border:#87919c;--xpd-hover:rgba(128,128,128,.12);}
+    .xpd_dialog_theme_dark .xpd_global_settings_controls .dsp_btn_icon_wrap{filter:invert(1);}
+    .xpd_global_settings_controls .xpd_language_separator{display:none;}
+    .xpd_global_settings_controls .xpd_language_select{color:inherit;background:transparent;}
+    .xpd_global_settings_dialog{width: min(420px, calc(100vw - 32px));}
+    .xpd_global_settings_dialog .xpd_dialog_message{font-size:1.15rem;font-weight:700;margin-bottom:20px;}
+    .xpd_global_settings_controls .xpd_global_setting_row,
+    .xpd_global_settings_controls .xpd_language_select_wrap{
         display:grid;grid-template-columns:minmax(0,1fr) minmax(0,55%);gap:16px;align-items:center;
         margin:0;padding:6px 0;min-width:0;
     }
-    .opd_global_settings_controls wa-select{
+    .xpd_global_settings_controls wa-select{
         box-sizing:border-box;min-width:0;width:100%;min-height:40px;
         border:0;padding:0;background-color:transparent;color:inherit;font:inherit;
     }
-    .opd_dialog_theme_dark .opd_global_settings_controls select{
+    .xpd_dialog_theme_dark .xpd_global_settings_controls select{
         color-scheme:dark;
     }
-    .opd_global_settings_controls .opd_language_select_wrap{color:inherit;font:inherit;}
-    .opd_global_settings_controls .opd_language_select_label{color:inherit;font:inherit;padding:0;}
-    .opd_global_settings_controls #second_rack{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:0 12px;border:1px solid #87919c;border-radius:8px;}
-    .opd_global_settings_controls #second_rack .dsp_btn_icon_wrap{display:none;}
-    .opd_global_settings_controls #second_rack .dsp_btn_label{font:inherit;color:inherit;}
-    .opd_global_settings_dialog .opd_dialog_actions{margin-top:16px;}
-    #opd_main_element[opd-dsp-theme="dark"] .opd_global_settings_button img{filter:invert(1);}
-    #opd_main_element #switch_theme,
-    #opd_main_element #second_rack,
-    #opd_main_element .opd_language_select_wrap{display:none;}
-    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo_parent{gap:2px;}
-    #opd_main_element.opd_sidebar_collapsed .opd_global_settings_button{display:none;}
-    .opd_language_select_wrap{
+    .xpd_global_settings_controls .xpd_language_select_wrap{color:inherit;font:inherit;}
+    .xpd_global_settings_controls .xpd_language_select_label{color:inherit;font:inherit;padding:0;}
+    .xpd_global_settings_controls #second_rack{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:0 12px;border:1px solid #87919c;border-radius:8px;}
+    .xpd_global_settings_controls #second_rack .dsp_btn_icon_wrap{display:none;}
+    .xpd_global_settings_controls #second_rack .dsp_btn_label{font:inherit;color:inherit;}
+    .xpd_global_settings_dialog .xpd_dialog_actions{margin-top:16px;}
+    #xpd_main_element[xpd-dsp-theme="dark"] .xpd_global_settings_button img{filter:invert(1);}
+    #xpd_main_element #switch_theme,
+    #xpd_main_element #second_rack,
+    #xpd_main_element .xpd_language_select_wrap{display:none;}
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_ui_logo_parent{gap:2px;}
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_global_settings_button{display:none;}
+    .xpd_language_select_wrap{
         display: flex;
         flex-direction: column;
         align-items: stretch;
@@ -408,34 +408,34 @@ export function run(settings) {
         gap: 0.25rem;
         margin-top: auto;
     }
-    .opd_language_separator{
+    .xpd_language_separator{
         width: 100%;
         margin: 0.15rem 0 0.2rem;
         border: 0;
-        border-top: 1px solid var(--opd-border);
+        border-top: 1px solid var(--xpd-border);
     }
-    .opd_language_select_label{
-        color: var(--opd-muted);
+    .xpd_language_select_label{
+        color: var(--xpd-muted);
         font-size: 0.72rem;
         text-align: left;
         line-height: 1;
         padding: 0 0.15rem;
     }
-    .opd_language_select{
+    .xpd_language_select{
         width: 100%;
         min-height: 30px;
-        border: 1px solid var(--opd-border);
+        border: 1px solid var(--xpd-border);
         border-radius: 8px;
-        background: var(--opd-surface);
-        color: var(--opd-text);
+        background: var(--xpd-surface);
+        color: var(--xpd-text);
         font-size: 0.8rem;
         padding: 0 0.45rem;
         cursor: pointer;
     }
-    .opd_language_select:hover{
-        background-color: var(--opd-hover);
+    .xpd_language_select:hover{
+        background-color: var(--xpd-hover);
     }
-    .opd_ui_logo{
+    .xpd_ui_logo{
         flex-shrink: 0;
         background-size: cover;
         background-repeat: no-repeat;
@@ -446,10 +446,10 @@ export function run(settings) {
     }
     #main_rack_element{
         position: fixed;
-        left: var(--opd-sidebar-width);
+        left: var(--xpd-sidebar-width);
         height:100vh;
-        max-width:calc(100vw - var(--opd-sidebar-width));
-        width:calc(100vw - var(--opd-sidebar-width));
+        max-width:calc(100vw - var(--xpd-sidebar-width));
+        width:calc(100vw - var(--xpd-sidebar-width));
         overflow:scroll hidden;
         transition: left 0.18s ease, width 0.18s ease, max-width 0.18s ease;
     }
@@ -461,11 +461,11 @@ export function run(settings) {
     }
     .dsp_column_emptycolumn p{
         text-align: center;
-        color: var(--opd-text);
+        color: var(--xpd-text);
     }
     .dsp_column_second_emptycolumn p{
         text-align: center;
-        color: var(--opd-text);
+        color: var(--xpd-text);
     }
     .dsp_btn_parent{
         overflow: hidden;
@@ -481,8 +481,8 @@ export function run(settings) {
         padding: 0 0.7rem;
     }
     .dsp_btn_parent:hover{
-        background: var(--opd-hover);
-        border-color: var(--opd-border);
+        background: var(--xpd-hover);
+        border-color: var(--xpd-border);
         cursor: pointer;
     }
     .dsp_btn_icon_wrap{
@@ -496,13 +496,13 @@ export function run(settings) {
     .dsp_btn_label{
         overflow: hidden;
         max-width: 100%;
-        color: var(--opd-text);
+        color: var(--xpd-text);
         font-size: 0.9rem;
         line-height: 1.2;
         white-space: nowrap;
         text-overflow: ellipsis;
-        opacity: var(--opd-sidebar-label-opacity);
-        width: var(--opd-sidebar-label-width);
+        opacity: var(--xpd-sidebar-label-opacity);
+        width: var(--xpd-sidebar-label-width);
         transition: opacity 120ms ease-out;
     }
     .dsp_btn_sidebar_fold_img{
@@ -515,67 +515,67 @@ export function run(settings) {
         height: 22px;
         transform: scaleX(1);
     }
-    #sidebar_fold_toggle.opd_sidebar_toggle_is_collapsed .dsp_btn_sidebar_fold_img{
+    #sidebar_fold_toggle.xpd_sidebar_toggle_is_collapsed .dsp_btn_sidebar_fold_img{
         transform: scaleX(-1);
     }
     #api_limit_status_button .dsp_btn_icon_wrap{
         width: auto;
         min-width: 48px;
     }
-    .opd_api_sidebar{padding:12px 8px;margin:4px 0;border-block:1px solid var(--opd-border);}
-    .opd_api_sidebar_heading{display:flex;align-items:center;justify-content:flex-start;text-align:left;height:24px;font-size:0.72rem;font-weight:400;line-height:1;color:var(--opd-muted);padding:0 0.15rem;margin:0 0 8px;}
-    .opd_api_sidebar_row{display:flex;align-items:center;gap:8px;width:100%;height:48px;min-height:48px;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:var(--opd-text);cursor:pointer;font:inherit;}
-    .opd_api_sidebar_row:hover{background:var(--opd-hover);}
-    .opd_api_sidebar_row:focus-visible{outline:2px solid var(--opd-muted);outline-offset:1px;}
-    .opd_api_sidebar_icon{width:18px;height:18px;flex-shrink:0;}
-    .opd_api_sidebar_label{font-size:12px;flex:1;text-align:left;}
-    .opd_api_sidebar_value{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
-    .opd_api_sidebar_row[data-level="green"] .opd_api_sidebar_value{color:#16834a;}
-    .opd_api_sidebar_row[data-level="amber"] .opd_api_sidebar_value{color:#b77909;}
-    .opd_api_sidebar_row[data-level="red"] .opd_api_sidebar_value{color:#d33b36;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar{padding:12px 0;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_heading{justify-content:center;text-align:center;font-size:9px;line-height:1.3;margin:0 2px 8px;overflow-wrap:anywhere;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_label{display:none;}
-    #opd_main_element.opd_sidebar_collapsed .opd_api_sidebar_row{flex-direction:column;gap:3px;padding:7px 0;min-height:48px;}
+    .xpd_api_sidebar{padding:12px 8px;margin:4px 0;border-block:1px solid var(--xpd-border);}
+    .xpd_api_sidebar_heading{display:flex;align-items:center;justify-content:flex-start;text-align:left;height:24px;font-size:0.72rem;font-weight:400;line-height:1;color:var(--xpd-muted);padding:0 0.15rem;margin:0 0 8px;}
+    .xpd_api_sidebar_row{display:flex;align-items:center;gap:8px;width:100%;height:48px;min-height:48px;padding:7px 8px;border:0;border-radius:8px;background:transparent;color:var(--xpd-text);cursor:pointer;font:inherit;}
+    .xpd_api_sidebar_row:hover{background:var(--xpd-hover);}
+    .xpd_api_sidebar_row:focus-visible{outline:2px solid var(--xpd-muted);outline-offset:1px;}
+    .xpd_api_sidebar_icon{width:18px;height:18px;flex-shrink:0;}
+    .xpd_api_sidebar_label{font-size:12px;flex:1;text-align:left;}
+    .xpd_api_sidebar_value{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
+    .xpd_api_sidebar_row[data-level="green"] .xpd_api_sidebar_value{color:#16834a;}
+    .xpd_api_sidebar_row[data-level="amber"] .xpd_api_sidebar_value{color:#b77909;}
+    .xpd_api_sidebar_row[data-level="red"] .xpd_api_sidebar_value{color:#d33b36;}
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_api_sidebar{padding:12px 0;}
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_api_sidebar_heading{justify-content:center;text-align:center;font-size:9px;line-height:1.3;margin:0 2px 8px;overflow-wrap:anywhere;}
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_api_sidebar_label{display:none;}
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_api_sidebar_row{flex-direction:column;gap:3px;padding:7px 0;min-height:48px;}
     #api_limit_status_button .dsp_btn_label{
         text-align: center;
     }
-    #opd_main_element.opd_sidebar_collapsed .dsp_btn_parent{
+    #xpd_main_element.xpd_sidebar_collapsed .dsp_btn_parent{
         justify-content: center;
         padding: 0;
         gap: 0;
     }
-    #opd_main_element.opd_sidebar_collapsed .dsp_btn_label{opacity:0;pointer-events:none;}
+    #xpd_main_element.xpd_sidebar_collapsed .dsp_btn_label{opacity:0;pointer-events:none;}
     @media(prefers-reduced-motion:reduce){
-        #opd_main_element .dsp_btn_label,
-        #opd_main_element .dsp_column_draggable_false,
-        #opd_main_element{transition:none !important;}
+        #xpd_main_element .dsp_btn_label,
+        #xpd_main_element .dsp_column_draggable_false,
+        #xpd_main_element{transition:none !important;}
     }
-    #opd_main_element.opd_sidebar_collapsed .dsp_profile_section{
+    #xpd_main_element.xpd_sidebar_collapsed .dsp_profile_section{
         align-items: center;
     }
-    #opd_main_element.opd_sidebar_collapsed .main_bar_functions{
+    #xpd_main_element.xpd_sidebar_collapsed .main_bar_functions{
         align-items: center;
         padding-left: 0.2rem;
         padding-right: 0.2rem;
     }
-    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo_parent{
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_ui_logo_parent{
         justify-content: center;
         padding: 0;
         min-height: 52px;
     }
-    #opd_main_element.opd_sidebar_collapsed .opd_language_select_wrap{
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_language_select_wrap{
         visibility: hidden;
         pointer-events: none;
     }
-    #opd_main_element.opd_sidebar_collapsed .opd_version_span{
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_version_span{
         display: none;
     }
-    #opd_main_element.opd_sidebar_collapsed .opd_ui_logo{
+    #xpd_main_element.xpd_sidebar_collapsed .xpd_ui_logo{
         width: 42px;
         height: 42px;
     }
-    #opd_main_element.opd_sidebar_collapsed #api_limit_status_button .dsp_btn_icon_wrap{
+    #xpd_main_element.xpd_sidebar_collapsed #api_limit_status_button .dsp_btn_icon_wrap{
         min-width: 48px;
     }
     .dsp_btn_add_post_img{
@@ -662,25 +662,25 @@ export function run(settings) {
         display: flex;
         font-size: 0.95rem;
         font-weight: 600;
-        color: var(--opd-muted);
+        color: var(--xpd-muted);
         justify-content: center;
         align-items: center;
         height: 100%;
         width: 100%;
     }
     .dsp_btn_profile_selected{
-        border: 1px solid var(--opd-focus);
-        color: var(--opd-text);
-        background: var(--opd-profile-selected-bg);
-        box-shadow: var(--opd-profile-selected-shadow);
+        border: 1px solid var(--xpd-focus);
+        color: var(--xpd-text);
+        background: var(--xpd-profile-selected-bg);
+        box-shadow: var(--xpd-profile-selected-shadow);
     }
     .dsp_btn_profile_selected:hover{
-        background: var(--opd-profile-selected-bg);
-        border-color: var(--opd-focus);
+        background: var(--xpd-profile-selected-bg);
+        border-color: var(--xpd-focus);
     }
     .dsp_btn_profile_selected .dsp_btn_change_profile_btn,
     .dsp_btn_profile_selected .dsp_btn_label{
-        color: var(--opd-text);
+        color: var(--xpd-text);
     }
     .dsp_profile_section{
         display: flex;
@@ -700,13 +700,13 @@ export function run(settings) {
         width: 100%;
     }
     .dsp_column_draggable_true{
-        border: 1px solid var(--opd-border);
+        border: 1px solid var(--xpd-border);
         /*overflow: hidden;*/
-        background-color: var(--opd-surface);
+        background-color: var(--xpd-surface);
         border-radius: 8px;
         margin: 0 0.15rem;
     }
-    .dsp_column_draggable_true div[opd_column_type]{
+    .dsp_column_draggable_true div[xpd_column_type]{
         display: flex;
         flex-direction: column;
     }
@@ -727,8 +727,8 @@ export function run(settings) {
         border: 1px solid transparent;
     }
     .dsp_column_btn:hover{
-        background: var(--opd-hover);
-        border-color: var(--opd-border);
+        background: var(--xpd-hover);
+        border-color: var(--xpd-border);
         cursor: pointer;
     }
     .column_bar{
@@ -740,14 +740,14 @@ export function run(settings) {
         padding: 3px 6px;
         gap: 2px;
         overflow: visible;
-        border-top: solid var(--opd-border) 1px !important;
-        border-bottom: solid var(--opd-border) 1px !important;
+        border-top: solid var(--xpd-border) 1px !important;
+        border-bottom: solid var(--xpd-border) 1px !important;
         border-radius: 8px 8px 0 0;
-        background: var(--opd-surface-alt);
+        background: var(--xpd-surface-alt);
     }
     .dsp_column_title{
         width: auto;
-        color: var(--opd-text);
+        color: var(--xpd-text);
         font-size: 0.85rem;
         font-weight: 600;
         margin-right: 2px;
@@ -801,11 +801,11 @@ export function run(settings) {
         background:url(${chrome.runtime.getURL("public/icons/copy_link.svg")}) center / contain no-repeat;
         cursor:pointer;
     }
-    .opd_homepage_btn{display:block;width:22px;height:22px;background:url(${chrome.runtime.getURL("public/icons/homepage.svg")}) center / contain no-repeat;cursor:pointer;}
-    #opd_main_element .opd_homepage_setting{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0 16px;border-bottom:1px solid var(--opd-border);font-size:13px;}
-    #opd_main_element .opd_homepage_setting > label{grid-column:1 / -1;}
-    #opd_main_element .opd_homepage_setting wa-input{width:100%;min-width:0;}
-    #opd_main_element .opd_homepage_current{align-self:center;}
+    .xpd_homepage_btn{display:block;width:22px;height:22px;background:url(${chrome.runtime.getURL("public/icons/homepage.svg")}) center / contain no-repeat;cursor:pointer;}
+    #xpd_main_element .xpd_homepage_setting{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0 16px;border-bottom:1px solid var(--xpd-border);font-size:13px;}
+    #xpd_main_element .xpd_homepage_setting > label{grid-column:1 / -1;}
+    #xpd_main_element .xpd_homepage_setting wa-input{width:100%;min-width:0;}
+    #xpd_main_element .xpd_homepage_current{align-self:center;}
     .dsp_column_refresh_btn input{
         display: none;
     }
@@ -863,8 +863,8 @@ export function run(settings) {
         position: relative;
         width: inherit;
         height: auto;
-        background: var(--opd-surface-alt);
-        border: 1px solid var(--opd-border-strong);
+        background: var(--xpd-surface-alt);
+        border: 1px solid var(--xpd-border-strong);
         border-radius: 0 0 8px 8px;
         border-top: 0;
         flex-direction: column;
@@ -879,17 +879,17 @@ export function run(settings) {
     .dsp_column_settings_panel_content h2{
         font-size: 0.9rem;
         font-weight: 700;
-        color: var(--opd-text);
+        color: var(--xpd-text);
         margin-bottom: 0.35rem;
     }
-    .opd_column_settings_input_text{
+    .xpd_column_settings_input_text{
         width: 4.5rem;
         margin-right: 0.2rem;
     }
     .dsp_column_settings_list{
-        background: var(--opd-surface);
+        background: var(--xpd-surface);
         border-radius: 6px;
-        border: 1px solid var(--opd-border);
+        border: 1px solid var(--xpd-border);
         margin: 0;
         padding: 0.45rem;
     }
@@ -900,7 +900,7 @@ export function run(settings) {
         align-items: center;
         gap: 0.3rem;
         font-size: 0.8rem;
-        color: var(--opd-text);
+        color: var(--xpd-text);
     }
     .dsp_column_settings_panel_close_btn_wrap{
         display: flex;
@@ -909,9 +909,9 @@ export function run(settings) {
         margin: 0.4rem 0.5rem 0.5rem 0.5rem;
     }
     .dsp_column_settings_panel_close_btn{
-        border: 1px solid var(--opd-border-strong);
-        background: var(--opd-surface);
-        color: var(--opd-text);
+        border: 1px solid var(--xpd-border-strong);
+        background: var(--xpd-surface);
+        color: var(--xpd-text);
         border-radius: 999px;
         font-size: 0.75rem;
         line-height: 1;
@@ -920,65 +920,65 @@ export function run(settings) {
         cursor: pointer;
     }
     .dsp_column_settings_panel_close_btn:hover{
-        background: var(--opd-hover);
+        background: var(--xpd-hover);
     }
     .dsp_column_settings_panel select,
     .dsp_column_settings_panel input[type="number"]{
-        border: 1px solid var(--opd-border);
+        border: 1px solid var(--xpd-border);
         border-radius: 6px;
         min-height: 24px;
         padding: 0 0.35rem;
         font-size: 0.76rem;
-        color: var(--opd-text);
-        background: var(--opd-surface);
+        color: var(--xpd-text);
+        background: var(--xpd-surface);
     }
     .column_width_btn{
-        border: 1px solid var(--opd-border);
+        border: 1px solid var(--xpd-border);
         border-radius: 6px;
-        background: var(--opd-surface);
+        background: var(--xpd-surface);
         min-height: 24px;
         padding: 0 0.45rem;
         cursor: pointer;
         font-size: 0.75rem;
     }
     .column_width_btn:hover{
-        background: var(--opd-hover);
+        background: var(--xpd-hover);
     }
-    #opd_main_element button:focus-visible,
-    #opd_main_element input:focus-visible,
-    #opd_main_element select:focus-visible,
-    #opd_main_element .dsp_btn_parent:focus-visible,
-    #opd_main_element .dsp_column_btn:focus-within{
-        outline: 2px solid var(--opd-focus);
+    #xpd_main_element button:focus-visible,
+    #xpd_main_element input:focus-visible,
+    #xpd_main_element select:focus-visible,
+    #xpd_main_element .dsp_btn_parent:focus-visible,
+    #xpd_main_element .dsp_column_btn:focus-within{
+        outline: 2px solid var(--xpd-focus);
         outline-offset: 1px;
     }
-    .opd_ui_icon_color{
+    .xpd_ui_icon_color{
         filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(13%) hue-rotate(322deg) brightness(107%) contrast(80%);
     }
     /*#main_rack_element section:first-child{
         margin-left:110px
     }*/
     /*:root {color-scheme: light;}*/
-    /*#opd_main_element[opd-dsp-theme="dark"] {
+    /*#xpd_main_element[xpd-dsp-theme="dark"] {
         color-scheme: dark;
     }*/
-    #opd_main_element[opd-dsp-theme="light"] {
+    #xpd_main_element[xpd-dsp-theme="light"] {
         color-scheme: light;
     }
     /* When dark mode is detected. */
-    #opd_main_element[opd-dsp-theme="dark"] {
+    #xpd_main_element[xpd-dsp-theme="dark"] {
         color-scheme: dark;
-        --opd-bg: #101215;
-        --opd-surface: #181d24;
-        --opd-surface-alt: #262e3a;
-        --opd-border: #3f4a5a;
-        --opd-border-strong: #5a677c;
-        --opd-text: #e5ebf3;
-        --opd-muted: #aab5c4;
-        --opd-hover: #3b4554;
-        --opd-focus: #66a4ff;
-        --opd-profile-selected-bg: linear-gradient(180deg, #34455f 0%, #2c3a50 100%);
-        --opd-profile-selected-shadow: inset 0 0 0 1px rgba(122, 154, 195, 0.3);
+        --xpd-bg: #101215;
+        --xpd-surface: #181d24;
+        --xpd-surface-alt: #262e3a;
+        --xpd-border: #3f4a5a;
+        --xpd-border-strong: #5a677c;
+        --xpd-text: #e5ebf3;
+        --xpd-muted: #aab5c4;
+        --xpd-hover: #3b4554;
+        --xpd-focus: #66a4ff;
+        --xpd-profile-selected-bg: linear-gradient(180deg, #34455f 0%, #2c3a50 100%);
+        --xpd-profile-selected-shadow: inset 0 0 0 1px rgba(122, 154, 195, 0.3);
 
         & #main_rack_element {
             background-color: #101215 !important;
@@ -1007,14 +1007,14 @@ export function run(settings) {
         & .dsp_btn_add_explr_img,
         & .dsp_btn_add_lists_img,
         & .dsp_btn_add_custom_url_img,
-        & .opd_ui_logo,
+        & .xpd_ui_logo,
         & .dsp_btn_sidebar_fold_img,
         & .dsp_btn_second_rack_img,
         & .dsp_btn_profile_add_img,
         & .dsp_btn_profile_delete_img,
         & .dsp_btn_switch_theme_img,
         & .dsp_column_move_icon,
-        & .opd_ui_icon_color {
+        & .xpd_ui_icon_color {
             filter: brightness(0) saturate(100%) invert(98%);
         }
 
@@ -1024,7 +1024,7 @@ export function run(settings) {
         }
 
         & .dsp_column_settings_panel {
-            background: var(--opd-surface);
+            background: var(--xpd-surface);
             border: 1px solid #4f5a68;
         }
 
@@ -1044,239 +1044,239 @@ export function run(settings) {
     }
 
     /* Shared workspace chrome: keep embedded timelines untouched. */
-    #opd_main_element{
-        --opd-bg: #f4f5f7;
-        --opd-surface: #ffffff;
-        --opd-surface-alt: #f8f9fb;
-        --opd-border: #e3e6eb;
-        --opd-border-strong: #cbd1da;
-        --opd-text: #20242c;
-        --opd-muted: #687180;
-        --opd-hover: #edf0f5;
-        --opd-focus: #2563eb;
-        --opd-profile-selected-bg: #f0f1f2;
-        --opd-profile-selected-shadow: none;
+    #xpd_main_element{
+        --xpd-bg: #f4f5f7;
+        --xpd-surface: #ffffff;
+        --xpd-surface-alt: #f8f9fb;
+        --xpd-border: #e3e6eb;
+        --xpd-border-strong: #cbd1da;
+        --xpd-text: #20242c;
+        --xpd-muted: #687180;
+        --xpd-hover: #edf0f5;
+        --xpd-focus: #2563eb;
+        --xpd-profile-selected-bg: #f0f1f2;
+        --xpd-profile-selected-shadow: none;
     }
-    #opd_main_element[opd-dsp-theme="dark"]{
-        --opd-bg: #101216;
-        --opd-surface: #181b21;
-        --opd-surface-alt: #20242c;
-        --opd-border: #303641;
-        --opd-border-strong: #485160;
-        --opd-text: #eef0f4;
-        --opd-muted: #a4adbc;
-        --opd-hover: #282e38;
-        --opd-focus: #78a6ff;
-        --opd-profile-selected-bg: #25292f;
-        --opd-profile-selected-shadow: none;
+    #xpd_main_element[xpd-dsp-theme="dark"]{
+        --xpd-bg: #101216;
+        --xpd-surface: #181b21;
+        --xpd-surface-alt: #20242c;
+        --xpd-border: #303641;
+        --xpd-border-strong: #485160;
+        --xpd-text: #eef0f4;
+        --xpd-muted: #a4adbc;
+        --xpd-hover: #282e38;
+        --xpd-focus: #78a6ff;
+        --xpd-profile-selected-bg: #25292f;
+        --xpd-profile-selected-shadow: none;
     }
-    #opd_main_element *{
+    #xpd_main_element *{
         font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
-    #opd_main_element .main_bar_functions{
+    #xpd_main_element .main_bar_functions{
         gap: 4px;
         padding: 8px;
         font-weight: 500;
     }
-    #opd_main_element:not(.opd_sidebar_collapsed) .main_bar_functions{
+    #xpd_main_element:not(.xpd_sidebar_collapsed) .main_bar_functions{
         padding-inline: 6px;
     }
-    #opd_main_element:not(.opd_sidebar_collapsed) .opd_ui_logo_parent{
+    #xpd_main_element:not(.xpd_sidebar_collapsed) .xpd_ui_logo_parent{
         padding-inline: 0;
         justify-content: space-evenly;
         gap: 0;
     }
-    .opd_ui_brand{display:flex;align-items:center;gap:0.75rem;}
-    .opd_ui_brand::part(base){padding:0;border:0;background:transparent;color:inherit;gap:0.75rem;border-radius:8px;}
-    .opd_ui_brand::part(label){display:contents;}
-    #opd_main_element .opd_ui_logo_parent .opd_global_settings_button{margin-left:0;}
-    #opd_main_element:not(.opd_sidebar_collapsed) .dsp_btn_parent{
+    .xpd_ui_brand{display:flex;align-items:center;gap:0.75rem;}
+    .xpd_ui_brand::part(base){padding:0;border:0;background:transparent;color:inherit;gap:0.75rem;border-radius:8px;}
+    .xpd_ui_brand::part(label){display:contents;}
+    #xpd_main_element .xpd_ui_logo_parent .xpd_global_settings_button{margin-left:0;}
+    #xpd_main_element:not(.xpd_sidebar_collapsed) .dsp_btn_parent{
         padding-inline: 8px;
         margin-inline: 6px;
         width: calc(100% - 12px);
     }
-    #opd_main_element:not(.opd_sidebar_collapsed) .opd_api_sidebar{
+    #xpd_main_element:not(.xpd_sidebar_collapsed) .xpd_api_sidebar{
         padding-inline: 6px;
     }
-    #opd_main_element .main_bar_functions hr{
+    #xpd_main_element .main_bar_functions hr{
         border: 0;
-        border-top: 1px solid var(--opd-border);
+        border-top: 1px solid var(--xpd-border);
         width: 100%;
         flex-shrink: 0;
         margin: 6px 0;
     }
-    #opd_main_element .main_bar_functions > .opd_api_sidebar,
-    #opd_main_element .main_bar_functions > hr{
+    #xpd_main_element .main_bar_functions > .xpd_api_sidebar,
+    #xpd_main_element .main_bar_functions > hr{
         width: 100%;
         align-self: stretch;
     }
-    #opd_main_element .dsp_btn_parent{
+    #xpd_main_element .dsp_btn_parent{
         height: 40px;
         border-radius: 8px;
         gap: 8px;
         transition: background-color 140ms ease;
     }
-    #opd_main_element .dsp_btn_parent:hover{
+    #xpd_main_element .dsp_btn_parent:hover{
         border-color: transparent;
-        background: var(--opd-hover);
+        background: var(--xpd-hover);
     }
-    #opd_main_element .dsp_btn_label{
+    #xpd_main_element .dsp_btn_label{
         font-size: 12px;
         font-weight: 500;
     }
-    #opd_main_element .dsp_btn_parent .dsp_btn_icon_wrap{
+    #xpd_main_element .dsp_btn_parent .dsp_btn_icon_wrap{
         width:18px;
         min-width:18px;
         height:18px;
     }
-    #opd_main_element .dsp_btn_parent .dsp_btn_icon_wrap > div:not(.dsp_btn_change_profile_btn){
+    #xpd_main_element .dsp_btn_parent .dsp_btn_icon_wrap > div:not(.dsp_btn_change_profile_btn){
         width:18px;
         height:18px;
         background-size:contain;
         background-position:center;
         flex-shrink:0;
     }
-    #opd_main_element .dsp_btn_profile_selected{
+    #xpd_main_element .dsp_btn_profile_selected{
         border-color: transparent;
         border-radius: 8px;
-        box-shadow: var(--opd-profile-selected-shadow);
+        box-shadow: var(--xpd-profile-selected-shadow);
     }
-    #opd_main_element .dsp_profile_list .dsp_btn_parent{
+    #xpd_main_element .dsp_profile_list .dsp_btn_parent{
         border-radius: 8px;
     }
-    #opd_main_element .dsp_btn_profile_selected .dsp_btn_label{
+    #xpd_main_element .dsp_btn_profile_selected .dsp_btn_label{
         font-weight: 600;
     }
-    #opd_main_element .dsp_column_draggable_true{
+    #xpd_main_element .dsp_column_draggable_true{
         margin: 0;
         border-radius: 0;
         border: 0;
-        border-right: 1px solid var(--opd-border);
+        border-right: 1px solid var(--xpd-border);
     }
-    #opd_main_element .column_bar{
+    #xpd_main_element .column_bar{
         min-height: 44px;
         padding: 6px 12px;
         gap: 4px;
         border-top: 0 !important;
         border-radius: 0;
-        background: var(--opd-surface);
+        background: var(--xpd-surface);
         flex-shrink: 0;
     }
-    #opd_main_element .dsp_column_title{
+    #xpd_main_element .dsp_column_title{
         font-size: 14px;
         font-weight: 600;
         white-space: nowrap;
     }
-    #opd_main_element .dsp_column_btn{
+    #xpd_main_element .dsp_column_btn{
         width: 30px;
         min-width: 30px;
         height: 30px;
         margin-right: 0;
         border-radius: 8px;
     }
-    #opd_main_element .dsp_column_settings_panel{
-        background: var(--opd-surface);
+    #xpd_main_element .dsp_column_settings_panel{
+        background: var(--xpd-surface);
         width: 100%;
         height: auto;
         max-height: none;
         overflow: visible;
         flex-shrink: 0;
         border: 0;
-        border-bottom: 1px solid var(--opd-border);
+        border-bottom: 1px solid var(--xpd-border);
         border-radius: 0;
     }
-    #opd_main_element .dsp_column_settings_panel_content{
+    #xpd_main_element .dsp_column_settings_panel_content{
         margin: 16px;
     }
-    #opd_main_element .dsp_column_settings_panel_content h2{
+    #xpd_main_element .dsp_column_settings_panel_content h2{
         font-size: 14px;
         margin-bottom: 12px;
     }
-    #opd_main_element .dsp_column_settings_list{
+    #xpd_main_element .dsp_column_settings_list{
         padding: 0;
         border: 0;
         border-radius: 0;
         background: transparent;
     }
-    #opd_main_element .dsp_column_settings_content_div{
+    #xpd_main_element .dsp_column_settings_content_div{
         min-height: 44px;
         padding-block: 10px;
         gap: 12px;
         margin: 0;
         font-size: 13px;
-        border-bottom: 1px solid var(--opd-border);
+        border-bottom: 1px solid var(--xpd-border);
     }
-    #opd_main_element .dsp_column_settings_content_div > span:last-child{
+    #xpd_main_element .dsp_column_settings_content_div > span:last-child{
         display: flex;
         align-items: center;
         gap: 8px;
         flex-shrink: 0;
     }
-    #opd_main_element .dsp_column_settings_panel select,
-    #opd_main_element .dsp_column_settings_panel input[type="number"],
-    #opd_main_element .column_width_btn,
-    #opd_main_element .dsp_column_settings_panel_close_btn{
+    #xpd_main_element .dsp_column_settings_panel select,
+    #xpd_main_element .dsp_column_settings_panel input[type="number"],
+    #xpd_main_element .column_width_btn,
+    #xpd_main_element .dsp_column_settings_panel_close_btn{
         min-height: 32px;
         border-radius: 8px;
         font-size: 12px;
-        color: var(--opd-text);
+        color: var(--xpd-text);
     }
-    #opd_main_element input[type="checkbox"]{
-        accent-color: var(--opd-focus);
+    #xpd_main_element input[type="checkbox"]{
+        accent-color: var(--xpd-focus);
     }
-    #opd_main_element .dsp_column_settings_panel wa-button{
+    #xpd_main_element .dsp_column_settings_panel wa-button{
         border:0;
         padding:0;
         background:transparent;
         border-radius:8px;
     }
-    #opd_main_element .dsp_column_settings_panel wa-button::part(base){
+    #xpd_main_element .dsp_column_settings_panel wa-button::part(base){
         min-height:40px;
-        border:1px solid var(--opd-border-strong);
+        border:1px solid var(--xpd-border-strong);
         border-radius:8px;
         background:transparent;
-        color:var(--opd-text);
+        color:var(--xpd-text);
         padding:0 14px;
         font-size:12px;
         box-shadow:none;
     }
-    #opd_main_element .dsp_column_settings_panel wa-button:hover::part(base){
-        background:var(--opd-hover);
+    #xpd_main_element .dsp_column_settings_panel wa-button:hover::part(base){
+        background:var(--xpd-hover);
     }
-    #opd_main_element .dsp_column_settings_panel wa-select::part(combobox),
-    #opd_main_element .dsp_column_settings_panel wa-input::part(base){
+    #xpd_main_element .dsp_column_settings_panel wa-select::part(combobox),
+    #xpd_main_element .dsp_column_settings_panel wa-input::part(base){
         min-height:40px;
-        border:1px solid var(--opd-border-strong);
+        border:1px solid var(--xpd-border-strong);
         border-radius:8px;
-        background:var(--opd-surface);
-        color:var(--opd-text);
+        background:var(--xpd-surface);
+        color:var(--xpd-text);
     }
-    #opd_main_element .dsp_column_settings_panel_close_btn_wrap{
+    #xpd_main_element .dsp_column_settings_panel_close_btn_wrap{
         justify-content:flex-end;
         margin:16px 0 0;
     }
     @media (prefers-reduced-motion: reduce){
-        #opd_main_element *, #opd_main_element *::before, #opd_main_element *::after{
+        #xpd_main_element *, #xpd_main_element *::before, #xpd_main_element *::after{
             transition: none !important;
             animation: none !important;
             scroll-behavior: auto !important;
         }
     }
-    div[opd_load_status] { position: relative; }
-    div[opd_load_status]::after {
-        content: attr(opd_load_status);
+    div[xpd_load_status] { position: relative; }
+    div[xpd_load_status]::after {
+        content: attr(xpd_load_status);
         position: absolute;
         inset: 48px 0 0;
         display: grid;
         place-items: center;
-        color: var(--opd-muted);
-        background: var(--opd-surface);
+        color: var(--xpd-muted);
+        background: var(--xpd-surface);
         pointer-events: none;
     }
-    .opd_column_drag_active .dsp_column iframe { pointer-events: none; }
-    .opd_column_dragging { opacity: 0.55; }
-    .dsp_column.opd_drop_before, .dsp_column.opd_drop_after { position: relative; }
-    .dsp_column.opd_drop_before::after, .dsp_column.opd_drop_after::after {
+    .xpd_column_drag_active .dsp_column iframe { pointer-events: none; }
+    .xpd_column_dragging { opacity: 0.55; }
+    .dsp_column.xpd_drop_before, .dsp_column.xpd_drop_after { position: relative; }
+    .dsp_column.xpd_drop_before::after, .dsp_column.xpd_drop_after::after {
         content: "";
         position: absolute;
         top: 0;
@@ -1287,47 +1287,47 @@ export function run(settings) {
         z-index: 10;
         pointer-events: none;
     }
-    .dsp_column.opd_drop_before::after { left: 0; }
-    .dsp_column.opd_drop_after::after { right: 0; }
+    .dsp_column.xpd_drop_before::after { left: 0; }
+    .dsp_column.xpd_drop_after::after { right: 0; }
     .dsp_column_move_icon { cursor: grab; }
-    .opd_column_drag_active .dsp_column_move_icon { cursor: grabbing; }
+    .xpd_column_drag_active .dsp_column_move_icon { cursor: grabbing; }
     </style>`,
     );
     const deck_styles = Array.from(
         document_head.querySelectorAll(
-            "style[second_column_css], style[opd_default_css]",
+            "style[second_column_css], style[xpd_default_css]",
         ),
     );
     load_scheduler.onDispose(() =>
         deck_styles.forEach((style) => style.remove()),
     );
     // Create and insert column elements.
-    let default_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_settings_btn opd_ui_icon_color opd_settings_btn" title="${i18n_message("ui_column_settings_title")}"></wa-button></span><span class="dsp_column_btn"><wa-checkbox class="opd_banner" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%></wa-checkbox><label class="dsp_column_banner_btn opd_ui_icon_color"></label></span>`;
-    let refresh_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_refresh_btn opd_ui_icon_color column_refresh_btn" title="${i18n_message("ui_column_refresh_title")}"></wa-button></span><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_copy_link_btn opd_ui_icon_color" title="${i18n_message("ui_column_copy_link_title")}"></wa-button></span>`;
-    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><wa-select class="opd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><wa-option value="0">${i18n_message("ui_settings_view_mode_all")}</wa-option><wa-option value="1">${i18n_message("ui_settings_view_mode_text_only")}</wa-option><wa-option value="2">${i18n_message("ui_settings_view_mode_media_only")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><wa-select class="opd_column_size_preset"><wa-option value="0">${i18n_message("ui_settings_column_width_small")}</wa-option><wa-option value="1">${i18n_message("ui_settings_column_width_medium")}</wa-option><wa-option value="2">${i18n_message("ui_settings_column_width_large")}</wa-option><wa-option value="3">${i18n_message("ui_settings_column_width_custom")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><wa-button class="column_width_btn">${i18n_message("ui_settings_column_width_custom_button")}</wa-button></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><wa-checkbox class="opd_a_reload_bar" %column_auto_reload_ch%></wa-checkbox></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><wa-input class="opd_column_settings_input_text opd_a_reload_time_setting" type="number" value="%column_auto_reload_time%"></wa-input>${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><wa-button class="dsp_column_settings_panel_close_btn">${i18n_message("ui_settings_close_button")}</wa-button></div></div></div>`;
+    let default_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_settings_btn xpd_ui_icon_color xpd_settings_btn" title="${i18n_message("ui_column_settings_title")}"></wa-button></span><span class="dsp_column_btn"><wa-checkbox class="xpd_banner" title="${i18n_message("ui_column_banner_toggle_title")}" %column_banner_ch%></wa-checkbox><label class="dsp_column_banner_btn xpd_ui_icon_color"></label></span>`;
+    let refresh_element_bar = `<span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_refresh_btn xpd_ui_icon_color column_refresh_btn" title="${i18n_message("ui_column_refresh_title")}"></wa-button></span><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_copy_link_btn xpd_ui_icon_color" title="${i18n_message("ui_column_copy_link_title")}"></wa-button></span>`;
+    let column_settings_panel = `<div class="dsp_column_settings_panel"><div class="dsp_column_settings_panel_content"><h2>${i18n_message("ui_settings_header")}</h2><div class="dsp_column_settings_list"><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_view_mode_label")}</span><span><wa-select class="xpd_tw_view_mode" column_tw_view_mode_val="%column_tw_view_mode%"><wa-option value="0">${i18n_message("ui_settings_view_mode_all")}</wa-option><wa-option value="1">${i18n_message("ui_settings_view_mode_text_only")}</wa-option><wa-option value="2">${i18n_message("ui_settings_view_mode_media_only")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_label")}</span><span><wa-select class="xpd_column_size_preset"><wa-option value="0">${i18n_message("ui_settings_column_width_small")}</wa-option><wa-option value="1">${i18n_message("ui_settings_column_width_medium")}</wa-option><wa-option value="2">${i18n_message("ui_settings_column_width_large")}</wa-option><wa-option value="3">${i18n_message("ui_settings_column_width_custom")}</wa-option></wa-select></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_column_width_custom_label")}</span><span><wa-button class="column_width_btn">${i18n_message("ui_settings_column_width_custom_button")}</wa-button></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_label")}</span><span><wa-checkbox class="xpd_a_reload_bar" %column_auto_reload_ch%></wa-checkbox></span></div><div class="dsp_column_settings_content_div"><span>${i18n_message("ui_settings_auto_reload_interval_label")}</span><span><wa-input class="xpd_column_settings_input_text xpd_a_reload_time_setting" type="number" value="%column_auto_reload_time%"></wa-input>${i18n_message("ui_settings_seconds_suffix")}</span></div></div><div class="dsp_column_settings_panel_close_btn_wrap"><wa-button class="dsp_column_settings_panel_close_btn">${i18n_message("ui_settings_close_button")}</wa-button></div></div></div>`;
     let default_element = {
-        /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div opd_column_type="main_bar_empty_column" opd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
+        /*main_bar_empty_column:{html:`<!--<section draggable="false" class="dsp_column"><div xpd_column_type="main_bar_empty_column" xpd_column_width="%column_width_num%" id="main_bar_empty_column" style="height:100%;min-width: 70px;"></div></section>-->`},*/
         empty_column: {
-            html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_emptycolumn"><div opd_column_type="empty_column" opd_column_width="%column_width_num%" style="height: 100%;min-width: 30rem;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_1)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_empty_column_message")}</p></div></div></section>`,
+            html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_emptycolumn"><div xpd_column_type="empty_column" xpd_column_width="%column_width_num%" style="height: 100%;min-width: 30rem;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_1)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_empty_column_message")}</p></div></div></section>`,
         },
         post: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="post" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_post_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div xpd_column_type="post" xpd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_post_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area xpd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn xpd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-xpd-src="https://x.com/compose/post" type="text/html" style="width: 100%;height: 100%;" xpd_init_webview></iframe></div></section>`,
         },
         second_empty_column: {
-            html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_second_emptycolumn"><div opd_column_type="second_empty_column" opd_column_width="%column_width_num%" style="height:100%;min-width: 30rem;overflow: hidden;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_2)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_second_empty_column_message")}</p></div></div></section>`,
+            html: `<section draggable="false" id="column_%column_num%" class="dsp_column_draggable_false dsp_column dsp_column_second_emptycolumn"><div xpd_column_type="second_empty_column" xpd_column_width="%column_width_num%" style="height:100%;min-width: 30rem;overflow: hidden;display: flex;align-items: center;justify-content: center;"><div><img src="${chrome.runtime.getURL(ui_icon_define.column_add_2)}" style="filter: brightness(0) saturate(100%) invert(61%) sepia(13%) saturate(13%) hue-rotate(335deg) brightness(89%) contrast(79%);"><p>${i18n_message("ui_second_empty_column_message")}</p></div></div></section>`,
         },
         home: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="home" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_timeline_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div xpd_column_type="home" xpd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_timeline_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area xpd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn xpd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-xpd-src="https://x.com/home" type="text/html" style="width: 100%;height: 100%;" xpd_init_webview></iframe></div></section>`,
         },
         notification: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="notification" opd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_notifications_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe allow="fullscreen" data-opd-src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div xpd_column_type="notification" xpd_column_width="%column_width_num%" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_notifications_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area xpd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn xpd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe allow="fullscreen" data-xpd-src="https://x.com/notifications" type="text/html" style="width: 100%;height: 100%;" xpd_init_webview></iframe></div></section>`,
         },
         explore: {
-            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div opd_column_type="explore" opd_column_width="%column_width_num%" opd_explore_path="%column_save_path%" opd_explore_title="Explore" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_explore_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area opd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn opd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-opd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" opd_init_webview></iframe></div></section>`,
+            html: `<section draggable="true" id="column_%column_num%" class="dsp_column_draggable_true dsp_column"><div xpd_column_type="explore" xpd_column_width="%column_width_num%" xpd_explore_path="%column_save_path%" xpd_explore_title="Explore" style="height: 100%;width: %column_width_num%rem;min-width: 1rem;"><div class="column_bar" style="height: max-content;"><span class="dsp_column_title"><div class="dsp_column_move_icon_parent"><span class="dsp_column_move_icon"></span><span>${i18n_message("ui_column_explore_title")}</span></div></span>${default_element_bar}${refresh_element_bar}<div class="dsp_column_empty_area xpd_column_scroll_to_top"></div><div class="dsp_column_close_btn_wrap"><span class="dsp_column_btn"><wa-button appearance="plain" class="dsp_column_close_btn xpd_ui_icon_color column_close_btn" title="${i18n_message("ui_column_close_title")}"></wa-button></span></div></div>${column_settings_panel}<iframe auto_reload_mouse_hover="false" allow="fullscreen" data-xpd-src="https://x.com%column_save_path%" type="text/html" style="width: 100%;height: 100%;" xpd_init_webview></iframe></div></section>`,
         },
     };
     let ins_html = document.createElement("div");
-    ins_html.id = "opd_main_element";
+    ins_html.id = "xpd_main_element";
     load_scheduler.onDispose(() => {
         ins_html
             .getAnimations({ subtree: true })
@@ -1338,7 +1338,7 @@ export function run(settings) {
         "style",
         "position: fixed;z-index: 999999;top:0;width: 100%;height: 100%;background: white;display: flex;flex-direction: row;overflow: hidden;",
     );
-    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" opd_column_type="dsp_column" opd_column_width="%column_width_num%" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="opd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="opd_ui_logo"></div><span class="opd_version_span">${manifest.version}</span></div>${create_api_sidebar_html()}${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div opd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--opd-sidebar-width);max-width: var(--opd-sidebar-width);"></div></section>`;
+    let side_bar = `<section class="dsp_column" style="position:fixed;z-index:999;height:98%;"><div draggable="false" class="dsp_column_draggable_false" xpd_column_type="dsp_column" xpd_column_width="%column_width_num%" style="height:100%;min-width: var(--xpd-sidebar-width);max-width: var(--xpd-sidebar-width);text-align: center;background-color: white;transition:min-width 0.18s ease,max-width 0.18s ease;"><div class="main_bar_functions"><div class="xpd_ui_logo_parent" title="${i18n_message("ui_sidebar_logo_title", [manifest.version])}"><div class="xpd_ui_logo"></div><span class="xpd_version_span">${manifest.version}</span></div>${create_api_sidebar_html()}${create_sidebar_button_html("sidebar_fold_toggle", i18n_message("ui_sidebar_collapse_title"), "dsp_btn_sidebar_fold_img", i18n_message("ui_sidebar_collapse_label"))}${create_sidebar_button_html("switch_theme", i18n_message_or_fallback("ui_theme_switch_title", "Toggle Theme"), "dsp_btn_switch_theme_img", i18n_message_or_fallback("ui_theme_switch_label", "Toggle Theme"))}${create_sidebar_button_html("second_rack", i18n_message("ui_toggle_second_rack_title"), "dsp_btn_second_rack_img", i18n_message("ui_toggle_second_rack_title"))}<hr>${create_sidebar_button_html("add_post", i18n_message("ui_add_post_column_title"), "dsp_btn_add_post_img", i18n_message("ui_add_post_column_title"))}${create_sidebar_button_html("add_timeline", i18n_message("ui_add_timeline_column_title"), "dsp_btn_add_tl_img", i18n_message("ui_add_timeline_column_title"))}${create_sidebar_button_html("add_notify", i18n_message("ui_add_notification_column_title"), "dsp_btn_add_ntfc_img", i18n_message("ui_add_notification_column_title"))}${create_sidebar_button_html("add_explore", i18n_message("ui_add_explore_column_title"), "dsp_btn_add_explr_img", i18n_message("ui_add_explore_column_title"))}${create_sidebar_button_html("add_lists", i18n_message("ui_add_lists_column_title"), "dsp_btn_add_lists_img", i18n_message("ui_add_lists_column_title"))}${create_sidebar_button_html("add_custom_url", i18n_message("ui_add_custom_url_column_title"), "dsp_btn_add_custom_url_img", i18n_message("ui_add_custom_url_column_title"))}<hr>${create_sidebar_button_html("profile_save", i18n_message("ui_profile_save_title"), "dsp_btn_profile_add_img", i18n_message("ui_profile_save_title"))}${create_sidebar_button_html("profile_delete", i18n_message("ui_profile_delete_title"), "dsp_btn_profile_delete_img", i18n_message("ui_profile_delete_title"))}<hr>${profile_list_html}${create_language_select_html()}</div></div></section><section draggable="false" class="dsp_column_draggable_false dsp_column"><div xpd_column_type="main_bar_empty_column" id="main_bar_empty_column" style="height:100%;min-width: var(--xpd-sidebar-width);max-width: var(--xpd-sidebar-width);"></div></section>`;
     let main_column_html = ``;
     let second_column_html = ``;
     // Two-row layout settings.
@@ -1439,19 +1439,19 @@ export function run(settings) {
     ins_html.innerHTML = `${side_bar}<div id="main_rack_element" style=""><div id="first_rack_element" style="height: 100%;display:flex;flex-direction:row;">${main_column_html}</div><div id="second_rack_element" style="display:flex;flex-direction:row;">${second_column_html}</div></div>`;
     // Insert HTML.
     document.body.insertAdjacentElement("afterbegin", ins_html);
-    const opd_main_element =
-        document.querySelector<HTMLElement>("#opd_main_element");
+    const xpd_main_element =
+        document.querySelector<HTMLElement>("#xpd_main_element");
     const sidebar_toggle_button = document.querySelector<HTMLElement>(
         "#sidebar_fold_toggle",
     );
-    if (!opd_main_element || !sidebar_toggle_button) {
+    if (!xpd_main_element || !sidebar_toggle_button) {
         return;
     }
     const switch_theme_button =
         document.querySelector<HTMLElement>("#switch_theme");
     const settings_button = document.createElement("wa-button");
     settings_button.appearance = "plain";
-    settings_button.className = "opd_global_settings_button";
+    settings_button.className = "xpd_global_settings_button";
     const settings_title = i18n_message_or_fallback(
         "ui_global_settings_title",
         "Settings",
@@ -1462,10 +1462,10 @@ export function run(settings) {
     settings_icon.src = chrome.runtime.getURL(ui_icon_define.column_settings);
     settings_icon.alt = "";
     settings_button.appendChild(settings_icon);
-    const logo_parent = document.querySelector(".opd_ui_logo_parent");
+    const logo_parent = document.querySelector(".xpd_ui_logo_parent");
     if (logo_parent) {
         const brand = document.createElement("wa-button");
-        brand.className = "opd_ui_brand";
+        brand.className = "xpd_ui_brand";
         brand.setAttribute("aria-label", i18n_message("ui_about_title"));
         brand.setAttribute("appearance", "plain");
         for (const child of Array.from(logo_parent.children)) {
@@ -1474,32 +1474,32 @@ export function run(settings) {
         logo_parent.append(brand, settings_button);
     }
     settings_button.addEventListener("click", () => {
-        void open_opd_dialog({
+        void open_xpd_dialog({
             type: "alert",
             message: settings_title,
             mount(dialog) {
                 const controls = [
                     document.getElementById("second_rack"),
                     document.querySelector<HTMLElement>(
-                        ".opd_language_select_wrap",
+                        ".xpd_language_select_wrap",
                     ),
                 ].filter((control): control is HTMLElement => control !== null);
                 const parents = controls.map(
                     (control) => control.parentElement,
                 );
                 const body = document.createElement("div");
-                body.className = "opd_global_settings_controls";
+                body.className = "xpd_global_settings_controls";
                 body.style.cssText =
                     "display:grid;gap:6px;text-align:left;min-width:0";
                 const theme_row = document.createElement("label");
-                theme_row.className = "opd_global_setting_row";
+                theme_row.className = "xpd_global_setting_row";
                 const theme_label = document.createElement("span");
                 theme_label.textContent = i18n_message_or_fallback(
                     "ui_theme_label",
                     "Theme",
                 );
                 const theme_select = document.createElement("wa-select");
-                theme_select.id = "opd_theme_select";
+                theme_select.id = "xpd_theme_select";
                 for (const [value, fallback] of [
                     ["system", "System"],
                     ["light", "Light"],
@@ -1516,13 +1516,13 @@ export function run(settings) {
                 theme_select.value = get_cookie_color_mode() ?? "system";
                 theme_select.addEventListener("change", () => {
                     stop_system_theme_listener();
-                    document.cookie = `opd_theme=${theme_select.value}; path=/; max-age=31536000; SameSite=Lax; Secure`;
-                    apply_theme_for_main_element(opd_main_element);
+                    document.cookie = `xpd_theme=${theme_select.value}; path=/; max-age=31536000; SameSite=Lax; Secure`;
+                    apply_theme_for_main_element(xpd_main_element);
                     dialog
-                        .closest(".opd_dialog_overlay")
+                        .closest(".xpd_dialog_overlay")
                         ?.classList.toggle(
-                            "opd_dialog_theme_dark",
-                            opd_main_element.getAttribute("opd-dsp-theme") ===
+                            "xpd_dialog_theme_dark",
+                            xpd_main_element.getAttribute("xpd-dsp-theme") ===
                                 "dark",
                         );
                 });
@@ -1531,14 +1531,14 @@ export function run(settings) {
                 for (const control of controls) {
                     if (control.id === "second_rack") {
                         const row = document.createElement("div");
-                        row.className = "opd_global_setting_row";
+                        row.className = "xpd_global_setting_row";
                         const label = document.createElement("span");
                         label.textContent = i18n_message_or_fallback(
                             "ui_layout_label",
                             "Layout",
                         );
                         const select = document.createElement("wa-select");
-                        select.id = "opd_layout_select";
+                        select.id = "xpd_layout_select";
                         select.setAttribute("aria-label", label.textContent);
                         for (const [value, fallback] of [
                             ["single", "One row"],
@@ -1565,23 +1565,23 @@ export function run(settings) {
                         body.appendChild(row);
                     } else body.appendChild(control);
                 }
-                dialog.classList.add("opd_global_settings_dialog");
+                dialog.classList.add("xpd_global_settings_dialog");
                 const theme_observer = new MutationObserver(() => {
                     dialog
-                        .closest(".opd_dialog_overlay")
+                        .closest(".xpd_dialog_overlay")
                         ?.classList.toggle(
-                            "opd_dialog_theme_dark",
-                            opd_main_element.getAttribute("opd-dsp-theme") ===
+                            "xpd_dialog_theme_dark",
+                            xpd_main_element.getAttribute("xpd-dsp-theme") ===
                                 "dark",
                         );
                 });
-                theme_observer.observe(opd_main_element, {
+                theme_observer.observe(xpd_main_element, {
                     attributes: true,
-                    attributeFilter: ["opd-dsp-theme"],
+                    attributeFilter: ["xpd-dsp-theme"],
                 });
                 queueMicrotask(() => {
                     const close = dialog.querySelector<WaButton>(
-                        ".opd_dialog_primary",
+                        ".xpd_dialog_primary",
                     );
                     if (close)
                         close.textContent = i18n_message_or_fallback(
@@ -1593,7 +1593,7 @@ export function run(settings) {
                 const layout = document.getElementById("second_rack");
                 const close_before_layout = () =>
                     dialog
-                        .querySelector<WaButton>(".opd_dialog_primary")
+                        .querySelector<WaButton>(".xpd_dialog_primary")
                         ?.click();
                 const close_on_escape = (event: KeyboardEvent) => {
                     if (event.key !== "Escape") return;
@@ -1642,18 +1642,18 @@ export function run(settings) {
         });
     });
     const language_select = document.querySelector<WaSelect>(
-        "#opd_language_select",
+        "#xpd_language_select",
     );
     const sidebar_toggle_label =
         sidebar_toggle_button.querySelector<HTMLElement>(".dsp_btn_label");
     if (!sidebar_toggle_label) return;
-    const opd_main_root = opd_main_element as HTMLElement;
+    const xpd_main_root = xpd_main_element as HTMLElement;
     const sidebar_toggle_root = sidebar_toggle_button as HTMLElement;
     const sidebar_toggle_text = sidebar_toggle_label as HTMLElement;
     function apply_sidebar_collapsed_state(is_collapsed) {
-        opd_main_root.classList.toggle("opd_sidebar_collapsed", is_collapsed);
+        xpd_main_root.classList.toggle("xpd_sidebar_collapsed", is_collapsed);
         sidebar_toggle_root.classList.toggle(
-            "opd_sidebar_toggle_is_collapsed",
+            "xpd_sidebar_toggle_is_collapsed",
             is_collapsed,
         );
         sidebar_toggle_root.title = is_collapsed
@@ -1663,18 +1663,18 @@ export function run(settings) {
             ? i18n_message("ui_sidebar_expand_label")
             : i18n_message("ui_sidebar_collapse_label");
     }
-    apply_theme_for_main_element(opd_main_element);
-    chrome.storage.local.get("opd_sidebar_collapsed", function (value) {
-        apply_sidebar_collapsed_state(value.opd_sidebar_collapsed === true);
+    apply_theme_for_main_element(xpd_main_element);
+    chrome.storage.local.get("xpd_sidebar_collapsed", function (value) {
+        apply_sidebar_collapsed_state(value.xpd_sidebar_collapsed === true);
     });
     sidebar_toggle_button.addEventListener("click", function () {
-        const next_sidebar_state = !opd_main_element.classList.contains(
-            "opd_sidebar_collapsed",
+        const next_sidebar_state = !xpd_main_element.classList.contains(
+            "xpd_sidebar_collapsed",
         );
         chrome.storage.local.set(
-            { opd_sidebar_collapsed: next_sidebar_state },
+            { xpd_sidebar_collapsed: next_sidebar_state },
             function () {
-                const contents = opd_main_element.querySelector<HTMLElement>(
+                const contents = xpd_main_element.querySelector<HTMLElement>(
                     ".main_bar_functions",
                 );
                 if (contents) {
@@ -1688,7 +1688,7 @@ export function run(settings) {
         );
     });
     if (language_select != null) {
-        language_select.value = opd_i18n_language;
+        language_select.value = xpd_i18n_language;
         language_select.addEventListener("change", function (ev) {
             const language_select_element =
                 ev.currentTarget instanceof HTMLElement &&
@@ -1697,11 +1697,11 @@ export function run(settings) {
                     : null;
             if (!language_select_element) return;
             const next_language = language_select_element.value;
-            if (next_language === opd_i18n_language) {
+            if (next_language === xpd_i18n_language) {
                 return;
             }
             chrome.storage.local.set(
-                { opd_language_override: next_language },
+                { xpd_language_override: next_language },
                 function () {
                     request_page_reload();
                 },
@@ -1711,30 +1711,30 @@ export function run(settings) {
     if (switch_theme_button != null) {
         switch_theme_button.addEventListener("click", function () {
             const next_theme_mode =
-                opd_main_element.getAttribute("opd-dsp-theme") === "dark"
+                xpd_main_element.getAttribute("xpd-dsp-theme") === "dark"
                     ? "light"
                     : "dark";
 
             stop_system_theme_listener();
 
             document.cookie = `night_mode=${next_theme_mode === "dark" ? 1 : 0}; path=/; max-age=31536000`;
-            opd_main_element.setAttribute("opd-dsp-theme", next_theme_mode);
+            xpd_main_element.setAttribute("xpd-dsp-theme", next_theme_mode);
             document
-                .querySelector(".opd_global_settings_controls")
-                ?.closest(".opd_dialog_overlay")
+                .querySelector(".xpd_global_settings_controls")
+                ?.closest(".xpd_dialog_overlay")
                 ?.classList.toggle(
-                    "opd_dialog_theme_dark",
+                    "xpd_dialog_theme_dark",
                     next_theme_mode === "dark",
                 );
             document.documentElement.setAttribute(
-                opd_root_theme_attribute,
+                xpd_root_theme_attribute,
                 next_theme_mode,
             );
         });
     }
     // Restore custom titles and Explore titles safely after DOM insertion.
     const all_columns = document.querySelectorAll(
-        "#opd_main_element div[opd_column_type]",
+        "#xpd_main_element div[xpd_column_type]",
     );
     for (
         let index = 0;
@@ -1745,13 +1745,13 @@ export function run(settings) {
         const frame = all_columns[index].querySelector("iframe");
         const homepage = resolve_column_homepage(
             saved,
-            frame?.getAttribute("data-opd-src") ?? "",
+            frame?.getAttribute("data-xpd-src") ?? "",
         );
         if (homepage)
-            all_columns[index].setAttribute("opd_homepage_path", homepage);
+            all_columns[index].setAttribute("xpd_homepage_path", homepage);
         const custom_title = settings.column_settings[index].custom_title;
         if (typeof custom_title === "string" && custom_title.trim() !== "") {
-            all_columns[index].setAttribute("opd_custom_title", custom_title);
+            all_columns[index].setAttribute("xpd_custom_title", custom_title);
         } else if (settings.column_settings[index].type !== "explore") {
             continue;
         }
@@ -1763,7 +1763,7 @@ export function run(settings) {
                 : i18n_message("ui_column_explore_title"));
         if (settings.column_settings[index].type === "explore") {
             all_columns[index].setAttribute(
-                "opd_explore_title",
+                "xpd_explore_title",
                 settings.column_settings[index].column_save_title ||
                     i18n_message("ui_column_explore_title"),
             );
@@ -1797,7 +1797,7 @@ export function run(settings) {
         );
     }
     // Open About page.
-    const ui_logo = document.querySelector(".opd_ui_brand");
+    const ui_logo = document.querySelector(".xpd_ui_brand");
     if (ui_logo) {
         ui_logo.addEventListener("click", async function () {
             await open_about_page_modal();
@@ -1937,7 +1937,7 @@ export function run(settings) {
                 }
                 //console.log(preload_desc_array)
                 if (
-                    await opd_confirm(
+                    await xpd_confirm(
                         `${i18n_message("msg_profile_load_confirm", [String(index + 1), preload_desc_array.join("\r\n")])}`,
                     )
                 ) {
@@ -1958,14 +1958,14 @@ export function run(settings) {
                                 (profile) => profile.id === target_profile.id,
                             ),
                         );
-                        document.querySelector("#opd_main_element")?.remove();
+                        document.querySelector("#xpd_main_element")?.remove();
                         run({
                             column_settings:
                                 profile_store[last_load_profile].profile,
                         });
                     } catch (error) {
                         if (deck_lifetime.signal.aborted) return;
-                        await opd_alert(
+                        await xpd_alert(
                             error instanceof Error
                                 ? error.message
                                 : String(error),
@@ -1990,8 +1990,8 @@ export function run(settings) {
         panel.toggleAttribute("open", open);
         panel.inert = !open;
         panel
-            .closest("div[opd_column_type]")
-            ?.querySelector(".opd_settings_btn")
+            .closest("div[xpd_column_type]")
+            ?.querySelector(".xpd_settings_btn")
             ?.setAttribute("aria-expanded", String(open));
         const finish = () => {
             panel.style.display = open ? "flex" : "none";
@@ -2026,8 +2026,8 @@ export function run(settings) {
         banner_observers.get(frame)?.disconnect();
         banner_observers.delete(frame);
         const control = frame
-            .closest("div[opd_column_type]")
-            ?.querySelector(".opd_banner")
+            .closest("div[xpd_column_type]")
+            ?.querySelector(".xpd_banner")
             ?.closest<HTMLElement>(".dsp_column_btn");
         if (!control) return;
         control.style.display = "none";
@@ -2067,24 +2067,24 @@ export function run(settings) {
         if (
             !frame.contentWindow ||
             frame.contentWindow.location.href === "about:blank" ||
-            frame.hasAttribute("opd_iframe_width_only")
+            frame.hasAttribute("xpd_iframe_width_only")
         )
             return;
-        const column = frame.closest("div[opd_column_type]");
-        const view = column?.querySelector<WaSelect>(".opd_tw_view_mode");
-        if (view && !view.hasAttribute("opd_view_initialized")) {
+        const column = frame.closest("div[xpd_column_type]");
+        const view = column?.querySelector<WaSelect>(".xpd_tw_view_mode");
+        if (view && !view.hasAttribute("xpd_view_initialized")) {
             view.value = view.getAttribute("column_tw_view_mode_val") ?? "0";
-            view.setAttribute("opd_view_initialized", "");
+            view.setAttribute("xpd_view_initialized", "");
         }
         const head = frame.contentWindow.document.querySelector("head");
         if (!head) return;
         const styles: Record<string, string> = {
-            opd_main_css: "html{scrollbar-width:thin;}",
-            opd_banner_css: column?.querySelector<WaCheckbox>(".opd_banner")
+            xpd_main_css: "html{scrollbar-width:thin;}",
+            xpd_banner_css: column?.querySelector<WaCheckbox>(".xpd_banner")
                 ?.checked
                 ? ""
                 : 'header[role="banner"]{display:none;}',
-            opd_tw_view_mode_css:
+            xpd_tw_view_mode_css:
                 view?.value === "1"
                     ? 'div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility:hidden;height:0;}'
                     : view?.value === "2"
@@ -2113,26 +2113,26 @@ export function run(settings) {
                 session_webview_obj ?? document.querySelectorAll("");
         } else {
             column_object = document.querySelectorAll(
-                '.dsp_column:not([opd_column_type="dsp_column"], [opd_column_type="empty_column"], [opd_column_type="main_bar_empty_column"]) iframe',
+                '.dsp_column:not([xpd_column_type="dsp_column"], [xpd_column_type="empty_column"], [xpd_column_type="main_bar_empty_column"]) iframe',
             );
         }
         for (let index = 0; index < column_object.length; index++) {
             const homepage_column = column_object[index].closest<HTMLElement>(
-                "div[opd_column_type]",
+                "div[xpd_column_type]",
             );
             if (homepage_column) bind_column_homepage(homepage_column);
-            if (column_object[index].hasAttribute("opd_load_bound")) continue;
-            column_object[index].setAttribute("opd_load_bound", "");
+            if (column_object[index].hasAttribute("xpd_load_bound")) continue;
+            column_object[index].setAttribute("xpd_load_bound", "");
             const banner_control = column_object[index]
-                .closest("div[opd_column_type]")
-                ?.querySelector(".opd_banner")
+                .closest("div[xpd_column_type]")
+                ?.querySelector(".xpd_banner")
                 ?.closest<HTMLElement>(".dsp_column_btn");
             if (banner_control) banner_control.style.display = "none";
             const banner_frame = column_object[index] as HTMLIFrameElement;
             load_scheduler.onDispose(() =>
                 banner_observers.get(banner_frame)?.disconnect(),
             );
-            column_object[index].removeAttribute("opd_init_webview");
+            column_object[index].removeAttribute("xpd_init_webview");
             // Document styles must be reapplied after every navigation.
             column_object[index].addEventListener("load", (event) => {
                 const frame = event.currentTarget;
@@ -2155,62 +2155,62 @@ export function run(settings) {
                             "about:blank"
                     )
                         return;
-                    if (iframe_elem.hasAttribute("opd_controls_initialized"))
+                    if (iframe_elem.hasAttribute("xpd_controls_initialized"))
                         return;
-                    iframe_elem.setAttribute("opd_controls_initialized", "");
+                    iframe_elem.setAttribute("xpd_controls_initialized", "");
                     //console.log(this)
-                    const opd_column_div = iframe_elem.closest(
-                        "div[opd_column_type]",
+                    const xpd_column_div = iframe_elem.closest(
+                        "div[xpd_column_type]",
                     ) as HTMLElement;
-                    const opd_column_width_btn =
-                        opd_column_div.querySelector<WaButton>(
+                    const xpd_column_width_btn =
+                        xpd_column_div.querySelector<WaButton>(
                             ".column_width_btn",
                         );
-                    const opd_column_width_select =
-                        opd_column_div.querySelector<WaSelect>(
-                            ".opd_column_size_preset",
+                    const xpd_column_width_select =
+                        xpd_column_div.querySelector<WaSelect>(
+                            ".xpd_column_size_preset",
                         );
-                    const opd_column_banner_checkbox =
-                        opd_column_div.querySelector<WaCheckbox>(".opd_banner");
+                    const xpd_column_banner_checkbox =
+                        xpd_column_div.querySelector<WaCheckbox>(".xpd_banner");
 
-                    const opd_column_tw_view_mode_opt =
-                        opd_column_div.querySelector<WaSelect>(
-                            ".opd_tw_view_mode",
+                    const xpd_column_tw_view_mode_opt =
+                        xpd_column_div.querySelector<WaSelect>(
+                            ".xpd_tw_view_mode",
                         );
-                    const opd_column_scroll_to_top =
-                        opd_column_div.querySelector<HTMLElement>(
-                            ".opd_column_scroll_to_top",
+                    const xpd_column_scroll_to_top =
+                        xpd_column_div.querySelector<HTMLElement>(
+                            ".xpd_column_scroll_to_top",
                         );
-                    const opd_column_refresh_btn =
-                        opd_column_div.querySelector<WaButton>(
+                    const xpd_column_refresh_btn =
+                        xpd_column_div.querySelector<WaButton>(
                             ".column_refresh_btn",
                         );
-                    let column_content_reload: OpdExtAutoReload | null = null;
+                    let column_content_reload: XpdExtAutoReload | null = null;
                     // Load column extensions.
                     if (mode != "session_set") {
                         const column_type = iframe_elem
-                            .closest("div[opd_column_type]")!
-                            .getAttribute("opd_column_type");
+                            .closest("div[xpd_column_type]")!
+                            .getAttribute("xpd_column_type");
                         if (
                             column_type === "home" ||
                             column_type === "explore"
                         ) {
                             const target_column = iframe_elem
-                                .closest("div[opd_column_type]")!
+                                .closest("div[xpd_column_type]")!
                                 ?.querySelector("iframe")?.contentWindow;
                             if (target_column == null) {
                                 return;
                             }
                             // Set up auto-refresh hooks.
-                            column_content_reload = new OpdExtAutoReload();
+                            column_content_reload = new XpdExtAutoReload();
                             column_content_reload.Init(target_column);
                         }
                     }
                     bind_column_auto_reload(iframe_elem, column_content_reload);
                     // Settings panel events.
                     if (mode != "session_set") {
-                        opd_column_div
-                            .querySelector(".opd_settings_btn")!
+                        xpd_column_div
+                            .querySelector(".xpd_settings_btn")!
                             .addEventListener("click", function (ev) {
                                 const settings_button =
                                     ev.currentTarget instanceof HTMLElement
@@ -2218,7 +2218,7 @@ export function run(settings) {
                                         : null;
                                 if (!settings_button) return;
                                 const settings_panel = settings_button
-                                    .closest("div[opd_column_type]")!
+                                    .closest("div[xpd_column_type]")!
                                     .querySelector(
                                         ".dsp_column_settings_panel",
                                     );
@@ -2232,7 +2232,7 @@ export function run(settings) {
                             });
                     }
                     if (mode != "session_set") {
-                        opd_column_div
+                        xpd_column_div
                             .querySelector(
                                 ".dsp_column_settings_panel_close_btn",
                             )!
@@ -2243,7 +2243,7 @@ export function run(settings) {
                                         : null;
                                 if (!close_button) return;
                                 const settings_panel = close_button
-                                    .closest("div[opd_column_type]")!
+                                    .closest("div[xpd_column_type]")!
                                     .querySelector(
                                         ".dsp_column_settings_panel",
                                     );
@@ -2253,41 +2253,41 @@ export function run(settings) {
                                 set_column_settings_open(settings_panel, false);
                             });
                         // Settings panel and hover interactions.
-                        opd_column_div
+                        xpd_column_div
                             .querySelector(".dsp_column_settings_panel")!
                             .addEventListener("mouseover", function () {
-                                opd_column_div
+                                xpd_column_div
                                     .closest(".dsp_column")!
                                     .setAttribute("draggable", "false");
                             });
-                        opd_column_div
+                        xpd_column_div
                             .querySelector(".dsp_column_settings_panel")!
                             .addEventListener("mouseleave", function () {
-                                opd_column_div
+                                xpd_column_div
                                     .closest(".dsp_column")!
                                     .setAttribute("draggable", "true");
                             });
                     }
                     // Settings panel column-width control.
-                    if (opd_column_width_select != null) {
+                    if (xpd_column_width_select != null) {
                         switch (
-                            opd_column_div.getAttribute("opd_column_width")
+                            xpd_column_div.getAttribute("xpd_column_width")
                         ) {
                             case "15":
-                                opd_column_width_select.value = "0";
+                                xpd_column_width_select.value = "0";
                                 break;
                             case "20":
-                                opd_column_width_select.value = "1";
+                                xpd_column_width_select.value = "1";
                                 break;
                             case "30":
-                                opd_column_width_select.value = "2";
+                                xpd_column_width_select.value = "2";
                                 break;
                             default:
-                                opd_column_width_select.value = "3";
+                                xpd_column_width_select.value = "3";
                                 break;
                         }
                         if (mode != "session_set") {
-                            opd_column_width_select.addEventListener(
+                            xpd_column_width_select.addEventListener(
                                 "change",
                                 function (ev) {
                                     const width_select =
@@ -2314,11 +2314,11 @@ export function run(settings) {
                                     }
                                     const width_select_column =
                                         width_select.closest(
-                                            "div[opd_column_type]",
+                                            "div[xpd_column_type]",
                                         );
                                     if (!width_select_column) return;
                                     width_select_column.setAttribute(
-                                        "opd_column_width",
+                                        "xpd_column_width",
                                         String(preset_rem),
                                     );
                                     width_select_column.style.width = `${preset_rem}rem`;
@@ -2329,8 +2329,8 @@ export function run(settings) {
                     }
                     if (mode != "session_set") {
                         // Column width setting events.
-                        if (opd_column_width_btn != null) {
-                            opd_column_width_btn.addEventListener(
+                        if (xpd_column_width_btn != null) {
+                            xpd_column_width_btn.addEventListener(
                                 "click",
                                 async function (ev) {
                                     const width_button =
@@ -2340,20 +2340,20 @@ export function run(settings) {
                                     if (!width_button) return;
                                     const width_button_column =
                                         width_button.closest(
-                                            "div[opd_column_type]",
+                                            "div[xpd_column_type]",
                                         );
                                     if (!width_button_column) return;
                                     const now_width =
                                         width_button_column.getAttribute(
-                                            "opd_column_width",
+                                            "xpd_column_width",
                                         );
                                     const column_width_preset =
                                         width_button_column.querySelector(
-                                            ".opd_column_size_preset",
+                                            ".xpd_column_size_preset",
                                         );
                                     const column_width_preset_select =
                                         column_width_preset as WaSelect | null;
-                                    let setting_width = await opd_prompt(
+                                    let setting_width = await xpd_prompt(
                                         i18n_message("msg_column_width_prompt"),
                                         now_width ?? undefined,
                                     );
@@ -2366,7 +2366,7 @@ export function run(settings) {
                                             setting_width_num > 11
                                         ) {
                                             width_button_column.setAttribute(
-                                                "opd_column_width",
+                                                "xpd_column_width",
                                                 String(setting_width_num),
                                             );
                                             width_button_column.style.width = `${setting_width_num}rem`;
@@ -2398,7 +2398,7 @@ export function run(settings) {
                                                 }
                                             }
                                         } else {
-                                            await opd_alert(
+                                            await xpd_alert(
                                                 i18n_message(
                                                     "msg_invalid_value_alert",
                                                 ),
@@ -2412,85 +2412,85 @@ export function run(settings) {
 
                     // Support for non-X columns.
                     if (
-                        iframe_elem.getAttribute("opd_iframe_width_only") != ""
+                        iframe_elem.getAttribute("xpd_iframe_width_only") != ""
                     ) {
                         // Load and apply banner visibility settings.
-                        /*if(opd_column_banner_checkbox.checked == true){
-                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style opd_banner_css></style>`);
+                        /*if(xpd_column_banner_checkbox.checked == true){
+                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style xpd_banner_css></style>`);
                     }else{
-                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style opd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
+                        this.contentWindow.document.querySelector("head")!.insertAdjacentHTML("beforeend", `<style xpd_banner_css>header[role="banner"]{content-visibility:hidden; }</style>`);
                     }*/
                         if (
                             iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_banner_css]",
+                                "head style[xpd_banner_css]",
                             ) == null
                         ) {
                             iframe_elem
                                 .contentWindow!.document.querySelector("head")!
                                 .insertAdjacentHTML(
                                     "beforeend",
-                                    `<style opd_banner_css></style>`,
+                                    `<style xpd_banner_css></style>`,
                                 );
                         }
-                        if (opd_column_banner_checkbox?.checked != true) {
+                        if (xpd_column_banner_checkbox?.checked != true) {
                             //console.log(this)
                             iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_banner_css]",
+                                "head style[xpd_banner_css]",
                             )!.textContent =
                                 `header[role="banner"]{display:none};`;
                         } else {
                             //console.log("else")
                             iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_banner_css]",
+                                "head style[xpd_banner_css]",
                             )!.textContent = ``;
                         }
 
                         // Load and apply tweet view mode settings.
                         if (
                             iframe_elem.contentWindow!.document.querySelector(
-                                "head style[opd_tw_view_mode_css]",
+                                "head style[xpd_tw_view_mode_css]",
                             ) == null
                         ) {
                             iframe_elem
                                 .contentWindow!.document.querySelector("head")!
                                 .insertAdjacentHTML(
                                     "beforeend",
-                                    `<style opd_tw_view_mode_css></style>`,
+                                    `<style xpd_tw_view_mode_css></style>`,
                                 );
                         }
-                        if (opd_column_tw_view_mode_opt != null) {
+                        if (xpd_column_tw_view_mode_opt != null) {
                             const tw_view_mode_value =
-                                opd_column_tw_view_mode_opt.value;
+                                xpd_column_tw_view_mode_opt.value;
 
                             switch (tw_view_mode_value) {
                                 case "0":
                                     iframe_elem.contentWindow!.document.querySelector(
-                                        "head style[opd_tw_view_mode_css]",
+                                        "head style[xpd_tw_view_mode_css]",
                                     )!.textContent = ``;
                                     break;
                                 case "1":
                                     iframe_elem.contentWindow!.document.querySelector(
-                                        "head style[opd_tw_view_mode_css]",
+                                        "head style[xpd_tw_view_mode_css]",
                                     )!.textContent =
                                         `div[data-testid="cellInnerDiv"]:has(div[aria-labelledby]){visibility: hidden; height: 0;}`;
                                     break;
                                 case "2":
                                     iframe_elem.contentWindow!.document.querySelector(
-                                        "head style[opd_tw_view_mode_css]",
+                                        "head style[xpd_tw_view_mode_css]",
                                     )!.textContent =
                                         `div[data-testid="cellInnerDiv"]:not(:has(div[aria-labelledby])){visibility: hidden; height: 0;}`;
                                     break;
                                 default:
                                     iframe_elem.contentWindow!.document.querySelector(
-                                        "head style[opd_tw_view_mode_css]",
+                                        "head style[xpd_tw_view_mode_css]",
                                     )!.textContent = ``;
                                     break;
                             }
                         }
-                        //console.log(opd_column_div.querySelector(".opd_banner").checked)
+                        //console.log(xpd_column_div.querySelector(".xpd_banner").checked)
                         if (mode != "session_set") {
                             // Banner toggle event.
-                            opd_column_banner_checkbox?.addEventListener(
+                            xpd_column_banner_checkbox?.addEventListener(
                                 "change",
                                 function (ev) {
                                     const banner_checkbox =
@@ -2502,10 +2502,10 @@ export function run(settings) {
                                             : null;
                                     if (!banner_checkbox) return;
                                     column_settings_save("", last_load_profile);
-                                    //console.log(this.closest("div[opd_column_type]")!.querySelector("iframe"))
+                                    //console.log(this.closest("div[xpd_column_type]")!.querySelector("iframe"))
                                     const banner_column =
                                         banner_checkbox.closest(
-                                            "div[opd_column_type]",
+                                            "div[xpd_column_type]",
                                         );
                                     if (!banner_column) return;
                                     const banner_mode_target_object =
@@ -2525,20 +2525,20 @@ export function run(settings) {
                                     const banner_head =
                                         banner_doc.querySelector("head")!;
                                     if (!banner_head) return;
-                                    //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[opd_banner_css]'))
+                                    //console.log(banner_mode_target_object.contentWindow.document.querySelector('head style[xpd_banner_css]'))
                                     if (
                                         banner_doc.querySelector(
-                                            "head style[opd_banner_css]",
+                                            "head style[xpd_banner_css]",
                                         ) == null
                                     ) {
                                         banner_head.insertAdjacentHTML(
                                             "beforeend",
-                                            `<style opd_banner_css></style>`,
+                                            `<style xpd_banner_css></style>`,
                                         );
                                     }
                                     const banner_style =
                                         banner_doc.querySelector(
-                                            "head style[opd_banner_css]",
+                                            "head style[xpd_banner_css]",
                                         );
                                     if (!banner_style) return;
                                     if (
@@ -2555,15 +2555,15 @@ export function run(settings) {
                             );
                         }
 
-                        /*if(this.closest("div[opd_column_type]")!.getAttribute("opd_column_type") == "explore" || this.closest("div[opd_column_type]")!.getAttribute("opd_column_type") == "home"){
+                        /*if(this.closest("div[xpd_column_type]")!.getAttribute("xpd_column_type") == "explore" || this.closest("div[xpd_column_type]")!.getAttribute("xpd_column_type") == "home"){
                     
                     }*/
                         if (
                             mode != "session_set" &&
-                            opd_column_tw_view_mode_opt != null
+                            xpd_column_tw_view_mode_opt != null
                         ) {
                             // Tweet view mode events.
-                            opd_column_tw_view_mode_opt.addEventListener(
+                            xpd_column_tw_view_mode_opt.addEventListener(
                                 "change",
                                 function (ev) {
                                     const tw_view_mode_select =
@@ -2574,10 +2574,10 @@ export function run(settings) {
                                             : null;
                                     if (!tw_view_mode_select) return;
                                     column_settings_save("", last_load_profile);
-                                    //console.log(this.closest("div[opd_column_type]")!.querySelector("iframe"))
+                                    //console.log(this.closest("div[xpd_column_type]")!.querySelector("iframe"))
                                     const tw_view_mode_column =
                                         tw_view_mode_select.closest(
-                                            "div[opd_column_type]",
+                                            "div[xpd_column_type]",
                                         );
                                     if (!tw_view_mode_column) return;
                                     const tw_view_mode_target_object =
@@ -2602,17 +2602,17 @@ export function run(settings) {
                                     //console.log(this.value)
                                     if (
                                         tw_view_doc.querySelector(
-                                            "head style[opd_tw_view_mode_css]",
+                                            "head style[xpd_tw_view_mode_css]",
                                         ) == null
                                     ) {
                                         tw_view_head.insertAdjacentHTML(
                                             "beforeend",
-                                            `<style opd_tw_view_mode_css></style>`,
+                                            `<style xpd_tw_view_mode_css></style>`,
                                         );
                                     }
                                     const tw_view_mode_style =
                                         tw_view_doc.querySelector(
-                                            "head style[opd_tw_view_mode_css]",
+                                            "head style[xpd_tw_view_mode_css]",
                                         );
                                     if (!tw_view_mode_style) return;
                                     switch (tw_view_mode_select.value) {
@@ -2635,8 +2635,8 @@ export function run(settings) {
                     }
 
                     // Clicking column bar empty area scrolls to top.
-                    if (opd_column_scroll_to_top != null) {
-                        opd_column_scroll_to_top.addEventListener(
+                    if (xpd_column_scroll_to_top != null) {
+                        xpd_column_scroll_to_top.addEventListener(
                             "click",
                             () => {
                                 iframe_elem.contentWindow!.scrollTo({
@@ -2647,10 +2647,10 @@ export function run(settings) {
                         );
                     }
                     // Manual refresh button reloads only this column.
-                    if (opd_column_refresh_btn != null) {
-                        opd_column_refresh_btn.addEventListener("click", () => {
-                            const target_iframe = opd_column_refresh_btn
-                                .closest("div[opd_column_type]")
+                    if (xpd_column_refresh_btn != null) {
+                        xpd_column_refresh_btn.addEventListener("click", () => {
+                            const target_iframe = xpd_column_refresh_btn
+                                .closest("div[xpd_column_type]")
                                 ?.querySelector("iframe");
                             if (!(target_iframe instanceof HTMLIFrameElement)) {
                                 return;
@@ -2674,16 +2674,16 @@ export function run(settings) {
                 { once: false },
             );
             // Explore URL detection logic.
-            const opd_column_mutate = column_object[index].closest(
-                "div[opd_column_type]",
+            const xpd_column_mutate = column_object[index].closest(
+                "div[xpd_column_type]",
             );
-            if (!opd_column_mutate) {
+            if (!xpd_column_mutate) {
                 continue;
             }
             if (
-                opd_column_mutate.getAttribute("opd_column_type") == "explore"
+                xpd_column_mutate.getAttribute("xpd_column_type") == "explore"
             ) {
-                mutate_url(opd_column_mutate);
+                mutate_url(xpd_column_mutate);
             }
         }
         queue_column_frames();
@@ -2705,7 +2705,7 @@ export function run(settings) {
                     );
                     //console.log(`${exp_url.pathname}${exp_url.search}`);
                     element.setAttribute(
-                        "opd_explore_path",
+                        "xpd_explore_path",
                         `${exp_url.pathname}${exp_url.search}`,
                     );
                     exp_old_url = exp_object.contentWindow.location.href;
@@ -2732,7 +2732,7 @@ export function run(settings) {
         queue_column_frames();
     };
     const on_rate_limit_change = (changes: ChromeStorageChanges) => {
-        if (changes.opd_rate_limit_until) resume_loading();
+        if (changes.xpd_rate_limit_until) resume_loading();
     };
     document.addEventListener("visibilitychange", resume_loading);
     window.addEventListener("resize", resume_loading);
@@ -2798,7 +2798,7 @@ export function run(settings) {
                 }
             } else {
                 if (
-                    await opd_confirm(
+                    await xpd_confirm(
                         i18n_message("msg_second_rack_to_single_confirm"),
                     )
                 ) {
@@ -2833,7 +2833,7 @@ export function run(settings) {
     if (add_post_btn) {
         add_post_btn.addEventListener("click", async function () {
             if (
-                !(await opd_confirm(
+                !(await xpd_confirm(
                     i18n_message("msg_column_add_confirm", [
                         i18n_message("ui_add_post_column_title"),
                     ]),
@@ -2868,7 +2868,7 @@ export function run(settings) {
                 inline: "end",
             });
             const all_webview = document.querySelectorAll(
-                "#main_rack_element iframe[opd_init_webview]",
+                "#main_rack_element iframe[xpd_init_webview]",
             );
             append_object_css("add_column", all_webview);
             column_dd();
@@ -2881,7 +2881,7 @@ export function run(settings) {
     if (add_timeline_btn) {
         add_timeline_btn.addEventListener("click", async function () {
             if (
-                !(await opd_confirm(
+                !(await xpd_confirm(
                     i18n_message("msg_column_add_confirm", [
                         i18n_message("ui_add_timeline_column_title"),
                     ]),
@@ -2916,7 +2916,7 @@ export function run(settings) {
                 inline: "end",
             });
             const all_webview = document.querySelectorAll(
-                "#main_rack_element iframe[opd_init_webview]",
+                "#main_rack_element iframe[xpd_init_webview]",
             );
             append_object_css("add_column", all_webview);
             column_dd();
@@ -2929,7 +2929,7 @@ export function run(settings) {
     if (add_notify_btn) {
         add_notify_btn.addEventListener("click", async function () {
             if (
-                !(await opd_confirm(
+                !(await xpd_confirm(
                     i18n_message("msg_column_add_confirm", [
                         i18n_message("ui_add_notification_column_title"),
                     ]),
@@ -2964,7 +2964,7 @@ export function run(settings) {
                 inline: "end",
             });
             const all_webview = document.querySelectorAll(
-                "#main_rack_element iframe[opd_init_webview]",
+                "#main_rack_element iframe[xpd_init_webview]",
             );
             append_object_css("add_column", all_webview);
             column_dd();
@@ -3082,15 +3082,15 @@ export function run(settings) {
         );
         const inserted_column = document.querySelector(`#column_${column_id}`);
         const inserted_column_root = inserted_column?.querySelector(
-            "div[opd_column_type='explore']",
+            "div[xpd_column_type='explore']",
         );
         const title_text = inserted_column?.querySelector(
             ".dsp_column_title .dsp_column_move_icon_parent span:last-child",
         );
         if (inserted_column_root != null) {
-            inserted_column_root.setAttribute("opd_custom_title", column_title);
+            inserted_column_root.setAttribute("xpd_custom_title", column_title);
             inserted_column_root.setAttribute(
-                "opd_explore_title",
+                "xpd_explore_title",
                 column_title,
             );
         }
@@ -3102,7 +3102,7 @@ export function run(settings) {
             inline: "end",
         });
         const all_webview = document.querySelectorAll(
-            "#main_rack_element iframe[opd_init_webview]",
+            "#main_rack_element iframe[xpd_init_webview]",
         );
         append_object_css("add_column", all_webview);
         column_dd();
@@ -3114,7 +3114,7 @@ export function run(settings) {
     if (add_explore_button) {
         add_explore_button.addEventListener("click", async function () {
             if (
-                !(await opd_confirm(
+                !(await xpd_confirm(
                     i18n_message("msg_column_add_confirm", [
                         i18n_message("ui_add_explore_column_title"),
                     ]),
@@ -3128,7 +3128,7 @@ export function run(settings) {
     const add_custom_url_button = document.getElementById("add_custom_url");
     if (add_custom_url_button) {
         add_custom_url_button.addEventListener("click", async function () {
-            const input_value = await opd_prompt(
+            const input_value = await xpd_prompt(
                 i18n_message("msg_custom_x_url_prompt"),
             );
             if (input_value == null) {
@@ -3136,17 +3136,17 @@ export function run(settings) {
             }
             const custom_path = normalize_custom_x_path(input_value);
             if (custom_path == null) {
-                await opd_alert(i18n_message("msg_invalid_value_alert"));
+                await xpd_alert(i18n_message("msg_invalid_value_alert"));
                 return;
             }
-            const requested_title = await opd_prompt(
+            const requested_title = await xpd_prompt(
                 i18n_message("msg_custom_column_title_prompt"),
                 i18n_message("ui_column_custom_title"),
             );
             if (requested_title == null) return;
             const column_title = requested_title.trim();
             if (!column_title) {
-                await opd_alert(i18n_message("msg_invalid_value_alert"));
+                await xpd_alert(i18n_message("msg_invalid_value_alert"));
                 return;
             }
             add_explore_column_with_path(custom_path, column_title);
@@ -3157,7 +3157,7 @@ export function run(settings) {
     if (add_lists_button) {
         add_lists_button.addEventListener("click", async function () {
             if (
-                !(await opd_confirm(
+                !(await xpd_confirm(
                     i18n_message("msg_column_add_confirm", [
                         i18n_message("ui_add_lists_column_title"),
                     ]),
@@ -3166,7 +3166,7 @@ export function run(settings) {
                 return;
             const username = get_current_x_username();
             if (username == null) {
-                await opd_alert(i18n_message("msg_username_not_found_alert"));
+                await xpd_alert(i18n_message("msg_username_not_found_alert"));
                 return;
             }
             add_explore_column_with_path(
@@ -3181,7 +3181,7 @@ export function run(settings) {
         profile_save_button.addEventListener("click", async function () {
             if (deck_lifetime.signal.aborted) return;
             const default_name = next_profile_name(profile_store);
-            const requested_name = await opd_prompt(
+            const requested_name = await xpd_prompt(
                 i18n_message_or_fallback(
                     "msg_profile_name_prompt",
                     "Name this profile:",
@@ -3227,7 +3227,7 @@ export function run(settings) {
                     create_profile_list_btn();
                 } catch (error) {
                     if (deck_lifetime.signal.aborted) return;
-                    await opd_alert(
+                    await xpd_alert(
                         error instanceof Error ? error.message : String(error),
                     );
                 }
@@ -3240,14 +3240,14 @@ export function run(settings) {
         profile_delete_button.addEventListener("click", async function () {
             if (deck_lifetime.signal.aborted) return;
             if (profile_store.length <= 1) {
-                await opd_alert(
+                await xpd_alert(
                     i18n_message("msg_profile_delete_current_alert"),
                 );
                 return;
             }
 
             const available_profiles = profile_store.slice();
-            const selected_profile = await open_opd_dialog({
+            const selected_profile = await open_xpd_dialog({
                 type: "select",
                 message: i18n_message("ui_profile_delete_title"),
                 defaultValue: String(last_load_profile),
@@ -3272,13 +3272,13 @@ export function run(settings) {
             let delete_num = profile_store.indexOf(selected_entry);
             if (delete_num < 0) return;
             if (profile_store.length <= 1) {
-                await opd_alert(
+                await xpd_alert(
                     i18n_message("msg_profile_delete_current_alert"),
                 );
                 return;
             }
             if (
-                await opd_confirm(
+                await xpd_confirm(
                     i18n_message("msg_profile_delete_confirm", [
                         profile_display_name(selected_entry, delete_num),
                     ]),
@@ -3320,7 +3320,7 @@ export function run(settings) {
                     );
                     set_last_load_profile(after_profile_num);
                     if (next_id !== active_id) {
-                        document.querySelector("#opd_main_element")?.remove();
+                        document.querySelector("#xpd_main_element")?.remove();
                         run({
                             column_settings:
                                 profile_store[after_profile_num].profile,
@@ -3338,7 +3338,7 @@ export function run(settings) {
                     }
                 } catch (error) {
                     if (deck_lifetime.signal.aborted) return;
-                    await opd_alert(
+                    await xpd_alert(
                         error instanceof Error ? error.message : String(error),
                     );
                 }
@@ -3348,20 +3348,20 @@ export function run(settings) {
     // Column move handling.
     function bind_column_auto_reload(
         frame: HTMLIFrameElement,
-        reload: OpdExtAutoReload | null,
+        reload: XpdExtAutoReload | null,
     ) {
-        const column = frame.closest("div[opd_column_type]");
-        const enabled = column?.querySelector<WaCheckbox>(".opd_a_reload_bar");
+        const column = frame.closest("div[xpd_column_type]");
+        const enabled = column?.querySelector<WaCheckbox>(".xpd_a_reload_bar");
         const interval = column?.querySelector<WaInput>(
-            ".opd_a_reload_time_setting",
+            ".xpd_a_reload_time_setting",
         );
         if (
             !enabled ||
             !interval ||
-            enabled.hasAttribute("opd_auto_reload_bound")
+            enabled.hasAttribute("xpd_auto_reload_bound")
         )
             return;
-        enabled.setAttribute("opd_auto_reload_bound", "");
+        enabled.setAttribute("xpd_auto_reload_bound", "");
         frame.setAttribute("auto_reload_mouse_hover", "false");
         frame.addEventListener("mouseover", () =>
             frame.setAttribute("auto_reload_mouse_hover", "true"),
@@ -3415,22 +3415,22 @@ export function run(settings) {
         );
     }
     function bind_column_homepage(column: HTMLElement) {
-        if (column.hasAttribute("opd_homepage_bound")) return;
+        if (column.hasAttribute("xpd_homepage_bound")) return;
         const bar = column.querySelector(".column_bar");
         const panel = column.querySelector(".dsp_column_settings_list");
         const frame = column.querySelector<HTMLIFrameElement>("iframe");
         if (!bar || !panel || !frame) return;
-        column.setAttribute("opd_homepage_bound", "");
-        if (!column.getAttribute("opd_homepage_path")) {
+        column.setAttribute("xpd_homepage_bound", "");
+        if (!column.getAttribute("xpd_homepage_path")) {
             const path = normalize_custom_x_path(
-                frame.getAttribute("data-opd-src") ?? frame.src,
+                frame.getAttribute("data-xpd-src") ?? frame.src,
             );
-            if (path) column.setAttribute("opd_homepage_path", path);
+            if (path) column.setAttribute("xpd_homepage_path", path);
         }
         const wrapper = document.createElement("span");
         wrapper.className = "dsp_column_btn";
         const home = document.createElement("wa-button");
-        home.className = "opd_homepage_btn opd_ui_icon_color";
+        home.className = "xpd_homepage_btn xpd_ui_icon_color";
         home.setAttribute("appearance", "plain");
         home.title = i18n_message("ui_column_homepage");
         home.setAttribute("aria-label", home.title);
@@ -3442,35 +3442,35 @@ export function run(settings) {
                 ?.closest(".dsp_column_btn") ?? null,
         );
         home.addEventListener("click", () => {
-            const path = column.getAttribute("opd_homepage_path");
+            const path = column.getAttribute("xpd_homepage_path");
             if (path)
                 queue_column_navigation(frame, () => {
                     frame.src = column_navigation_url(`https://x.com${path}`);
                 });
         });
         const row = document.createElement("div");
-        row.className = "opd_homepage_setting";
+        row.className = "xpd_homepage_setting";
         const label = document.createElement("label");
         label.textContent = i18n_message("ui_column_homepage");
         const input = document.createElement("wa-input");
-        input.className = "opd_homepage_input";
+        input.className = "xpd_homepage_input";
         input.setAttribute("aria-label", label.textContent);
-        input.value = `https://x.com${column.getAttribute("opd_homepage_path") ?? "/home"}`;
+        input.value = `https://x.com${column.getAttribute("xpd_homepage_path") ?? "/home"}`;
         const current = document.createElement("wa-button");
-        current.className = "opd_homepage_current";
+        current.className = "xpd_homepage_current";
         current.textContent = i18n_message("ui_homepage_set_current");
         row.append(label, input, current);
         panel.prepend(row);
         const save = async (value: string) => {
             const path = normalize_custom_x_path(value);
             if (!path) {
-                input.value = `https://x.com${column.getAttribute("opd_homepage_path") ?? "/home"}`;
-                await opd_alert(i18n_message("msg_invalid_value_alert"));
+                input.value = `https://x.com${column.getAttribute("xpd_homepage_path") ?? "/home"}`;
+                await xpd_alert(i18n_message("msg_invalid_value_alert"));
                 return;
             }
             input.value = `https://x.com${path}`;
-            if (path !== column.getAttribute("opd_homepage_path")) {
-                column.setAttribute("opd_homepage_path", path);
+            if (path !== column.getAttribute("xpd_homepage_path")) {
+                column.setAttribute("xpd_homepage_path", path);
                 column_settings_save("", last_load_profile);
             }
         };
@@ -3490,17 +3490,17 @@ export function run(settings) {
                     throw new Error("No current page");
                 await save(url);
             } catch {
-                await opd_alert(i18n_message("msg_invalid_value_alert"));
+                await xpd_alert(i18n_message("msg_invalid_value_alert"));
             }
         });
     }
     function column_rename() {
         const titles = document.querySelectorAll<HTMLElement>(
-            '#opd_main_element .dsp_column[draggable="true"] .dsp_column_title .dsp_column_move_icon_parent span:last-child',
+            '#xpd_main_element .dsp_column[draggable="true"] .dsp_column_title .dsp_column_move_icon_parent span:last-child',
         );
         for (const title of Array.from(titles)) {
-            if (title.hasAttribute("opd_rename_bound")) continue;
-            title.setAttribute("opd_rename_bound", "");
+            if (title.hasAttribute("xpd_rename_bound")) continue;
+            title.setAttribute("xpd_rename_bound", "");
             title.setAttribute("role", "button");
             title.setAttribute("tabindex", "0");
             title.setAttribute("draggable", "false");
@@ -3510,9 +3510,9 @@ export function run(settings) {
             );
             title.style.cursor = "pointer";
             const rename = async () => {
-                const column = title.closest("div[opd_column_type]");
+                const column = title.closest("div[xpd_column_type]");
                 if (!column) return;
-                const value = await opd_prompt(
+                const value = await xpd_prompt(
                     i18n_message_or_fallback(
                         "ui_column_rename",
                         "Rename column",
@@ -3523,7 +3523,7 @@ export function run(settings) {
                     return;
                 const custom_title = value.trim();
                 if (custom_title === title.textContent) return;
-                column.setAttribute("opd_custom_title", custom_title);
+                column.setAttribute("xpd_custom_title", custom_title);
                 title.textContent = custom_title;
                 column_settings_save("", last_load_profile);
             };
@@ -3545,20 +3545,20 @@ export function run(settings) {
         const columns = document.querySelectorAll<HTMLElement>(".dsp_column");
         const clear_indicators = () => {
             document
-                .querySelectorAll(".opd_drop_before, .opd_drop_after")
+                .querySelectorAll(".xpd_drop_before, .xpd_drop_after")
                 .forEach((column) => {
                     column.classList.remove(
-                        "opd_drop_before",
-                        "opd_drop_after",
+                        "xpd_drop_before",
+                        "xpd_drop_after",
                     );
                 });
         };
         const finish_drag = () => {
             clear_indicators();
             document
-                .querySelector(".opd_column_dragging")
-                ?.classList.remove("opd_column_dragging");
-            document.body.classList.remove("opd_column_drag_active");
+                .querySelector(".xpd_column_dragging")
+                ?.classList.remove("xpd_column_dragging");
+            document.body.classList.remove("xpd_column_drag_active");
         };
         const insertion_point = (column: HTMLElement, client_x: number) => {
             const bounds = column.getBoundingClientRect();
@@ -3571,8 +3571,8 @@ export function run(settings) {
             };
         };
         for (const column of Array.from(columns)) {
-            if (column.hasAttribute("opd_drag_bound")) continue;
-            column.setAttribute("opd_drag_bound", "");
+            if (column.hasAttribute("xpd_drag_bound")) continue;
+            column.setAttribute("xpd_drag_bound", "");
             column.addEventListener("dragstart", (event) => {
                 if (
                     !event.dataTransfer ||
@@ -3585,11 +3585,11 @@ export function run(settings) {
                 finish_drag();
                 event.dataTransfer.setData("text/plain", column.id);
                 event.dataTransfer.effectAllowed = "move";
-                column.classList.add("opd_column_dragging");
-                document.body.classList.add("opd_column_drag_active");
+                column.classList.add("xpd_column_dragging");
+                document.body.classList.add("xpd_column_drag_active");
             });
             column.addEventListener("dragover", (event) => {
-                const dragged = document.querySelector(".opd_column_dragging");
+                const dragged = document.querySelector(".xpd_column_dragging");
                 if (
                     !dragged ||
                     (!column.matches('[draggable="true"]') &&
@@ -3610,7 +3610,7 @@ export function run(settings) {
                 )
                     return;
                 column.classList.add(
-                    after ? "opd_drop_after" : "opd_drop_before",
+                    after ? "xpd_drop_after" : "xpd_drop_before",
                 );
             });
             column.addEventListener("dragleave", (event) => {
@@ -3619,11 +3619,11 @@ export function run(settings) {
                     column.contains(event.relatedTarget)
                 )
                     return;
-                column.classList.remove("opd_drop_before", "opd_drop_after");
+                column.classList.remove("xpd_drop_before", "xpd_drop_after");
             });
             column.addEventListener("dragend", finish_drag);
             column.addEventListener("drop", (event) => {
-                const dragged = document.querySelector(".opd_column_dragging");
+                const dragged = document.querySelector(".xpd_column_dragging");
                 if (
                     !dragged ||
                     (!column.matches('[draggable="true"]') &&
@@ -3644,7 +3644,7 @@ export function run(settings) {
                     return;
                 // Atomic moves preserve the iframe document and its current state.
                 if (typeof parent.moveBefore !== "function") {
-                    void opd_alert(
+                    void xpd_alert(
                         i18n_message_or_fallback(
                             "msg_column_move_browser_update",
                             "Please update your browser to move columns without refreshing them.",
@@ -3662,12 +3662,12 @@ export function run(settings) {
         for (const button of document.querySelectorAll<WaButton>(
             ".dsp_column_copy_link_btn",
         )) {
-            if (button.hasAttribute("opd_copy_link_bound")) continue;
-            button.setAttribute("opd_copy_link_bound", "");
+            if (button.hasAttribute("xpd_copy_link_bound")) continue;
+            button.setAttribute("xpd_copy_link_bound", "");
             button.addEventListener("click", async () => {
                 try {
                     const frame = button
-                        .closest("div[opd_column_type]")
+                        .closest("div[xpd_column_type]")
                         ?.querySelector("iframe");
                     const url = frame?.contentWindow?.location.href;
                     if (!url || url === "about:blank")
@@ -3681,9 +3681,9 @@ export function run(settings) {
                         )
                         .join("&");
                     await navigator.clipboard.writeText(copied_url.href);
-                    await opd_alert(i18n_message("ui_column_link_copied"));
+                    await xpd_alert(i18n_message("ui_column_link_copied"));
                 } catch {
-                    await opd_alert(
+                    await xpd_alert(
                         i18n_message("msg_column_copy_link_failed"),
                     );
                 }
@@ -3694,8 +3694,8 @@ export function run(settings) {
         bind_column_copy_links();
         const close_buttons = document.querySelectorAll(".column_close_btn");
         for (let index = 0; index < close_buttons.length; index++) {
-            if (close_buttons[index].hasAttribute("opd_close_bound")) continue;
-            close_buttons[index].setAttribute("opd_close_bound", "");
+            if (close_buttons[index].hasAttribute("xpd_close_bound")) continue;
+            close_buttons[index].setAttribute("xpd_close_bound", "");
             let confirmation_pending = false;
             close_buttons[index].addEventListener("click", async function (ev) {
                 const close_button =
@@ -3708,7 +3708,7 @@ export function run(settings) {
                 confirmation_pending = true;
                 try {
                     if (
-                        (await opd_confirm(
+                        (await xpd_confirm(
                             i18n_message("msg_column_close_confirm"),
                         )) &&
                         column_element.isConnected
@@ -3749,45 +3749,45 @@ export function run(settings) {
             version: manifest.version,
         };
         const columns = document.querySelectorAll(
-            "#opd_main_element div[opd_column_type]",
+            "#xpd_main_element div[xpd_column_type]",
         );
         for (let index = 0; index < columns.length; index++) {
             const column = columns[index];
-            const column_type = column.getAttribute("opd_column_type") ?? "";
+            const column_type = column.getAttribute("xpd_column_type") ?? "";
             const is_explore = column_type == "explore";
             const supports_reload =
-                column.querySelector(".opd_a_reload_bar") != null;
-            const column_width = column.getAttribute("opd_column_width");
+                column.querySelector(".xpd_a_reload_bar") != null;
+            const column_width = column.getAttribute("xpd_column_width");
             const reload_time = supports_reload
                 ? Number(
                       column.querySelector<WaInput>(
-                          ".opd_a_reload_time_setting",
+                          ".xpd_a_reload_time_setting",
                       )?.value ?? String(default_reload_seconds),
                   ) * milliseconds_per_second
                 : default_reload_time;
 
             settings_array.column_settings.push({
-                ...(column.getAttribute("opd_custom_title") != null
-                    ? { custom_title: column.getAttribute("opd_custom_title")! }
+                ...(column.getAttribute("xpd_custom_title") != null
+                    ? { custom_title: column.getAttribute("xpd_custom_title")! }
                     : {}),
                 type: column_type,
                 banner:
-                    column.querySelector<WaCheckbox>(".opd_banner")?.checked ==
+                    column.querySelector<WaCheckbox>(".xpd_banner")?.checked ==
                     true,
                 tw_view_mode: String(
-                    column.querySelector<WaSelect>(".opd_tw_view_mode")
+                    column.querySelector<WaSelect>(".xpd_tw_view_mode")
                         ?.value ?? "0",
                 ),
                 column_save_path: is_explore
-                    ? (column.getAttribute("opd_explore_path") ?? "")
+                    ? (column.getAttribute("xpd_explore_path") ?? "")
                     : "",
                 column_save_title: is_explore
-                    ? column.getAttribute("opd_explore_title")
+                    ? column.getAttribute("xpd_explore_title")
                     : null,
                 column_homepage_path:
-                    column.getAttribute("opd_homepage_path") ?? "",
+                    column.getAttribute("xpd_homepage_path") ?? "",
                 auto_reload: supports_reload
-                    ? column.querySelector<WaCheckbox>(".opd_a_reload_bar")
+                    ? column.querySelector<WaCheckbox>(".xpd_a_reload_bar")
                           ?.checked == true
                     : null,
                 auto_reload_time:
@@ -3812,7 +3812,7 @@ export function run(settings) {
         }).catch((error) =>
             deck_lifetime.signal.aborted
                 ? undefined
-                : opd_alert(
+                : xpd_alert(
                       error instanceof Error ? error.message : String(error),
                   ),
         );
@@ -3866,7 +3866,7 @@ export function run(settings) {
         }
 
         // Detect and apply dark mode settings.
-        const main_element = document.getElementById("opd_main_element");
+        const main_element = document.getElementById("xpd_main_element");
         if (!main_element) return;
 
         apply_theme_for_main_element(main_element);

@@ -7,17 +7,17 @@ export function start_reload_guard(development = false) {
     if (!isTopLevelDeck()) return () => {};
     let stopped = false;
     let preloadStyle: HTMLStyleElement | undefined;
-    const bypassKey = "opd_beforeunload_bypass_once";
-    const rootThemeAttribute = "data-opd-theme";
-    const preloadStyleId = "opd_preload_theme_style";
+    const bypassKey = "xpd_beforeunload_bypass_once";
+    const rootThemeAttribute = "data-xpd-theme";
+    const preloadStyleId = "xpd_preload_theme_style";
     const systemDarkQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const bootstrap: NonNullable<Window["__opdBootstrap"]> =
-        (window.__opdBootstrap = window.__opdBootstrap || {});
+    const bootstrap: NonNullable<Window["__xpdBootstrap"]> =
+        (window.__xpdBootstrap = window.__xpdBootstrap || {});
 
     function getCookieColorMode() {
         const cookie = document.cookie
             .split(/;\s*/)
-            .find((c) => c.startsWith("opd_theme="));
+            .find((c) => c.startsWith("xpd_theme="));
 
         if (!cookie) {
             return "system";
@@ -49,14 +49,14 @@ export function start_reload_guard(development = false) {
         const style = document.createElement("style");
         style.id = preloadStyleId;
         style.textContent = `
-html[data-opd-deck] #react-root { visibility: hidden !important; }
-html[data-opd-deck][data-opd-theme="dark"],
-html[data-opd-deck][data-opd-theme="dark"] body {
+html[data-xpd-deck] #react-root { visibility: hidden !important; }
+html[data-xpd-deck][data-xpd-theme="dark"],
+html[data-xpd-deck][data-xpd-theme="dark"] body {
     background: #101215 !important;
     color: #e5ebf3 !important;
 }
-html[data-opd-deck][data-opd-theme="light"],
-html[data-opd-deck][data-opd-theme="light"] body {
+html[data-xpd-deck][data-xpd-theme="light"],
+html[data-xpd-deck][data-xpd-theme="light"] body {
     background: #ffffff !important;
     color: #111827 !important;
 }
@@ -65,7 +65,7 @@ html[data-opd-deck][data-opd-theme="light"] body {
         preloadStyle = style;
     }
 
-    document.documentElement.setAttribute("data-opd-deck", "");
+    document.documentElement.setAttribute("data-xpd-deck", "");
     ensurePreloadThemeStyle();
     applyRootThemeMarker();
     bootstrap.beforeunloadBypassKey = bypassKey;
@@ -109,10 +109,10 @@ html[data-opd-deck][data-opd-theme="light"] body {
         systemDarkQuery.removeEventListener("change", applyRootThemeMarker);
         window.removeEventListener("beforeunload", beforeUnload);
         window.removeEventListener("popstate", checkLocation);
-        document.documentElement.removeAttribute("data-opd-deck");
+        document.documentElement.removeAttribute("data-xpd-deck");
         document.documentElement.removeAttribute(rootThemeAttribute);
         preloadStyle?.remove();
-        if (window.__opdBootstrap === bootstrap) delete window.__opdBootstrap;
+        if (window.__xpdBootstrap === bootstrap) delete window.__xpdBootstrap;
     };
     return cleanup;
 }

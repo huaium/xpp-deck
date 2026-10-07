@@ -4,7 +4,7 @@ export function create_profile_storage() {
     const read = () =>
         new Promise<Record<string, unknown>>((resolve, reject) => {
             chrome.storage.local.get(
-                ["opd_profile_store", "opd_settings"],
+                ["xpd_profile_store", "xpd_settings"],
                 (value) => {
                     if (chrome.runtime.lastError)
                         reject(new Error(chrome.runtime.lastError.message));
@@ -36,16 +36,16 @@ export function create_profile_storage() {
         if (
             operation.op === "reset" &&
             operation.only_if_missing &&
-            (stored.opd_profile_store !== undefined ||
-                stored.opd_settings !== undefined)
+            (stored.xpd_profile_store !== undefined ||
+                stored.xpd_settings !== undefined)
         )
             return stored;
-        if (operation.op === "read" && stored.opd_profile_store === undefined)
+        if (operation.op === "read" && stored.xpd_profile_store === undefined)
             return stored;
         let profiles =
             operation.op === "reset"
                 ? operation.profiles
-                : JSON.parse(String(stored.opd_profile_store));
+                : JSON.parse(String(stored.xpd_profile_store));
         if (
             !Array.isArray(profiles) ||
             profiles.length === 0 ||
@@ -74,13 +74,13 @@ export function create_profile_storage() {
         }
         if (operation.op === "read") {
             if (migrated)
-                await write({ opd_profile_store: JSON.stringify(profiles) });
-            return { ...stored, opd_profile_store: JSON.stringify(profiles) };
+                await write({ xpd_profile_store: JSON.stringify(profiles) });
+            return { ...stored, xpd_profile_store: JSON.stringify(profiles) };
         }
         const settings =
             operation.op === "reset"
                 ? operation.settings
-                : JSON.parse(String(stored.opd_settings));
+                : JSON.parse(String(stored.xpd_settings));
         if (
             !settings ||
             typeof settings !== "object" ||
@@ -151,9 +151,9 @@ export function create_profile_storage() {
                 throw new Error("Unknown profile operation");
         }
         await write({
-            opd_profile_store: JSON.stringify(profiles),
+            xpd_profile_store: JSON.stringify(profiles),
             ...(save_settings
-                ? { opd_settings: JSON.stringify(settings) }
+                ? { xpd_settings: JSON.stringify(settings) }
                 : {}),
         });
         return { profiles, settings };

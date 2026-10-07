@@ -25,7 +25,7 @@ test("deleting the active profile replaces its columns before storage callbacks"
         let removed = false;
         const pending = [];
         h.globals.document.querySelector = (selector) =>
-            selector === "#opd_main_element"
+            selector === "#xpd_main_element"
                 ? {
                       remove() {
                           removed = true;
@@ -48,7 +48,7 @@ test("deleting the active profile replaces its columns before storage callbacks"
         assert.equal(h.store[Math.max(0, active - 1)].profile, expected);
         while (pending.length) pending.shift()();
         assert.equal(
-            JSON.parse(h.writes[1].opd_settings).last_load_profile,
+            JSON.parse(h.writes[1].xpd_settings).last_load_profile,
             Math.max(0, active - 1),
         );
     }
@@ -72,7 +72,7 @@ test("deletion offers every profile and preserves the active profile when anothe
                 confirmationName = substitutions[0];
             return key;
         };
-        h.globals.open_opd_dialog = async (value) => {
+        h.globals.open_xpd_dialog = async (value) => {
             options = value;
             return String(selected);
         };
@@ -90,7 +90,7 @@ test("deletion offers every profile and preserves the active profile when anothe
         );
         assert.equal(h.store[remainingActive].name, `profile-${active}`);
         assert.equal(
-            JSON.parse(h.writes[1].opd_settings).last_load_profile,
+            JSON.parse(h.writes[1].xpd_settings).last_load_profile,
             remainingActive,
         );
     }
@@ -99,8 +99,8 @@ test("deletion offers every profile and preserves the active profile when anothe
 test("cancelled and invalid selections never delete or confirm", async () => {
     for (const selected of [null, "invalid", "-1", "3", "0.5"]) {
         const h = profileHarness(true);
-        h.globals.open_opd_dialog = async () => selected;
-        h.globals.opd_confirm = async () =>
+        h.globals.open_xpd_dialog = async () => selected;
+        h.globals.xpd_confirm = async () =>
             assert.fail("Unexpected confirmation");
         await deletion(h)();
         assert.equal(h.store.length, 3);
@@ -110,7 +110,7 @@ test("cancelled and invalid selections never delete or confirm", async () => {
 
 test("the final profile is protected even if the store changes during confirmation", async () => {
     const h = profileHarness(true, 0, 2);
-    h.globals.opd_confirm = async () => {
+    h.globals.xpd_confirm = async () => {
         h.store.splice(1, 1);
         return true;
     };

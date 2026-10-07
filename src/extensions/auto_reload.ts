@@ -1,23 +1,23 @@
 // Used by the auto-refresh feature.
-export class OpdExtAutoReload {
-    opd_reload_token: string | null;
+export class XpdExtAutoReload {
+    xpd_reload_token: string | null;
     Init: (column_window: Window) => void;
     Reload: (column_window: Window) => boolean;
 
     constructor() {
-        this.opd_reload_token = null;
+        this.xpd_reload_token = null;
         this.Init = (column_window) => {
             // Inject helper script.
             const helper_script =
                 column_window.document.createElement("script");
             helper_script.src = chrome.runtime.getURL("auto_reload_helper.js");
             const token = crypto.randomUUID();
-            this.opd_reload_token = token;
+            this.xpd_reload_token = token;
             helper_script.addEventListener(
                 "load",
                 () => {
                     column_window.document.dispatchEvent(
-                        new CustomEvent("opd_column_reload_init", {
+                        new CustomEvent("xpd_column_reload_init", {
                             detail: JSON.stringify({
                                 token,
                             }),
@@ -29,7 +29,7 @@ export class OpdExtAutoReload {
             column_window.document.head.appendChild(helper_script);
         };
         this.Reload = (column_window) => {
-            if (!this.opd_reload_token) return false;
+            if (!this.xpd_reload_token) return false;
             const doc = column_window.document;
             let refreshed = false;
             const on_result = (event: Event) => {
@@ -37,25 +37,25 @@ export class OpdExtAutoReload {
                     const detail = JSON.parse(
                         String((event as CustomEvent).detail),
                     );
-                    if (detail.token === this.opd_reload_token)
+                    if (detail.token === this.xpd_reload_token)
                         refreshed = detail.refreshed === true;
                 } catch {
                     // Ignore malformed page events.
                 }
             };
-            doc.addEventListener("opd_column_reload_result", on_result);
+            doc.addEventListener("xpd_column_reload_result", on_result);
             try {
                 doc.dispatchEvent(
-                    new CustomEvent("opd_column_reload", {
+                    new CustomEvent("xpd_column_reload", {
                         bubbles: true,
                         composed: true,
                         detail: JSON.stringify({
-                            token: this.opd_reload_token,
+                            token: this.xpd_reload_token,
                         }),
                     }),
                 );
             } finally {
-                doc.removeEventListener("opd_column_reload_result", on_result);
+                doc.removeEventListener("xpd_column_reload_result", on_result);
             }
             return refreshed;
         };

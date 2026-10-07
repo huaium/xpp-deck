@@ -24,7 +24,7 @@ for (const stage of ["storage", "acknowledgement"]) {
                               finish = resolve;
                           })
                         : Promise.resolve(),
-                opd_alert: () => {
+                xpd_alert: () => {
                     alerts++;
                     return new Promise((resolve) => {
                         finish = resolve;
@@ -61,10 +61,10 @@ test("initial setup persists a default profile before acknowledgement and reload
         {
             profile_storage_request: async (operation) => {
                 writes.push({
-                    opd_profile_store: JSON.stringify(operation.profiles),
+                    xpd_profile_store: JSON.stringify(operation.profiles),
                 });
                 writes.push({
-                    opd_settings: JSON.stringify(operation.settings),
+                    xpd_settings: JSON.stringify(operation.settings),
                 });
             },
             manifest: { version: "1.2.3" },
@@ -80,7 +80,7 @@ test("initial setup persists a default profile before acknowledgement and reload
                 },
             },
             i18n_message: (key) => key,
-            opd_alert: () =>
+            xpd_alert: () =>
                 new Promise((resolve) => {
                     acknowledge = resolve;
                 }),
@@ -92,14 +92,14 @@ test("initial setup persists a default profile before acknowledgement and reload
     const setup = settings_init();
     await Promise.resolve();
     assert.equal(writes.length, 2);
-    const profiles = JSON.parse(writes[0].opd_profile_store);
+    const profiles = JSON.parse(writes[0].xpd_profile_store);
     assert.equal(profiles.length, 1);
     assert.equal(profiles[0].name, "ui_profile_switch_label");
     assert.ok(profiles[0].profile.some((column) => column.type === "home"));
     assert.ok(
         profiles[0].profile.every((column) => !("top_visible" in column)),
     );
-    assert.deepEqual(JSON.parse(writes[1].opd_settings), {
+    assert.deepEqual(JSON.parse(writes[1].xpd_settings), {
         last_load_profile: 0,
         version: "1.2.3",
     });
@@ -119,20 +119,20 @@ test("column snapshots preserve display, width, homepage URL, title, and refresh
     const columns = [
         column(
             {
-                opd_column_type: "explore",
-                opd_column_width: "30",
-                opd_explore_path: "/search?q=test",
-                opd_homepage_path: "/i/bookmarks",
-                opd_explore_title: "Saved",
+                xpd_column_type: "explore",
+                xpd_column_width: "30",
+                xpd_explore_path: "/search?q=test",
+                xpd_homepage_path: "/i/bookmarks",
+                xpd_explore_title: "Saved",
             },
             {
-                ".opd_banner": { checked: true },
-                ".opd_tw_view_mode": { value: "2" },
-                ".opd_a_reload_bar": { checked: true },
-                ".opd_a_reload_time_setting": { value: "5" },
+                ".xpd_banner": { checked: true },
+                ".xpd_tw_view_mode": { value: "2" },
+                ".xpd_a_reload_bar": { checked: true },
+                ".xpd_a_reload_time_setting": { value: "5" },
             },
         ),
-        column({ opd_column_type: "notification", opd_column_width: "null" }),
+        column({ xpd_column_type: "notification", xpd_column_width: "null" }),
     ];
     const { column_settings_save: save } = loadFunctions(
         "../src/content/run.ts",
@@ -142,7 +142,7 @@ test("column snapshots preserve display, width, homepage URL, title, and refresh
             manifest: { version: "1" },
             last_load_profile: 0,
             profile_storage_request: async () => {
-                writes.push({ opd_profile_store: JSON.stringify(profiles) });
+                writes.push({ xpd_profile_store: JSON.stringify(profiles) });
             },
             deck_lifetime: new AbortController(),
             profile_store: profiles,
@@ -177,7 +177,7 @@ test("column snapshots preserve display, width, homepage URL, title, and refresh
     assert.equal(writes.length, 1);
     assert.equal(profiles[1].name, "untouched");
     assert.deepEqual(
-        JSON.parse(writes[0].opd_profile_store)[0].profile,
+        JSON.parse(writes[0].xpd_profile_store)[0].profile,
         JSON.parse(JSON.stringify(snapshot.column_settings)),
     );
 });
@@ -194,8 +194,8 @@ test("invalid refresh intervals fall back to ten seconds", () => {
                 document: {
                     querySelectorAll: () => [
                         column(
-                            { opd_column_type: "home" },
-                            { ".opd_a_reload_time_setting": { value } },
+                            { xpd_column_type: "home" },
+                            { ".xpd_a_reload_time_setting": { value } },
                         ),
                     ],
                 },

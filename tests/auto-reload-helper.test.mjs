@@ -44,7 +44,7 @@ function harness() {
         "utf8",
     );
     const reload = vm.runInNewContext(
-        transpile(source) + "; new OpdExtAutoReload()",
+        transpile(source) + "; new XpdExtAutoReload()",
         {
             CustomEvent,
             crypto: { randomUUID: () => "token" },

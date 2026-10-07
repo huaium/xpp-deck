@@ -23,7 +23,7 @@ export function read_x_session(): SessionStatus {
         Array.from(page.querySelectorAll(selector)).some(
             (element) =>
                 !element.closest(
-                    '#opd_welcome, [hidden], [aria-hidden="true"]',
+                    '#xpd_welcome, [hidden], [aria-hidden="true"]',
                 ),
         );
     if (
@@ -42,7 +42,7 @@ export function read_x_session(): SessionStatus {
         Array.from(
             page.querySelectorAll('a[href*="/i/jf/onboarding/web"]'),
         ).some((element) => {
-            if (element.closest('#opd_welcome, [hidden], [aria-hidden="true"]'))
+            if (element.closest('#xpd_welcome, [hidden], [aria-hidden="true"]'))
                 return false;
             const href = element.getAttribute("href");
             if (!href) return false;
@@ -104,31 +104,31 @@ export function check_x_session(signal?: AbortSignal): Promise<SessionStatus> {
 
 export function mount_session_gate(options: WelcomeOptions) {
     const root = document.documentElement;
-    root.setAttribute("data-opd-deck", "");
+    root.setAttribute("data-xpd-deck", "");
     const style = document.createElement("style");
-    style.id = "opd_welcome_style";
+    style.id = "xpd_welcome_style";
     style.textContent = `
-html[data-opd-deck] #react-root{visibility:hidden!important;}
-#opd_welcome{--welcome-bg:#fff;--welcome-text:#1f2937;--welcome-muted:#5f6b7a;--welcome-line:#c6ced8;position:fixed;inset:0;z-index:2147483645;display:grid;place-items:center;overflow:auto;box-sizing:border-box;padding:32px 24px;background:var(--welcome-bg);color:var(--welcome-text);font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;}
-html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5ebf3;--welcome-muted:#a4afbc;--welcome-line:#44505e;}
-#opd_welcome [hidden]{display:none!important;}
-#opd_welcome *{box-sizing:border-box;font-family:inherit;}
-#opd_welcome .welcome-content{width:100%;max-width:420px;margin:auto;}
-#opd_welcome .welcome-brand{font-size:clamp(32px,7vw,44px);font-weight:750;letter-spacing:-1.5px;margin:0 0 48px;}
-#opd_welcome h1{font-size:24px;line-height:1.3;letter-spacing:-.5px;margin:0 0 12px;}
-#opd_welcome p{font-size:15px;line-height:1.6;color:var(--welcome-muted);margin:0 0 24px;}
-#opd_welcome .welcome-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;}
-#opd_welcome a,#opd_welcome button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 20px;border:1px solid var(--welcome-line);border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;background:transparent;color:var(--welcome-text);}
-#opd_welcome a{background:var(--welcome-text);color:var(--welcome-bg);border-color:var(--welcome-text);}
-#opd_welcome a:hover,#opd_welcome button:hover{filter:brightness(.9);}
-#opd_welcome a:focus-visible,#opd_welcome button:focus-visible{outline:2px solid #2563eb;outline-offset:4px;}
-#opd_welcome .welcome-note{margin:24px 0 0;font-size:13px;}
-#opd_welcome button:disabled{opacity:.55;cursor:wait;}
-@media(max-height:480px){#opd_welcome .welcome-brand{margin-bottom:24px;}}
+html[data-xpd-deck] #react-root{visibility:hidden!important;}
+#xpd_welcome{--welcome-bg:#fff;--welcome-text:#1f2937;--welcome-muted:#5f6b7a;--welcome-line:#c6ced8;position:fixed;inset:0;z-index:2147483645;display:grid;place-items:center;overflow:auto;box-sizing:border-box;padding:32px 24px;background:var(--welcome-bg);color:var(--welcome-text);font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;}
+html[data-xpd-theme="dark"] #xpd_welcome{--welcome-bg:#101215;--welcome-text:#e5ebf3;--welcome-muted:#a4afbc;--welcome-line:#44505e;}
+#xpd_welcome [hidden]{display:none!important;}
+#xpd_welcome *{box-sizing:border-box;font-family:inherit;}
+#xpd_welcome .welcome-content{width:100%;max-width:420px;margin:auto;}
+#xpd_welcome .welcome-brand{font-size:clamp(32px,7vw,44px);font-weight:750;letter-spacing:-1.5px;margin:0 0 48px;}
+#xpd_welcome h1{font-size:24px;line-height:1.3;letter-spacing:-.5px;margin:0 0 12px;}
+#xpd_welcome p{font-size:15px;line-height:1.6;color:var(--welcome-muted);margin:0 0 24px;}
+#xpd_welcome .welcome-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;}
+#xpd_welcome a,#xpd_welcome button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 20px;border:1px solid var(--welcome-line);border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;background:transparent;color:var(--welcome-text);}
+#xpd_welcome a{background:var(--welcome-text);color:var(--welcome-bg);border-color:var(--welcome-text);}
+#xpd_welcome a:hover,#xpd_welcome button:hover{filter:brightness(.9);}
+#xpd_welcome a:focus-visible,#xpd_welcome button:focus-visible{outline:2px solid #2563eb;outline-offset:4px;}
+#xpd_welcome .welcome-note{margin:24px 0 0;font-size:13px;}
+#xpd_welcome button:disabled{opacity:.55;cursor:wait;}
+@media(max-height:480px){#xpd_welcome .welcome-brand{margin-bottom:24px;}}
 `;
     document.head.appendChild(style);
     const view = document.createElement("main");
-    view.id = "opd_welcome";
+    view.id = "xpd_welcome";
     view.setAttribute("aria-label", "XPP-Deck");
     const content = document.createElement("div");
     content.className = "welcome-content";
@@ -146,10 +146,10 @@ html[data-opd-theme="dark"] #opd_welcome{--welcome-bg:#101215;--welcome-text:#e5
     signIn.target = "_blank";
     signIn.rel = "noopener noreferrer";
     const retry = document.createElement("wa-button");
-    retry.id = "opd_welcome_retry";
+    retry.id = "xpd_welcome_retry";
     retry.setAttribute("type", "button");
     const reset = document.createElement("wa-button");
-    reset.id = "opd_welcome_reset";
+    reset.id = "xpd_welcome_reset";
     reset.setAttribute("type", "button");
     reset.setAttribute("variant", "danger");
     reset.setAttribute("appearance", "outlined");

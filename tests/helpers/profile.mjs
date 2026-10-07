@@ -17,16 +17,16 @@ export function profileHarness(confirmed, active = 1, count = 3) {
                     name: operation.name,
                     profile: operation.columns,
                 });
-                writes.push({ opd_profile_store: JSON.stringify(store) });
+                writes.push({ xpd_profile_store: JSON.stringify(store) });
             } else if (operation.op === "delete") {
                 store.splice(
                     store.findIndex((p) => p.id === operation.id),
                     1,
                 );
-                writes.push({ opd_profile_store: JSON.stringify(store) });
+                writes.push({ xpd_profile_store: JSON.stringify(store) });
             } else if (operation.op === "select") {
                 writes.push({
-                    opd_settings: JSON.stringify({
+                    xpd_settings: JSON.stringify({
                         last_load_profile: store.findIndex(
                             (p) => p.id === operation.id,
                         ),
@@ -36,7 +36,7 @@ export function profileHarness(confirmed, active = 1, count = 3) {
             } else if (operation.op === "save") {
                 store.find((p) => p.id === operation.id).profile =
                     operation.columns;
-                writes.push({ opd_profile_store: JSON.stringify(store) });
+                writes.push({ xpd_profile_store: JSON.stringify(store) });
             }
             return { profiles: store.slice() };
         },
@@ -53,7 +53,7 @@ export function profileHarness(confirmed, active = 1, count = 3) {
                     },
                     get(_key, done) {
                         done({
-                            opd_settings: JSON.stringify({
+                            xpd_settings: JSON.stringify({
                                 version: "1",
                                 last_load_profile: active,
                             }),
@@ -62,13 +62,13 @@ export function profileHarness(confirmed, active = 1, count = 3) {
                 },
             },
         },
-        opd_confirm: async () => confirmed,
-        opd_prompt: async () => (confirmed ? "Named profile" : null),
+        xpd_confirm: async () => confirmed,
+        xpd_prompt: async () => (confirmed ? "Named profile" : null),
         next_profile_name: () => "Profile 1",
         profile_display_name: (profile) => profile.name,
         i18n_message_or_fallback: (_key, fallback) => fallback,
-        open_opd_dialog: async () => String(active),
-        opd_alert: async (message) => alerts.push(message),
+        open_xpd_dialog: async () => String(active),
+        xpd_alert: async (message) => alerts.push(message),
         i18n_message: (key) => key,
         column_settings_save: () => ({
             column_settings: [

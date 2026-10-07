@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import console from "node:console";
 import process from "node:process";
-/* global window, document, innerWidth, open_opd_dialog */
+/* global window, document, innerWidth, open_xpd_dialog */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { URL } from "node:url";
@@ -25,9 +25,9 @@ const source = readFileSync(
     "utf8",
 );
 const names = new Set([
-    "ensure_opd_dialog_style",
-    "enqueue_opd_dialog",
-    "open_opd_dialog",
+    "ensure_xpd_dialog_style",
+    "enqueue_xpd_dialog",
+    "open_xpd_dialog",
     "open_about_page_modal",
     "i18n_message_or_fallback",
 ]);
@@ -41,11 +41,11 @@ const script = transpile(
 const manifest = {version: '1.0.0'};
 const chrome = {runtime: {getManifest: () => manifest, getURL: (path) => 'https://fixture.invalid/' + path}};
 const ui_icon_define = {column_close: 'close.svg'};
-let opd_dialog_queue = Promise.resolve();
+let xpd_dialog_queue = Promise.resolve();
 function i18n_message(key) {return key === 'ui_dialog_cancel_button' ? 'Cancel' : 'OK';}
-function is_opd_dark_theme_enabled() {return false;}
+function is_xpd_dark_theme_enabled() {return false;}
 ${declarations.join("\n")}
-window.openTestDialog = (options) => {window.result = 'pending'; open_opd_dialog(options).then(value => window.result = value);};
+window.openTestDialog = (options) => {window.result = 'pending'; open_xpd_dialog(options).then(value => window.result = value);};
 window.openTestAbout = open_about_page_modal;
 `,
 );
@@ -72,7 +72,7 @@ for (const engine of ["chromium", "firefox"]) {
                 defaultValue: "30",
             }),
         );
-        const input = page.locator(".opd_dialog_input");
+        const input = page.locator(".xpd_dialog_input");
         await input.waitFor();
         assert.equal(
             await input.evaluate((el) => document.activeElement === el),
@@ -81,7 +81,7 @@ for (const engine of ["chromium", "firefox"]) {
         await page.keyboard.press("Shift+Tab");
         assert.equal(
             await page
-                .locator(".opd_dialog_primary")
+                .locator(".xpd_dialog_primary")
                 .evaluate((el) => document.activeElement === el),
             true,
         );
@@ -95,7 +95,7 @@ for (const engine of ["chromium", "firefox"]) {
             key: "Enter",
             isComposing: true,
         });
-        assert.equal(await page.locator(".opd_dialog").count(), 1);
+        assert.equal(await page.locator(".xpd_dialog").count(), 1);
         await page.keyboard.press("Enter");
         await page.waitForFunction(() => window.result === "45");
         assert.equal(
@@ -117,18 +117,18 @@ for (const engine of ["chromium", "firefox"]) {
         await page.waitForFunction(() => window.result === false);
         await page.evaluate(() => {
             window.openTestDialog({ type: "alert", message: "First" });
-            window.second = open_opd_dialog({
+            window.second = open_xpd_dialog({
                 type: "prompt",
                 message: "Second",
             });
         });
         await page
-            .locator(".opd_dialog_message")
+            .locator(".xpd_dialog_message")
             .filter({ hasText: "First" })
             .waitFor();
-        assert.equal(await page.locator(".opd_dialog").count(), 1);
+        assert.equal(await page.locator(".xpd_dialog").count(), 1);
         await page.getByRole("button", { name: "OK", exact: true }).click();
-        await page.locator(".opd_dialog_input").waitFor();
+        await page.locator(".xpd_dialog_input").waitFor();
         await page.keyboard.press("Escape");
         assert.equal(await page.evaluate(() => window.second), null);
         for (const width of [360, 1100]) {
@@ -143,10 +143,10 @@ for (const engine of ["chromium", "firefox"]) {
             await input.waitFor();
             const rects = await page.evaluate(() => {
                 const dialog = document
-                    .querySelector(".opd_dialog")
+                    .querySelector(".xpd_dialog")
                     .getBoundingClientRect();
                 const input = document
-                    .querySelector(".opd_dialog_input")
+                    .querySelector(".xpd_dialog_input")
                     .getBoundingClientRect();
                 return {
                     left: dialog.left,
@@ -162,11 +162,11 @@ for (const engine of ["chromium", "firefox"]) {
                 JSON.stringify(rects),
             );
             await page.keyboard.press("Escape");
-            await page.locator(".opd_dialog").waitFor({ state: "detached" });
+            await page.locator(".xpd_dialog").waitFor({ state: "detached" });
             await page.evaluate(() => {
                 window.aboutResult = window.openTestAbout();
             });
-            await page.locator(".opd_about_dialog").waitFor();
+            await page.locator(".xpd_about_dialog").waitFor();
             await page.keyboard.press("Escape");
             await page.evaluate(() => window.aboutResult);
         }

@@ -80,19 +80,19 @@ function harness(supported = true) {
                         ? order
                         : order.filter(
                               (column) =>
-                                  column.classes.has("opd_drop_before") ||
-                                  column.classes.has("opd_drop_after"),
+                                  column.classes.has("xpd_drop_before") ||
+                                  column.classes.has("xpd_drop_after"),
                           ),
                 querySelector: () =>
                     order.find((column) =>
-                        column.classes.has("opd_column_dragging"),
+                        column.classes.has("xpd_column_dragging"),
                     ) ?? null,
             },
             Node: Element,
             column_rename() {},
             last_load_profile: 0,
             column_settings_save: () => saves++,
-            opd_alert: () => alerts++,
+            xpd_alert: () => alerts++,
             i18n_message_or_fallback: (_key, fallback) => fallback,
         },
     );
@@ -126,7 +126,7 @@ test("dragging uses midpoint insertion, cleans feedback, and saves once", () => 
         assert.equal(h.dataTransfer.effectAllowed, "move");
         h.c.handlers.get("dragover")(h.event(after ? 290 : 110));
         assert.ok(
-            h.c.classes.has(after ? "opd_drop_after" : "opd_drop_before"),
+            h.c.classes.has(after ? "xpd_drop_after" : "xpd_drop_before"),
         );
         assert.equal(h.dataTransfer.dropEffect, "move");
         h.c.handlers.get("drop")(h.event(after ? 290 : 110));
@@ -152,7 +152,7 @@ test("cancelled, external and no-op drags do not save", () => {
     h.a.handlers.get("dragstart")(h.event());
     h.c.handlers.get("dragover")(h.event());
     h.c.handlers.get("dragleave")({ relatedTarget: h.c });
-    assert.ok(h.c.classes.has("opd_drop_before"));
+    assert.ok(h.c.classes.has("xpd_drop_before"));
     h.a.handlers.get("dragend")();
     assert.equal(h.saves(), 0);
     assert.equal(h.body.classes.size, 0);

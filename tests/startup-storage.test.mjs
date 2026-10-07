@@ -24,8 +24,8 @@ function harness(stored, deferVersion = false) {
                         }),
                     );
                 writes.push({
-                    opd_settings: JSON.stringify({
-                        ...JSON.parse(stored.opd_settings),
+                    xpd_settings: JSON.stringify({
+                        ...JSON.parse(stored.xpd_settings),
                         version: operation.version,
                     }),
                 });
@@ -38,7 +38,7 @@ function harness(stored, deferVersion = false) {
             is_deck_location: () => true,
             location: { href: "https://x.com/run-xppdeck" },
             manifest: { version: "1" },
-            opd_confirm: async () => false,
+            xpd_confirm: async () => false,
             i18n_message: (key) => key,
             chrome: {
                 runtime,
@@ -58,8 +58,8 @@ function harness(stored, deferVersion = false) {
     return { initialize, callbacks, writes, runtime };
 }
 const valid = {
-    opd_settings: JSON.stringify({ last_load_profile: 0, version: "1" }),
-    opd_profile_store: JSON.stringify([
+    xpd_settings: JSON.stringify({ last_load_profile: 0, version: "1" }),
+    xpd_profile_store: JSON.stringify([
         { name: "Saved", profile: [{ type: "home" }] },
     ]),
 };
@@ -99,7 +99,7 @@ test("cancellation during version persistence prevents mounting", async () => {
     const h = harness(
         {
             ...valid,
-            opd_settings: JSON.stringify({
+            xpd_settings: JSON.stringify({
                 version: "old",
                 last_load_profile: 0,
             }),
@@ -191,14 +191,14 @@ test("startup waits for storage and deck initialization", async () => {
 });
 
 for (const stored of [
-    { ...valid, opd_settings: "invalid JSON" },
-    { ...valid, opd_profile_store: "invalid JSON" },
-    { opd_settings: valid.opd_settings },
-    { opd_profile_store: valid.opd_profile_store },
-    { ...valid, opd_settings: '{"last_load_profile":99}' },
-    { ...valid, opd_profile_store: "[]" },
-    { ...valid, opd_profile_store: '[{"profile":[null]}]' },
-    { ...valid, opd_profile_store: '[{"profile":{}}]' },
+    { ...valid, xpd_settings: "invalid JSON" },
+    { ...valid, xpd_profile_store: "invalid JSON" },
+    { xpd_settings: valid.xpd_settings },
+    { xpd_profile_store: valid.xpd_profile_store },
+    { ...valid, xpd_settings: '{"last_load_profile":99}' },
+    { ...valid, xpd_profile_store: "[]" },
+    { ...valid, xpd_profile_store: '[{"profile":[null]}]' },
+    { ...valid, xpd_profile_store: '[{"profile":{}}]' },
 ]) {
     test(`corrupt startup rejects without resetting saved data: ${JSON.stringify(stored)}`, async () => {
         const h = harness(stored);

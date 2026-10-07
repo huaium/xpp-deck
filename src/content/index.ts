@@ -3,7 +3,7 @@ import {
     initialize_i18n_override,
     i18n_message_or_fallback,
     request_page_reload,
-    opd_confirm,
+    xpd_confirm,
 } from "./prelude";
 import { run, dispose_deck } from "./run";
 import { settings_init } from "./settings";
@@ -23,7 +23,7 @@ export function start_content() {
         start: () => initialize_content(run, settings_init, startup.signal),
         reload: request_page_reload,
         confirmReset: () =>
-            opd_confirm(
+            xpd_confirm(
                 i18n_message_or_fallback(
                     "msg_reset_profiles_confirm",
                     "Reset all profiles? This permanently replaces your saved profiles and column layouts with the default profile.",
@@ -31,9 +31,13 @@ export function start_content() {
             ),
         reset: () => settings_init(false, startup.signal),
     });
-    void initialize_i18n_override().then(async () => {
-        if (!startup.signal.aborted) await gate.check();
-    });
+    void initialize_i18n_override()
+        .catch(() => {
+            // Preference read failures are reported through the startup gate.
+        })
+        .then(async () => {
+            if (!startup.signal.aborted) await gate.check();
+        });
     return () => {
         if (startup.signal.aborted) return;
         startup.abort();

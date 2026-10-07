@@ -10,8 +10,8 @@ test("navigation saves the URL without reading or replacing page titles", () => 
     let disconnected = 0;
     let removed = 0;
     const attributes = new Map([
-        ["opd_explore_title", "Search"],
-        ["opd_custom_title", "Search"],
+        ["xpd_explore_title", "Search"],
+        ["xpd_custom_title", "Search"],
     ]);
     const frame = {
         contentWindow: {
@@ -59,9 +59,9 @@ test("navigation saves the URL without reading or replacing page titles", () => 
     onload();
     frame.contentWindow.location.href = "https://x.com/search?q=test";
     onmutation();
-    assert.equal(attributes.get("opd_explore_path"), "/search?q=test");
-    assert.equal(attributes.get("opd_explore_title"), "Search");
-    assert.equal(attributes.get("opd_custom_title"), "Search");
+    assert.equal(attributes.get("xpd_explore_path"), "/search?q=test");
+    assert.equal(attributes.get("xpd_explore_title"), "Search");
+    assert.equal(attributes.get("xpd_custom_title"), "Search");
     assert.equal(saves, 1);
     onload();
     assert.equal(disconnected, 1);
@@ -80,10 +80,10 @@ for (const title of [null, "   ", "  My Search  "]) {
             ["add_custom_url_button_handler", "normalize_custom_x_path"],
             "",
             {
-                opd_confirm: async () =>
+                xpd_confirm: async () =>
                     assert.fail("custom URL must not ask for confirmation"),
-                opd_prompt: async () => prompts.shift(),
-                opd_alert: async () => {
+                xpd_prompt: async () => prompts.shift(),
+                xpd_alert: async () => {
                     alerts++;
                 },
                 i18n_message: (key) => key,

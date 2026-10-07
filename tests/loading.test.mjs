@@ -282,7 +282,7 @@ test("navigation keeps its slot through blank loads and cleans placeholders on c
     queue_column_navigation(frame, () => navigations++);
     queue_column_navigation(frame, () => navigations++);
     assert.equal(navigations, 1);
-    assert.equal(attributes.get("opd_load_status"), "Loading...");
+    assert.equal(attributes.get("xpd_load_status"), "Loading...");
     for (const loaded of listeners) loaded();
     assert.equal(h.scheduler.has(frame), true);
     frame.contentWindow.location.href = "https://x.com/home";

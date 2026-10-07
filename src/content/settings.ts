@@ -2,9 +2,9 @@ import { profile_storage_request } from "./profile-storage";
 import {
     i18n_message,
     manifest,
-    opd_alert,
-    opd_bootstrap,
-    opd_root_theme_attribute,
+    xpd_alert,
+    xpd_bootstrap,
+    xpd_root_theme_attribute,
     request_page_reload,
     system_dark_query,
 } from "./prelude";
@@ -27,9 +27,9 @@ export function apply_theme_for_main_element(main_element) {
                 const currentScheme = system_dark_query.matches
                     ? "dark"
                     : "light";
-                main_element.setAttribute("opd-dsp-theme", currentScheme);
+                main_element.setAttribute("xpd-dsp-theme", currentScheme);
                 document.documentElement.setAttribute(
-                    opd_root_theme_attribute,
+                    xpd_root_theme_attribute,
                     currentScheme,
                 );
             };
@@ -47,9 +47,9 @@ export function apply_theme_for_main_element(main_element) {
                 system_dark_query.removeEventListener("change", apply_ui_color);
                 is_added_system_color_mode = false;
             }
-            main_element.setAttribute("opd-dsp-theme", "light");
+            main_element.setAttribute("xpd-dsp-theme", "light");
             document.documentElement.setAttribute(
-                opd_root_theme_attribute,
+                xpd_root_theme_attribute,
                 "light",
             );
             break;
@@ -59,9 +59,9 @@ export function apply_theme_for_main_element(main_element) {
                 system_dark_query.removeEventListener("change", apply_ui_color);
                 is_added_system_color_mode = false;
             }
-            main_element.setAttribute("opd-dsp-theme", "dark");
+            main_element.setAttribute("xpd-dsp-theme", "dark");
             document.documentElement.setAttribute(
-                opd_root_theme_attribute,
+                xpd_root_theme_attribute,
                 "dark",
             );
             break;
@@ -72,16 +72,16 @@ export function apply_theme_for_main_element(main_element) {
 }
 // Get color mode from cookie.
 export function get_cookie_color_mode() {
-    if (typeof opd_bootstrap.getCookieColorMode === "function") {
+    if (typeof xpd_bootstrap.getCookieColorMode === "function") {
         try {
-            return opd_bootstrap.getCookieColorMode();
+            return xpd_bootstrap.getCookieColorMode();
         } catch {
             // no-op: fallback to local cookie parsing
         }
     }
     const cookie = document.cookie
         .split(/;\s*/)
-        .find((c) => c.startsWith("opd_theme="));
+        .find((c) => c.startsWith("xpd_theme="));
 
     if (!cookie) return "system";
 
@@ -168,7 +168,7 @@ export function settings_init(only_if_missing = false, signal?: AbortSignal) {
         settings,
     }).then(async () => {
         if (signal?.aborted) return;
-        await opd_alert(i18n_message("msg_initial_setup_completed"));
+        await xpd_alert(i18n_message("msg_initial_setup_completed"));
         if (signal?.aborted) return;
         request_page_reload();
     });

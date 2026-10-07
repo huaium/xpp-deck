@@ -50,7 +50,7 @@ function harness() {
             HTMLElement: Button,
             HTMLInputElement: Input,
             i18n_message: (key) => key,
-            opd_confirm: (message) => {
+            xpd_confirm: (message) => {
                 prompts.push(message);
                 return new Promise((done) => {
                     resolve = done;

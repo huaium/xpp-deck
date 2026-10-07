@@ -74,10 +74,10 @@ for (const stage of [
             new Promise((resolve) => {
                 finish = resolve;
             });
-        if (stage === "save name") h.globals.opd_prompt = deferred;
+        if (stage === "save name") h.globals.xpd_prompt = deferred;
         else if (stage === "delete selection")
-            h.globals.open_opd_dialog = deferred;
-        else h.globals.opd_confirm = deferred;
+            h.globals.open_xpd_dialog = deferred;
+        else h.globals.xpd_confirm = deferred;
         h.globals.profile_storage_request = () =>
             assert.fail("dead action must not submit a request");
         const handler = action(
@@ -157,7 +157,7 @@ test("actual rebuild and disposal abort each deck's lifetime independently", () 
     const { run, dispose_deck } = loadFunctions(
         "../src/content/run.ts",
         ["run", "dispose_deck"],
-        "let opd_column_load_scheduler;",
+        "let xpd_column_load_scheduler;",
         {
             AbortController: Controller,
             api_loading_paused_until: () => 0,

@@ -12,7 +12,7 @@ export default defineContentScript({
             if (
                 window !== window.top &&
                 window.parent.location.pathname === "/run-xppdeck" &&
-                window.frameElement?.closest("div[opd_column_type]")
+                window.frameElement?.closest("div[xpd_column_type]")
             ) {
                 void injectScript("/column-navigation-main.js").catch((error) =>
                     console.error("Column navigation guard failed", error),

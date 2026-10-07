@@ -1,15 +1,45 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadFunctions } from "./helpers/source.mjs";
+import { setImmediate } from "node:timers/promises";
 
 const { AbortController } = globalThis;
+
+test("failed preference loading still reaches the recoverable startup gate", async () => {
+    let checks = 0;
+    const { start_content } = loadFunctions(
+        "../src/content/index.ts",
+        ["start_content"],
+        "",
+        {
+            AbortController,
+            location: { href: "https://x.com/run-xppdeck" },
+            is_deck_location: () => true,
+            ensure_dropdown_style() {},
+            mount_webawesome_controls: () => () => {},
+            keep_deck_tab_title: () => () => {},
+            chrome: { runtime: { getURL: (url) => url } },
+            mount_session_gate: () => ({ check: () => checks++, dispose() {} }),
+            i18n_message_or_fallback() {},
+            request_page_reload() {},
+            initialize_i18n_override: async () => {
+                throw new Error("Preference loading failed");
+            },
+            dispose_deck() {},
+        },
+    );
+    const stop = start_content();
+    await setImmediate();
+    assert.equal(checks, 1);
+    stop();
+});
 
 test("deck disposal releases its active lifecycle exactly once", () => {
     let disposed = 0;
     const { dispose_deck } = loadFunctions(
         "../src/content/run.ts",
         ["dispose_deck"],
-        "let opd_column_load_scheduler = scheduler;",
+        "let xpd_column_load_scheduler = scheduler;",
         {
             scheduler: { dispose: () => disposed++ },
         },

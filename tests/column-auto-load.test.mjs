@@ -16,11 +16,11 @@ test("every content column saves its auto-load toggle and interval", () => {
                     querySelectorAll: () => [
                         {
                             getAttribute: (key) =>
-                                key === "opd_column_type" ? type : null,
+                                key === "xpd_column_type" ? type : null,
                             querySelector: (selector) =>
-                                selector === ".opd_a_reload_bar"
+                                selector === ".xpd_a_reload_bar"
                                     ? { checked: true }
-                                    : selector === ".opd_a_reload_time_setting"
+                                    : selector === ".xpd_a_reload_time_setting"
                                       ? { value: "15" }
                                       : null,
                         },
@@ -107,7 +107,7 @@ test("auto-load binding restores enabled state, validates intervals and stops di
         isConnected: true,
         closest: () => ({
             querySelector: (selector) =>
-                selector === ".opd_a_reload_bar" ? enabled : interval,
+                selector === ".xpd_a_reload_bar" ? enabled : interval,
         }),
         setAttribute() {},
         addEventListener() {},

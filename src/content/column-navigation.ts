@@ -17,7 +17,7 @@ export function guard_column_navigation() {
         if (
             window === window.top ||
             window.parent.location.pathname !== "/run-xppdeck" ||
-            !window.frameElement?.closest("div[opd_column_type]")
+            !window.frameElement?.closest("div[xpd_column_type]")
         )
             return () => {};
     } catch {

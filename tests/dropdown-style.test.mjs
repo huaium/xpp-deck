@@ -21,7 +21,7 @@ test("shared Web Awesome styling covers deck and dialog controls without duplica
     assert.equal(styles.length, 1);
     assert.match(
         styles[0].textContent,
-        /#opd_main_element wa-select,\.opd_dialog_overlay wa-select/,
+        /#xpd_main_element wa-select,\.xpd_dialog_overlay wa-select/,
     );
     assert.match(styles[0].textContent, /wa-select::part\(combobox\)/);
     assert.doesNotMatch(

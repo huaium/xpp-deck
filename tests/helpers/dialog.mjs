@@ -70,12 +70,12 @@ export function dialogHarness() {
     document.body = new Element("body");
     const trigger = new Element("button");
     trigger.focus();
-    const { open_opd_dialog: open } = loadFunctions(
+    const { open_xpd_dialog: open } = loadFunctions(
         "../src/content/prelude.ts",
-        ["enqueue_opd_dialog", "open_opd_dialog", "animate_dialog_exit"],
-        `let opd_dialog_queue = Promise.resolve();
-         function ensure_opd_dialog_style() {}
-         function is_opd_dark_theme_enabled() { return false; }
+        ["enqueue_xpd_dialog", "open_xpd_dialog", "animate_dialog_exit"],
+        `let xpd_dialog_queue = Promise.resolve();
+         function ensure_xpd_dialog_style() {}
+         function is_xpd_dark_theme_enabled() { return false; }
          function i18n_message_or_fallback(key, fallback) { return fallback; }`,
         {
             document,

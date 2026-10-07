@@ -38,7 +38,7 @@ test("sidebar state updates both classes and localized action labels", () => {
         ["apply_sidebar_collapsed_state"],
         "",
         {
-            opd_main_root: root,
+            xpd_main_root: root,
             sidebar_toggle_root: toggle,
             sidebar_toggle_text: label,
             i18n_message: (key) => key,
@@ -46,8 +46,8 @@ test("sidebar state updates both classes and localized action labels", () => {
     );
     for (const collapsed of [true, false]) {
         apply(collapsed);
-        assert.equal(states.get("opd_sidebar_collapsed"), collapsed);
-        assert.equal(states.get("opd_sidebar_toggle_is_collapsed"), collapsed);
+        assert.equal(states.get("xpd_sidebar_collapsed"), collapsed);
+        assert.equal(states.get("xpd_sidebar_toggle_is_collapsed"), collapsed);
         assert.equal(
             toggle.title,
             collapsed ? "ui_sidebar_expand_title" : "ui_sidebar_collapse_title",
@@ -70,7 +70,7 @@ test("language selection saves changes before reload and ignores unchanged value
             "",
             {
                 HTMLElement: Select,
-                opd_i18n_language: "browser",
+                xpd_i18n_language: "browser",
                 request_page_reload: () => {
                     reloads++;
                 },
@@ -94,6 +94,6 @@ test("language selection saves changes before reload and ignores unchanged value
         assert.equal(reloads, language === "browser" ? 0 : 1);
         assert.equal(writes.length, reloads);
         if (writes.length)
-            assert.equal(writes[0].opd_language_override, language);
+            assert.equal(writes[0].xpd_language_override, language);
     }
 });

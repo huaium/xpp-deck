@@ -46,22 +46,19 @@ export function start_background() {
                 sendResponse({ ok: false, error: "Invalid profile sender" });
                 return false;
             }
-            void profile_storage
-                .request(
-                    (
-                        request as unknown as {
-                            operation: Record<string, unknown>;
-                        }
-                    ).operation,
-                )
-                .then(
-                    (value) => sendResponse({ ok: true, value }),
-                    (error) =>
-                        sendResponse({
-                            ok: false,
-                            error: String(error.message),
-                        }),
-                );
+            const operation = (
+                request as unknown as {
+                    operation: Record<string, unknown>;
+                }
+            ).operation;
+            void profile_storage.request(operation).then(
+                (value) => sendResponse({ ok: true, value }),
+                (error) =>
+                    sendResponse({
+                        ok: false,
+                        error: String(error.message),
+                    }),
+            );
             return true;
         }
         if (request.message !== "dnr_upd") return false;
@@ -185,12 +182,16 @@ export function start_background() {
         });
     }
     let rate_limit_until = 0;
-    chrome.storage.local.get("opd_rate_limit_until", (value) => {
-        rate_limit_until = Math.max(
-            rate_limit_until,
-            Number(value.opd_rate_limit_until) || 0,
-        );
+    const rate_limits_ready = new Promise<void>((resolve) => {
+        chrome.storage.local.get("xpd_rate_limit_until", (value) => {
+            rate_limit_until = Math.max(
+                rate_limit_until,
+                Number(value.xpd_rate_limit_until) || 0,
+            );
+            resolve();
+        });
     });
+    void rate_limits_ready.catch(() => {});
     chrome.webRequest.onHeadersReceived.addListener(
         function (resp) {
             const response_headers = resp.responseHeaders ?? [];
@@ -217,9 +218,9 @@ export function start_background() {
                     Number.isFinite(retry_time) ? retry_time : 0,
                 );
                 rate_limit_until = Math.max(rate_limit_until, deadline);
-                chrome.storage.local.set({
-                    opd_rate_limit_until: rate_limit_until,
-                    opd_rate_limit_event: {
+                const update = {
+                    xpd_rate_limit_until: rate_limit_until,
+                    xpd_rate_limit_event: {
                         endpoint: new URL(resp.url).pathname.split("/").at(-1),
                         status: resp.statusCode ?? null,
                         tabId: resp.tabId ?? null,
@@ -233,7 +234,18 @@ export function start_background() {
                             : null,
                         until: rate_limit_until,
                     },
-                });
+                };
+                void rate_limits_ready
+                    .then(() => {
+                        update.xpd_rate_limit_until = Math.max(
+                            update.xpd_rate_limit_until,
+                            rate_limit_until,
+                        );
+                        update.xpd_rate_limit_event.until =
+                            update.xpd_rate_limit_until;
+                        chrome.storage.local.set(update);
+                    })
+                    .catch(() => {});
             }
             const update_counters = () => {
                 for (const [endpoint, key] of api_endpoints) {

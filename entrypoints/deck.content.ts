@@ -5,14 +5,14 @@ export default defineContentScript({
     async main(ctx) {
         // The legacy deck owns many page resources; reload rather than duplicate them.
         if (import.meta.env.DEV) {
-            if (document.documentElement.hasAttribute("data-opd-dev-mounted")) {
-                sessionStorage.setItem("opd_beforeunload_bypass_once", "1");
+            if (document.documentElement.hasAttribute("data-xpd-dev-mounted")) {
+                sessionStorage.setItem("xpd_beforeunload_bypass_once", "1");
                 location.reload();
                 return;
             }
-            document.documentElement.setAttribute("data-opd-dev-mounted", "");
+            document.documentElement.setAttribute("data-xpd-dev-mounted", "");
             ctx.onInvalidated(() => {
-                sessionStorage.setItem("opd_beforeunload_bypass_once", "1");
+                sessionStorage.setItem("xpd_beforeunload_bypass_once", "1");
                 location.reload();
             });
         }

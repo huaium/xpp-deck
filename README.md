@@ -1,6 +1,8 @@
 # XPP-Deck
 
-![icon](https://github.com/kawa-nobu/Open-Deck/assets/44832116/3d4d1e64-6a74-4587-a248-da8424190d41)
+![XPP-Deck icon](public/icon.png)
+
+[GitHub repository](https://github.com/huaium/xpp-deck)
 
 ## Features
 
@@ -25,34 +27,22 @@ Traditional Chinese, Korean, Spanish, French, German, and Brazilian Portuguese.
 It follows the browser language by default and falls back to English.
 Changing the extension language does not change embedded X pages or user-entered names.
 
-## Screenshots
+## Installation
 
-<img width="960" alt="image" src="https://github.com/kawa-nobu/Open-Deck/assets/44832116/0970c89f-d099-4d8e-ac84-54037d8c9868">  
-<img width="962" alt="image" src="https://github.com/kawa-nobu/Open-Deck/assets/44832116/2753c97a-f8e5-4eab-b096-82cfed081fb0">
+Use [XPP-Deck releases](https://github.com/huaium/xpp-deck/releases) for published
+browser packages, when available. Otherwise, build locally using the development
+instructions below.
 
-## Usage
+Load the appropriate browser bundle through your browser's extension developer
+tools, then open [XPP-Deck](https://x.com/run-xppdeck).
 
-Coming soon.
+The Firefox extension ID is `xpp-deck@huaium`. Firefox treats this as a separate
+extension from previous builds using the legacy ID; saved profiles do not
+transfer automatically. Original license and author attribution are retained.
 
-## Installation (Recommended)
-
-### Via Chrome Web Store
-
-Visit the [Chrome Web Store listing](https://chromewebstore.google.com/detail/open-deck/gmkadaeibmhchpimnfplodelecmogdic),  
-then click the **Add to Chrome (or Brave, etc.)** button to install it easily.
-
-### Via Mozilla Official Site
-
-Visit [addons.mozilla.org (AMO)](https://addons.mozilla.org/ja/firefox/addon/open-deck/),  
-then click the **Add to Firefox** button to install it easily.
-
-## Installation (Developer Mode)
-
-**Only use this if you already know how to install extensions in developer mode.**
-
-- Download the ZIP from the browser-specific branch you want
-- Install it in developer mode
-- Open the extension runtime URL: https://twitter.com/run-xppdeck
+Internal names use the `xpd_` namespace; legacy data is not migrated. Site data
+and extension-local storage are separate. Clear both if you want a complete
+fresh start.
 
 ## Development
 
@@ -102,7 +92,7 @@ a random 2–3-second gap between starts. Initial loads wait until their columns
 are onscreen; hidden tabs do not start new loads. HTTP 429 responses pause queued
 work until the response reset/retry deadline (at least 60 seconds when missing).
 The API Usage dialog shows the pause. Last rate-limit attribution is stored
-locally in `opd_rate_limit_event`, without query parameters or credentials.
+locally in `xpd_rate_limit_event`, without query parameters or credentials.
 This does not throttle X's own requests inside already-loaded pages.
 
 ### Validate

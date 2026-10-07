@@ -54,10 +54,12 @@ function harness(saved) {
                 ],
             });
         },
-        restore() {
+        async restore() {
+            await Promise.resolve();
+            await Promise.resolve();
             for (const { key, done } of reads) {
                 done(
-                    key === "opd_rate_limit_until"
+                    key === "xpd_rate_limit_until"
                         ? {}
                         : { api_access_limit: saved },
                 );
@@ -66,7 +68,7 @@ function harness(saved) {
     };
 }
 
-test("worker restart preserves unrelated API counters, including responses before restore", () => {
+test("worker restart preserves unrelated API counters, including responses before restore", async () => {
     const saved = {
         search: { limit: "50", remaining: "40", reset_unix_time: "1800000000" },
         time_line: {
@@ -83,7 +85,7 @@ test("worker restart preserves unrelated API counters, including responses befor
     const h = harness(saved);
     h.response("HomeTimeline", "480");
     h.response("SearchTimeline", "35");
-    h.restore();
+    await h.restore();
     const value = h.writes.at(-1).api_access_limit;
     assert.deepEqual(value.time_line, saved.time_line);
     assert.equal(value.recommend_timeline.remaining, "480");
@@ -95,7 +97,7 @@ test("worker restart preserves unrelated API counters, including responses befor
     );
 });
 
-test("missing or malformed saved counters do not prevent API updates", () => {
+test("missing or malformed saved counters do not prevent API updates", async () => {
     for (const saved of [
         undefined,
         null,
@@ -103,17 +105,17 @@ test("missing or malformed saved counters do not prevent API updates", () => {
         { search: null, time_line: { limit: {} } },
     ]) {
         const h = harness(saved);
-        h.restore();
+        await h.restore();
         h.response("SearchTimeline", "20");
         assert.equal(h.writes.at(-1).api_access_limit.search.remaining, "20");
     }
 });
 
-test("badge 429 captures only safe attribution and honors response cooldown headers", () => {
+test("badge 429 captures only safe attribution and honors response cooldown headers", async () => {
     const h = harness();
-    h.restore();
+    await h.restore();
     const before = Date.now();
-    h.respond({
+    await h.respond({
         url: "https://x.com/i/api/graphql/id/ViewerBadgeCounts?variables=private",
         statusCode: 429,
         tabId: 7,
@@ -121,9 +123,9 @@ test("badge 429 captures only safe attribution and honors response cooldown head
         responseHeaders: [{ name: "Retry-After", value: "600" }],
     });
     const value = h.writes.at(-1);
-    assert.ok(value.opd_rate_limit_until >= before + 600000);
-    assert.equal(value.opd_rate_limit_event.endpoint, "ViewerBadgeCounts");
-    assert.equal(value.opd_rate_limit_event.tabId, 7);
-    assert.equal(value.opd_rate_limit_event.frameId, 4);
+    assert.ok(value.xpd_rate_limit_until >= before + 600000);
+    assert.equal(value.xpd_rate_limit_event.endpoint, "ViewerBadgeCounts");
+    assert.equal(value.xpd_rate_limit_event.tabId, 7);
+    assert.equal(value.xpd_rate_limit_event.frameId, 4);
     assert.doesNotMatch(JSON.stringify(value), /variables|private|graphql/);
 });

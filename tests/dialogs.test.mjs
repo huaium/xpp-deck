@@ -128,10 +128,10 @@ test("alert remains open on Escape and closes on acknowledgement", async () => {
 });
 
 test("dialog queue waits for dismissal before opening the next dialog", async () => {
-    const { enqueue_opd_dialog: enqueue } = loadFunctions(
+    const { enqueue_xpd_dialog: enqueue } = loadFunctions(
         "../src/content/prelude.ts",
-        ["enqueue_opd_dialog"],
-        "let opd_dialog_queue = Promise.resolve();",
+        ["enqueue_xpd_dialog"],
+        "let xpd_dialog_queue = Promise.resolve();",
     );
     const opened = [];
     let dismiss;
@@ -154,10 +154,10 @@ test("dialog queue waits for dismissal before opening the next dialog", async ()
 });
 
 test("a failed dialog does not block subsequent dialogs", async () => {
-    const { enqueue_opd_dialog: enqueue } = loadFunctions(
+    const { enqueue_xpd_dialog: enqueue } = loadFunctions(
         "../src/content/prelude.ts",
-        ["enqueue_opd_dialog"],
-        "let opd_dialog_queue = Promise.resolve();",
+        ["enqueue_xpd_dialog"],
+        "let xpd_dialog_queue = Promise.resolve();",
     );
     await assert.rejects(
         enqueue(() => Promise.reject(new Error("failed"))),

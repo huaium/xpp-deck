@@ -8,7 +8,7 @@ export default defineConfig({
     imports: false,
     manifest: ({ browser }) => ({
         name: "XPP-Deck",
-        description: "The OpenSource Deck",
+        description: "A multi-column workspace for X.",
         default_locale: browser === "firefox" ? "ja" : "en",
         icons: { 128: "icon.png" },
         permissions: ["storage", "webRequest", "declarativeNetRequest"],
@@ -24,11 +24,11 @@ export default defineConfig({
             ? {
                   browser_specific_settings: {
                       gecko: {
-                          id: "opd_release@kwdev",
+                          id: "xpp-deck@huaium",
                           strict_min_version: "115.0",
                       },
                       gecko_android: {
-                          id: "opd_release@kwdev",
+                          id: "xpp-deck@huaium",
                           strict_min_version: "115.0",
                       },
                   },

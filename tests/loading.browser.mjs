@@ -48,7 +48,7 @@ try {
         if (route.request().url() === "https://fixture.invalid/") {
             await route.fulfill({
                 contentType: "text/html",
-                body: "<main id=opd_main_element></main>",
+                body: "<main id=xpd_main_element></main>",
             });
             return;
         }
@@ -79,10 +79,10 @@ try {
     `),
     });
     await page.evaluate(() => {
-        document.getElementById("opd_main_element").innerHTML = Array.from(
+        document.getElementById("xpd_main_element").innerHTML = Array.from(
             { length: 4 },
             (_, i) =>
-                `<section id=c${i} class=dsp_column draggable=true><div opd_column_type=home><iframe id=f${i} data-opd-src="https://fixture.invalid/column/${i}"></iframe></div></section>`,
+                `<section id=c${i} class=dsp_column draggable=true><div xpd_column_type=home><iframe id=f${i} data-xpd-src="https://fixture.invalid/column/${i}"></iframe></div></section>`,
         ).join("");
         queue_column_frames();
         queue_column_frames();
@@ -143,7 +143,7 @@ try {
     );
     assert.equal(starts.length, before + 1);
     await page.evaluate(() => {
-        const root = document.getElementById("opd_main_element");
+        const root = document.getElementById("xpd_main_element");
         // Hold the next column in the pacing gap so disposal tests queued work,
         // rather than racing an already-started navigation.
         const frame = document.getElementById("f0");
@@ -152,7 +152,7 @@ try {
         );
         root.insertAdjacentHTML(
             "beforeend",
-            '<div opd_column_type=home><iframe data-opd-src="https://fixture.invalid/cancelled"></iframe></div>',
+            '<div xpd_column_type=home><iframe data-xpd-src="https://fixture.invalid/cancelled"></iframe></div>',
         );
         queue_column_frames();
         load_scheduler.dispose();

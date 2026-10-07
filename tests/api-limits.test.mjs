@@ -85,7 +85,7 @@ test("API cards show unknown data, update live, and release their listener", asy
             },
             i18n_message: (key, values = []) => `${key}:${values.join("/")}`,
             formatting_locale: () => "en-US",
-            open_opd_dialog: (options) => {
+            open_xpd_dialog: (options) => {
                 cleanup = options.mount(dialog);
             },
             chrome: {
@@ -140,7 +140,7 @@ test("API cards show unknown data, update live, and release their listener", asy
     assert.equal(card.children[2].textContent, "ui_api_remaining:492/500");
     assert.ok(card.children[3].textContent.startsWith("ui_api_reset:"));
     paused = true;
-    listener({ opd_rate_limit_until: { newValue: deadline } });
+    listener({ xpd_rate_limit_until: { newValue: deadline } });
     assert.equal(dialog.children[2].hidden, false);
     assert.ok(
         dialog.children[2].textContent.startsWith("ui_api_loading_paused:"),

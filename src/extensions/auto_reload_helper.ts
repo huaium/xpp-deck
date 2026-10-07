@@ -1,7 +1,7 @@
 export function start_auto_reload_helper() {
     // Auto-refresh helper.
     (() => {
-        let opd_reload_token: string | null = null;
+        let xpd_reload_token: string | null = null;
         function read_path(
             source: unknown,
             path: (string | number)[],
@@ -58,19 +58,19 @@ export function start_auto_reload_helper() {
         }
         // Set token for feature events.
         window.addEventListener(
-            "opd_column_reload_init",
+            "xpd_column_reload_init",
             (e) => {
                 const detail = JSON.parse(String(e.detail));
-                opd_reload_token = detail.token;
+                xpd_reload_token = detail.token;
             },
             true,
         );
         // Register auto-refresh event.
         window.addEventListener(
-            "opd_column_reload",
+            "xpd_column_reload",
             (e) => {
                 const detail = JSON.parse(String(e.detail));
-                if (!opd_reload_token || opd_reload_token !== detail.token)
+                if (!xpd_reload_token || xpd_reload_token !== detail.token)
                     return;
                 let refreshed = false;
                 try {
@@ -79,9 +79,9 @@ export function start_auto_reload_helper() {
                     // A changed X component tree can make its hook unusable.
                 }
                 document.dispatchEvent(
-                    new CustomEvent("opd_column_reload_result", {
+                    new CustomEvent("xpd_column_reload_result", {
                         detail: JSON.stringify({
-                            token: opd_reload_token,
+                            token: xpd_reload_token,
                             refreshed,
                         }),
                     }),

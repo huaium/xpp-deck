@@ -99,10 +99,10 @@ test("theme bootstrap leaves ordinary pages and all embedded documents untouched
         { href: "https://x.com/home", embedded: true },
         { href: "https://x.com/run-xppdeck", embedded: true },
     ]) {
-        const h = bootstrap("opd_theme=dark", true, false, false, options);
+        const h = bootstrap("xpd_theme=dark", true, false, false, options);
         assert.deepEqual(h.attributes, {});
         assert.equal(h.styles.length, 0);
-        assert.equal(h.window.__opdBootstrap, undefined);
+        assert.equal(h.window.__xpdBootstrap, undefined);
         assert.equal(h.themeListener, undefined);
     }
 });
@@ -112,7 +112,7 @@ test("leaving the deck removes theme markers and styles before further system up
     assert.equal(h.styles.length, 1);
     assert.match(
         h.styles[0].textContent,
-        /html\[data-opd-deck\]\[data-opd-theme=/,
+        /html\[data-xpd-deck\]\[data-xpd-theme=/,
     );
     h.window.location.pathname = "/home";
     h.routeMutation();
@@ -164,7 +164,7 @@ test("the deck warning does not follow SPA navigation to an ordinary X page", ()
 test("development skips leave-page confirmation but retains theme initialization", () => {
     const h = bootstrap("", true, false, true);
     assert.equal(h.listeners.beforeunload, undefined);
-    assert.equal(h.attributes["data-opd-theme"], "dark");
+    assert.equal(h.attributes["data-xpd-theme"], "dark");
     assert.equal(typeof h.themeListener, "function");
     h.cleanup();
     assert.equal(typeof bootstrap("").listeners.beforeunload, "function");
@@ -172,24 +172,24 @@ test("development skips leave-page confirmation but retains theme initialization
 
 test("bootstrap respects explicit cookie themes and falls back to system theme", () => {
     for (const [cookie, dark, expected] of [
-        ["opd_theme=light", true, "light"],
-        ["other=1; opd_theme=dark", false, "dark"],
-        ["opd_theme=dark", false, "dark"],
+        ["xpd_theme=light", true, "light"],
+        ["other=1; xpd_theme=dark", false, "dark"],
+        ["xpd_theme=dark", false, "dark"],
         ["", true, "dark"],
-        ["opd_theme=invalid", false, "light"],
+        ["xpd_theme=invalid", false, "light"],
     ]) {
         assert.equal(
-            bootstrap(cookie, dark).attributes["data-opd-theme"],
+            bootstrap(cookie, dark).attributes["data-xpd-theme"],
             expected,
         );
     }
     assert.equal(typeof bootstrap("").themeListener, "function");
-    assert.equal(bootstrap("opd_theme=dark").themeListener, undefined);
+    assert.equal(bootstrap("xpd_theme=dark").themeListener, undefined);
 });
 
 test("intentional reload bypass is consumed once; later navigation warns", () => {
     const { listeners, storage } = bootstrap("");
-    storage.set("opd_beforeunload_bypass_once", "1");
+    storage.set("xpd_beforeunload_bypass_once", "1");
     let prevented = 0;
     const event = {
         preventDefault: () => {
@@ -232,7 +232,7 @@ test("theme follows system changes and removes the listener when an explicit the
         {
             get_cookie_color_mode: () => mode,
             system_dark_query: query,
-            opd_root_theme_attribute: "data-opd-theme",
+            xpd_root_theme_attribute: "data-xpd-theme",
             document: {
                 documentElement: {
                     setAttribute: (key, value) => root.set(key, value),
@@ -242,23 +242,23 @@ test("theme follows system changes and removes the listener when an explicit the
     );
     const element = { setAttribute: (key, value) => main.set(key, value) };
     apply(element);
-    assert.equal(main.get("opd-dsp-theme"), "light");
+    assert.equal(main.get("xpd-dsp-theme"), "light");
     assert.equal(listeners.size, 1);
     query.matches = true;
     for (const listener of listeners) listener();
-    assert.equal(main.get("opd-dsp-theme"), "dark");
-    assert.equal(root.get("data-opd-theme"), "dark");
+    assert.equal(main.get("xpd-dsp-theme"), "dark");
+    assert.equal(root.get("data-xpd-theme"), "dark");
     apply(element);
     apply(element);
     assert.equal(listeners.size, 1);
     mode = "light";
     apply(element);
     assert.equal(listeners.size, 0);
-    assert.equal(main.get("opd-dsp-theme"), "light");
+    assert.equal(main.get("xpd-dsp-theme"), "light");
     query.matches = true;
     for (const listener of listeners) listener();
-    assert.equal(main.get("opd-dsp-theme"), "light");
-    assert.equal(root.get("data-opd-theme"), "light");
+    assert.equal(main.get("xpd-dsp-theme"), "light");
+    assert.equal(root.get("data-xpd-theme"), "light");
     mode = "system";
     apply(element);
     apply(element);
@@ -267,8 +267,8 @@ test("theme follows system changes and removes the listener when an explicit the
     assert.equal(listeners.size, 0);
     query.matches = false;
     for (const listener of listeners) listener();
-    assert.equal(main.get("opd-dsp-theme"), "dark");
-    assert.equal(root.get("data-opd-theme"), "dark");
+    assert.equal(main.get("xpd-dsp-theme"), "dark");
+    assert.equal(root.get("data-xpd-theme"), "dark");
     apply(null);
 });
 

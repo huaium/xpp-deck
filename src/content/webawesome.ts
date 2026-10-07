@@ -22,23 +22,23 @@ export function mount_webawesome_controls() {
             }
         }
         for (const control of document.querySelectorAll<HTMLElement>(
-            "#opd_main_element wa-button[title], #opd_main_element wa-checkbox[title]",
+            "#xpd_main_element wa-button[title], #xpd_main_element wa-checkbox[title]",
         )) {
             if (!control.hasAttribute("aria-label"))
                 control.setAttribute("aria-label", control.title);
         }
         for (const overlay of document.querySelectorAll<HTMLElement>(
-            ".opd_dialog_overlay",
+            ".xpd_dialog_overlay",
         )) {
             const content = overlay.querySelector<HTMLElement>(
-                ":scope > .opd_dialog",
+                ":scope > .xpd_dialog",
             );
             if (!content) continue;
             const modal = document.createElement("wa-dialog");
-            modal.className = "opd_wa_dialog";
+            modal.className = "xpd_wa_dialog";
             modal.withoutHeader = true;
             modal.label =
-                content.querySelector(".opd_dialog_message, .opd_about_title")
+                content.querySelector(".xpd_dialog_message, .xpd_about_title")
                     ?.textContent ?? "XPP-Deck";
             // Existing controllers own queue resolution and exit animations.
             modal.addEventListener("wa-hide", (event) => {
@@ -49,19 +49,19 @@ export function mount_webawesome_controls() {
             modal.open = true;
         }
         for (const root of document.querySelectorAll<HTMLElement>(
-            "#opd_main_element, .opd_dialog_overlay, #opd_welcome",
+            "#xpd_main_element, .xpd_dialog_overlay, #xpd_welcome",
         )) {
             const dark =
-                root.getAttribute("opd-dsp-theme") === "dark" ||
-                root.classList.contains("opd_dialog_theme_dark") ||
-                (root.id === "opd_welcome" &&
-                    document.documentElement.getAttribute("data-opd-theme") ===
+                root.getAttribute("xpd-dsp-theme") === "dark" ||
+                root.classList.contains("xpd_dialog_theme_dark") ||
+                (root.id === "xpd_welcome" &&
+                    document.documentElement.getAttribute("data-xpd-theme") ===
                         "dark");
             root.classList.toggle("wa-dark", dark);
             root.classList.toggle("wa-light", !dark);
         }
     };
-    const scope = "#opd_main_element, .opd_dialog_overlay, #opd_welcome";
+    const scope = "#xpd_main_element, .xpd_dialog_overlay, #xpd_welcome";
     const observer = new MutationObserver((records) => {
         if (
             records.some(
@@ -81,7 +81,7 @@ export function mount_webawesome_controls() {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["opd-dsp-theme", "class", "disabled"],
+        attributeFilter: ["xpd-dsp-theme", "class", "disabled"],
         characterData: true,
     });
     upgrade();

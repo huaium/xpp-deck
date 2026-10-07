@@ -38,7 +38,7 @@ test("copy link reads the current column URL at click time", async () => {
                 clipboard: { writeText: async (value) => copied.push(value) },
             },
             i18n_message: (key) => key,
-            opd_alert: async (message) => messages.push(message),
+            xpd_alert: async (message) => messages.push(message),
         },
     );
     bind();

@@ -59,7 +59,7 @@ test("homepage editing, current-page capture, and navigation stay independent", 
             queue_column_navigation: (_frame, navigate) => navigate(),
             column_settings_save: () => saves++,
             last_load_profile: 0,
-            opd_alert: async () => alerts++,
+            xpd_alert: async () => alerts++,
         },
     );
     bind(column);
@@ -68,14 +68,14 @@ test("homepage editing, current-page capture, and navigation stay independent", 
     const [, input, current] = panel.children[0].children;
     input.value = "/i/bookmarks";
     input.handlers.get("keydown")({ key: "Enter", preventDefault() {} });
-    assert.equal(attributes.get("opd_homepage_path"), "/i/bookmarks");
+    assert.equal(attributes.get("xpd_homepage_path"), "/i/bookmarks");
     assert.equal(frame.src, "");
     input.value = "https://example.com";
     input.handlers.get("blur")();
     assert.equal(input.value, "https://x.com/i/bookmarks");
     assert.equal(alerts, 1);
     await current.handlers.get("click")();
-    assert.equal(attributes.get("opd_homepage_path"), "/search?q=test");
+    assert.equal(attributes.get("xpd_homepage_path"), "/search?q=test");
     assert.equal(saves, 2);
     bar.children[0].children[0].handlers.get("click")();
     assert.equal(frame.src, "https://x.com/search?q=test&lang=");
@@ -113,8 +113,8 @@ test("homepage migration prefers explicit homepage, then legacy pin, then origin
 test("all content column types persist their homepage location", () => {
     for (const type of ["home", "notification", "post", "explore"]) {
         const attributes = {
-            opd_column_type: type,
-            opd_homepage_path: "/i/bookmarks",
+            xpd_column_type: type,
+            xpd_homepage_path: "/i/bookmarks",
         };
         const { column_settings_save } = loadFunctions(
             "../src/content/run.ts",

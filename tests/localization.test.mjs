@@ -15,7 +15,7 @@ const languages = {
     de: "Deutsch",
     pt_BR: "Português (Brasil)",
 };
-const preamble = `let opd_i18n_override_messages = null; let opd_english_messages = {}; let opd_i18n_language = "browser"; const supported_languages = ${JSON.stringify(languages)};`;
+const preamble = `let xpd_i18n_override_messages = null; let xpd_english_messages = {}; let xpd_i18n_language = "browser"; const supported_languages = ${JSON.stringify(languages)};`;
 const substitutionFunctions = [
     "normalize_i18n_substitutions",
     "apply_i18n_substitutions",
@@ -105,12 +105,15 @@ for (const selection of ["browser", ...Object.keys(languages), "invalid"]) {
             ],
             preamble,
             {
+                rate_limit_until: 0,
+                rate_limit_endpoint: null,
+                read_rate_limit_endpoint: () => null,
                 navigator: { language: "fr-CA" },
                 chrome: {
                     storage: {
                         local: {
                             get: (key, done) =>
-                                done({ opd_language_override: selection }),
+                                done({ xpd_language_override: selection }),
                         },
                     },
                     runtime: { getURL: (path) => path },
@@ -165,11 +168,14 @@ test("translation fetch errors retain English messages", async () => {
             ],
             preamble,
             {
+                rate_limit_until: 0,
+                rate_limit_endpoint: null,
+                read_rate_limit_endpoint: () => null,
                 chrome: {
                     storage: {
                         local: {
                             get: (key, done) =>
-                                done({ opd_language_override: "de" }),
+                                done({ xpd_language_override: "de" }),
                         },
                     },
                     runtime: { getURL: (path) => path },

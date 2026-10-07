@@ -99,7 +99,7 @@ interface Chrome {
 declare const chrome: Chrome;
 
 interface Window {
-    __opdBootstrap?: {
+    __xpdBootstrap?: {
         beforeunloadBypassKey?: string;
         rootThemeAttribute?: string;
         getCookieColorMode?: () => string | null;

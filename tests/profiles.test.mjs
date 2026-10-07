@@ -5,12 +5,12 @@ import { profileHarness } from "./helpers/profile.mjs";
 
 test("clicking the current profile does not confirm, persist, or rebuild the deck", async () => {
     const h = profileHarness(true);
-    h.globals.opd_confirm = async () => {
+    h.globals.xpd_confirm = async () => {
         assert.fail("current profile must not ask for confirmation");
     };
     h.globals.run = () => assert.fail("current profile must not rebuild");
     h.globals.document.querySelector = (selector) => {
-        assert.notEqual(selector, "#opd_main_element");
+        assert.notEqual(selector, "#xpd_main_element");
         return {
             addEventListener(_event, handler) {
                 h.buttons.set(selector, handler);
@@ -43,7 +43,7 @@ test("profile saving persists a snapshot only after the name prompt is submitted
         assert.equal(h.writes.length, confirmed ? 1 : 0);
         if (confirmed)
             assert.equal(
-                JSON.parse(h.writes[0].opd_profile_store)[3].profile[0]
+                JSON.parse(h.writes[0].xpd_profile_store)[3].profile[0]
                     .column_save_path,
                 "/i/bookmarks",
             );
@@ -84,7 +84,7 @@ test("deleting the active profile selects the previous profile or first remainin
             h.store.every((profile) => profile.name !== `profile-${active}`),
         );
         assert.equal(
-            JSON.parse(h.writes[1].opd_settings).last_load_profile,
+            JSON.parse(h.writes[1].xpd_settings).last_load_profile,
             Math.max(0, active - 1),
         );
     }
@@ -96,7 +96,7 @@ test("profile switching waits for confirmation, persists selection, and renders 
         let removed = false;
         let rendered;
         h.globals.document.querySelector = (selector) =>
-            selector === "#opd_main_element"
+            selector === "#xpd_main_element"
                 ? {
                       remove() {
                           removed = true;
@@ -122,7 +122,7 @@ test("profile switching waits for confirmation, persists selection, and renders 
         assert.equal(h.writes.length, confirmed ? 1 : 0);
         if (confirmed) {
             assert.equal(
-                JSON.parse(h.writes[0].opd_settings).last_load_profile,
+                JSON.parse(h.writes[0].xpd_settings).last_load_profile,
                 2,
             );
             assert.equal(rendered.column_settings, h.store[2].profile);

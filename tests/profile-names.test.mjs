@@ -69,7 +69,7 @@ test("profile creation prompts, trims names, supports defaults and cancellation"
     for (const input of [null, "  Work  ", "   "]) {
         const h = profileHarness(true);
         let prompt;
-        h.globals.opd_prompt = async (message, defaultName) => {
+        h.globals.xpd_prompt = async (message, defaultName) => {
             prompt = { message, defaultName };
             return input;
         };
@@ -100,5 +100,5 @@ test("column changes preserve the selected profile's name", () => {
     );
     column_settings_save();
     assert.equal(h.store[0].name, "Work");
-    assert.equal(JSON.parse(h.writes[0].opd_profile_store)[0].name, "Work");
+    assert.equal(JSON.parse(h.writes[0].xpd_profile_store)[0].name, "Work");
 });
