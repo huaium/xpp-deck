@@ -160,6 +160,12 @@ test("actual rebuild and disposal abort each deck's lifetime independently", () 
         "let xpd_column_load_scheduler;",
         {
             AbortController: Controller,
+            loading_preferences: {
+                concurrency: 1,
+                minGapMs: 2000,
+                maxGapMs: 3000,
+                timeoutMs: 30000,
+            },
             api_loading_paused_until: () => 0,
             IntersectionObserver: class {
                 disconnect() {}

@@ -98,3 +98,62 @@ test("initial loads defer offscreen and hidden documents without losing their UR
     queue_column_frames();
     assert.equal(frames[0].src, "https://x.com/home");
 });
+
+test("live loading preferences change future starts but preserve pauses", () => {
+    let now = 0;
+    let paused = false;
+    let until = 0;
+    let next = 0;
+    const timers = new Map();
+    const { create_column_load_scheduler: create } = loadFunctions(
+        "../src/content/loading.ts",
+        ["create_column_load_scheduler"],
+        "",
+        {
+            Date: { now: () => now },
+            Math: { random: () => 0, floor: Math.floor, min: Math.min },
+            setTimeout: (fn, delay) => {
+                timers.set(++next, { fn, delay });
+                return next;
+            },
+            clearTimeout: (id) => timers.delete(id),
+        },
+    );
+    const scheduler = create({
+        concurrency: 1,
+        minGapMs: 2000,
+        maxGapMs: 3000,
+        paused: () => paused,
+        blockedUntil: () => until,
+    });
+    const starts = [];
+    for (let index = 0; index < 3; index++)
+        scheduler.enqueue({
+            key: {},
+            valid: () => true,
+            priority: () => 0,
+            start: () => {
+                starts.push(now);
+            },
+        });
+    const settings = {
+        concurrency: 2,
+        minGapMs: 500,
+        maxGapMs: 500,
+        timeoutMs: 45000,
+    };
+    paused = true;
+    now = 500;
+    scheduler.configure(settings);
+    assert.deepEqual(starts, [0]);
+    paused = false;
+    until = 5000;
+    scheduler.configure(settings);
+    assert.deepEqual(starts, [0]);
+    now = 5000;
+    scheduler.resume();
+    assert.deepEqual(starts, [0, 5000]);
+    assert.ok([...timers.values()].some((timer) => timer.delay === 45000));
+    scheduler.dispose();
+    assert.equal(timers.size, 0);
+});

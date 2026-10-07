@@ -105,6 +105,7 @@ for (const selection of ["browser", ...Object.keys(languages), "invalid"]) {
             ],
             preamble,
             {
+                apply_loading_preferences() {},
                 rate_limit_until: 0,
                 rate_limit_endpoint: null,
                 read_rate_limit_endpoint: () => null,
@@ -168,6 +169,7 @@ test("translation fetch errors retain English messages", async () => {
             ],
             preamble,
             {
+                apply_loading_preferences() {},
                 rate_limit_until: 0,
                 rate_limit_endpoint: null,
                 read_rate_limit_endpoint: () => null,

@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "Se alcanzó el límite de X. La carga y actualización de columnas se pausa hasta las $1."
+    },
+    "ui_advanced_settings": {
+        "message": "Ajustes avanzados"
+    },
+    "ui_advanced_concurrency": {
+        "message": "Cargas de columnas simultáneas"
+    },
+    "ui_advanced_min_gap": {
+        "message": "Intervalo mínimo (s)"
+    },
+    "ui_advanced_max_gap": {
+        "message": "Intervalo máximo (s)"
+    },
+    "ui_advanced_timeout": {
+        "message": "Tiempo de espera de carga (s)"
+    },
+    "ui_advanced_help": {
+        "message": "Una mayor frecuencia puede activar los límites de X. Las pausas por límites y pestañas ocultas siempre se aplican."
+    },
+    "ui_advanced_defaults": {
+        "message": "Restaurar valores predeterminados"
+    },
+    "ui_advanced_save": {
+        "message": "Guardar"
+    },
+    "ui_advanced_invalid": {
+        "message": "Usa 1–2 cargas, intervalos de 0,5–60 segundos (mínimo ≤ máximo) y un tiempo de espera de 5–120 segundos."
+    },
+    "ui_advanced_saved": {
+        "message": "Ajustes avanzados guardados."
+    },
+    "ui_advanced_failed": {
+        "message": "No se pudieron guardar los ajustes. Inténtalo de nuevo."
     }
 }

@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "Limite de X atteinte. Le chargement et l’actualisation des colonnes sont suspendus jusqu’à $1."
+    },
+    "ui_advanced_settings": {
+        "message": "Paramètres avancés"
+    },
+    "ui_advanced_concurrency": {
+        "message": "Chargements simultanés"
+    },
+    "ui_advanced_min_gap": {
+        "message": "Intervalle minimal (s)"
+    },
+    "ui_advanced_max_gap": {
+        "message": "Intervalle maximal (s)"
+    },
+    "ui_advanced_timeout": {
+        "message": "Délai de chargement (s)"
+    },
+    "ui_advanced_help": {
+        "message": "Une fréquence élevée peut déclencher les limites de X. Les pauses liées aux limites et aux onglets masqués restent actives."
+    },
+    "ui_advanced_defaults": {
+        "message": "Rétablir les valeurs par défaut"
+    },
+    "ui_advanced_save": {
+        "message": "Enregistrer"
+    },
+    "ui_advanced_invalid": {
+        "message": "Utilisez 1–2 chargements, des intervalles de 0,5–60 secondes (minimum ≤ maximum) et un délai de 5–120 secondes."
+    },
+    "ui_advanced_saved": {
+        "message": "Paramètres avancés enregistrés."
+    },
+    "ui_advanced_failed": {
+        "message": "Impossible d’enregistrer les paramètres. Réessayez."
     }
 }

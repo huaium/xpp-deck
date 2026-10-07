@@ -2,8 +2,6 @@
 
 ![XPP-Deck icon](public/icon.png)
 
-[GitHub repository](https://github.com/huaium/xpp-deck)
-
 ## Features
 
 - Timeline columns
@@ -87,8 +85,13 @@ Browser profiles are stored in `.wxt-profiles/chrome/` and
 
 ### Loading Limits
 
-Column loads and extension-triggered refreshes run one at a time per deck, with
-a random 2–3-second gap between starts. Initial loads wait until their columns
+By default, column loads and extension-triggered refreshes run one at a time per deck,
+with a random 2–3-second gap between starts and a 30-second load timeout.
+Settings → Advanced Settings lets you change concurrency (1–2), the randomized
+gap range (0.5–60 seconds), and timeout (5–120 seconds). Click Save to apply
+changes to future loads across open decks; Restore defaults fills the default
+values for saving. Rate-limit cooldowns and hidden-tab pauses cannot be disabled.
+Initial loads wait until their columns
 are onscreen; hidden tabs do not start new loads. HTTP 429 responses pause queued
 work until the response reset/retry deadline (at least 60 seconds when missing).
 The API Usage dialog shows the pause. Last rate-limit attribution is stored

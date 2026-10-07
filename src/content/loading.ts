@@ -11,6 +11,7 @@ export function create_column_load_scheduler(
         concurrency?: number;
         minGapMs?: number;
         maxGapMs?: number;
+        timeoutMs?: number;
         blockedUntil?: () => number;
         paused?: () => boolean;
     } = {},
@@ -60,7 +61,7 @@ export function create_column_load_scheduler(
             jobs.delete(job.key);
             pump();
         };
-        const timeout = setTimeout(done, 30000);
+        const timeout = setTimeout(done, options.timeoutMs ?? 30000);
         active.set(job.key, done);
         last_start = Date.now();
         // Sample once per start, not on every queue wake-up or enqueue.
@@ -81,6 +82,21 @@ export function create_column_load_scheduler(
         pump();
     };
     return {
+        configure(settings: {
+            concurrency: number;
+            minGapMs: number;
+            maxGapMs: number;
+            timeoutMs: number;
+        }) {
+            Object.assign(options, settings);
+            concurrency_limit = settings.concurrency;
+            start_gap =
+                settings.minGapMs +
+                Math.floor(
+                    Math.random() * (settings.maxGapMs - settings.minGapMs + 1),
+                );
+            pump();
+        },
         resume: pump,
         has(key: object) {
             return jobs.has(key);

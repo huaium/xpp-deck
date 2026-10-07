@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "X 요청 한도에 도달했습니다. 열 로딩과 새로고침이 $1까지 일시 중지됩니다."
+    },
+    "ui_advanced_settings": {
+        "message": "고급 설정"
+    },
+    "ui_advanced_concurrency": {
+        "message": "동시 열 로드 수"
+    },
+    "ui_advanced_min_gap": {
+        "message": "최소 로드 간격(초)"
+    },
+    "ui_advanced_max_gap": {
+        "message": "최대 로드 간격(초)"
+    },
+    "ui_advanced_timeout": {
+        "message": "로드 제한 시간(초)"
+    },
+    "ui_advanced_help": {
+        "message": "로드 빈도가 높으면 X 제한에 도달할 수 있습니다. 제한 대기와 숨겨진 탭 일시 중지는 항상 적용됩니다."
+    },
+    "ui_advanced_defaults": {
+        "message": "기본값 복원"
+    },
+    "ui_advanced_save": {
+        "message": "저장"
+    },
+    "ui_advanced_invalid": {
+        "message": "로드 수 1–2, 간격 0.5–60초(최소 ≤ 최대), 제한 시간 5–120초를 사용하세요."
+    },
+    "ui_advanced_saved": {
+        "message": "고급 설정이 저장되었습니다."
+    },
+    "ui_advanced_failed": {
+        "message": "설정을 저장하지 못했습니다. 다시 시도하세요."
     }
 }

@@ -3,6 +3,7 @@ import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js"
 import type WaButton from "@awesome.me/webawesome/dist/components/button/button.js";
 import { is_deck_location } from "./session";
 import { profile_storage_request } from "./profile-storage";
+import { apply_loading_preferences } from "./loading-preferences";
 
 export const manifest = chrome.runtime.getManifest();
 // Print welcome messages to console
@@ -97,6 +98,7 @@ export async function initialize_i18n_override() {
         "xpd_language_override",
         "xpd_rate_limit_until",
         "xpd_rate_limit_event",
+        "xpd_loading_preferences",
     ]);
     rate_limit_until = Math.max(
         rate_limit_until,
@@ -106,6 +108,7 @@ export async function initialize_i18n_override() {
         language_setting.xpd_rate_limit_event,
     );
     const language_setting_record = language_setting as Record<string, unknown>;
+    apply_loading_preferences(language_setting.xpd_loading_preferences);
     const selected_language =
         typeof language_setting_record.xpd_language_override === "string"
             ? language_setting_record.xpd_language_override

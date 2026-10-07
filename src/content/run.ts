@@ -1,4 +1,9 @@
 import { profile_storage_request } from "./profile-storage";
+import { mount_advanced_settings } from "./advanced-settings";
+import {
+    loading_preferences,
+    apply_loading_preferences,
+} from "./loading-preferences";
 import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
 import { column_navigation_url } from "./column-navigation";
 import type WaInput from "@awesome.me/webawesome/dist/components/input/input.js";
@@ -55,9 +60,7 @@ export function dispose_deck() {
 export function run(settings) {
     dispose_deck();
     const load_scheduler = create_column_load_scheduler({
-        concurrency: 1,
-        minGapMs: 2000,
-        maxGapMs: 3000,
+        ...loading_preferences,
         blockedUntil: api_loading_paused_until,
         paused: () => document.hidden,
     });
@@ -371,6 +374,10 @@ export function run(settings) {
     .xpd_global_settings_button:hover{background:var(--xpd-hover);}
     .xpd_global_settings_button img{width:24px;height:24px;}
     .xpd_global_settings_controls{--xpd-text:inherit;--xpd-muted:inherit;--xpd-border:#87919c;--xpd-hover:rgba(128,128,128,.12);}
+    .xpd_advanced_toggle{margin-top:12px;}
+    .xpd_advanced_settings{border-top:1px solid var(--xpd-border);margin-top:12px;padding-top:12px;}
+    .xpd_advanced_settings wa-input{min-width:0;width:100%;}
+    .xpd_advanced_actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
     .xpd_dialog_theme_dark .xpd_global_settings_controls .dsp_btn_icon_wrap{filter:invert(1);}
     .xpd_global_settings_controls .xpd_language_separator{display:none;}
     .xpd_global_settings_controls .xpd_language_select{color:inherit;background:transparent;}
@@ -1590,6 +1597,11 @@ export function run(settings) {
                         );
                 });
                 dialog.appendChild(body);
+                mount_advanced_settings(
+                    body,
+                    load_scheduler,
+                    deck_lifetime.signal,
+                );
                 const layout = document.getElementById("second_rack");
                 const close_before_layout = () =>
                     dialog
@@ -2732,6 +2744,11 @@ export function run(settings) {
         queue_column_frames();
     };
     const on_rate_limit_change = (changes: ChromeStorageChanges) => {
+        if (deck_lifetime.signal.aborted) return;
+        if (changes.xpd_loading_preferences) {
+            apply_loading_preferences(changes.xpd_loading_preferences.newValue);
+            load_scheduler.configure(loading_preferences);
+        }
         if (changes.xpd_rate_limit_until) resume_loading();
     };
     document.addEventListener("visibilitychange", resume_loading);

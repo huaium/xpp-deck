@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "已达到 X 的请求限制。列加载和刷新将暂停至 $1。"
+    },
+    "ui_advanced_settings": {
+        "message": "高级设置"
+    },
+    "ui_advanced_concurrency": {
+        "message": "同时加载列数"
+    },
+    "ui_advanced_min_gap": {
+        "message": "最小加载间隔（秒）"
+    },
+    "ui_advanced_max_gap": {
+        "message": "最大加载间隔（秒）"
+    },
+    "ui_advanced_timeout": {
+        "message": "加载超时（秒）"
+    },
+    "ui_advanced_help": {
+        "message": "提高加载频率可能触发 X 的限制。限流等待和隐藏标签页暂停始终生效。"
+    },
+    "ui_advanced_defaults": {
+        "message": "恢复默认值"
+    },
+    "ui_advanced_save": {
+        "message": "保存"
+    },
+    "ui_advanced_invalid": {
+        "message": "同时加载 1–2 列，间隔为 0.5–60 秒（最小值 ≤ 最大值），超时为 5–120 秒。"
+    },
+    "ui_advanced_saved": {
+        "message": "高级设置已保存。"
+    },
+    "ui_advanced_failed": {
+        "message": "无法保存设置，请重试。"
     }
 }

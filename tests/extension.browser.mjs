@@ -294,6 +294,35 @@ try {
     await page.locator("wa-button.xpd_global_settings_button").click();
     const globalSettings = page.locator(".xpd_global_settings_controls");
     await globalSettings.waitFor({ state: "visible" });
+    const advanced = globalSettings.locator(".xpd_advanced_settings");
+    assert.equal(await advanced.isVisible(), false);
+    await globalSettings.locator(".xpd_advanced_toggle").click();
+    assert.equal(await advanced.isVisible(), true);
+    assert.equal(
+        await advanced
+            .locator("#xpd_advanced_minGapMs")
+            .evaluate((input) => input.value),
+        "2",
+    );
+    await advanced.locator("#xpd_advanced_minGapMs").evaluate((input) => {
+        input.value = "4";
+    });
+    await advanced.getByText("Save", { exact: true }).click();
+    await advanced
+        .getByRole("status")
+        .filter({ hasText: "Use 1–2 loads" })
+        .waitFor();
+    await advanced.getByText("Restore defaults", { exact: true }).click();
+    await advanced.locator("#xpd_advanced_timeoutMs").evaluate((input) => {
+        input.value = "45";
+    });
+    await advanced.getByText("Save", { exact: true }).click();
+    await advanced
+        .getByRole("status")
+        .filter({ hasText: "Advanced settings saved." })
+        .waitFor();
+    await globalSettings.locator(".xpd_advanced_toggle").click();
+    assert.equal(await advanced.isVisible(), false);
     assert.equal(
         await page
             .locator("wa-dialog.xpd_wa_dialog")
@@ -383,6 +412,24 @@ try {
     await globalSettings.waitFor({ state: "detached" });
     await page.locator("wa-button.xpd_global_settings_button").click();
     await globalSettings.waitFor({ state: "visible" });
+    assert.equal(await advanced.isVisible(), false);
+    await globalSettings.locator(".xpd_advanced_toggle").click();
+    assert.equal(
+        await advanced
+            .locator("#xpd_advanced_timeoutMs")
+            .evaluate((input) => input.value),
+        "45",
+    );
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.waitForTimeout(100);
+    assert.equal(
+        await advanced.evaluate(
+            (panel) => panel.scrollWidth <= panel.clientWidth,
+        ),
+        true,
+    );
+    await page.setViewportSize({ width: 1800, height: 1000 });
+    await globalSettings.locator(".xpd_advanced_toggle").click();
     await page.keyboard.press("Escape");
     await globalSettings.waitFor({ state: "detached" });
     await page.locator("wa-button.xpd_global_settings_button").click();

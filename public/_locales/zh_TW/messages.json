@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "已達到 X 的請求限制。欄位載入和重新整理將暫停至 $1。"
+    },
+    "ui_advanced_settings": {
+        "message": "進階設定"
+    },
+    "ui_advanced_concurrency": {
+        "message": "同時載入欄數"
+    },
+    "ui_advanced_min_gap": {
+        "message": "最小載入間隔（秒）"
+    },
+    "ui_advanced_max_gap": {
+        "message": "最大載入間隔（秒）"
+    },
+    "ui_advanced_timeout": {
+        "message": "載入逾時（秒）"
+    },
+    "ui_advanced_help": {
+        "message": "提高載入頻率可能觸發 X 的限制。限流等待和隱藏分頁暫停始終生效。"
+    },
+    "ui_advanced_defaults": {
+        "message": "還原預設值"
+    },
+    "ui_advanced_save": {
+        "message": "儲存"
+    },
+    "ui_advanced_invalid": {
+        "message": "同時載入 1–2 欄，間隔為 0.5–60 秒（最小值 ≤ 最大值），逾時為 5–120 秒。"
+    },
+    "ui_advanced_saved": {
+        "message": "進階設定已儲存。"
+    },
+    "ui_advanced_failed": {
+        "message": "無法儲存設定，請重試。"
     }
 }

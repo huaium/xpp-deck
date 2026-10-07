@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "X rate limit reached. Column loading and refreshes are paused until $1."
+    },
+    "ui_advanced_settings": {
+        "message": "Advanced Settings"
+    },
+    "ui_advanced_concurrency": {
+        "message": "Concurrent column loads"
+    },
+    "ui_advanced_min_gap": {
+        "message": "Minimum load gap (sec)"
+    },
+    "ui_advanced_max_gap": {
+        "message": "Maximum load gap (sec)"
+    },
+    "ui_advanced_timeout": {
+        "message": "Load timeout (sec)"
+    },
+    "ui_advanced_help": {
+        "message": "Higher loading rates may trigger X limits. Cooldowns and hidden-tab pauses always apply."
+    },
+    "ui_advanced_defaults": {
+        "message": "Restore defaults"
+    },
+    "ui_advanced_save": {
+        "message": "Save"
+    },
+    "ui_advanced_invalid": {
+        "message": "Use 1–2 loads, gaps of 0.5–60 seconds (minimum ≤ maximum), and a timeout of 5–120 seconds."
+    },
+    "ui_advanced_saved": {
+        "message": "Advanced settings saved."
+    },
+    "ui_advanced_failed": {
+        "message": "Unable to save settings. Try again."
     }
 }

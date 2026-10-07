@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "Xのレート制限に達しました。カラムの読み込みと更新は$1まで一時停止します。"
+    },
+    "ui_advanced_settings": {
+        "message": "詳細設定"
+    },
+    "ui_advanced_concurrency": {
+        "message": "同時に読み込むカラム数"
+    },
+    "ui_advanced_min_gap": {
+        "message": "最小読み込み間隔（秒）"
+    },
+    "ui_advanced_max_gap": {
+        "message": "最大読み込み間隔（秒）"
+    },
+    "ui_advanced_timeout": {
+        "message": "読み込みタイムアウト（秒）"
+    },
+    "ui_advanced_help": {
+        "message": "読み込み頻度を上げるとXの制限に達する場合があります。制限時と非表示タブの一時停止は常に有効です。"
+    },
+    "ui_advanced_defaults": {
+        "message": "初期値に戻す"
+    },
+    "ui_advanced_save": {
+        "message": "保存"
+    },
+    "ui_advanced_invalid": {
+        "message": "同時読み込みは1〜2、間隔は0.5〜60秒（最小 ≤ 最大）、タイムアウトは5〜120秒にしてください。"
+    },
+    "ui_advanced_saved": {
+        "message": "詳細設定を保存しました。"
+    },
+    "ui_advanced_failed": {
+        "message": "保存できませんでした。もう一度お試しください。"
     }
 }

@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "Limite do X atingido. O carregamento e a atualização das colunas estão pausados até $1."
+    },
+    "ui_advanced_settings": {
+        "message": "Configurações avançadas"
+    },
+    "ui_advanced_concurrency": {
+        "message": "Carregamentos simultâneos"
+    },
+    "ui_advanced_min_gap": {
+        "message": "Intervalo mínimo (s)"
+    },
+    "ui_advanced_max_gap": {
+        "message": "Intervalo máximo (s)"
+    },
+    "ui_advanced_timeout": {
+        "message": "Tempo limite de carga (s)"
+    },
+    "ui_advanced_help": {
+        "message": "Frequências maiores podem atingir os limites do X. As pausas por limites e abas ocultas sempre se aplicam."
+    },
+    "ui_advanced_defaults": {
+        "message": "Restaurar padrões"
+    },
+    "ui_advanced_save": {
+        "message": "Salvar"
+    },
+    "ui_advanced_invalid": {
+        "message": "Use 1–2 cargas, intervalos de 0,5–60 segundos (mínimo ≤ máximo) e um tempo limite de 5–120 segundos."
+    },
+    "ui_advanced_saved": {
+        "message": "Configurações avançadas salvas."
+    },
+    "ui_advanced_failed": {
+        "message": "Não foi possível salvar. Tente novamente."
     }
 }

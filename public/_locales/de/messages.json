@@ -409,5 +409,38 @@
     },
     "ui_api_loading_paused": {
         "message": "X-Anfragelimit erreicht. Laden und Aktualisieren der Spalten pausieren bis $1."
+    },
+    "ui_advanced_settings": {
+        "message": "Erweiterte Einstellungen"
+    },
+    "ui_advanced_concurrency": {
+        "message": "Gleichzeitige Spaltenladevorgänge"
+    },
+    "ui_advanced_min_gap": {
+        "message": "Minimaler Ladeabstand (Sek.)"
+    },
+    "ui_advanced_max_gap": {
+        "message": "Maximaler Ladeabstand (Sek.)"
+    },
+    "ui_advanced_timeout": {
+        "message": "Ladezeitlimit (Sek.)"
+    },
+    "ui_advanced_help": {
+        "message": "Höhere Laderaten können X-Limits auslösen. Wartezeiten und Pausen für ausgeblendete Tabs gelten immer."
+    },
+    "ui_advanced_defaults": {
+        "message": "Standardwerte wiederherstellen"
+    },
+    "ui_advanced_save": {
+        "message": "Speichern"
+    },
+    "ui_advanced_invalid": {
+        "message": "Verwenden Sie 1–2 Ladevorgänge, Abstände von 0,5–60 Sekunden (Minimum ≤ Maximum) und ein Zeitlimit von 5–120 Sekunden."
+    },
+    "ui_advanced_saved": {
+        "message": "Erweiterte Einstellungen gespeichert."
+    },
+    "ui_advanced_failed": {
+        "message": "Speichern fehlgeschlagen. Versuchen Sie es erneut."
     }
 }
