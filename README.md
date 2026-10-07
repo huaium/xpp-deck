@@ -1,9 +1,8 @@
 # XPP-Deck
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
-  <img src="public/icons/logo_icon.svg" alt="XPP-Deck logo" width="160" height="160">
-</picture>
+<p align="center">
+  <img src="docs/screenshot.png" alt="XPP-Deck screenshot" width="500">
+</p>
 
 Browse X in multiple columns, with saved layouts and adjustable settings.
 
