@@ -91,6 +91,6 @@ Firefox ESR 115 does not support the column view-mode filters.
 
 XPP-Deck uses the [MIT License](LICENSE), copyright 2026 huaium.
 
-This project builds on the original work of kawa-nobu. Thank you for creating
+This project builds on the original work of [kawa-nobu](https://github.com/kawa-nobu). Thank you for creating
 the foundation that made XPP-Deck possible. The original MIT license and
 copyright notice (2023 kawa-nobu) are preserved in [LICENSE.original](LICENSE.original).
