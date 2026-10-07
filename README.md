@@ -33,25 +33,6 @@ Supported languages: English, Japanese, Simplified Chinese, Traditional Chinese,
 Korean, Spanish, French, German, and Brazilian Portuguese. The interface falls
 back to English; changing its language does not change embedded X pages.
 
-## Loading and X Limits
-
-Auto-refresh is off by default. Column loads and refreshes start one at a time,
-with a random 2–3-second gap and a 30-second load timeout.
-
-Under **Settings → Advanced Settings**, you can adjust:
-
-- Concurrent loads: 1–2
-- Minimum and maximum load gap: 0.5–60 seconds
-- Load timeout: 5–120 seconds
-
-Click **Save** to apply changes. **Restore defaults** fills in the default values;
-click Save to keep them.
-
-Offscreen columns wait to load, and hidden tabs pause new loads. When X reports
-a rate limit, queued loads and refreshes pause until it clears. The **API Usage**
-dialog shows the pause. These protections stay enabled regardless of your settings.
-X's own requests inside loaded pages are not controlled by this queue.
-
 ## Development
 
 Requires Node.js 22.13+ and pnpm. WXT handles development and packaging for
@@ -98,10 +79,4 @@ Unpacked bundles are in `.output/chrome-mv3/` and `.output/firefox-mv2/`.
 ZIP packages are in `.output/`. Run `pnpm run clean` to remove generated output
 without deleting development browser profiles.
 
-## Compatibility Notes
-
-- Firefox ESR 115 does not support the column view-mode filters.
-- Older builds' saved data is not migrated. Firefox uses the extension ID
-  `xpp-deck@huaium`; profiles from the legacy extension do not transfer automatically.
-- For a complete fresh start, clear both X site data and extension-local storage.
-- X page changes can affect the extension's session detection and embedded columns.
+Firefox ESR 115 does not support the column view-mode filters.
