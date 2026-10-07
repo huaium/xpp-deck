@@ -28,7 +28,7 @@ test("copy link reads the current column URL at click time", async () => {
     };
     const { bind_column_copy_links: bind } = loadFunctions(
         "../src/content/run.ts",
-        ["bind_column_copy_links"],
+        ["bind_column_copy_links", "without_language_parameter"],
         "",
         {
             URL,

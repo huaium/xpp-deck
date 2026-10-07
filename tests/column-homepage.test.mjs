@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { URLSearchParams } from "node:url";
 import { loadFunctions } from "./helpers/source.mjs";
 import { column_navigation_url } from "./helpers/column-navigation.mjs";
 
@@ -33,7 +34,9 @@ test("homepage editing, current-page capture, and navigation stay independent", 
     const frame = {
         src: "",
         getAttribute: () => "https://x.com/home",
-        contentWindow: { location: { href: "https://x.com/search?q=test" } },
+        contentWindow: {
+            location: { href: "https://x.com/search?lang=&q=test&lang=en" },
+        },
     };
     const column = {
         hasAttribute: (name) => attributes.has(name),
@@ -50,9 +53,14 @@ test("homepage editing, current-page capture, and navigation stay independent", 
     let alerts = 0;
     const { bind_column_homepage: bind } = loadFunctions(
         "../src/content/run.ts",
-        ["bind_column_homepage", "normalize_custom_x_path"],
+        [
+            "bind_column_homepage",
+            "normalize_custom_x_path",
+            "without_language_parameter",
+        ],
         "",
         {
+            URLSearchParams,
             document: { createElement: () => new Element() },
             i18n_message: (key) => key,
             column_navigation_url,
@@ -76,6 +84,7 @@ test("homepage editing, current-page capture, and navigation stay independent", 
     assert.equal(alerts, 1);
     await current.handlers.get("click")();
     assert.equal(attributes.get("xpd_homepage_path"), "/search?q=test");
+    assert.equal(input.value, "https://x.com/search?q=test");
     assert.equal(saves, 2);
     bar.children[0].children[0].handlers.get("click")();
     assert.equal(frame.src, "https://x.com/search?q=test&lang=");
