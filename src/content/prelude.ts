@@ -461,7 +461,7 @@ function ensure_xpd_dialog_style() {
         background: #1d4ed8;
     }
     .xpd_about_dialog{
-        width: min(760px, 100%);
+        width: min(1120px, 100%);
         max-height: min(92vh, 700px);
         overflow: auto;
     }
@@ -539,8 +539,8 @@ function ensure_xpd_dialog_style() {
     }
     .xpd_about_area2{
         margin-top: 0.9rem;
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         row-gap: 0.8rem;
         column-gap: 1rem;
         justify-content: space-between;
@@ -549,7 +549,8 @@ function ensure_xpd_dialog_style() {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        min-width: 170px;
+        min-width: 0;
+        overflow-wrap: anywhere;
         font-size: 1rem;
         color: #111827;
     }
@@ -616,6 +617,11 @@ function ensure_xpd_dialog_style() {
     .xpd_dialog_overlay.xpd_dialog_theme_dark .xpd_about_area2 a:hover{
         color: #9dc2ff;
     }
+    @media (max-width: 900px){
+        .xpd_about_area2{
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
     @media (max-width: 680px){
         .xpd_about_area1{
             flex-direction: column;
@@ -630,7 +636,7 @@ function ensure_xpd_dialog_style() {
             font-size: clamp(1.8rem, 10vw, 3rem);
         }
         .xpd_about_area2{
-            justify-content: flex-start;
+            grid-template-columns: minmax(0, 1fr);
         }
     }`;
     document.head.appendChild(style);
@@ -942,6 +948,7 @@ export async function open_about_page_modal() {
                 const body_links = document.createElement("section");
                 body_links.className = "xpd_about_area2";
                 body_links.innerHTML = `
+                    <div>${i18n_message_or_fallback("ui_about_current_dev_label", "Current Dev")}<br /><a href="https://github.com/huaium" target="_blank" rel="noopener noreferrer">huaium</a></div>
                     <div>${i18n_message_or_fallback("ui_about_original_dev_label", "Original Dev")}<br /><a href="https://twitter.com/kw_nobu2" target="_blank" rel="noopener noreferrer">kawa-nobu</a></div>
                     <div>${i18n_message_or_fallback("ui_about_github_label", "GitHub")}<br /><a href="https://github.com/huaium/xpp-deck" target="_blank" rel="noopener noreferrer">XPP-Deck</a></div>
                     <div>${i18n_message_or_fallback("ui_about_changelog_label", "Change Log")}<br /><a href="https://github.com/huaium/xpp-deck/releases" target="_blank" rel="noopener noreferrer">${i18n_message_or_fallback("ui_about_releases_label", "Releases")}</a></div>

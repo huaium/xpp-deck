@@ -188,6 +188,9 @@
     "ui_about_title": {
         "message": "情報"
     },
+    "ui_about_current_dev_label": {
+        "message": "現在の開発者"
+    },
     "ui_about_original_dev_label": {
         "message": "オリジナル開発"
     },

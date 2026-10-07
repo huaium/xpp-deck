@@ -188,6 +188,9 @@
     "ui_about_title": {
         "message": "Über"
     },
+    "ui_about_current_dev_label": {
+        "message": "Aktueller Entwickler"
+    },
     "ui_about_original_dev_label": {
         "message": "Ursprünglicher Entwickler"
     },

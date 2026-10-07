@@ -1,6 +1,9 @@
 # XPP-Deck
 
-![XPP-Deck icon](public/icon.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+  <img src="public/icons/logo_icon.svg" alt="XPP-Deck logo" width="160" height="160">
+</picture>
 
 Browse X in multiple columns, with saved layouts and adjustable settings.
 
@@ -80,3 +83,11 @@ ZIP packages are in `.output/`. Run `pnpm run clean` to remove generated output
 without deleting development browser profiles.
 
 Firefox ESR 115 does not support the column view-mode filters.
+
+## License Reminder
+
+XPP-Deck uses the [MIT License](LICENSE), copyright 2026 huaium.
+
+This project builds on the original work of kawa-nobu. Thank you for creating
+the foundation that made XPP-Deck possible. The original MIT license and
+copyright notice (2023 kawa-nobu) are preserved in [LICENSE.original](LICENSE.original).

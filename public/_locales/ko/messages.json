@@ -188,6 +188,9 @@
     "ui_about_title": {
         "message": "정보"
     },
+    "ui_about_current_dev_label": {
+        "message": "현재 개발자"
+    },
     "ui_about_original_dev_label": {
         "message": "원 개발자"
     },
